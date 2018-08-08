@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/idepix-meris/idepix-meris.iml" filepath="$PROJECT_DIR$/idepix-meris/idepix-meris.iml" />
+      <module fileurl="file://$PROJECT_DIR$/idepix-modis/idepix-modis.iml" filepath="$PROJECT_DIR$/idepix-modis/idepix-modis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/idepix-olci/idepix-olci.iml" filepath="$PROJECT_DIR$/idepix-olci/idepix-olci.iml" />
+      <module fileurl="file://$PROJECT_DIR$/snap-idepix-parent.iml" filepath="$PROJECT_DIR$/snap-idepix-parent.iml" />
+    </modules>
+  </component>
+</project>

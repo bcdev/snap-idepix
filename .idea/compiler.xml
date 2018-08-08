@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="idepix-meris" />
+        <module name="idepix-modis" />
+        <module name="idepix-olci" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="idepix-meris" target="1.8" />
+      <module name="idepix-modis" target="1.8" />
+      <module name="idepix-olci" target="1.8" />
+      <module name="snap-idepix-parent" target="1.5" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
