@@ -18,7 +18,7 @@
     <!--</tocitem>-->
     <!--</tocitem>-->
 
-    <!--<mapID target="idepixPluginOlciTool" url="olci/IdepixOlciTool.html"/>-->
+    <!--<mapID target="idepixPluginOlciTool" url="olci/MerisTool.html"/>-->
     <!--<mapID target="idepixPluginOlciAlgorithmSpecification" url="olci/IdepixOlciAlgorithmSpecification.html"/>-->
     <!--<mapID target="idepixPluginOlciProcessorDescription" url="olci/IdepixOlciProcessorDescription.html"/>-->
 
@@ -26,11 +26,11 @@
         <tocitem text="Optical">
             <tocitem text="Pre-Processing">
                 <tocitem text="Masking">
-                    <tocitem text="Idepix Classification of Pixels (external Sentinel-3 OLCI Plugin)"
+                    <tocitem text="Idepix Classification of Pixels (MERIS Plugin)"
                              target="snapIdepixMerisTool">
-                        <tocitem text="Sentinel-3 OLCI Processor Description" target="snapIdepixMerisProcessorDescription"/>
-                        <tocitem text="Sentinel-3 OLCI Algorithm Specification" target="snapIdepixMerisAlgorithmSpecification"/>
-                        <tocitem text="Sentinel-3 OLCI Command Line Processing" target="snapIdepixMerisCommandLine"/>
+                        <tocitem text="MERIS Processor Description" target="snapIdepixMerisProcessorDescription"/>
+                        <tocitem text="MERIS Algorithm Specification" target="snapIdepixMerisAlgorithmSpecification"/>
+                        <tocitem text="MERIS Command Line Processing" target="snapIdepixMerisCommandLine"/>
                     </tocitem>
                 </tocitem>
             </tocitem>

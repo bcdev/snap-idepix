@@ -5,9 +5,9 @@
 
 <map version="2.0">
 
-    <mapID target="snapIdepixMerisTool" url="meris/IdepixOlciTool.html"/>
-    <mapID target="snapIdepixMerisAlgorithmSpecification" url="meris/IdepixOlciAlgorithmSpecification.html"/>
-    <mapID target="snapIdepixMerisProcessorDescription" url="meris/IdepixOlciProcessorDescription.html"/>
-    <mapID target="snapIdepixMerisCommandLine" url="meris/IdepixOlciCommandLine.html"/>
+    <mapID target="snapIdepixMerisTool" url="meris/MerisTool.html"/>
+    <mapID target="snapIdepixMerisAlgorithmSpecification" url="meris/MerisAlgorithmSpecification.html"/>
+    <mapID target="snapIdepixMerisProcessorDescription" url="meris/MerisProcessorDescription.html"/>
+    <mapID target="snapIdepixMerisCommandLine" url="meris/MerisCommandLine.html"/>
 
 </map>

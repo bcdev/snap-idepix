@@ -16,7 +16,7 @@
 
 <html>
 <head>
-    <title>SNAP Data Processors - Idepix OLCI external plugin - Command Line Description</title>
+    <title>SNAP Data Processors - Idepix OLCI plugin - Command Line Description</title>
     <link rel="stylesheet" href="../style.css">
 </head>
 
@@ -25,10 +25,10 @@
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            Idepix OLCI external plugin - Command Line Description
+            Idepix OLCI plugin - Command Line Description
         </td>
         <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
-                                                                                     border=0></a>
+                                                                                                                                                       border=0></a>
         </td>
     </tr>
 </table>
@@ -51,17 +51,17 @@ To obtain general help on the graph processing, use the command
     </li>
 </ul>
 
-Specific help on the Idepix processor for a given instrument onboard a given satellite can be obtained with
+Specific help on the Idepix processor for a given instrument can be obtained with
 <ul>
     <li>
-        ${SNAP-INSTALL-DIR}/bin/gpt -h Idepix.&lt;Satellite&gt;.&lt;Instrument&gt;
+        ${SNAP-INSTALL-DIR}/bin/gpt -h Snap.Idepix.&lt;Instrument&gt;
     </li>
 </ul>
 
 so we have here for OLCI:
 <ul>
     <li>
-        ${SNAP-INSTALL-DIR}/bin/gpt -h Idepix.Sentinel3.OLCI
+        ${SNAP-INSTALL-DIR}/bin/gpt -h Snap.Idepix.OLCI
     </li>
 </ul>
 In this case, information on the usage and a list of all available parameters are given.
@@ -74,15 +74,12 @@ to explicitly set parameters if default values shall be used).
     &lt;graph id="IdepixOlciTest"&gt;
         &lt;version&gt;1.0&lt;/version&gt;
         &lt;node id="idepix"&gt;
-            &lt;operator&gt;Idepix.Sentinel3.Plugin.Olci&lt;/operator&gt;
+            &lt;operator&gt;Snap.Idepix.Olci&lt;/operator&gt;
             &lt;sources&gt;
                 &lt;source&gt;${sourceProduct}&lt;/source&gt;
             &lt;/sources&gt;
             &lt;parameters&gt;
                 &lt;cloudBufferWidth&gt;3&lt;/cloudBufferWidth&gt;
-            &lt;/parameters&gt;
-            &lt;parameters&gt;
-                &lt;useSrtmLandWaterMask&gt;true&lt;/useSrtmLandWaterMask&gt;
             &lt;/parameters&gt;
         &lt;/node&gt;
     &lt;/graph&gt;
@@ -98,4 +95,3 @@ This graph can be invoked by the following call on the command line:
 
 <hr>
 </body>
-</html>

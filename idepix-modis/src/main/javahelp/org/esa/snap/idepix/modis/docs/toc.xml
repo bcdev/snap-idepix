@@ -26,11 +26,11 @@
         <tocitem text="Optical">
             <tocitem text="Pre-Processing">
                 <tocitem text="Masking">
-                    <tocitem text="Idepix Classification of Pixels (external Sentinel-3 OLCI Plugin)"
+                    <tocitem text="Idepix Classification of Pixels (MODIS Plugin)"
                              target="snapIdepixModisTool">
-                        <tocitem text="Sentinel-3 OLCI Processor Description" target="snapIdepixModisProcessorDescription"/>
-                        <tocitem text="Sentinel-3 OLCI Algorithm Specification" target="snapIdepixModisAlgorithmSpecification"/>
-                        <tocitem text="Sentinel-3 OLCI Command Line Processing" target="snapIdepixModisCommandLine"/>
+                        <tocitem text="MODIS Processor Description" target="snapIdepixModisProcessorDescription"/>
+                        <tocitem text="MODIS Algorithm Specification" target="snapIdepixModisAlgorithmSpecification"/>
+                        <tocitem text="MODIS Command Line Processing" target="snapIdepixModisCommandLine"/>
                     </tocitem>
                 </tocitem>
             </tocitem>

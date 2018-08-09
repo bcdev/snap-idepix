@@ -5,9 +5,9 @@
 
 <map version="2.0">
 
-    <mapID target="snapIdepixModisTool" url="modis/IdepixOlciTool.html"/>
-    <mapID target="snapIdepixModisAlgorithmSpecification" url="modis/IdepixOlciAlgorithmSpecification.html"/>
-    <mapID target="snapIdepixModisProcessorDescription" url="modis/IdepixOlciProcessorDescription.html"/>
-    <mapID target="snapIdepixModisCommandLine" url="modis/IdepixOlciCommandLine.html"/>
+    <mapID target="snapIdepixModisTool" url="modis/ModisTool.html"/>
+    <mapID target="snapIdepixModisAlgorithmSpecification" url="modis/ModisAlgorithmSpecification.html"/>
+    <mapID target="snapIdepixModisProcessorDescription" url="modis/ModisProcessorDescription.html"/>
+    <mapID target="snapIdepixModisCommandLine" url="modis/ModisCommandLine.html"/>
 
 </map>

@@ -5,9 +5,9 @@
 
 <map version="2.0">
 
-    <mapID target="snapIdepixOlciTool" url="olci/IdepixOlciTool.html"/>
-    <mapID target="snapIdepixOlciAlgorithmSpecification" url="olci/IdepixOlciAlgorithmSpecification.html"/>
-    <mapID target="snapIdepixOlciProcessorDescription" url="olci/IdepixOlciProcessorDescription.html"/>
-    <mapID target="snapIdepixOlciCommandLine" url="olci/IdepixOlciCommandLine.html"/>
+    <mapID target="snapIdepixOlciTool" url="olci/OlciTool.html"/>
+    <mapID target="snapIdepixOlciAlgorithmSpecification" url="olci/OlciAlgorithmSpecification.html"/>
+    <mapID target="snapIdepixOlciProcessorDescription" url="olci/OlciProcessorDescription.html"/>
+    <mapID target="snapIdepixOlciCommandLine" url="olci/OlciCommandLine.html"/>
 
 </map>
