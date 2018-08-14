@@ -15,7 +15,5 @@
 
     <modules>
         <module>idepix-olci</module>
-        <module>idepix-meris</module>
-        <module>idepix-modis</module>
     </modules>
 </project>   

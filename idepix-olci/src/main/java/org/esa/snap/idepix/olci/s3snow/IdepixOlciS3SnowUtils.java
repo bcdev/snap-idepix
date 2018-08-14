@@ -1,4 +1,4 @@
-package org.esa.snap.idepix.olci;
+package org.esa.snap.idepix.olci.s3snow;
 
 import org.esa.s3tbx.idepix.core.IdepixFlagCoding;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
@@ -19,7 +19,7 @@ import java.util.Map;
  * @author olafd
  */
 
-public class IdepixOlciUtils {
+public class IdepixOlciS3SnowUtils {
 
     /**
      * Provides OLCI pixel classification flag coding

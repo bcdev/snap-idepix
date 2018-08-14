@@ -9,7 +9,7 @@
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            Idepix OLCI - Algorithm Specification
+            Idepix OLCI plugin for S3-Snow - Algorithm Specification
         </td>
         <td class="header" align="right">
             <a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html">
@@ -24,7 +24,7 @@
 
 <h4>Neural network classification</h4>
 
-<p>
+<p class="i1">
     The Idepix classification algorithm for Sentinel-3 OLCI is based on a neural network approach. A common neural net
     is used for both land and water pixels.
     As input for the neural net, the square roots of the OLCI TOA reflectances (obtained from an internal
@@ -34,7 +34,7 @@
     'cloud ambiguous', 'cloud' (which means sure OR ambiguous) ,  or 'snow/ice'.
 
 <h4>Additional properties</h4>
-<p>
+<p class="i1">
     The following additional pixel properties are provided from the classification:
 <ul>
     <li>
@@ -53,6 +53,7 @@
     </li>
 </ul>
 
+<p class="i1">
 By default, the 'land' and 'coastline' pixels are identified from the land flag included in the
 quality flags which come with the L1b product. Optionally, the SRTM (Shuttle Radar Topography Mission) land/water
 mask[2] can be applied instead.
@@ -100,9 +101,27 @@ The latter is a fractional mask:
     </li>
 </ul>
 
+<h4>Additional bands</h4>
+<p class="i1">
+    Thee are additional bands provided which are computed as follows:
+<ul>
+    <li>
+        'surface_pressure': <br>
+        &emsp; p = 1013.25 * exp(-altitude/H) with the altitude given in metres, and the scale height H = 8400m
+    </li>
+    <li>
+        'cloud_over_snow': <br>
+        &emsp; 1.0 &emsp; if pixel_classif_flags.IDEPIX_LAND && Oa21_reflectance > 0.5 && surface_13 - trans_13 < 0.01 <br>
+        &emsp; 0.0 &emsp; otherwise
+    </li>
+    <li>
+        'coastline': the pixel is a coastline pixel
+    </li>
+</ul>
+
 <h4>Known issues</h4>
 <p>
-    The following pixel properties are currently NOT provided for MERIS:
+    The following pixel properties are currently NOT provided for OLCI:
 <ul>
     <li>
         'BRIGHT'

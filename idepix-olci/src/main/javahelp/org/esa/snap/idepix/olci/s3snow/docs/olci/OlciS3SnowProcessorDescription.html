@@ -25,7 +25,7 @@
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            Idepix OLCI - Processor Description
+            Idepix OLCI plugin for S3-SNOW - Processor Description
         </td>
         <td class="header" align="right">
             <a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html">
@@ -44,14 +44,13 @@
 <h5>Source Product Group</h5>
 
 <p class="i1">
-    <b>Name: </b>
-    Used to select the spectral source product. The source product shall
-    contain spectral bands providing a source spectrum at each pixel. Use the <b>...</b> button to
+    Used to select the IdePix OLCI source product. Use the <b>...</b> buttons to
     open a data product currently not opened in the Sentinel Toolbox.
 </p>
 
-<h5>Supported Sentinel-3 OLCI Source Products</h5>
-The following Sentinel-3 OLCI source products are supported for Idepix classification:
+<h5>Supported IdePix OLCI L1b Source Products</h5>
+<p class="i1">
+The following source products are supported for Idepix classification:
 <ul>
     <li>
         S3A_OL_1_EFR_*.SEN3:<br>
@@ -62,9 +61,24 @@ The following Sentinel-3 OLCI source products are supported for Idepix classific
         Reduced Resolution TOA Radiance, after radiometrical and spectral calibration
     </li>
 </ul>
+<p class="i1">
 For detailed product descriptions and file naming conventions see the Sentinel-3 OLCI L1b Product User Guide
 (https://sentinel.esa.int/web/sentinel/user-guides/sentinel-3-olci/product-types/level-1b).
 
+<h5>Supported optional source products</h5>
+<p class="i1">
+The following optional source products are supported for Idepix classification:
+<ul>
+    <li>
+        DEM product for O2 correction:<br>
+        A product which has an input format supported by SNAP and which contains a DEM altitude band to
+        be used in the O2 correction called by IdePix as an alternative to the altitude band provided
+        with the OLCI L1b product.
+    </li>
+</ul>
+<p class="i1">
+For more details on the O2 correction see the help documentation of the corresponding SNAP plugin which had
+to be installed together with this IdePix plugin.
 
 <h5>Target Product Group</h5>
 
@@ -90,47 +104,59 @@ For detailed product descriptions and file naming conventions see the Sentinel-3
 <p align="center"><img src="../images/OlciParameters.png"></p>
 
 <p class="i1">
-    <b>Select TOA radiances to write to the target product: </b><br>
-    The TOA radiance bands from the source product which shall be written into the target product can be selected here.
-    Multiple selection is possible.
-</p>
-
-<p class="i1">
-    <b>Select TOA reflectances to write to the target product: </b><br>
-    The intermediately computed TOA reflectances bands which shall be written into the target product can be selected here.
-    Multiple selection is possible.
-</p>
-
-<p class="i1">
-    <b>Write NN value to the target product: </b><br>
-    If selected, the output value of the neural network
-    (floating point number on the interval [0.0, 5.0]) is written to the target product. The default is 'false'.
-</p>
-
-<p class="i1">
-    <b>Compute cloud shadow: </b><br>
-    If set, a cloud shadow is computed and added to the pixel classification. The default value is 'true'.
-</p>
-
-<p class="i1">
-    <b>Compute a cloud buffer: </b><br>
-    If set, a cloud buffer of certain width is computed and added to the pixel classification. The default value is 'true'.
-</p>
-
-<p class="i1">
-    <b>Width of cloud buffer (# of pixels): </b><br>
-    If a cloud buffer is computed, the buffer width (in # of pixels around the cloudy reference pixel) can be specified.
-    The default value is '2'.
-</p>
-
-<p class="i1">
-    <b>Use SRTM Land/Water mask: </b><br>
-    If set, a land/water mask derived from the SRTM (Shuttle Radar Topography Mission) dataset is used instead
-    of the land flag included in the Sentinel-3 OLCI L1b product. The SRTM land/water mask is usually more precise in specific
-    case (e.g. inland lakes), but slows down the processing speed. The default value is 'false'.
+    <b>Name of DEM band (if optional DEM product is provided): </b><br>
+    The name of the altitude band in the optional DEM product. Mandatory if a DEM product is provided.
+    If no DEM product is provided, this parameter has no effect.
 </p>
 
 <h3>The Processing Result</h3>
+
+<p>
+    The IdePix OLCI processor for S3-Snow provides the following outputs:
+</p>
+
+<p align="center"><img src="../images/processor_output.png"></p>
+
+<p class="i1">
+    <b>Oa21_reflectance: </b><br>
+    TOA reflectance for band 21 (1020nm).
+</p>
+
+<p class="i1">
+    <b>trans_13: </b><br>
+    The rectified and desmiled transmission for band 13 (761.25nm).
+</p>
+
+<p class="i1">
+    <b>press_13: </b><br>
+    The pressure for band 13 for a given rectified transmission, which would be measured in given band
+    without scattering. Useful for a first object height estimation for bright targets.
+</p>
+
+<p class="i1">
+    <b>surface_13: </b><br>
+    The rectified transmission for band 13, which would be measured without scattering ('surface transmission').
+    Useful only for comparison purposes.
+</p>
+
+<p class="i1">
+    <b>surface_pressure: </b><br>
+    The pressure at altitude of the surface.
+</p>
+
+<p class="i1">
+    <b>cloud_over_snow: </b><br>
+    Mask band indicating if there is cloud over snow (value 1.0) for the given pixel, 0.0 otherwise.
+</p>
+
+<p class="i1">
+    <b>pixel_classif_flags: </b><br>
+    Standard IdePix classification flag band (see below).
+</p>
+<br>
+
+
+<p class="i1">
 The Idepix classification result is written into the target product as a flag band named 'pixel_classif_flags'.
 This band holds integer values which for Sentinel-3 OLCI follow the flag coding shown below.
 
@@ -139,6 +165,7 @@ This band holds integer values which for Sentinel-3 OLCI follow the flag coding 
 </p>
 <br>
 
+<p class="i1">
 The target product also provides a corresponding flag mask to visualize the pixel classification through the
 SNAP Mask Manager:
 

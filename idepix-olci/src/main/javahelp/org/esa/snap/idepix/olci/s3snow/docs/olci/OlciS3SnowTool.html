@@ -16,7 +16,7 @@
 
 <html>
 <head>
-    <title>SNAP Data Processors - Idepix OLCI plugin</title>
+    <title>SNAP Data Processors - Idepix OLCI</title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
     <link rel="stylesheet" href="../style.css">
 </head>
@@ -25,8 +25,11 @@
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            Idepix OLCI plugin</td>
-        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg" border=0></a>
+            Idepix OLCI plugin for S3-Snow
+        </td>
+        <td class="header" align="right"><a
+                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg" border=0></a>
         </td>
     </tr>
 </table>
@@ -34,10 +37,11 @@
 <h3>Introduction</h3>
 
 <p>
-    The Idepix Processor provides a pixel classification into properties such as clear/cloudy, land/water, snow, ice etc.
+    The Idepix Processor provides a pixel classification into properties such as clear/cloudy, land/water, snow, ice
+    etc.
     The processing options/parameters as well as the underlying classification algorithms are instrument-dependent.
-    The Idepix processor core components are an internal part of the Sentinel-3 Toolbox of the current SNAP version.
-    Actually, plugins for the following satellites/sensors are available:
+    The Idepix processor modules for different satellites/sensors are an internal part of the Sentinel-3 Toolbox of
+    the current SNAP version. Actually the following satellites/sensors are supported:
 </p>
 
 <p>
@@ -81,27 +85,36 @@
 </table>
 
 <br>
-Idepix is continuously being improved for already supported sensors and extended for further sensors in the frame
-of various projects, such as the ESA LandCover ([1],[2]) and OceanColour ([3]) CCI projects.
+    However, the processor described here is a special version of the IdePix Sentinel-3 OLCI processor, being adapted
+    for the specific needs for a pixel classification within the 'SEOM S3 for Snow' project [1]. This allows to more easily
+    provide special user options which are ultimately not needed in other projects than S3-Snow, and in return leave
+    out other options which are not relevant for S3-Snow.
+<br>
+
+<br>
+In general, IdePix is continuously being improved for already supported sensors and extended for further sensors
+in the frame of various other projects, such as the ESA LandCover ([2],[3]) and OceanColour ([4]) CCI projects.
 
 <br>
 
-<p><a href="OlciProcessorDescription.html">Idepix OLCI Processor Description</a></p>
-<p><a href="OlciAlgorithmSpecification.html">Idepix OLCI Algorithm Specification</a></p>
-
-<p><a href="OlciCommandLine.html">Processing from the Command Line</a></p>
+<p><a href="OlciS3SnowProcessorDescription.html">Idepix OLCI Processor Description (S3 for Snow version)</a></p>
+<p><a href="OlciS3SnowAlgorithmSpecification.html">Idepix OLCI Algorithm Specification (S3 for Snow version)</a></p>
+<p><a href="OlciS3SnowCommandLine.html">Processing from the Command Line (S3 for Snow version)</a></p>
 
 <h3>References</h3>
 
 <p class="i1">
 
     <b>[1]</b>
-    LandCover Project Web Site: <a href="http://www.esa-landcover-cci.org/">www.esa-landcover-cci.org</a><br><br>
+    SEOM S3 for Snow Project Web Site: <a href="http://seom.esa.int/page_project032.php">seom.esa.int/page_project032.php</a><br><br>
 
     <b>[2]</b>
-    LandCover CCI ATBD. Version 1.0, 28 June 2012.<br><br>
+    LandCover Project Web Site: <a href="http://www.esa-landcover-cci.org/">www.esa-landcover-cci.org</a><br><br>
 
     <b>[3]</b>
+    LandCover CCI ATBD. Version 1.0, 28 June 2012.<br><br>
+
+    <b>[4]</b>
     OceanColour Project Web Site: <a href="http://www.esa-oceancolour-cci.org/">www.esa-oceancolour-cci.org</a><br><br>
 </p>
 <br>

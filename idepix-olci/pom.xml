@@ -20,12 +20,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.esa.snap</groupId>
-    <artifactId>idepix-olci</artifactId>
+    <artifactId>idepix-olci-s3snow</artifactId>
     <version>0.81-SNAPSHOT</version>
 
-    <name>Idepix OLCI</name>
+    <name>Idepix OLCI for S3 Snow</name>
     <packaging>nbm</packaging>
-    <description>Performs IdePix pixel classification for OLCI.</description>
+    <description>Performs IdePix pixel classification for OLCI (S3 Snow branch).</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

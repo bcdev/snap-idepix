@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!DOCTYPE map
+        PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp Map Version 2.0//EN"
+        "http://java.sun.com/products/javahelp/map_2_0.dtd">
+
+<map version="2.0">
+
+    <mapID target="snapIdepixOlciS3SnowTool" url="olci/OlciS3SnowTool.html"/>
+    <mapID target="snapIdepixOlciS3SnowAlgorithmSpecification" url="olci/OlciS3SnowAlgorithmSpecification.html"/>
+    <mapID target="snapIdepixOlciS3SnowProcessorDescription" url="olci/OlciS3SnowProcessorDescription.html"/>
+    <mapID target="snapIdepixOlciS3SnowCommandLine" url="olci/OlciS3SnowCommandLine.html"/>
+
+</map>

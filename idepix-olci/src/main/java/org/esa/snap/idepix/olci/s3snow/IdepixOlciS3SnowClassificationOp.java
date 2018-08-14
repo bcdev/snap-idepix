@@ -1,4 +1,4 @@
-package org.esa.snap.idepix.olci;
+package org.esa.snap.idepix.olci.s3snow;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
@@ -49,7 +49,7 @@ import java.util.Map;
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Idepix land pixel classification operator for OLCI.")
-public class IdepixOlciClassificationOp extends Operator {
+public class IdepixOlciS3SnowClassificationOp extends Operator {
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product.",
@@ -95,7 +95,7 @@ public class IdepixOlciClassificationOp extends Operator {
 
     private ThreadLocal<SchillerNeuralNetWrapper> olciAllNeuralNet;
 
-    private IdepixOlciCloudNNInterpreter nnInterpreter;
+    private IdepixOlciS3SnowCloudNNInterpreter nnInterpreter;
     private SeaIceClassifier seaIceClassifier;
 
     private static final double SEA_ICE_CLIM_THRESHOLD = 10.0;
@@ -104,7 +104,7 @@ public class IdepixOlciClassificationOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         setBands();
-        nnInterpreter = IdepixOlciCloudNNInterpreter.create();
+        nnInterpreter = IdepixOlciS3SnowCloudNNInterpreter.create();
         readSchillerNeuralNets();
         createTargetProduct();
 
@@ -146,7 +146,7 @@ public class IdepixOlciClassificationOp extends Operator {
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
         final Band cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
-        FlagCoding flagCoding = IdepixOlciUtils.createOlciFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = IdepixOlciS3SnowUtils.createOlciFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -168,7 +168,7 @@ public class IdepixOlciClassificationOp extends Operator {
         if (landWaterBand != null) {
             waterFractionTile = getSourceTile(landWaterBand, rectangle);
         }
-        final Band olciQualityFlagBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_QUALITY_FLAGS_BAND_NAME);
+        final Band olciQualityFlagBand = sourceProduct.getBand(IdepixOlciS3SnowConstants.OLCI_QUALITY_FLAGS_BAND_NAME);
         final Tile olciQualityFlagTile = getSourceTile(olciQualityFlagBand, rectangle);
 
         Tile[] olciReflectanceTiles = new Tile[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
@@ -192,7 +192,7 @@ public class IdepixOlciClassificationOp extends Operator {
                         waterFraction = waterFractionTile.getSampleInt(x, y);
                     }
                     initCloudFlag(olciQualityFlagTile, targetTiles.get(cloudFlagTargetBand), olciReflectanceTiles, y, x);
-                    final boolean isBright = olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_BRIGHT);
+                    final boolean isBright = olciQualityFlagTile.getSampleBit(x, y, IdepixOlciS3SnowConstants.L1_F_BRIGHT);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, isBright);
                     if (isOlciLandPixel(x, y, olciQualityFlagTile, waterFraction)) {
                         classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile, y, x);
@@ -257,7 +257,7 @@ public class IdepixOlciClassificationOp extends Operator {
 
     private boolean isOlciLandPixel(int x, int y, Tile olciL1bFlagTile, int waterFraction) {
         if (waterFraction < 0) {
-            return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
+            return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciS3SnowConstants.L1_F_LAND);
         } else {
             // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
             if (IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y).lat > -58f) {
@@ -267,17 +267,17 @@ public class IdepixOlciClassificationOp extends Operator {
                     // is always 0 or 100!! (TS, OD, 20140502)
                     return waterFraction == 0;
                 } else {
-                    return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
+                    return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciS3SnowConstants.L1_F_LAND);
                 }
             } else {
-                return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
+                return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciS3SnowConstants.L1_F_LAND);
             }
         }
     }
 
     private void classifyCloud(int x, int y, Tile l1FlagsTile, Tile[] rhoToaTiles, Tile targetTile, int waterFraction) {
 
-        final boolean isCoastline = waterFraction < 0 ? l1FlagsTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_COASTLINE) :
+        final boolean isCoastline = waterFraction < 0 ? l1FlagsTile.getSampleBit(x, y, IdepixOlciS3SnowConstants.L1_F_COASTLINE) :
                 isCoastlinePixel(x, y, waterFraction);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, isCoastline);
 
@@ -360,7 +360,7 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private boolean isGlintPixel(int x, int y, Tile l1FlagsTile) {
-        return l1FlagsTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_GLINT);
+        return l1FlagsTile.getSampleBit(x, y, IdepixOlciS3SnowConstants.L1_F_GLINT);
     }
 
     private void initCloudFlag(Tile olciL1bFlagTile, Tile targetTile, Tile[] olciReflectanceTiles, int y, int x) {
@@ -370,7 +370,7 @@ public class IdepixOlciClassificationOp extends Operator {
             olciReflectances[i] = olciReflectanceTiles[i].getSampleFloat(x, y);
         }
 
-        final boolean l1Invalid = olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
+        final boolean l1Invalid = olciL1bFlagTile.getSampleBit(x, y, IdepixOlciS3SnowConstants.L1_F_INVALID);
         final boolean reflectancesValid = IdepixIO.areAllReflectancesValid(olciReflectances);
 
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l1Invalid || !reflectancesValid);
@@ -385,4 +385,9 @@ public class IdepixOlciClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, false);
     }
 
+//    public static class Spi extends OperatorSpi {
+//        public Spi() {
+//            super(IdepixOlciClassificationOp.class);
+//        }
+//    }
 }

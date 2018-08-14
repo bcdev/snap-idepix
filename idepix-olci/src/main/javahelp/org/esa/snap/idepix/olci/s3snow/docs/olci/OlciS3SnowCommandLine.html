@@ -16,7 +16,7 @@
 
 <html>
 <head>
-    <title>SNAP Data Processors - Idepix OLCI plugin - Command Line Description</title>
+    <title>SNAP Data Processors - Idepix OLCI Command Line Description</title>
     <link rel="stylesheet" href="../style.css">
 </head>
 
@@ -25,10 +25,10 @@
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            Idepix OLCI plugin - Command Line Description
+            Idepix OLCI plugin for S3-Snow - Command Line Description
         </td>
         <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
-                                                                                                                                                       border=0></a>
+                                                                                     border=0></a>
         </td>
     </tr>
 </table>
@@ -40,30 +40,24 @@ used also as a command line tool. The graph processing is invoked
 by the command
 <ul>
     <li>
-        ${SNAP-INSTALL-DIR}/bin/gpt
+        ${S3TBX-INSTALL-DIR}/bin/gpt
     </li>
 </ul>
 
 To obtain general help on the graph processing, use the command
 <ul>
     <li>
-        ${SNAP-INSTALL-DIR}/bin/gpt -h
+        ${S3TBX-INSTALL-DIR}/bin/gpt -h
     </li>
 </ul>
 
-Specific help on the Idepix processor for a given instrument can be obtained with
+Specific help on the Idepix OLCI processor for S3-Snow can be obtained with
 <ul>
     <li>
-        ${SNAP-INSTALL-DIR}/bin/gpt -h Snap.Idepix.&lt;Instrument&gt;
+        ${S3TBX-INSTALL-DIR}/bin/gpt -h Snap.Idepix.Olci.S3Snow
     </li>
 </ul>
 
-so we have here for OLCI:
-<ul>
-    <li>
-        ${SNAP-INSTALL-DIR}/bin/gpt -h Snap.Idepix.OLCI
-    </li>
-</ul>
 In this case, information on the usage and a list of all available parameters are given.
 
 The Idepix processor parameters can also be specified via a graph xml file.
@@ -71,15 +65,16 @@ E.g., a possible graph xml file for OLCI could look like the following. (Note th
 to explicitly set parameters if default values shall be used).
 <pre>
 
-    &lt;graph id="IdepixOlciTest"&gt;
+    &lt;graph id="Snap.Idepix.Olci.S3Snow.Test"&gt;
         &lt;version&gt;1.0&lt;/version&gt;
         &lt;node id="idepix"&gt;
-            &lt;operator&gt;Snap.Idepix.Olci&lt;/operator&gt;
+            &lt;operator&gt;Snap.Idepix.Olci.S3Snow&lt;/operator&gt;
             &lt;sources&gt;
-                &lt;source&gt;${sourceProduct}&lt;/source&gt;
+                &lt;sourceProduct&gt;${sourceProduct}&lt;/sourceProduct&gt;
+                &lt;demProduct&gt;${demProduct}&lt;/demProduct&gt;
             &lt;/sources&gt;
             &lt;parameters&gt;
-                &lt;cloudBufferWidth&gt;3&lt;/cloudBufferWidth&gt;
+                &lt;demBandName&gt;myAltitude&lt;/demBandName&gt;
             &lt;/parameters&gt;
         &lt;/node&gt;
     &lt;/graph&gt;
@@ -87,11 +82,10 @@ to explicitly set parameters if default values shall be used).
 </pre>
 
 This graph can be invoked by the following call on the command line:
-<ul>
-    <li>
-        ${SNAP-INSTALL-DIR}/bin/gpt &lt;graph-file.xml&gt; -SsourceProduct=&lt;path-to-source-file&gt;
-    </li>
-</ul>
+<pre>
+  gpt &lt;graph-file.xml&gt; -SsourceProduct=&lt;path-to-source-file&gt;
+</pre>
 
 <hr>
 </body>
+</html>

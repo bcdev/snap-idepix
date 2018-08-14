@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.snap.idepix.olci;
+package org.esa.snap.idepix.olci.s3snow;
 
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -23,14 +23,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class IdepixOlciOpTest {
+public class IdepixOlciS3SnowOpTest {
 
     @Test
     public void testOperatorSpiIsLoaded() {
         OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
-        OperatorSpi operatorSpi = registry.getOperatorSpi("Snap.Idepix.Olci");
+        OperatorSpi operatorSpi = registry.getOperatorSpi("Snap.Idepix.Olci.S3Snow");
         assertNotNull(operatorSpi);
-        assertEquals("Snap.Idepix.Olci", operatorSpi.getOperatorAlias());
+        assertEquals("Snap.Idepix.Olci.S3Snow", operatorSpi.getOperatorAlias());
         assertNotNull(operatorSpi.getOperatorDescriptor());
         assertSame(operatorSpi.getOperatorClass(), operatorSpi.getOperatorDescriptor().getOperatorClass());
     }
