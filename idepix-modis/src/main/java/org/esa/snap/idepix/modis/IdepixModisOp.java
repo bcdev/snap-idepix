@@ -1,7 +1,5 @@
 package org.esa.snap.idepix.modis;
 
-import org.esa.s3tbx.idepix.algorithms.modis.ModisClassificationOp;
-import org.esa.s3tbx.idepix.algorithms.modis.ModisPostProcessOp;
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.operators.BasisOp;
@@ -163,12 +161,12 @@ public class IdepixModisOp extends BasisOp {
         postProcessInput.put("waterMask", waterMaskProduct);
 
         postProcessInput.put("refl", sourceProduct);
-        classifProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ModisClassificationOp.class),
+        classifProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixModisClassificationOp.class),
                                            occciCloudClassificationParameters, occciClassifInput);
 
         postProcessInput.put("classif", classifProduct);
 
-        Product postProcessProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ModisPostProcessOp.class),
+        Product postProcessProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixModisPostProcessOp.class),
                                                        postProcessParameters, postProcessInput);
 
         ProductUtils.copyMetadata(sourceProduct,postProcessProduct);

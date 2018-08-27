@@ -1,7 +1,5 @@
 package org.esa.snap.idepix.modis;
 
-import org.esa.s3tbx.idepix.algorithms.modis.ModisAlgorithm;
-import org.esa.s3tbx.idepix.algorithms.modis.ModisUtils;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
@@ -123,7 +121,7 @@ public class IdepixModisClassificationOp extends PixelOperator {
 
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        final org.esa.s3tbx.idepix.algorithms.modis.ModisAlgorithm algorithm = createModisAlgorithm(x, y, sourceSamples, targetSamples);
+        final IdepixModisAlgorithm algorithm = createModisAlgorithm(x, y, sourceSamples, targetSamples);
         setClassifFlag(targetSamples, algorithm);
     }
 
@@ -170,12 +168,12 @@ public class IdepixModisClassificationOp extends PixelOperator {
 
         classifFlagBand.setDescription("Pixel classification flag");
         classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = org.esa.s3tbx.idepix.algorithms.modis.ModisUtils.createModisFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = IdepixModisUtils.createModisFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 
         getTargetProduct().setSceneGeoCoding(reflProduct.getSceneGeoCoding());
-        ModisUtils.setupModisClassifBitmask(getTargetProduct());
+        IdepixModisUtils.setupModisClassifBitmask(getTargetProduct());
 
         Band nnValueBand = productConfigurer.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
         nnValueBand.setDescription("Schiller NN output value");
@@ -196,7 +194,7 @@ public class IdepixModisClassificationOp extends PixelOperator {
         }
     }
 
-    private void setClassifFlag(WritableSample[] targetSamples, org.esa.s3tbx.idepix.algorithms.modis.ModisAlgorithm algorithm) {
+    private void setClassifFlag(WritableSample[] targetSamples, IdepixModisAlgorithm algorithm) {
         targetSamples[0].set(IdepixConstants.IDEPIX_INVALID, algorithm.isInvalid());
         targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD, algorithm.isCloud());
         targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
@@ -210,8 +208,8 @@ public class IdepixModisClassificationOp extends PixelOperator {
         targetSamples[0].set(IdepixConstants.IDEPIX_BRIGHT, algorithm.isBright());
     }
 
-    private org.esa.s3tbx.idepix.algorithms.modis.ModisAlgorithm createModisAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        org.esa.s3tbx.idepix.algorithms.modis.ModisAlgorithm modisAlgorithm = new ModisAlgorithm();
+    private IdepixModisAlgorithm createModisAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
+        IdepixModisAlgorithm modisAlgorithm = new IdepixModisAlgorithm();
 
         final double[] reflectance = new double[IdepixModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS];
         double[] neuralNetOutput;

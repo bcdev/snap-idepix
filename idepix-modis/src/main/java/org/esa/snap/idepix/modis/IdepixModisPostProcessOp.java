@@ -1,7 +1,6 @@
 package org.esa.snap.idepix.modis;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.algorithms.modis.ModisUtils;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.operators.BasisOp;
 import org.esa.snap.core.datamodel.Band;
@@ -249,7 +248,7 @@ public class IdepixModisPostProcessOp extends BasisOp {
         ProductUtils.copyFlagCodings(classifProduct, targetProduct);
         ProductUtils.copyGeoCoding(reflProduct, targetProduct);
 
-        ModisUtils.setupModisClassifBitmask(targetProduct);
+        IdepixModisUtils.setupModisClassifBitmask(targetProduct);
     }
 
     private void combineFlags(int x, int y, Tile sourceFlagTile, Tile targetTile) {
