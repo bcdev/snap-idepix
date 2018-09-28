@@ -101,27 +101,33 @@
             <artifactId>s3tbx-rad2refl</artifactId>
             <version>${snap.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-netcdf</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
 		
 		<!--<dependency>-->
             <!--<groupId>org.esa.s3tbx</groupId>-->
             <!--<artifactId>s3tbx-meris-brr</artifactId>-->
             <!--<version>${snap.version}</version>-->
         <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.esa.s3tbx</groupId>-->
-            <!--<artifactId>s3tbx-meris-sdr</artifactId>-->
-            <!--<version>${snap.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-meris-sdr</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-meris-l2auxdata</artifactId>
             <version>${snap.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.esa.s3tbx</groupId>-->
-            <!--<artifactId>s3tbx-meris-ops</artifactId>-->
-            <!--<version>${snap.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-meris-ops</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
         
         <dependency>
             <groupId>junit</groupId>
@@ -146,6 +152,12 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>18.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>netcdf</artifactId>
+            <version>4.3.22</version>
         </dependency>
 
     </dependencies>
