@@ -21,7 +21,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>idepix-modis</artifactId>
-    <version>0.8-SNAPSHOT</version>
+    <version>0.81-SNAPSHOT</version>
 
     <name>Idepix MODIS</name>
     <packaging>nbm</packaging>

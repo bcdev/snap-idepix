@@ -25,7 +25,7 @@ import java.awt.*;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Meris.Postprocess",
+@OperatorMetadata(alias = "Snap.Idepix.Meris.Postprocess",
         version = "1.0",
         internal = true,
         authors = "Olaf Danne",

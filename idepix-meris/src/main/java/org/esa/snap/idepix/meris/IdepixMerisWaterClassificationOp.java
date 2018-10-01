@@ -37,7 +37,7 @@ import java.util.Calendar;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Meris.Water",
+@OperatorMetadata(alias = "Snap.Idepix.Meris.Water",
         version = "1.0",
         internal = true,
         authors = "Olaf Danne",

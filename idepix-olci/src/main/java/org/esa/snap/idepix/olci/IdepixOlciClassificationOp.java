@@ -11,6 +11,7 @@ import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
@@ -43,7 +44,7 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Olci.Classification",
+@OperatorMetadata(alias = "Snap.Idepix.Olci.Classification",
         version = "1.0",
         internal = true,
         authors = "Olaf Danne",
@@ -383,6 +384,17 @@ public class IdepixOlciClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, false);
+    }
+
+    /**
+     * The Service Provider Interface (SPI) for the operator.
+     * It provides operator meta-data and is a factory for new operator instances.
+     */
+    public static class Spi extends OperatorSpi {
+
+        public Spi() {
+            super(IdepixOlciClassificationOp.class);
+        }
     }
 
 }

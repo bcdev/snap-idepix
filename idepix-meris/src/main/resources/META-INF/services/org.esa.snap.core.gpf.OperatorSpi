@@ -1,1 +1,5 @@
 org.esa.snap.idepix.meris.IdepixMerisOp$Spi
+org.esa.snap.idepix.meris.IdepixMerisLandClassificationOp$Spi
+org.esa.snap.idepix.meris.IdepixMerisWaterClassificationOp$Spi
+org.esa.snap.idepix.meris.IdepixMerisMergeLandWaterOp$Spi
+org.esa.snap.idepix.meris.IdepixMerisPostProcessOp$Spi

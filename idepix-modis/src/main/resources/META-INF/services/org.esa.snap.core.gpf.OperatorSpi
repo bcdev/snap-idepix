@@ -1,1 +1,3 @@
 org.esa.snap.idepix.modis.IdepixModisOp$Spi
+org.esa.snap.idepix.modis.IdepixModisClassificationOp$Spi
+org.esa.snap.idepix.modis.IdepixModisPostProcessOp$Spi

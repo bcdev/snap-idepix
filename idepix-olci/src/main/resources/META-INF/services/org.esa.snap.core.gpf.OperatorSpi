@@ -1,1 +1,3 @@
 org.esa.snap.idepix.olci.IdepixOlciOp$Spi
+org.esa.snap.idepix.olci.IdepixOlciClassificationOp$Spi
+org.esa.snap.idepix.olci.IdepixOlciPostProcessOp$Spi
