@@ -77,6 +77,10 @@ public class S2IdepixClassificationOp extends Operator {
     private boolean copyToaReflectances;
 
     @Parameter(defaultValue = "false",
+            label = " Compute cloud shadow")
+    private boolean computeCloudShadow = false;
+
+    @Parameter(defaultValue = "false",
             label = " Write feature values to the target product",
             description = " Write all feature values to the target product")
     private boolean copyFeatureValues;
@@ -354,6 +358,8 @@ public class S2IdepixClassificationOp extends Operator {
     public void extendTargetProduct() throws OperatorException {
         if (copyToaReflectances) {
             copyReflectances();
+        } else if (computeCloudShadow) {
+            copyReflectancesForCloudShadow();
         }
 
         for (String s2MsiAnnotationBandName : S2IdepixConstants.S2_MSI_ANNOTATION_BAND_NAMES) {
@@ -381,9 +387,23 @@ public class S2IdepixClassificationOp extends Operator {
 
     private void copyReflectances() {
         for (int i = 0; i < S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES.length; i++) {
-            final Band b = ProductUtils.copyBand(S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES[i], sourceProduct,
-                                                 targetProduct, true);
-            b.setUnit("dl");
+            if (!targetProduct.containsBand(S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES[i])) {
+                final Band b = ProductUtils.copyBand(S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES[i], sourceProduct,
+                                                     targetProduct, true);
+                b.setUnit("dl");
+            }
+
+        }
+    }
+
+    private void copyReflectancesForCloudShadow() {
+        for (int i = 0; i < S2IdepixConstants.S2_MSI_CLOUD_SHADOW_REFLECTANCE_BAND_NAMES.length; i++) {
+            if (!targetProduct.containsBand(S2IdepixConstants.S2_MSI_CLOUD_SHADOW_REFLECTANCE_BAND_NAMES[i])) {
+                final Band b = ProductUtils.copyBand(S2IdepixConstants.S2_MSI_CLOUD_SHADOW_REFLECTANCE_BAND_NAMES[i],
+                                                     sourceProduct,
+                                                     targetProduct, true);
+                b.setUnit("dl");
+            }
         }
     }
 
@@ -633,7 +653,9 @@ public class S2IdepixClassificationOp extends Operator {
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_WHITE, s2Algorithm.isWhite());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_BRIGHTWHITE, s2Algorithm.isBrightWhite());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_VEG_RISK, s2Algorithm.isVegRisk());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW, false); // not computed here
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW, false); //not computed here
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_POTENTIAL_SHADOW, false); //not computed here
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLUSTERED_CLOUD_SHADOW, false); //not computed here
     }
 
     /**

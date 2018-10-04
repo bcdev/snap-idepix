@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Dimap_Document name="s2_classif.dim">
+    <Metadata_Id>
+        <METADATA_FORMAT version="2.12.1">DIMAP</METADATA_FORMAT>
+        <METADATA_PROFILE>BEAM-DATAMODEL-V1</METADATA_PROFILE>
+    </Metadata_Id>
+    <Dataset_Id>
+        <DATASET_SERIES>BEAM-PRODUCT</DATASET_SERIES>
+        <DATASET_NAME>s2_classif</DATASET_NAME>
+    </Dataset_Id>
+    <Production>
+        <DATASET_PRODUCER_NAME />
+        <PRODUCT_TYPE>S2_MSI_Level-1C</PRODUCT_TYPE>
+        <PRODUCT_SCENE_RASTER_START_TIME>13-DEC-2016 07:53:22.026000</PRODUCT_SCENE_RASTER_START_TIME>
+        <PRODUCT_SCENE_RASTER_STOP_TIME>13-DEC-2016 07:53:22.026000</PRODUCT_SCENE_RASTER_STOP_TIME>
+    </Production>
+    <Coordinate_Reference_System>
+        <WKT>
+             PROJCS["WGS 84 / UTM zone 35S", 
+               GEOGCS["WGS 84", 
+                 DATUM["World Geodetic System 1984", 
+                   SPHEROID["WGS 84", 6378137.0, 298.257223563, AUTHORITY["EPSG","7030"]], 
+                   AUTHORITY["EPSG","6326"]], 
+                 PRIMEM["Greenwich", 0.0, AUTHORITY["EPSG","8901"]], 
+                 UNIT["degree", 0.017453292519943295], 
+                 AXIS["Geodetic longitude", EAST], 
+                 AXIS["Geodetic latitude", NORTH], 
+                 AUTHORITY["EPSG","4326"]], 
+               PROJECTION["Transverse_Mercator"], 
+               PARAMETER["central_meridian", 27.0], 
+               PARAMETER["latitude_of_origin", 0.0], 
+               PARAMETER["scale_factor", 0.9996], 
+               PARAMETER["false_easting", 500000.0], 
+               PARAMETER["false_northing", 10000000.0], 
+               UNIT["m", 1.0], 
+               AXIS["Easting", EAST], 
+               AXIS["Northing", NORTH], 
+               AUTHORITY["EPSG","32735"]]
+        </WKT>
+    </Coordinate_Reference_System>
+    <Geoposition>
+        <IMAGE_TO_MODEL_TRANSFORM>60.0,0.0,0.0,-60.0,667740.0,7180420.0</IMAGE_TO_MODEL_TRANSFORM>
+    </Geoposition>
+    <Flag_Coding name="pixel_classif_flags">
+        <Flag>
+            <Flag_Name>IDEPIX_INVALID</Flag_Name>
+            <Flag_Index>1</Flag_Index>
+            <Flag_description>Invalid pixels</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_CLOUD</Flag_Name>
+            <Flag_Index>2</Flag_Index>
+            <Flag_description>Pixels which are either cloud_sure or cloud_ambiguous</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_CLOUD_AMBIGUOUS</Flag_Name>
+            <Flag_Index>4</Flag_Index>
+            <Flag_description>Semi transparent clouds, or clouds where the detection level is uncertain</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_CLOUD_SURE</Flag_Name>
+            <Flag_Index>8</Flag_Index>
+            <Flag_description>Fully opaque clouds with full confidence of their detection</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_CLOUD_BUFFER</Flag_Name>
+            <Flag_Index>16</Flag_Index>
+            <Flag_description>A buffer of n pixels around a cloud. n is a user supplied parameter. Applied to pixels masked as 'cloud'</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_CLOUD_SHADOW</Flag_Name>
+            <Flag_Index>32</Flag_Index>
+            <Flag_description>Pixels is affect by a cloud shadow</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_SNOW_ICE</Flag_Name>
+            <Flag_Index>64</Flag_Index>
+            <Flag_description>Clear snow/ice pixels</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_BRIGHT</Flag_Name>
+            <Flag_Index>128</Flag_Index>
+            <Flag_description>Bright pixels</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_WHITE</Flag_Name>
+            <Flag_Index>256</Flag_Index>
+            <Flag_description>White pixels</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_COASTLINE</Flag_Name>
+            <Flag_Index>512</Flag_Index>
+            <Flag_description>Pixels at a coastline</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_LAND</Flag_Name>
+            <Flag_Index>1024</Flag_Index>
+            <Flag_description>Land pixels</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_CIRRUS_SURE</Flag_Name>
+            <Flag_Index>2048</Flag_Index>
+            <Flag_description>Cirrus clouds with full confidence of their detection</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_CIRRUS_AMBIGUOUS</Flag_Name>
+            <Flag_Index>4096</Flag_Index>
+            <Flag_description>Cirrus clouds, or clouds where the detection level is uncertain</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_CLEAR_LAND</Flag_Name>
+            <Flag_Index>8192</Flag_Index>
+            <Flag_description>Clear land pixels</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_CLEAR_WATER</Flag_Name>
+            <Flag_Index>16384</Flag_Index>
+            <Flag_description>Clear water pixels</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_WATER</Flag_Name>
+            <Flag_Index>32768</Flag_Index>
+            <Flag_description>Water pixels</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_BRIGHTWHITE</Flag_Name>
+            <Flag_Index>65536</Flag_Index>
+            <Flag_description>'Brightwhite' pixels</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>IDEPIX_VEG_RISK</Flag_Name>
+            <Flag_Index>131072</Flag_Index>
+            <Flag_description>Pixels with vegetation risk</Flag_description>
+        </Flag>
+    </Flag_Coding>
+    <Raster_Dimensions>
+        <NCOLS>21</NCOLS>
+        <NROWS>17</NROWS>
+        <NBANDS>8</NBANDS>
+    </Raster_Dimensions>
+    <Data_Access>
+        <DATA_FILE_FORMAT>ENVI</DATA_FILE_FORMAT>
+        <DATA_FILE_FORMAT_DESC>ENVI File Format</DATA_FILE_FORMAT_DESC>
+        <DATA_FILE_ORGANISATION>BAND_SEPARATE</DATA_FILE_ORGANISATION>
+        <Data_File>
+            <DATA_FILE_PATH href="s2_classif.data/pixel_classif_flags.hdr" />
+            <BAND_INDEX>0</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="s2_classif.data/B3.hdr" />
+            <BAND_INDEX>1</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="s2_classif.data/B8A.hdr" />
+            <BAND_INDEX>2</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="s2_classif.data/sun_zenith.hdr" />
+            <BAND_INDEX>3</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="s2_classif.data/view_zenith_mean.hdr" />
+            <BAND_INDEX>4</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="s2_classif.data/sun_azimuth.hdr" />
+            <BAND_INDEX>5</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="s2_classif.data/view_azimuth_mean.hdr" />
+            <BAND_INDEX>6</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="s2_classif.data/elevation.hdr" />
+            <BAND_INDEX>7</BAND_INDEX>
+        </Data_File>
+    </Data_Access>
+    <Image_Display>
+        <Band_Statistics>
+            <BAND_INDEX>1</BAND_INDEX>
+            <NUM_COLORS>256</NUM_COLORS>
+            <Color_Palette_Point>
+                <SAMPLE>0.06918007586500607</SAMPLE>
+                <COLOR red="0" green="0" blue="0" alpha="255" />
+            </Color_Palette_Point>
+            <Color_Palette_Point>
+                <SAMPLE>0.19213163267704658</SAMPLE>
+                <COLOR red="128" green="128" blue="128" alpha="255" />
+            </Color_Palette_Point>
+            <Color_Palette_Point>
+                <SAMPLE>0.3150831894890871</SAMPLE>
+                <COLOR red="255" green="255" blue="255" alpha="255" />
+            </Color_Palette_Point>
+            <NO_DATA_COLOR red="0" green="0" blue="0" alpha="0" />
+            <HISTOGRAM_MATCHING>None</HISTOGRAM_MATCHING>
+        </Band_Statistics>
+    </Image_Display>
+    <Masks>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_INVALID" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Invalid pixels" />
+            <COLOR red="189" green="93" blue="223" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_INVALID" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_CLOUD" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Pixels which are either cloud_sure or cloud_ambiguous" />
+            <COLOR red="178" green="178" blue="0" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_CLOUD or pixel_classif_flags.IDEPIX_CLOUD_SURE or pixel_classif_flags.IDEPIX_CLOUD_AMBIGUOUS" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_CLOUD_AMBIGUOUS" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Semi transparent clouds, or clouds where the detection level is uncertain" />
+            <COLOR red="255" green="219" blue="156" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_CLOUD_AMBIGUOUS" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_CLOUD_SURE" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Fully opaque clouds with full confidence of their detection" />
+            <COLOR red="224" green="224" blue="30" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_CLOUD_SURE" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_CLOUD_BUFFER" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="A buffer of n pixels around a cloud. n is a user supplied parameter. Applied to pixels masked as 'cloud'" />
+            <COLOR red="255" green="0" blue="0" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_CLOUD_BUFFER" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_CLOUD_SHADOW" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Pixels is affect by a cloud shadow" />
+            <COLOR red="0" green="255" blue="255" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_CLOUD_SHADOW" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_SNOW_ICE" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Clear snow/ice pixels" />
+            <COLOR red="217" green="129" blue="3" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_SNOW_ICE" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_BRIGHT" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Bright pixels" />
+            <COLOR red="72" green="9" blue="178" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_BRIGHT" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_WHITE" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="White pixels" />
+            <COLOR red="15" green="160" blue="34" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_WHITE" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_COASTLINE" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Pixels at a coastline" />
+            <COLOR red="10" green="103" blue="143" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_COASTLINE" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_LAND" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Clear land pixels" />
+            <COLOR red="91" green="47" blue="201" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_LAND" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_CIRRUS_SURE" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Cirrus clouds with full confidence of their detection" />
+            <COLOR red="96" green="209" blue="23" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_CIRRUS_SURE" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_CIRRUS_AMBIGUOUS" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Cirrus clouds, or clouds where the detection level is uncertain" />
+            <COLOR red="219" green="247" blue="193" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_CIRRUS_AMBIGUOUS" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_CLEAR_LAND" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Clear land pixels" />
+            <COLOR red="212" green="132" blue="95" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_CLEAR_LAND" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_CLEAR_WATER" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Clear water pixels" />
+            <COLOR red="64" green="102" blue="134" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_CLEAR_WATER" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_WATER" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Water pixels" />
+            <COLOR red="116" green="11" blue="38" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_WATER" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_BRIGHTWHITE" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="'Brightwhite' pixels" />
+            <COLOR red="1" green="114" blue="213" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_BRIGHTWHITE" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="IDEPIX_VEG_RISK" />
+            <MASK_RASTER_WIDTH value="21" />
+            <MASK_RASTER_HEIGHT value="17" />
+            <DESCRIPTION value="Pixels with vegetation risk" />
+            <COLOR red="72" green="68" blue="151" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <IMAGE_TO_MODEL_TRANSFORM value="60.0,0.0,0.0,-60.0,667740.0,7180420.0" />
+            <EXPRESSION value="pixel_classif_flags.IDEPIX_VEG_RISK" />
+        </Mask>
+    </Masks>
+    <Image_Interpretation>
+        <Spectral_Band_Info>
+            <BAND_INDEX>0</BAND_INDEX>
+            <BAND_DESCRIPTION />
+            <BAND_NAME>pixel_classif_flags</BAND_NAME>
+            <BAND_RASTER_WIDTH>21</BAND_RASTER_WIDTH>
+            <BAND_RASTER_HEIGHT>17</BAND_RASTER_HEIGHT>
+            <DATA_TYPE>int32</DATA_TYPE>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <FLAG_CODING_NAME>pixel_classif_flags</FLAG_CODING_NAME>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>
+            <IMAGE_TO_MODEL_TRANSFORM>60.0,0.0,0.0,-60.0,667740.0,7180420.0</IMAGE_TO_MODEL_TRANSFORM>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>1</BAND_INDEX>
+            <BAND_DESCRIPTION>Reflectance in band B3</BAND_DESCRIPTION>
+            <BAND_NAME>B3</BAND_NAME>
+            <BAND_RASTER_WIDTH>21</BAND_RASTER_WIDTH>
+            <BAND_RASTER_HEIGHT>17</BAND_RASTER_HEIGHT>
+            <DATA_TYPE>uint16</DATA_TYPE>
+            <PHYSICAL_UNIT>dl</PHYSICAL_UNIT>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <SPECTRAL_BAND_INDEX>2</SPECTRAL_BAND_INDEX>
+            <BAND_WAVELEN>560.0</BAND_WAVELEN>
+            <BANDWIDTH>100.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0E-4</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>
+            <VALID_MASK_TERM>B3.raw &gt; 0</VALID_MASK_TERM>
+            <IMAGE_TO_MODEL_TRANSFORM>60.0,0.0,0.0,-60.0,667740.0,7180420.0</IMAGE_TO_MODEL_TRANSFORM>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>2</BAND_INDEX>
+            <BAND_DESCRIPTION>Reflectance in band B8A</BAND_DESCRIPTION>
+            <BAND_NAME>B8A</BAND_NAME>
+            <BAND_RASTER_WIDTH>21</BAND_RASTER_WIDTH>
+            <BAND_RASTER_HEIGHT>17</BAND_RASTER_HEIGHT>
+            <DATA_TYPE>uint16</DATA_TYPE>
+            <PHYSICAL_UNIT>dl</PHYSICAL_UNIT>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <SPECTRAL_BAND_INDEX>8</SPECTRAL_BAND_INDEX>
+            <BAND_WAVELEN>865.0</BAND_WAVELEN>
+            <BANDWIDTH>79.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0E-4</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>
+            <VALID_MASK_TERM>B8A.raw &gt; 0</VALID_MASK_TERM>
+            <IMAGE_TO_MODEL_TRANSFORM>60.0,0.0,0.0,-60.0,667740.0,7180420.0</IMAGE_TO_MODEL_TRANSFORM>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>3</BAND_INDEX>
+            <BAND_DESCRIPTION>Solar zenith angle</BAND_DESCRIPTION>
+            <BAND_NAME>sun_zenith</BAND_NAME>
+            <BAND_RASTER_WIDTH>21</BAND_RASTER_WIDTH>
+            <BAND_RASTER_HEIGHT>17</BAND_RASTER_HEIGHT>
+            <DATA_TYPE>float32</DATA_TYPE>
+            <PHYSICAL_UNIT>dl</PHYSICAL_UNIT>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>true</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>NaN</NO_DATA_VALUE>
+            <IMAGE_TO_MODEL_TRANSFORM>60.0,0.0,0.0,-60.0,667740.0,7180420.0</IMAGE_TO_MODEL_TRANSFORM>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>4</BAND_INDEX>
+            <BAND_DESCRIPTION>Viewing incidence zenith angle</BAND_DESCRIPTION>
+            <BAND_NAME>view_zenith_mean</BAND_NAME>
+            <BAND_RASTER_WIDTH>21</BAND_RASTER_WIDTH>
+            <BAND_RASTER_HEIGHT>17</BAND_RASTER_HEIGHT>
+            <DATA_TYPE>float32</DATA_TYPE>
+            <PHYSICAL_UNIT>dl</PHYSICAL_UNIT>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>true</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>NaN</NO_DATA_VALUE>
+            <IMAGE_TO_MODEL_TRANSFORM>60.0,0.0,0.0,-60.0,667740.0,7180420.0</IMAGE_TO_MODEL_TRANSFORM>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>5</BAND_INDEX>
+            <BAND_DESCRIPTION>Solar azimuth angle</BAND_DESCRIPTION>
+            <BAND_NAME>sun_azimuth</BAND_NAME>
+            <BAND_RASTER_WIDTH>21</BAND_RASTER_WIDTH>
+            <BAND_RASTER_HEIGHT>17</BAND_RASTER_HEIGHT>
+            <DATA_TYPE>float32</DATA_TYPE>
+            <PHYSICAL_UNIT>dl</PHYSICAL_UNIT>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>true</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>NaN</NO_DATA_VALUE>
+            <IMAGE_TO_MODEL_TRANSFORM>60.0,0.0,0.0,-60.0,667740.0,7180420.0</IMAGE_TO_MODEL_TRANSFORM>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>6</BAND_INDEX>
+            <BAND_DESCRIPTION>Viewing incidence azimuth angle</BAND_DESCRIPTION>
+            <BAND_NAME>view_azimuth_mean</BAND_NAME>
+            <BAND_RASTER_WIDTH>21</BAND_RASTER_WIDTH>
+            <BAND_RASTER_HEIGHT>17</BAND_RASTER_HEIGHT>
+            <DATA_TYPE>float32</DATA_TYPE>
+            <PHYSICAL_UNIT>dl</PHYSICAL_UNIT>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>true</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>NaN</NO_DATA_VALUE>
+            <IMAGE_TO_MODEL_TRANSFORM>60.0,0.0,0.0,-60.0,667740.0,7180420.0</IMAGE_TO_MODEL_TRANSFORM>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>7</BAND_INDEX>
+            <BAND_DESCRIPTION />
+            <BAND_NAME>elevation</BAND_NAME>
+            <BAND_RASTER_WIDTH>21</BAND_RASTER_WIDTH>
+            <BAND_RASTER_HEIGHT>17</BAND_RASTER_HEIGHT>
+            <DATA_TYPE>float32</DATA_TYPE>
+            <PHYSICAL_UNIT>m</PHYSICAL_UNIT>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>
+            <IMAGE_TO_MODEL_TRANSFORM>60.0,0.0,0.0,-60.0,667740.0,7180420.0</IMAGE_TO_MODEL_TRANSFORM>
+        </Spectral_Band_Info>
+    </Image_Interpretation> 
+</Dimap_Document>

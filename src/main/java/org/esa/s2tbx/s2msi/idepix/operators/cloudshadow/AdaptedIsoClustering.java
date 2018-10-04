@@ -17,22 +17,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-     /*
-     * Licensed to the Apache Software Foundation (ASF) under one or more
-     * contributor license agreements.  See the NOTICE file distributed with
-     * this work for additional information regarding copyright ownership.
-     * The ASF licenses this file to You under the Apache License, Version 2.0
-     * (the "License"); you may not use this file except in compliance with
-     * the License.  You may obtain a copy of the License at
-     *
-     *      http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     */
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // package org.apache.commons.math3.ml.clustering;
 
@@ -41,6 +41,7 @@ import java.util.List;
  * This has been adapted by Grit Kirches and Michael Paperin.
  *
  * @param <T> type of the points to cluster
+ *
  * @see <a href="http://en.wikipedia.org/wiki/K-means%2B%2B">K-means++ (wikipedia)</a>
  * @since 3.2
  */
@@ -175,7 +176,9 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
      * Runs the K-means++ clustering algorithm.
      *
      * @param points the points to cluster
+     *
      * @return a list of clusters containing the points
+     *
      * @throws MathIllegalArgumentException if the data points are null or the number
      *                                      of clusters is larger than the number of data points
      * @throws ConvergenceException         if an empty cluster is encountered and the
@@ -192,29 +195,19 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
         if (points.size() < k) {
             throw new NumberIsTooSmallException(points.size(), k, false);
         }
-        // todo adaption for more bands is required
         double darkestPoint = Double.MAX_VALUE;
         int darkestPointIndex = -1;
         for (int index = 0; index < points.size(); index++) {
-            DoublePoint p = ((ArrayList<DoublePoint>) points).get(index);
-            double value = p.getPoint()[0];
+            double[] p = ((ArrayList<DoublePoint>) points).get(index).getPoint();
+            double value = 0;
+            for (int i = 0; i < p.length; i++) {
+                value += Math.pow(p[i], 2);
+            }
             if (value < darkestPoint) {
                 darkestPoint = value;
                 darkestPointIndex = index;
             }
         }
-        /*
-        int array [][] = {{11, 0},{34, 1},{8, 2}};
-
-         java.util.Arrays.sort(array, new java.util.Comparator<double[]>() {
-             public int compare(double[] a, double[] b) {
-                 return b[0] - a[0];
-             }
-        });
-
-        array [][] = {{8, 2}, {11, 0}, {34, 1}};
-        */
-
 
         // create the initial clusters
         List<CentroidCluster<T>> clusters = chooseInitialCenters(points, darkestPointIndex);
@@ -269,6 +262,7 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
      * @param clusters    the {@link Cluster}s to add the points to
      * @param points      the points to add to the given {@link Cluster}s
      * @param assignments points assignments to clusters
+     *
      * @return the number of points assigned to different clusters as the iteration before
      */
     private int assignPointsToClusters(final List<CentroidCluster<T>> clusters,
@@ -361,8 +355,6 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
             }
 
 
-            //System.out.printf(":  %f  \n", firstPoint.getPoint()[0]);
-
             // If it's not set to >= 0, the point wasn't found in the previous
             // for loop, probably because distances are extremely small.  Just pick
             // the last available point.
@@ -374,12 +366,11 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
                     }
                 }
             }
-            //System.out.printf("\n InitialCentroids:  %f   \n", firstPoint.getPoint()[0]);
+
             // We found one.
             if (nextPointIndex >= 0) {
 
                 final T p = pointList.get(nextPointIndex);
-                //System.out.printf(":  %f   \n", p.getPoint()[0]);
 
                 resultSet.add(new CentroidCluster<>(p));
 
@@ -416,7 +407,9 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
      * Get a random point from the {@link Cluster} with the largest distance variance.
      *
      * @param clusters the {@link Cluster}s to search
+     *
      * @return a random point from the selected cluster
+     *
      * @throws ConvergenceException if clusters are all empty
      */
     private T getPointFromLargestVarianceCluster(final Collection<CentroidCluster<T>> clusters)
@@ -459,7 +452,9 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
      * Get a random point from the {@link Cluster} with the largest number of points
      *
      * @param clusters the {@link Cluster}s to search
+     *
      * @return a random point from the selected cluster
+     *
      * @throws ConvergenceException if clusters are all empty
      */
     private T getPointFromLargestNumberCluster(final Collection<? extends Cluster<T>> clusters)
@@ -495,7 +490,9 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
      * Get the point farthest to its cluster center
      *
      * @param clusters the {@link Cluster}s to search
+     *
      * @return point farthest to its cluster center
+     *
      * @throws ConvergenceException if clusters are all empty
      */
     private T getFarthestPoint(final Collection<CentroidCluster<T>> clusters) throws ConvergenceException {
@@ -533,6 +530,7 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
      *
      * @param clusters the {@link Cluster}s to search
      * @param point    the point to find the nearest {@link Cluster} for
+     *
      * @return the index of the nearest {@link Cluster} to the given point
      */
     private int getNearestCluster(final Collection<CentroidCluster<T>> clusters, final T point) {
@@ -555,6 +553,7 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
      *
      * @param points    the set of points
      * @param dimension the point dimension
+     *
      * @return the computed centroid for the set of points
      */
     private Clusterable centroidOf(final Collection<T> points, final int dimension) {
@@ -572,4 +571,3 @@ public class AdaptedIsoClustering<T extends Clusterable> extends Clusterer<T> {
     }
 
 }
-//}
