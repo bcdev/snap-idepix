@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="1da014d6-4344-4600-9e42-169d3e5ba692" name="Default" comment="changed name" />
+    <ignored path="$PROJECT_DIR$/s2tbx-cache/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-jp2-writer/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters-help/target/" />
+    <ignored path="$PROJECT_DIR$/lib-gdal/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-idepix-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-cc/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-spot-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-deimos-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-rapideye-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-radiometric-indices/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/sen2three/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-resampler/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/pansharpening-bayes/target/" />
+    <ignored path="$PROJECT_DIR$/lib-openjpeg/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-land-cover/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-meanshift/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-cache-ui/target/" />
+    <ignored path="$PROJECT_DIR$/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/sen2cor/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-muscate-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/sfstextureextraction/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-mosaic-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/pansharpening-rcs/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-commons/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-watershed/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/pansharpening-lmvm/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-biophysical/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-aerosol-retrieval/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-gdal-reader-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/maintenance/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-mci/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/multivariate-alteration-detector/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-mprofiles/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/s2tbx-otb-adapters-kit/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-kit/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-preferences-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-mci-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-spot6-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-jp2-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-mosaic/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-idepix/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-gdal-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-reflectance-to-radiance/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-reflectance-to-radiance-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-reader-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-pleiades-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-grm-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-radiometric-indices-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-grm/target/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/s2tbx-s2msi-idepix/pom.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="187">
+              <caret line="11" column="21" selection-start-line="11" selection-start-column="21" selection-end-line="11" selection-end-column="21" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="S2IdepixCloudShadowOp.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="323">
+              <caret line="47" selection-start-line="47" selection-end-line="48" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="S2IdepixPostProcessOp.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-287">
+              <caret line="37" column="13" selection-start-line="37" selection-start-column="13" selection-end-line="37" selection-end-column="13" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="cloud_and_mountain_shadow" />
+      </map>
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/s2tbx-s2msi-idepix/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="lookForNested" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="MavenProjectNavigator">
+    <treeState>
+      <expand />
+      <select />
+    </treeState>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="s2tbx-temp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="s2tbx" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="s2tbx-temp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="s2tbx" type="462c0819:PsiDirectoryNode" />
+              <item name="s2tbx-s2msi-idepix" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="s2tbx-temp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="s2tbx" type="462c0819:PsiDirectoryNode" />
+              <item name="s2tbx-s2msi-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="s2tbx-temp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="s2tbx" type="462c0819:PsiDirectoryNode" />
+              <item name="s2tbx-s2msi-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="s2tbx-temp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="s2tbx" type="462c0819:PsiDirectoryNode" />
+              <item name="s2tbx-s2msi-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="s2tbx-temp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="s2tbx" type="462c0819:PsiDirectoryNode" />
+              <item name="s2tbx-s2msi-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="s2tbx-temp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="s2tbx" type="462c0819:PsiDirectoryNode" />
+              <item name="s2tbx-s2msi-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="sentinel2" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="s2tbx-temp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="s2tbx" type="462c0819:PsiDirectoryNode" />
+              <item name="s2tbx-s2msi-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="operators" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="s2tbx-temp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="s2tbx" type="462c0819:PsiDirectoryNode" />
+              <item name="s2tbx-s2msi-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="operators" type="462c0819:PsiDirectoryNode" />
+              <item name="cloudshadow" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <patterns />
+    </configuration>
+    <configuration name="&lt;template&gt;" type="TestNG" default="true" selected="false">
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1da014d6-4344-4600-9e42-169d3e5ba692" name="Default" comment="" />
+      <created>1538657159496</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1538657159496</updated>
+      <workItem from="1538657162555" duration="1594000" />
+    </task>
+    <task id="LOCAL-00001" summary="merging cloud and mountain shadow branch to master&#10;&#10;# Conflicts:&#10;#&#9;s2tbx-muscate-reader/pom.xml&#10;#&#9;s2tbx-muscate-reader/src/main/java/org/esa/s2tbx/dataio/muscate/MuscateProductReader.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixClassificationOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixConstants.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixUtils.java">
+      <created>1538658059462</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1538658059462</updated>
+    </task>
+    <task id="LOCAL-00002" summary="adapted to master">
+      <created>1538658096537</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1538658096537</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="1594000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <layout>
+      <window_info anchor="right" id="Palette" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Messages" />
+      <window_info anchor="right" id="Palette&#9;" />
+      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info anchor="right" id="Maven Projects" visible="true" weight="0.32995737" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Version Control" visible="true" weight="0.4134199" />
+      <window_info anchor="bottom" id="Terminal" />
+      <window_info id="Designer" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info id="UI Designer" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info id="Favorites" side_tool="true" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="merging cloud and mountain shadow branch to master&#10;&#10;# Conflicts:&#10;#&#9;s2tbx-muscate-reader/pom.xml&#10;#&#9;s2tbx-muscate-reader/src/main/java/org/esa/s2tbx/dataio/muscate/MuscateProductReader.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixClassificationOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixConstants.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixUtils.java" />
+    <MESSAGE value="adapted to master" />
+    <option name="LAST_COMMIT_MESSAGE" value="adapted to master" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="47" selection-start-line="47" selection-end-line="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-287">
+          <caret line="37" column="13" selection-start-line="37" selection-start-column="13" selection-end-line="37" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/s2tbx-s2msi-idepix/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="21" selection-start-line="11" selection-start-column="21" selection-end-line="11" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.8 (1)</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>
