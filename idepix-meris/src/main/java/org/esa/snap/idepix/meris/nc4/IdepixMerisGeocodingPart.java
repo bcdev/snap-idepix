@@ -1,4 +1,4 @@
-package org.esa.snap.idepix.modis.dataio.nc4;
+package org.esa.snap.idepix.meris.nc4;
 
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
@@ -20,13 +20,13 @@ import java.awt.geom.AffineTransform;
 import java.io.IOException;
 
 /**
- * Modification of BeamGeocodingPart for IdePix MODIS purposes, i.e. do not write lat/lon bands
+ * Modification of BeamGeocodingPart for IdePix MERIS purposes, i.e. do not write lat/lon bands
  * into target netcdf file, as we want to keep products small and we still have the TPGs
  * *** CURRENTLY NOT USED ***
  *
  * @author olafd
  */
-public class IdepixModisGeocodingPart extends CfGeocodingPart {
+public class IdepixMerisGeocodingPart extends CfGeocodingPart {
     private static final String TIEPOINT_COORDINATES = "tiepoint_coordinates";
 
     private static final int LON_INDEX = 0;
@@ -43,10 +43,10 @@ public class IdepixModisGeocodingPart extends CfGeocodingPart {
         // final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
         //addLatLonBands(ncFile, ImageManager.getPreferredTileSize(product));
 
-//        final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
-//        if (!isLatLonPresent(ncFile)) {
-//            addLatLonBands(ncFile, ImageManager.getPreferredTileSize(product));
-//        }
+        final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
+        if (!isLatLonPresent(ncFile)) {
+            addLatLonBands(ncFile, ImageManager.getPreferredTileSize(product));
+        }
 
         ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, false);
 

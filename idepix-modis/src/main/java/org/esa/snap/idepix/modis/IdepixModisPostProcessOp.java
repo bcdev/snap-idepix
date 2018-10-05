@@ -3,10 +3,7 @@ package org.esa.snap.idepix.modis;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.operators.BasisOp;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
@@ -87,9 +84,7 @@ public class IdepixModisPostProcessOp extends BasisOp {
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-
                 if (targetRectangle.contains(x, y)) {
-                    boolean isCloud = classifFlagSourceTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     combineFlags(x, y, classifFlagSourceTile, targetTile);
 
                     if (!(classifProduct.getSceneGeoCoding() instanceof TiePointGeoCoding) &&
@@ -115,11 +110,10 @@ public class IdepixModisPostProcessOp extends BasisOp {
         for (int y = extendedRectangle.y; y < extendedRectangle.y + extendedRectangle.height; y++) {
             checkForCancellation();
             for (int x = extendedRectangle.x; x < extendedRectangle.x + extendedRectangle.width; x++) {
-
                 if (targetRectangle.contains(x, y)) {
                     boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     if (isCloud) {
-                        computeCloudBuffer(x, y, classifFlagSourceTile, targetTile);
+                        computeCloudBuffer(x, y, targetTile);
                     }
                 }
             }
@@ -262,7 +256,12 @@ public class IdepixModisPostProcessOp extends BasisOp {
         ProductUtils.copyFlagBands(reflProduct, targetProduct, true);
         ProductUtils.copyFlagCodings(reflProduct, targetProduct);
         ProductUtils.copyFlagCodings(classifProduct, targetProduct);
-        ProductUtils.copyGeoCoding(reflProduct, targetProduct);
+//        ProductUtils.copyGeoCoding(reflProduct, targetProduct);
+
+        TiePointGrid latTpg = targetProduct.getTiePointGrid("latitude");
+        TiePointGrid lonTpg = targetProduct.getTiePointGrid("longitude");
+        final TiePointGeoCoding tiePointGeoCoding = new TiePointGeoCoding(latTpg, lonTpg);
+        targetProduct.setSceneGeoCoding(tiePointGeoCoding);
 
         IdepixModisUtils.setupModisClassifBitmask(targetProduct);
     }
@@ -273,7 +272,7 @@ public class IdepixModisPostProcessOp extends BasisOp {
         targetTile.setSample(x, y, sourceFlags | computedFlags);
     }
 
-    private void computeCloudBuffer(int x, int y, Tile sourceFlagTile, Tile targetTile) {
+    private void computeCloudBuffer(int x, int y, Tile targetTile) {
         Rectangle rectangle = targetTile.getRectangle();
         final int LEFT_BORDER = Math.max(x - cloudBufferWidth, rectangle.x);
         final int RIGHT_BORDER = Math.min(x + cloudBufferWidth, rectangle.x + rectangle.width - 1);
@@ -281,7 +280,7 @@ public class IdepixModisPostProcessOp extends BasisOp {
         final int BOTTOM_BORDER = Math.min(y + cloudBufferWidth, rectangle.y + rectangle.height - 1);
         for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
             for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                boolean is_already_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
+                boolean is_already_cloud = targetTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
                 boolean centre_is_cloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                 if (centre_is_cloud && !is_already_cloud && rectangle.contains(i, j)) {
 //                if (!is_already_cloud && rectangle.contains(i, j)) {
