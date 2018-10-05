@@ -40,6 +40,7 @@ import java.util.List;
         authors = "Grit Kirches, Michael Paperin, Olaf Danne, Tonio Fincke, Dagmar Müller",
         copyright = "(c) Brockmann Consult GmbH",
         version = "1.0",
+        internal = true,
         description = "Post-processing for algorithm detecting cloud shadow...")
 
 public class S2IdepixPostCloudShadowOp extends Operator {

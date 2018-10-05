@@ -40,6 +40,7 @@ import java.util.Map;
         authors = "Grit Kirches, Michael Paperin, Olaf Danne, Tonio Fincke, Dagmar Müller",
         copyright = "(c) Brockmann Consult GmbH",
         version = "1.0",
+        internal = true,
         description = "Pre-processing for algorithm detecting cloud shadow...")
 
 public class S2IdepixPreCloudShadowOp extends Operator {
