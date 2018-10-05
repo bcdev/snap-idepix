@@ -1,4 +1,4 @@
-package org.esa.snap.idepix.s2msi.sentinel2;
+package org.esa.snap.idepix.s2msi;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixCloudShadowOp;

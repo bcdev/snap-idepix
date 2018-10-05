@@ -11,7 +11,8 @@
     <packaging>nbm</packaging>
 
     <name>Idepix S2-MSI</name>
-    <description>Generic classification of pixels (cloud, snow, ice, land, water) originating from S2-MSI instrument.</description>
+    <description>Generic classification of pixels (cloud, snow, ice, land, water) originating from S2-MSI instrument.
+    </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -115,34 +116,15 @@
                     <!--keystore>${project.basedir}/../keystore/s2tbx.ks</keystore>
                     <keystorealias>snap</keystorealias>
                     <keystorepassword>snap-123</keystorepassword-->
-                    <sourceManifestFile>target/nbm/manifest.mf</sourceManifestFile>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.5</version>
                 <configuration>
                     <useDefaultManifestFile>true</useDefaultManifestFile>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>regex-property</id>
-                        <goals>
-                            <goal>regex-property</goal>
-                        </goals>
-                        <configuration>
-                            <name>project.nbmSpecVersion</name>
-                            <value>${project.version}</value>
-                            <regex>-SNAPSHOT</regex>
-                            <replacement>.0</replacement>
-                            <failIfNoMatch>false</failIfNoMatch>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>

@@ -1,4 +1,4 @@
-package org.esa.snap.idepix.s2msi.sentinel2;
+package org.esa.snap.idepix.s2msi;
 
 import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudBufferOp;
 import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
@@ -15,7 +15,6 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 

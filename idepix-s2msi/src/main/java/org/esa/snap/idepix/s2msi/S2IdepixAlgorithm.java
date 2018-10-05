@@ -1,4 +1,4 @@
-package org.esa.snap.idepix.s2msi.sentinel2;
+package org.esa.snap.idepix.s2msi;
 
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
