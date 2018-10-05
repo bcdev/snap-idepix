@@ -7,7 +7,9 @@ import org.esa.snap.dataio.netcdf.AbstractNetCdfWriterPlugIn;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartWriter;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartWriter;
-import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamGeocodingPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamFlagCodingPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamMaskPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamTiePointGridPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.nc.NWritableFactory;
@@ -44,28 +46,27 @@ public class IdepixModisNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
 
     @Override
     public ProfilePartWriter createFlagCodingPartWriter() {
-        return new IdepixModisFlagCodingPart();
-    }
-
-    @Override
-    public ProfilePartWriter createMetadataPartWriter() {
-        return new IdepixModisMetadataPart();
+        return new BeamFlagCodingPart();
     }
 
     @Override
     public ProfilePartWriter createTiePointGridPartWriter() {
-        return new IdepixModisTiePointGridPart();
-    }
-
-    @Override
-    public ProfilePartWriter createGeoCodingPartWriter() {
-//        return new SnapWvcciGeocodingPart();  // use this instead of BeamGeocodingPart
-        return new BeamGeocodingPart();
+        return new BeamTiePointGridPart();
     }
 
     @Override
     public ProfilePartWriter createMaskPartWriter() {
-        return new IdepixModisMaskPart();
+        return new BeamMaskPart();
+    }
+
+    @Override
+    public ProfilePartWriter createMetadataPartWriter() {
+        return new IdepixModisMetadataPart();    // use this instead of BeamMetadataPart
+    }
+
+    @Override
+    public ProfilePartWriter createGeoCodingPartWriter() {
+        return new IdepixModisGeocodingPart();  // use this instead of BeamGeocodingPart
     }
 
     @Override

@@ -5,6 +5,8 @@ import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.operators.BasisOp;
 import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -172,6 +174,11 @@ public class IdepixModisOp extends BasisOp {
         ProductUtils.copyMetadata(sourceProduct,postProcessProduct);
         setTargetProduct(postProcessProduct);
         addBandsToTargetProduct(postProcessProduct);
+
+        final TiePointGrid latTpg = getTargetProduct().getTiePointGrid("latitude");
+        final TiePointGrid lonTpg = getTargetProduct().getTiePointGrid("longitude");
+        final TiePointGeoCoding tiePointGeoCoding = new TiePointGeoCoding(latTpg, lonTpg);
+        getTargetProduct().setSceneGeoCoding(tiePointGeoCoding);
     }
 
     private void computeAlgorithmInputProducts(Map<String, Product> occciClassifInput) {
@@ -208,13 +215,6 @@ public class IdepixModisOp extends BasisOp {
     }
 
     private void addBandsToTargetProduct(Product targetProduct) {
-//        if (outputCawaRefSB) {
-//            copySourceBands(new String[]{"EV_250_Aggr1km_RefSB_2"}, sourceProduct, targetProduct);
-//            copySourceBands(new String[]{"EV_500_Aggr1km_RefSB_5"}, sourceProduct, targetProduct);
-//            copySourceBands(new String[]{"EV_1KM_RefSB_17"}, sourceProduct, targetProduct);
-//            copySourceBands(new String[]{"EV_1KM_RefSB_18"}, sourceProduct, targetProduct);
-//            copySourceBands(new String[]{"EV_1KM_RefSB_19"}, sourceProduct, targetProduct);
-//        }
         if (outputRad2Refl) {
             copySourceBands(reflBandsToCopy, sourceProduct, targetProduct);
         }
