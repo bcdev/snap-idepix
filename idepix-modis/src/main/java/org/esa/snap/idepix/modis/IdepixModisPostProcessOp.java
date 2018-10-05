@@ -29,10 +29,10 @@ import java.awt.*;
  * @author olafd
  */
 @OperatorMetadata(alias = "Snap.Idepix.Modis.Postprocess",
-                  version = "2.2",
-                  copyright = "(c) 2016 by Brockmann Consult",
-                  description = "Refines the MODIS pixel classification.",
-                  internal = true)
+        version = "2.2",
+        copyright = "(c) 2016 by Brockmann Consult",
+        description = "Refines the MODIS pixel classification.",
+        internal = true)
 public class IdepixModisPostProcessOp extends BasisOp {
 
     @SourceProduct(alias = "refl", description = "MODIS L1b reflectance product")
@@ -55,7 +55,8 @@ public class IdepixModisPostProcessOp extends BasisOp {
             description = " Compute cloud shadow with latest 'fronts' algorithm")
     private boolean computeCloudShadow;
 
-    private RectangleExtender rectCalculator;
+    private RectangleExtender rectCalculatorPlus;
+    private RectangleExtender rectCalculatorMinus;
 
     private Band landWaterBand;
 
@@ -63,10 +64,13 @@ public class IdepixModisPostProcessOp extends BasisOp {
     public void initialize() throws OperatorException {
         createTargetProduct();
 
-        rectCalculator = new RectangleExtender(new Rectangle(reflProduct.getSceneRasterWidth(),
-                                                             reflProduct.getSceneRasterHeight()),
-                                               cloudBufferWidth, cloudBufferWidth
-        );
+        rectCalculatorPlus = new RectangleExtender(new Rectangle(reflProduct.getSceneRasterWidth(),
+                reflProduct.getSceneRasterHeight()),
+                cloudBufferWidth, cloudBufferWidth);
+
+        rectCalculatorMinus = new RectangleExtender(new Rectangle(reflProduct.getSceneRasterWidth(),
+                reflProduct.getSceneRasterHeight()),
+                -cloudBufferWidth, -cloudBufferWidth);
 
         landWaterBand = waterMaskProduct.getBand("land_water_fraction");
     }
@@ -75,13 +79,14 @@ public class IdepixModisPostProcessOp extends BasisOp {
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Band classifFlagSourceBand = classifProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         final Rectangle targetRectangle = targetTile.getRectangle();
-        final Rectangle extendedRectangle = rectCalculator.extend(targetRectangle);
+        final Rectangle extendedRectangle = rectCalculatorPlus.extend(targetRectangle);
+        final Rectangle shrinkedRectangle = rectCalculatorMinus.extend(targetRectangle);
         final Tile classifFlagSourceTile = getSourceTile(classifFlagSourceBand, extendedRectangle);
         final Tile waterFractionTile = getSourceTile(landWaterBand, extendedRectangle);
 
-        for (int y = extendedRectangle.y; y < extendedRectangle.y + extendedRectangle.height; y++) {
+        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
-            for (int x = extendedRectangle.x; x < extendedRectangle.x + extendedRectangle.width; x++) {
+            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
 
                 if (targetRectangle.contains(x, y)) {
                     boolean isCloud = classifFlagSourceTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
@@ -94,14 +99,25 @@ public class IdepixModisPostProcessOp extends BasisOp {
                             targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, true);
                         }
                     }
-
+                }
+                if (shrinkedRectangle.contains(x, y)) {
+                    boolean isCloud = classifFlagSourceTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     if (isNearCoastline(x, y, targetTile, waterFractionTile, targetRectangle)) {
                         refineSnowIceFlaggingForCoastlines(x, y, classifFlagSourceTile, targetTile);
                         if (isCloud) {
                             refineCloudFlaggingForCoastlines(x, y, classifFlagSourceTile, waterFractionTile, targetTile, targetRectangle);
                         }
                     }
+                }
+            }
+        }
 
+        for (int y = extendedRectangle.y; y < extendedRectangle.y + extendedRectangle.height; y++) {
+            checkForCancellation();
+            for (int x = extendedRectangle.x; x < extendedRectangle.x + extendedRectangle.width; x++) {
+
+                if (targetRectangle.contains(x, y)) {
+                    boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     if (isCloud) {
                         computeCloudBuffer(x, y, classifFlagSourceTile, targetTile);
                     }
@@ -140,7 +156,7 @@ public class IdepixModisPostProcessOp extends BasisOp {
                 }
             }
             // also consider reduced boxes at product edge
-            return (count >= 4 && landCount >= Math.max(count-6, 1) && landCount <= count - 3);
+            return (count >= 4 && landCount >= Math.max(count - 6, 1) && landCount <= count - 3);
         }
 
         return false;
@@ -266,7 +282,9 @@ public class IdepixModisPostProcessOp extends BasisOp {
         for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
             for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
                 boolean is_already_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
-                if (!is_already_cloud && rectangle.contains(i, j)) {
+                boolean centre_is_cloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+                if (centre_is_cloud && !is_already_cloud && rectangle.contains(i, j)) {
+//                if (!is_already_cloud && rectangle.contains(i, j)) {
                     targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_BUFFER, true);
                 }
             }
