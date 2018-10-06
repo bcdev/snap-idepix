@@ -56,6 +56,10 @@ public class IdepixModisOp extends BasisOp {
             defaultValue = "")
     private String[] emissiveBandsToCopy;
 
+    @Parameter(defaultValue = "true",
+            label = " Process only products with DayNightFlag = 'Day'")
+    private boolean processDayProductsOnly;
+
     @Parameter(defaultValue = "CLOUD_CONSERVATIVE",
             valueSet = {"CLEAR_SKY_CONSERVATIVE", "CLOUD_CONSERVATIVE"},
             label = " Strength of cloud flagging",
@@ -86,27 +90,27 @@ public class IdepixModisOp extends BasisOp {
             description = " NN cloud ambiguous cloud sure/snow separation value")
     double nnCloudSureSnowSeparationValue;
 
-//    @Parameter(defaultValue = "0.08",
+    //    @Parameter(defaultValue = "0.08",
 //            label = " 'B_NIR' threshold at 859nm (MODIS)",
 //            description = "'B_NIR' threshold: 'Cloud B_NIR' set if EV_250_Aggr1km_RefSB_2 > THRESH.")
     private double bNirThresh859 = 0.08;
 
-//    @Parameter(defaultValue = "0.15",
+    //    @Parameter(defaultValue = "0.15",
 //            label = " 'Dark glint' threshold at 859nm for 'cloud sure' (MODIS)",
 //            description = "'Dark glint' threshold: 'Cloud sure' possible only if EV_250_Aggr1km_RefSB_2 > THRESH.")
     private double glintThresh859forCloudSure = 0.15;
 
-//    @Parameter(defaultValue = "0.06",
+    //    @Parameter(defaultValue = "0.06",
 //            label = " 'Dark glint' threshold at 859nm for 'cloud ambiguous' (MODIS)",
 //            description = "'Dark glint' threshold: 'Cloud ambiguous' possible only if EV_250_Aggr1km_RefSB_2 > THRESH.")
     private double glintThresh859forCloudAmbiguous = 0.06;
 
-//    @Parameter(defaultValue = "true",
+    //    @Parameter(defaultValue = "true",
 //            label = " Apply brightness test (MODIS)",
 //            description = "Apply brightness test: EV_250_Aggr1km_RefSB_1 > THRESH (MODIS).")
     private boolean applyBrightnessTest = true;
 
-//    @Parameter(defaultValue = "true",
+    //    @Parameter(defaultValue = "true",
 //            label = " Apply 'OR' logic in cloud test (MODIS)",
 //            description = "Apply 'OR' logic instead of 'AND' logic in cloud test (MODIS).")
     private boolean applyOrLogicInCloudTest = true;
@@ -143,6 +147,10 @@ public class IdepixModisOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
+        if (processDayProductsOnly) {
+            IdepixModisUtils.checkIfDayProduct(sourceProduct);
+        }
+
         outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
         outputEmissive = emissiveBandsToCopy != null && emissiveBandsToCopy.length > 0;
 
@@ -164,14 +172,14 @@ public class IdepixModisOp extends BasisOp {
 
         postProcessInput.put("refl", sourceProduct);
         classifProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixModisClassificationOp.class),
-                                           occciCloudClassificationParameters, occciClassifInput);
+                occciCloudClassificationParameters, occciClassifInput);
 
         postProcessInput.put("classif", classifProduct);
 
         Product postProcessProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixModisPostProcessOp.class),
-                                                       postProcessParameters, postProcessInput);
+                postProcessParameters, postProcessInput);
 
-        ProductUtils.copyMetadata(sourceProduct,postProcessProduct);
+        ProductUtils.copyMetadata(sourceProduct, postProcessProduct);
         setTargetProduct(postProcessProduct);
         addBandsToTargetProduct(postProcessProduct);
 
@@ -231,7 +239,6 @@ public class IdepixModisOp extends BasisOp {
             }
         }
     }
-
 
 
     /**
