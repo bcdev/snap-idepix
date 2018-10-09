@@ -209,6 +209,14 @@ public class IdepixModisClassificationOp extends PixelOperator {
     }
 
     private IdepixModisAlgorithm createModisAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
+
+        // we need a check like this as there seem to be scans in MOD021KM with missing lat/lons.
+        // e.g. MOD021KM.A2011336.1310.061.2017328034132.hdf
+        // OD, 20181009
+        if (!(Math.abs(getGeoPos(x, y).lat) <= 90f && Math.abs(getGeoPos(x, y).lon) <= 180f)) {
+            throw new OperatorException("Latitude and/or longitude TPGs seem to have missing/corrupt values - cannot proceed.");
+        }
+
         IdepixModisAlgorithm modisAlgorithm = new IdepixModisAlgorithm();
 
         final double[] reflectance = new double[IdepixModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS];
