@@ -97,8 +97,15 @@ public class IdepixModisClassificationOp extends PixelOperator {
     @SourceProduct(alias = "refl", description = "MODIS L1b reflectance product")
     private Product reflProduct;
 
-    @SourceProduct(alias = "waterMask")
-    private Product waterMaskProduct;
+    @SourceProduct(alias = "srtmWaterMask",
+            description = "SRTM water mask product")
+    private Product srtmWaterMaskProduct;
+
+    @SourceProduct(alias = "modisWaterMask",
+            description = "MODIS water mask product (must be MOD03 or MYD03)",
+            optional = true)
+    private Product modisWaterMaskProduct;
+
 
     public static final String MODIS_WATER_NET_NAME = "9x7x5x3_130.3_water.net";
     public static final String MODIS_LAND_NET_NAME = "8x6x4x2_290.4_land.net";
@@ -150,7 +157,11 @@ public class IdepixModisClassificationOp extends PixelOperator {
         }
 
         int index = IdepixModisConstants.MODIS_SRC_RAD_OFFSET + IdepixModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS + 1;
-        sampleConfigurer.defineSample(index, IdepixConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
+        sampleConfigurer.defineSample(index, IdepixConstants.LAND_WATER_FRACTION_BAND_NAME, srtmWaterMaskProduct);
+        if (modisWaterMaskProduct != null) {
+            index++;
+            sampleConfigurer.defineSample(index, IdepixModisConstants.MODIS_WATER_MASK_BAND_NAME, modisWaterMaskProduct);
+        }
     }
 
     @Override
@@ -222,7 +233,7 @@ public class IdepixModisClassificationOp extends PixelOperator {
         final double[] reflectance = new double[IdepixModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS];
         double[] neuralNetOutput;
 
-        float waterFraction = Float.NaN;
+        float srtmWaterFraction = Float.NaN;
 
         for (int i = 0; i < IdepixModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS; i++) {
             reflectance[i] = sourceSamples[i].getFloat();
@@ -230,10 +241,18 @@ public class IdepixModisClassificationOp extends PixelOperator {
         modisAlgorithm.setRefl(reflectance);
         // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
         if (getGeoPos(x, y).lat > -58f) {
-            waterFraction =
+            srtmWaterFraction =
                     sourceSamples[IdepixModisConstants.MODIS_SRC_RAD_OFFSET + IdepixModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS + 1].getFloat();
         }
-        modisAlgorithm.setWaterFraction(waterFraction);
+        modisAlgorithm.setSrtmWaterFraction(srtmWaterFraction);
+
+        int modisWaterMaskValue = -1;
+        if (modisWaterMaskProduct != null) {
+            modisWaterMaskValue =
+                    sourceSamples[IdepixModisConstants.MODIS_SRC_RAD_OFFSET +
+                            IdepixModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS + 2].getInt();
+        }
+        modisAlgorithm.setModisWaterMaskvalue(modisWaterMaskValue);
 
         modisAlgorithm.setModisApplyBrightnessTest(applyBrightnessTest);
         final double ocModisBrightnessThreshCloudSure = 0.15;

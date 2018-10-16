@@ -6,6 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="idepix-meris" />
+        <module name="idepix-modis" />
+        <module name="idepix-olci" />
+        <module name="idepix-s2msi" />
         <module name="lib-gdal" />
         <module name="lib-openjpeg" />
         <module name="maintenance" />
@@ -56,5 +60,12 @@
         <module name="sfstextureextraction" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="idepix-meris" target="1.8" />
+      <module name="idepix-modis" target="1.8" />
+      <module name="idepix-olci" target="1.8" />
+      <module name="idepix-s2msi" target="1.8" />
+      <module name="snap-idepix-parent" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
 </project>

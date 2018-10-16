@@ -18,6 +18,8 @@ import org.esa.snap.core.util.ProductUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.esa.snap.idepix.modis.IdepixModisConstants.MODIS_WATER_MASK_BAND_NAME;
+
 /**
  * Idepix operator for pixel identification and classification for MODIS
  *
@@ -124,9 +126,14 @@ public class IdepixModisOp extends BasisOp {
     @SourceProduct(alias = "sourceProduct", label = "Name (MODIS L1b product)", description = "The source product.")
     private Product sourceProduct;
 
-    private Product waterMaskProduct;
+    @SourceProduct(alias = "modisWaterMask",
+            label = "MODIS water mask product (optional)",
+            description = "MODIS water mask product (must be MOD03 or MYD03)",
+            optional = true)
+    private Product modisWaterMaskProduct;
+
+    private Product srtmWaterMaskProduct;
     private Product classifProduct;
-    private Map<String, Object> waterClassificationParameters;
 
     private boolean outputRad2Refl;
     private boolean outputEmissive;
@@ -151,6 +158,12 @@ public class IdepixModisOp extends BasisOp {
             IdepixModisUtils.checkIfDayProduct(sourceProduct);
         }
 
+        if (modisWaterMaskProduct != null) {
+            IdepixModisUtils.validateModisWaterMaskProduct(sourceProduct,
+                                                           modisWaterMaskProduct,
+                                                           MODIS_WATER_MASK_BAND_NAME);
+        }
+
         outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
         outputEmissive = emissiveBandsToCopy != null && emissiveBandsToCopy.length > 0;
 
@@ -168,7 +181,7 @@ public class IdepixModisOp extends BasisOp {
         Map<String, Object> postProcessParameters = new HashMap<>();
         postProcessParameters.put("cloudBufferWidth", cloudBufferWidth);
         Map<String, Product> postProcessInput = new HashMap<>();
-        postProcessInput.put("waterMask", waterMaskProduct);
+        postProcessInput.put("waterMask", srtmWaterMaskProduct);
 
         postProcessInput.put("refl", sourceProduct);
         classifProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixModisClassificationOp.class),
@@ -189,10 +202,11 @@ public class IdepixModisOp extends BasisOp {
         getTargetProduct().setSceneGeoCoding(tiePointGeoCoding);
     }
 
-    private void computeAlgorithmInputProducts(Map<String, Product> occciClassifInput) {
+    private void computeAlgorithmInputProducts(Map<String, Product> modisClassifInput) {
         createWaterMaskProduct();
-        occciClassifInput.put("waterMask", waterMaskProduct);
-        occciClassifInput.put("refl", sourceProduct);
+        modisClassifInput.put("refl", sourceProduct);
+        modisClassifInput.put("srtmWaterMask", srtmWaterMaskProduct);
+        modisClassifInput.put("modisWaterMask", modisWaterMaskProduct);
     }
 
 
@@ -201,7 +215,7 @@ public class IdepixModisOp extends BasisOp {
         waterParameters.put("resolution", waterMaskResolution);
         waterParameters.put("subSamplingFactorX", 3);
         waterParameters.put("subSamplingFactorY", 3);
-        waterMaskProduct = GPF.createProduct("LandWaterMask", waterParameters, sourceProduct);
+        srtmWaterMaskProduct = GPF.createProduct("LandWaterMask", waterParameters, sourceProduct);
     }
 
     private Map<String, Object> createModisPixelClassificationParameters() {

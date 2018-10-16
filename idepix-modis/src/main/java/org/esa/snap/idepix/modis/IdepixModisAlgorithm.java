@@ -22,7 +22,8 @@ public class IdepixModisAlgorithm {
     private double nnCloudAmbiguousSureSeparationValue;
     private double nnCloudSureSnowSeparationValue;
 
-    float waterFraction;
+    float srtmWaterFraction;
+    int modisWaterMaskvalue;
     double[] refl;
     double[] nnOutput;
 
@@ -247,11 +248,16 @@ public class IdepixModisAlgorithm {
     public boolean isCoastline() {
         // NOTE that this does not work if we have a PixelGeocoding. In that case, waterFraction
         // is always 0 or 100!! (TS, OD, 20140502). If so, get a coastline in post processing approach.
-        return waterFraction < 100 && waterFraction > 0;
+        return srtmWaterFraction < 100 && srtmWaterFraction > 0;
     }
 
     public boolean isLand() {
-        return waterFraction == 0;
+        if (!Float.isNaN(srtmWaterFraction)) {
+            return srtmWaterFraction == 0;
+        } else {
+            // if available, consider MODIS land/sea mask for lat < -58deg south
+            return modisWaterMaskvalue == 1 || modisWaterMaskvalue == 2;     // 1 is land, 2 is coastline
+        }
     }
 
     public boolean isBright() {
@@ -277,8 +283,12 @@ public class IdepixModisAlgorithm {
 
     
     ///////////////// further setter methods ////////////////////////////////////////
-    public void setWaterFraction(float waterFraction) {
-        this.waterFraction = waterFraction;
+    public void setSrtmWaterFraction(float srtmWaterFraction) {
+        this.srtmWaterFraction = srtmWaterFraction;
+    }
+
+    public void setModisWaterMaskvalue(int modisWaterMaskvalue) {
+        this.modisWaterMaskvalue = modisWaterMaskvalue;
     }
 
     public void setRefl(double[] reflectance) {

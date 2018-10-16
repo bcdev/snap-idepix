@@ -2,56 +2,10 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib-gdal" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib-openjpeg" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-biophysical" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-cache" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-cache-ui" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-commons" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-deimos-reader" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-gdal-reader" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-gdal-reader-ui" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-grm" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-grm-ui" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-jp2-reader" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-jp2-writer" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-kit" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-land-cover" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-mosaic" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-mosaic-ui" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-muscate-reader" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-pleiades-reader" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-preferences-ui" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-radiometric-indices" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-radiometric-indices-ui" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-rapideye-reader" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-reflectance-to-radiance" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-reflectance-to-radiance-ui" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-s2msi-aerosol-retrieval" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-s2msi-idepix" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-s2msi-idepix-ui" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-s2msi-mci" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-s2msi-mci-ui" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-s2msi-reader" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-s2msi-reader-ui" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-s2msi-resampler" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-spot-reader" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-spot6-reader" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters-help" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/maintenance" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/multivariate-alteration-detector" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/pansharpening-bayes" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/pansharpening-lmvm" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/pansharpening-rcs" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/s2tbx-otb-adapters-kit" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-cc" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-meanshift" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-mprofiles" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-watershed" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/sfstextureextraction" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/sen2cor" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/s2tbx-sta-adapters/sen2three" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/idepix-meris" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/idepix-modis" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/idepix-olci" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/idepix-s2msi" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
