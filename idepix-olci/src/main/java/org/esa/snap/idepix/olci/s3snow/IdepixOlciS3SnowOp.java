@@ -180,7 +180,9 @@ public class IdepixOlciS3SnowOp extends BasisOp {
     }
 
     private void addCloudOverSnowBand() {
-        String expr = "pixel_classif_flags.IDEPIX_LAND && Oa21_reflectance > 0.5 && surface_13 - trans_13 < 0.01";
+//        String expr = "pixel_classif_flags.IDEPIX_LAND && Oa21_reflectance > 0.5 && surface_13 - trans_13 < 0.01";
+        String expr = "pixel_classif_flags.IDEPIX_LAND && " +
+                "((Oa21_reflectance > 0.5 && surface_13 - trans_13 < 0.01) || Oa21_reflectance > 0.76)";
         final Band surfPresBand = new VirtualBand("cloud_over_snow",
                                                   ProductData.TYPE_FLOAT32,
                                                   targetProduct.getSceneRasterWidth(),
