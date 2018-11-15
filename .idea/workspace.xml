@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e6664cee-518c-47a6-944c-0dd1b4d2ac3c" name="Default" comment="added check for missing lat and lon tiepoints in input L1b HDF files">
-      <change beforePath="$PROJECT_DIR$/.idea/.name" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisAlgorithm.java" afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisAlgorithm.java" />
-      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java" afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java" />
-      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisConstants.java" afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisConstants.java" />
-      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java" afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java" />
-      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisUtils.java" afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisUtils.java" />
+    <list default="true" id="e6664cee-518c-47a6-944c-0dd1b4d2ac3c" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java" afterPath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java" />
     </list>
     <ignored path="$PROJECT_DIR$/s2tbx-cache/target/" />
     <ignored path="$PROJECT_DIR$/s2tbx-jp2-writer/target/" />
@@ -79,208 +70,32 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="IdepixModisOp.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java">
+      <file leaf-file-name="IdepixOlciOp.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="297">
-              <caret line="133" column="0" lean-forward="false" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
+            <state relative-caret-position="121">
+              <caret line="35" column="43" lean-forward="false" selection-start-line="35" selection-start-column="27" selection-end-line="35" selection-end-column="43" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="IdepixModisConstants.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisConstants.java">
+      <file leaf-file-name="IdepixMerisOp.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/idepix-meris/src/main/java/org/esa/snap/idepix/meris/IdepixMerisOp.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="541">
-              <caret line="106" column="57" lean-forward="false" selection-start-line="106" selection-start-column="31" selection-end-line="106" selection-end-column="57" />
+            <state relative-caret-position="262">
+              <caret line="37" column="45" lean-forward="true" selection-start-line="37" selection-start-column="45" selection-end-line="37" selection-end-column="45" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="OperatorContext.class" pinned="false" current-in-tab="false">
-        <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-gpf/7.0.0-SNAPSHOT/snap-gpf-7.0.0-20181002.132757-62.jar!/org/esa/snap/core/gpf/internal/OperatorContext.class">
+      <file leaf-file-name="IdepixOlciPostProcessOp.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="259" column="0" lean-forward="false" selection-start-line="259" selection-start-column="0" selection-end-line="259" selection-end-column="0" />
-              <folding>
-                <marker date="1538659697432" expanded="false" signature="0:104" ph="/.../" />
-                <marker date="1538659697432" expanded="false" signature="154:3396" ph="..." />
-                <marker date="1538659697432" expanded="false" signature="4698:4827" ph="initialValue() → {" />
-                <marker date="1538659697432" expanded="false" signature="4899:4910" ph="}" />
-                <marker date="1538659697432" expanded="true" signature="4959:5673" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="5726:6126" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="6185:6905" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="6933:7306" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="7341:7404" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="7435:7446" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="7465:7471" ph=" }" />
-                <marker date="1538659697432" expanded="true" signature="7514:7593" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="7641:7652" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="7698:7704" ph=" }" />
-                <marker date="1538659697432" expanded="true" signature="7767:8043" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="8086:8195" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="8251:8634" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="8707:9103" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="9159:9973" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="10038:10172" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="10230:10337" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="10388:10477" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="10511:10522" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="10544:10550" ph=" }" />
-                <marker date="1538659697432" expanded="false" signature="10599:10610" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="10637:10643" ph=" }" />
-                <marker date="1538659697432" expanded="true" signature="10709:10830" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="10872:11053" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="10987:11002" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="11110:11121" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="11152:11158" ph=" }" />
-                <marker date="1538659697432" expanded="false" signature="11193:11204" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="11225:11231" ph=" }" />
-                <marker date="1538659697432" expanded="true" signature="11277:11376" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="11434:11828" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="11897:12307" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="12358:12817" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="12883:13127" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="13174:13185" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="13212:13218" ph=" }" />
-                <marker date="1538659697432" expanded="false" signature="13284:13295" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="13335:13341" ph=" }" />
-                <marker date="1538659697432" expanded="false" signature="13414:13425" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="13462:13468" ph=" }" />
-                <marker date="1538659697432" expanded="false" signature="13504:13515" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="13549:13555" ph=" }" />
-                <marker date="1538659697432" expanded="false" signature="13608:13619" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="13660:13666" ph=" }" />
-                <marker date="1538659697432" expanded="false" signature="13724:13735" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="13781:13787" ph=" }" />
-                <marker date="1538659697432" expanded="true" signature="13868:13956" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="14068:14463" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="14515:14526" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="14578:14584" ph=" }" />
-                <marker date="1538659697432" expanded="false" signature="14617:14628" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="14649:14655" ph=" }" />
-                <marker date="1538659697432" expanded="true" signature="14683:15260" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="15354:15477" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="15576:15708" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="15761:15855" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="15967:16392" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="16457:17264" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="17324:17432" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="17475:18688" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="18727:19133" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="19266:25393" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="24352:24430" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="25483:26805" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="26907:28224" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="28262:31192" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="30476:31119" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="30597:31093" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="31259:31738" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="31785:32536" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="32594:32605" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="32648:32654" ph=" }" />
-                <marker date="1538659697432" expanded="true" signature="32718:33443" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="33521:34961" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="35067:36904" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="36974:37045" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="37129:38138" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="38268:39864" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="39997:42051" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="42096:43096" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="43177:43796" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="43891:43965" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="44080:44153" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="44251:44340" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="44459:44533" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="44679:45658" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="45747:46321" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="46422:46953" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="47018:47389" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="47519:48593" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="48657:49838" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="49913:50173" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="50226:50891" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="50942:51095" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="51196:51618" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="51649:51797" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="51827:51974" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="52007:52157" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="52189:52338" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="52370:52381" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="52460:52466" ph=" }" />
-                <marker date="1538659697432" expanded="true" signature="52510:52798" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="52837:52848" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="52877:52883" ph=" }" />
-                <marker date="1538659697432" expanded="false" signature="52946:52957" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="52998:53004" ph=" }" />
-                <marker date="1538659697432" expanded="true" signature="53071:53199" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="53212:53292" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="53346:54068" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="53451:53529" ph="{...}" />
-                <marker date="1538659697432" expanded="true" signature="53559:53651" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="53679:53694" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="53728:53738" ph=" }" />
-                <marker date="1538659697432" expanded="false" signature="53769:53784" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="53818:53828" ph=" }" />
-                <marker date="1538659697432" expanded="true" signature="53859:53968" ph="{...}" />
-                <marker date="1538659697432" expanded="false" signature="53999:54014" ph=" { " />
-                <marker date="1538659697432" expanded="false" signature="54052:54062" ph=" }" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="IdepixModisUtils.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisUtils.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="394">
-              <caret line="75" column="82" lean-forward="false" selection-start-line="75" selection-start-column="82" selection-end-line="75" selection-end-column="82" />
+            <state relative-caret-position="3085">
+              <caret line="207" column="52" lean-forward="false" selection-start-line="207" selection-start-column="52" selection-end-line="207" selection-end-column="52" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="IdepixModisPostProcessOp.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisPostProcessOp.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
-              <caret line="26" column="3" lean-forward="false" selection-start-line="26" selection-start-column="3" selection-end-line="26" selection-end-column="3" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="IdepixModisClassificationOp.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="250" column="33" lean-forward="false" selection-start-line="250" selection-start-column="33" selection-end-line="250" selection-end-column="33" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="IdepixModisAlgorithm.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisAlgorithm.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="265" column="73" lean-forward="true" selection-start-line="265" selection-start-column="73" selection-end-line="265" selection-end-column="73" />
-              <folding>
-                <element signature="e#10460#10461#0" expanded="true" />
-                <element signature="e#10529#10530#0" expanded="true" />
-                <element signature="e#11335#11336#0" expanded="true" />
-                <element signature="e#11393#11394#0" expanded="true" />
-                <element signature="e#11460#11461#0" expanded="true" />
-                <element signature="e#11522#11523#0" expanded="true" />
-                <element signature="e#11571#11572#0" expanded="true" />
-                <element signature="e#11605#11606#0" expanded="true" />
-                <element signature="e#11655#11656#0" expanded="true" />
-                <element signature="e#11695#11696#0" expanded="true" />
-                <element signature="e#12078#12079#0" expanded="true" />
-                <element signature="e#12138#12139#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -288,8 +103,8 @@
       <file leaf-file-name="IdepixOlciClassificationOp.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6205">
-              <caret line="388" column="7" lean-forward="false" selection-start-line="388" selection-start-column="7" selection-end-line="388" selection-end-column="7" />
+            <state relative-caret-position="227">
+              <caret line="187" column="56" lean-forward="false" selection-start-line="187" selection-start-column="56" selection-end-line="187" selection-end-column="56" />
               <folding />
             </state>
           </provider>
@@ -298,18 +113,8 @@
       <file leaf-file-name="IdepixOlciConstants.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="IdepixModisNc4WriterPlugIn.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/dataio/nc4/IdepixModisNc4WriterPlugIn.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1258">
-              <caret line="112" column="0" lean-forward="false" selection-start-line="112" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
+            <state relative-caret-position="221">
+              <caret line="13" column="28" lean-forward="false" selection-start-line="13" selection-start-column="28" selection-end-line="13" selection-end-column="28" />
               <folding />
             </state>
           </provider>
@@ -329,6 +134,12 @@
       <find>srtmWaterMaskProduct</find>
       <find>srtmWaterFraction</find>
       <find>modisWaterMaskProduct</find>
+      <find>modisWaterMaskvalue</find>
+      <find>esource</find>
+      <find>COASTLINE</find>
+      <find>waterFractionTile</find>
+      <find>classifyCloud</find>
+      <find>useSrtmLandWaterMask</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -354,6 +165,7 @@
         <option value="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java" />
         <option value="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisAlgorithm.java" />
         <option value="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java" />
       </list>
     </option>
   </component>
@@ -414,8 +226,8 @@
     </treeState>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="30" />
-    <option name="y" value="8" />
+    <option name="x" value="39" />
+    <option name="y" value="20" />
     <option name="width" value="1797" />
     <option name="height" value="1013" />
   </component>
@@ -435,8 +247,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -484,33 +294,6 @@
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
               <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="meris" type="462c0819:PsiDirectoryNode" />
-              <item name="nc4" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-              <item name="services" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -529,16 +312,6 @@
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="meris" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="meris" type="462c0819:PsiDirectoryNode" />
-              <item name="nc4" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
@@ -565,102 +338,6 @@
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="resources" type="462c0819:PsiDirectoryNode" />
               <item name="meris" type="462c0819:PsiDirectoryNode" />
-              <item name="nc4" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="modis" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="modis" type="462c0819:PsiDirectoryNode" />
-              <item name="nc4" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-              <item name="services" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="modis" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="modis" type="462c0819:PsiDirectoryNode" />
               <item name="nc4" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -753,13 +430,18 @@
             <path>
               <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Maven: org.esa.snap:snap-netcdf:7.0.0-SNAPSHOT" type="70bed36:NamedLibraryElementNode" />
+              <item name="Maven: org.esa.snap:snap-gpf:7.0.0-SNAPSHOT" type="70bed36:NamedLibraryElementNode" />
+              <item name="snap-gpf-7.0.0-20181002.132757-62.jar" type="462c0819:PsiDirectoryNode" />
+              <item name="gpf" type="462c0819:PsiDirectoryNode" />
+              <item name="pointop" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
       <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="AndroidView" />
     </panes>
   </component>
@@ -768,6 +450,8 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../calvalus-instances" />
+    <property name="extract.method.default.visibility" value="private" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -786,7 +470,26 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JAR Application.Idepix MODIS (SNAP GUI)">
+  <component name="RunManager" selected="JAR Application.Idepix OLCI (SNAP GUI)">
+    <configuration name="IdepixMerisNc4WriterTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="org.esa.snap.idepix.meris.dataio.nc4.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="org.esa.snap.idepix.meris.dataio.nc4.IdepixMerisNc4WriterTest" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="idepix-meris" />
+      <envs />
+    </configuration>
     <configuration default="true" type="Application" factoryName="Application">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <option name="MAIN_CLASS_NAME" />
@@ -821,6 +524,16 @@
       <envs />
       <patterns />
     </configuration>
+    <configuration name="Idepix OLCI (SNAP GUI)" type="JarApplication" factoryName="JAR Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="JAR_PATH" value="F:/olafd/snap-snapshots/snapshot_7.0.0/snap/snap/modules/ext/org.esa.snap.snap-rcp/org-esa-snap/snap-main.jar" />
+      <option name="VM_PARAMETERS" value="-Dsun.awt.nopixfmt=true -Dsun.java2d.noddraw=true -Dsun.java2d.dpiaware=false -Dsnap.pythonModuleDir=C:\Users\olafd\workspaces\git\senbox-org -Dsnap.log.level=ALL -Ds3tbx.landsat.readAs=reflectance -Dorg.netbeans.modules.javahelp.level=100 -Dorg.netbeans.modules.javahelp=0" />
+      <option name="PROGRAM_PARAMETERS" value="--clusters &quot;C:\Users\olafd\workspaces\git\snap-idepix\idepix-olci\target\nbm\netbeans\s3tbx&quot; --patches &quot;C:\Users\olafd\workspaces\git\snap-idepix\idepix-olci\$\target\classes&quot; --userdir &quot;C:\Users\olafd\.snap&quot;" />
+      <option name="WORKING_DIRECTORY" value="F:\olafd\snap-snapshots\snapshot_7.0.0\snap" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
+      <envs />
+    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <module name="" />
@@ -848,10 +561,17 @@
       <properties />
       <listeners />
     </configuration>
-    <list size="2">
+    <list size="4">
       <item index="0" class="java.lang.String" itemvalue="JAR Application.Idepix MODIS (SNAP GUI)" />
-      <item index="1" class="java.lang.String" itemvalue="JAR Application.gpt_s3snow_subset_100x100" />
+      <item index="1" class="java.lang.String" itemvalue="JAR Application.Idepix OLCI (SNAP GUI)" />
+      <item index="2" class="java.lang.String" itemvalue="JAR Application.gpt_s3snow_subset_100x100" />
+      <item index="3" class="java.lang.String" itemvalue="Application.IdepixMerisNc4WriterTest" />
     </list>
+    <recent_temporary>
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="Application.IdepixMerisNc4WriterTest" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
@@ -868,7 +588,11 @@
       <workItem from="1539076703710" duration="163000" />
       <workItem from="1539076876939" duration="5651000" />
       <workItem from="1539609357159" duration="686000" />
-      <workItem from="1539691780524" duration="7458000" />
+      <workItem from="1539691780524" duration="7505000" />
+      <workItem from="1539946372684" duration="1588000" />
+      <workItem from="1541670310030" duration="67000" />
+      <workItem from="1542031995064" duration="885000" />
+      <workItem from="1542275682314" duration="4773000" />
     </task>
     <task id="LOCAL-00001" summary="merging cloud and mountain shadow branch to master&#10;&#10;# Conflicts:&#10;#&#9;s2tbx-muscate-reader/pom.xml&#10;#&#9;s2tbx-muscate-reader/src/main/java/org/esa/s2tbx/dataio/muscate/MuscateProductReader.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixClassificationOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixConstants.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixUtils.java">
       <created>1538658059462</created>
@@ -891,14 +615,21 @@
       <option name="project" value="LOCAL" />
       <updated>1539096590002</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="added optional MOD03 land mask product as input in Idepix MODIS">
+      <created>1539701503924</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1539701503924</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="15673000" />
+    <option name="totallyTimeSpent" value="23033000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="30" y="8" width="1797" height="1013" extended-state="0" />
+    <frame x="39" y="20" width="1797" height="1013" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -909,14 +640,14 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.52680653" sideWeight="0.502015" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17443869" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26340327" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29137528" sideWeight="0.4956822" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32983682" sideWeight="0.4956822" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23431203" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.208981" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="JProfiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21911421" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2925408" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -997,7 +728,8 @@
     <MESSAGE value="merging cloud and mountain shadow branch to master&#10;&#10;# Conflicts:&#10;#&#9;s2tbx-muscate-reader/pom.xml&#10;#&#9;s2tbx-muscate-reader/src/main/java/org/esa/s2tbx/dataio/muscate/MuscateProductReader.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixClassificationOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixConstants.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixUtils.java" />
     <MESSAGE value="adapted to master" />
     <MESSAGE value="added check for missing lat and lon tiepoints in input L1b HDF files" />
-    <option name="LAST_COMMIT_MESSAGE" value="added check for missing lat and lon tiepoints in input L1b HDF files" />
+    <MESSAGE value="added optional MOD03 land mask product as input in Idepix MODIS" />
+    <option name="LAST_COMMIT_MESSAGE" value="added optional MOD03 land mask product as input in Idepix MODIS" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1008,13 +740,47 @@
           <properties />
           <option name="timeStamp" value="2" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-meris/src/test/java/org/esa/snap/idepix/meris/dataio/nc4/IdepixMerisNc4WriterTest.java</url>
+          <line>13</line>
+          <properties />
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java</url>
+          <line>174</line>
+          <properties class="org.esa.snap.idepix.modis.IdepixModisClassificationOp" method="configureTargetProduct">
+            <option name="EMULATED" value="true" />
+          </properties>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="3" />
+      <option name="time" value="6" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_COASTLINE)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_BRIGHT)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>product.getMetadataRoot().getElements()</expression-string>
         <language-id>JAVA</language-id>
@@ -1048,35 +814,10 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-modis/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="23" column="17" lean-forward="false" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-meris/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="25" column="29" lean-forward="false" selection-start-line="25" selection-start-column="29" selection-end-line="25" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/idepix-meris/src/main/java/org/esa/snap/idepix/meris/IdepixMerisLandClassificationOp.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
           <caret line="29" column="32" lean-forward="false" selection-start-line="29" selection-start-column="32" selection-end-line="29" selection-end-column="32" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1091,7 +832,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
           <caret line="2" column="54" lean-forward="false" selection-start-line="2" selection-start-column="54" selection-end-line="2" selection-end-column="54" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1099,22 +839,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
           <caret line="2" column="50" lean-forward="false" selection-start-line="2" selection-start-column="50" selection-end-line="2" selection-end-column="50" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3570">
-          <caret line="228" column="5" lean-forward="false" selection-start-line="219" selection-start-column="4" selection-end-line="228" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3179">
-          <caret line="207" column="52" lean-forward="false" selection-start-line="207" selection-start-column="52" selection-end-line="207" selection-end-column="52" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1137,66 +861,24 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="221">
           <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/dataio/nc4/IdepixModisMaskPart.java" />
-    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-netcdf/7.0.0-SNAPSHOT/snap-netcdf-7.0.0-20180925.104905-58.jar!/org/esa/snap/dataio/netcdf/NetCdfWriteProfile.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="555">
-          <caret line="48" column="0" lean-forward="false" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-netcdf/7.0.0-SNAPSHOT/snap-netcdf-7.0.0-20180925.104905-58.jar!/org/esa/snap/dataio/netcdf/nc/N4FileWriteable.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1003">
-          <caret line="72" column="0" lean-forward="false" selection-start-line="72" selection-start-column="0" selection-end-line="72" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-netcdf/7.0.0-SNAPSHOT/snap-netcdf-7.0.0-20180925.104905-58.jar!/org/esa/snap/dataio/netcdf/DefaultNetCdfWriter.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="39" column="0" lean-forward="false" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-netcdf/7.0.0-SNAPSHOT/snap-netcdf-7.0.0-20180925.104905-58.jar!/org/esa/snap/dataio/netcdf/metadata/profiles/beam/BeamMetadataPart.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2176">
-          <caret line="156" column="0" lean-forward="false" selection-start-line="156" selection-start-column="0" selection-end-line="156" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-netcdf/7.0.0-SNAPSHOT/snap-netcdf-7.0.0-20180925.104905-58.jar!/org/esa/snap/dataio/netcdf/NetCdfWriteProfile.class" />
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-netcdf/7.0.0-SNAPSHOT/snap-netcdf-7.0.0-20180925.104905-58.jar!/org/esa/snap/dataio/netcdf/nc/N4FileWriteable.class" />
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-netcdf/7.0.0-SNAPSHOT/snap-netcdf-7.0.0-20180925.104905-58.jar!/org/esa/snap/dataio/netcdf/DefaultNetCdfWriter.class" />
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-netcdf/7.0.0-SNAPSHOT/snap-netcdf-7.0.0-20180925.104905-58.jar!/org/esa/snap/dataio/netcdf/metadata/profiles/beam/BeamMetadataPart.class" />
     <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/dataio/nc4/IdepixModisGeocodingPart.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="527">
           <caret line="48" column="11" lean-forward="false" selection-start-line="48" selection-start-column="11" selection-end-line="48" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java" />
     <entry file="file://$PROJECT_DIR$/s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java" />
     <entry file="file://$PROJECT_DIR$/s2tbx-s2msi-idepix/pom.xml" />
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6205">
-          <caret line="388" column="7" lean-forward="false" selection-start-line="388" selection-start-column="7" selection-end-line="388" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/dataio/nc4/IdepixModisNc4WriterPlugIn.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1258">
@@ -1207,7 +889,7 @@
     </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-gpf/7.0.0-SNAPSHOT/snap-gpf-7.0.0-20181002.132757-62.jar!/org/esa/snap/core/gpf/internal/OperatorContext.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
+        <state relative-caret-position="2958">
           <caret line="259" column="0" lean-forward="false" selection-start-line="259" selection-start-column="0" selection-end-line="259" selection-end-column="0" />
           <folding>
             <marker date="1538659697432" expanded="false" signature="0:104" ph="/.../" />
@@ -1336,17 +1018,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisPostProcessOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="26" column="3" lean-forward="false" selection-start-line="26" selection-start-column="3" selection-end-line="26" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisUtils.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="394">
+        <state relative-caret-position="1139">
           <caret line="75" column="82" lean-forward="false" selection-start-line="75" selection-start-column="82" selection-end-line="75" selection-end-column="82" />
           <folding />
         </state>
@@ -1354,46 +1028,209 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisConstants.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="541">
+        <state relative-caret-position="1802">
           <caret line="106" column="57" lean-forward="false" selection-start-line="106" selection-start-column="31" selection-end-line="106" selection-end-column="57" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="250" column="33" lean-forward="false" selection-start-line="250" selection-start-column="33" selection-end-line="250" selection-end-column="33" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="133" column="0" lean-forward="false" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisAlgorithm.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="265" column="73" lean-forward="true" selection-start-line="265" selection-start-column="73" selection-end-line="265" selection-end-column="73" />
+        <state relative-caret-position="4267">
+          <caret line="253" column="29" lean-forward="false" selection-start-line="253" selection-start-column="29" selection-end-line="253" selection-end-column="29" />
           <folding>
-            <element signature="e#10460#10461#0" expanded="true" />
-            <element signature="e#10529#10530#0" expanded="true" />
-            <element signature="e#11335#11336#0" expanded="true" />
-            <element signature="e#11393#11394#0" expanded="true" />
-            <element signature="e#11460#11461#0" expanded="true" />
-            <element signature="e#11522#11523#0" expanded="true" />
-            <element signature="e#11571#11572#0" expanded="true" />
-            <element signature="e#11605#11606#0" expanded="true" />
-            <element signature="e#11655#11656#0" expanded="true" />
-            <element signature="e#11695#11696#0" expanded="true" />
-            <element signature="e#12078#12079#0" expanded="true" />
-            <element signature="e#12138#12139#0" expanded="true" />
+            <element signature="e#10460#10461#0" expanded="false" />
+            <element signature="e#10529#10530#0" expanded="false" />
+            <element signature="e#11335#11336#0" expanded="false" />
+            <element signature="e#11393#11394#0" expanded="false" />
+            <element signature="e#11460#11461#0" expanded="false" />
+            <element signature="e#11522#11523#0" expanded="false" />
+            <element signature="e#11571#11572#0" expanded="false" />
+            <element signature="e#11605#11606#0" expanded="false" />
+            <element signature="e#11655#11656#0" expanded="false" />
+            <element signature="e#11695#11696#0" expanded="false" />
+            <element signature="e#12078#12079#0" expanded="false" />
+            <element signature="e#12138#12139#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-meris/src/test/java/org/esa/snap/idepix/meris/dataio/nc4/IdepixMerisNc4WriterTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="14" column="23" lean-forward="false" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="501">
+          <caret line="191" column="95" lean-forward="false" selection-start-line="191" selection-start-column="95" selection-end-line="191" selection-end-column="95" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisPostProcessOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="262">
+          <caret line="251" column="17" lean-forward="false" selection-start-line="251" selection-start-column="17" selection-end-line="251" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-gpf/7.0.0-SNAPSHOT/snap-gpf-7.0.0-20181002.132757-62.jar!/org/esa/snap/core/gpf/pointop/PointOperator.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="262">
+          <caret line="88" column="19" lean-forward="false" selection-start-line="88" selection-start-column="19" selection-end-line="88" selection-end-column="19" />
+          <folding>
+            <marker date="1538659697432" expanded="false" signature="0:104" ph="/.../" />
+            <marker date="1538659697432" expanded="false" signature="153:1492" ph="..." />
+            <marker date="1538659697432" expanded="true" signature="1772:1779" ph="{}" />
+            <marker date="1538659697432" expanded="true" signature="1841:2531" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="2593:2632" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="2660:3018" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="3089:3368" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="3449:3603" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="3887:4008" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="4086:4240" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="4320:4513" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="4605:4757" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="4830:5339" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="5393:5707" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="5762:5870" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="5939:6598" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="6729:7154" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="7238:10895" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="7409:7516" ph="{...}" />
+            <marker date="1538659697432" expanded="false" signature="7559:7574" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="7600:7610" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="7671:7686" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="7721:7731" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="7774:7789" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="7815:7825" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="7861:7876" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="7952:7962" ph=" }" />
+            <marker date="1538659697432" expanded="true" signature="8001:8188" ph="{...}" />
+            <marker date="1538659697432" expanded="false" signature="8225:8240" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="8317:8327" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="8360:8375" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="8448:8458" ph=" }" />
+            <marker date="1538659697432" expanded="true" signature="8507:8854" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="8918:9319" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="9376:9797" ph="{...}" />
+            <marker date="1538659697432" expanded="false" signature="9835:9850" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="9928:9938" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="9994:10009" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="10064:10074" ph=" }" />
+            <marker date="1538659697432" expanded="true" signature="10151:10330" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="10392:10473" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="10555:10736" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="10781:10889" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="11035:11401" ph="{...}" />
+            <marker date="1538659697432" expanded="false" signature="11081:11096" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="11108:11118" ph=" }" />
+            <marker date="1538659697432" expanded="true" signature="11177:11274" ph="{...}" />
+            <marker date="1538659697432" expanded="false" signature="11303:11318" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="11385:11395" ph=" }" />
+            <marker date="1538659697432" expanded="true" signature="11551:16647" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="11651:11739" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="11798:11896" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="11972:12041" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="12155:12619" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="12737:14013" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="13657:13937" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="13719:13923" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="14099:14317" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="14430:14660" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="14737:15133" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="15196:16216" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="16261:16388" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="16446:16641" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="16734:18657" ph="{...}" />
+            <marker date="1538659697432" expanded="false" signature="16810:16825" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="16856:16866" ph=" }" />
+            <marker date="1538659697432" expanded="true" signature="16977:17350" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="17441:17810" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="17856:18500" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="18540:18651" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="18735:21018" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="19095:19320" ph="{...}" />
+            <marker date="1538659697432" expanded="true" signature="19359:19525" ph="{...}" />
+            <marker date="1538659697432" expanded="false" signature="19566:19581" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="19598:19608" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="19639:19654" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="19672:19682" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="19716:19731" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="19752:19762" ph=" }" />
+            <marker date="1538659697432" expanded="true" signature="19808:19906" ph="{...}" />
+            <marker date="1538659697432" expanded="false" signature="19943:19958" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="20026:20036" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="20065:20080" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="20144:20154" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="20187:20202" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="20268:20278" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="20313:20328" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="20395:20405" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="20455:20470" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="20537:20547" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="20583:20598" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="20655:20665" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="20697:20712" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="20769:20779" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="20813:20828" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="20885:20895" ph=" }" />
+            <marker date="1538659697432" expanded="false" signature="20930:20945" ph=" { " />
+            <marker date="1538659697432" expanded="false" signature="21002:21012" ph=" }" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="548">
+          <caret line="188" column="26" lean-forward="false" selection-start-line="188" selection-start-column="26" selection-end-line="188" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3085">
+          <caret line="207" column="52" lean-forward="false" selection-start-line="207" selection-start-column="52" selection-end-line="207" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="13" column="28" lean-forward="false" selection-start-line="13" selection-start-column="28" selection-end-line="13" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="227">
+          <caret line="187" column="56" lean-forward="false" selection-start-line="187" selection-start-column="56" selection-end-line="187" selection-end-column="56" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-meris/src/main/java/org/esa/snap/idepix/meris/IdepixMerisOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="262">
+          <caret line="37" column="45" lean-forward="true" selection-start-line="37" selection-start-column="45" selection-end-line="37" selection-end-column="45" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="121">
+          <caret line="35" column="43" lean-forward="false" selection-start-line="35" selection-start-column="27" selection-end-line="35" selection-end-column="43" />
+          <folding />
         </state>
       </provider>
     </entry>
