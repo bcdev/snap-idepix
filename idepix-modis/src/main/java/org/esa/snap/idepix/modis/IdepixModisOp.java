@@ -76,6 +76,10 @@ public class IdepixModisOp extends BasisOp {
             description = "Resolution of used land-water mask in meters per pixel")
     private int waterMaskResolution;
 
+    @Parameter(defaultValue = "false",
+            label = " Write NN value to the target product.",
+            description = " If applied, write NN value to the target product ")
+    private boolean outputSchillerNNValue;
 
     @Parameter(defaultValue = "1.035",     // this does not work over land!
             label = " NN cloud ambiguous lower boundary",
@@ -91,6 +95,7 @@ public class IdepixModisOp extends BasisOp {
             label = " NN cloud sure/snow separation value",
             description = " NN cloud ambiguous cloud sure/snow separation value")
     double nnCloudSureSnowSeparationValue;
+
 
     //    @Parameter(defaultValue = "0.08",
 //            label = " 'B_NIR' threshold at 859nm (MODIS)",
@@ -127,7 +132,7 @@ public class IdepixModisOp extends BasisOp {
     private Product sourceProduct;
 
     @SourceProduct(alias = "modisWaterMask",
-            label = "MODIS water mask product (optional)",
+            label = "MODIS water mask product",
             description = "MODIS water mask product (must be MOD03 or MYD03)",
             optional = true)
     private Product modisWaterMaskProduct;
@@ -171,9 +176,9 @@ public class IdepixModisOp extends BasisOp {
     }
 
     private void processModis() {
-        Map<String, Product> occciClassifInput = new HashMap<>(4);
-        computeAlgorithmInputProducts(occciClassifInput);
-        Map<String, Object> occciCloudClassificationParameters = createModisPixelClassificationParameters();
+        Map<String, Product> classifInput = new HashMap<>(4);
+        computeAlgorithmInputProducts(classifInput);
+        Map<String, Object> classificationParameters = createModisPixelClassificationParameters();
 
         // post processing input:
         // - cloud buffer
@@ -185,7 +190,7 @@ public class IdepixModisOp extends BasisOp {
 
         postProcessInput.put("refl", sourceProduct);
         classifProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixModisClassificationOp.class),
-                occciCloudClassificationParameters, occciClassifInput);
+                classificationParameters, classifInput);
 
         postProcessInput.put("classif", classifProduct);
 
@@ -219,21 +224,20 @@ public class IdepixModisOp extends BasisOp {
     }
 
     private Map<String, Object> createModisPixelClassificationParameters() {
-        Map<String, Object> occciCloudClassificationParameters = new HashMap<>(1);
-        occciCloudClassificationParameters.put("cloudBufferWidth", cloudBufferWidth);
-        occciCloudClassificationParameters.put("wmResolution", waterMaskResolution);
-        occciCloudClassificationParameters.put("applyBrightnessTest", applyBrightnessTest);
-        occciCloudClassificationParameters.put("applyOrLogicInCloudTest", applyOrLogicInCloudTest);
-        occciCloudClassificationParameters.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
-        occciCloudClassificationParameters.put("nnCloudAmbiguousSureSeparationValue", nnCloudAmbiguousSureSeparationValue);
-        occciCloudClassificationParameters.put("nnCloudSureSnowSeparationValue", nnCloudSureSnowSeparationValue);
+        Map<String, Object> pixelClassificationParameters = new HashMap<>(1);
+        pixelClassificationParameters.put("cloudBufferWidth", cloudBufferWidth);
+        pixelClassificationParameters.put("wmResolution", waterMaskResolution);
+        pixelClassificationParameters.put("applyBrightnessTest", applyBrightnessTest);
+        pixelClassificationParameters.put("applyOrLogicInCloudTest", applyOrLogicInCloudTest);
+        pixelClassificationParameters.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
+        pixelClassificationParameters.put("nnCloudAmbiguousSureSeparationValue", nnCloudAmbiguousSureSeparationValue);
+        pixelClassificationParameters.put("nnCloudSureSnowSeparationValue", nnCloudSureSnowSeparationValue);
+        pixelClassificationParameters.put("brightnessThreshCloudAmbiguous", brightnessThreshCloudAmbiguous);
+        pixelClassificationParameters.put("glintThresh859forCloudSure", glintThresh859forCloudSure);
+        pixelClassificationParameters.put("glintThresh859forCloudAmbiguous", glintThresh859forCloudAmbiguous);
+        pixelClassificationParameters.put("bNirThresh859", bNirThresh859);
 
-        occciCloudClassificationParameters.put("brightnessThreshCloudAmbiguous", brightnessThreshCloudAmbiguous);
-        occciCloudClassificationParameters.put("glintThresh859forCloudSure", glintThresh859forCloudSure);
-        occciCloudClassificationParameters.put("glintThresh859forCloudAmbiguous", glintThresh859forCloudAmbiguous);
-        occciCloudClassificationParameters.put("bNirThresh859", bNirThresh859);
-
-        return occciCloudClassificationParameters;
+        return pixelClassificationParameters;
     }
 
     private void addBandsToTargetProduct(Product targetProduct) {
@@ -243,6 +247,10 @@ public class IdepixModisOp extends BasisOp {
 
         if (outputEmissive) {
             copySourceBands(emissiveBandsToCopy, sourceProduct, targetProduct);
+        }
+
+        if (outputSchillerNNValue) {
+           ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, classifProduct, targetProduct, true);
         }
     }
 

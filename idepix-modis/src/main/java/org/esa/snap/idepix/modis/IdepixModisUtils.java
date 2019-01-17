@@ -1,10 +1,7 @@
 package org.esa.snap.idepix.modis;
 
 import org.esa.s3tbx.idepix.core.IdepixFlagCoding;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.BitSetter;
 
@@ -60,10 +57,10 @@ public class IdepixModisUtils {
     }
 
     static void checkIfDayProduct(Product product) {
-        final String dayNightString = product.getMetadataRoot().getElement("Global_Attributes").
-                getAttribute("DayNightFlag").getData().getElemString();
+        final MetadataAttribute dayNightAttr = product.getMetadataRoot().getElement("Global_Attributes").
+                getAttribute("DayNightFlag");
 
-        if (!dayNightString.equals("Day")) {
+        if (dayNightAttr != null && !dayNightAttr.getData().getElemString().equals("Day")) {
             throw new OperatorException("Product '" + product.getName() +
                                                 "' does not seem to be a MODIS L1b Day product - will exit IdePix.");
         }
