@@ -21,7 +21,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>idepix-olci-s3snow</artifactId>
-    <version>0.82-SNAPSHOT</version>
+    <version>1.0</version>
 
     <name>Idepix OLCI for S3 Snow</name>
     <packaging>nbm</packaging>

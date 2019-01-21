@@ -28,7 +28,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Snap.Idepix.Olci.S3Snow",
         category = "Optical/Pre-Processing",
-        version = "0.82",
+        version = "1.0",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
         description = "Pixel identification and classification for OLCI. Specific version for S3-SNOW project.")

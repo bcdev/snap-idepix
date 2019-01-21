@@ -9,7 +9,7 @@
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="IdePix OLCI [S3 SNOW]"/>
                 <attr name="operatorName" stringvalue="Snap.Idepix.Olci.S3Snow"/>
-                <attr name="dialogTitle" stringvalue="IdePix OLCI S3 SNOW - v0.8"/>
+                <attr name="dialogTitle" stringvalue="IdePix OLCI S3 SNOW - v1.0"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixOlciS3SnowTool"/>
             </file>
