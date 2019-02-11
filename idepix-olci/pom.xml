@@ -126,6 +126,12 @@
             <version>18.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow</artifactId>
+            <version>1.9.0-rc1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
