@@ -4,80 +4,72 @@ import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 11.02.2019
- * Time: 14:59
+ * Applies a tensorflow model and provides corresponding NN output for given input.
  *
  * @author olafd
  */
 public class NNTensorflowApplyModel {
     
-    //for the example "I13x30x30x30x30x30x10xO6_sqrt_S2_6OutNodes")
-//    final static double[] INPUT_1 =
-//            {0.6851, 0.6961, 0.6699, 0.7329, 0.7584, 0.7809, 0.8009, 0.7963, 0.812, 0.5375, 0.0407, 0.5998, 0.4881};
-//    final static float[] EXPECTED_OUTPUT_1 =
-//            {0.0012113489F, 1.0016897F,0.029165775F, 1.7926563e-5F, 5.213171e-4F, -0.0031922571F};
-
-    static double[] INPUT_1 = {0.15601175, 0.57917833, 0.7634207, 0.02903139, 1.7085681, 0.96827781, 0.15205044};
-    static float[] EXPECTED_OUTPUT_1 = {1.3985262F};
-    public static String[] NNOutNames = {"CTP"};
-
-    final static String TRANSFORM_METHOD  = "sqrt";
-
-    final static String MODEL_FILE = "saved_model.pb";  // todo: preliminary
-
+//    public static String[] NNOutNames = {"CTP"};
 
     private String firstNodeName;
     private String lastNodeName;
     private Session session;
-    private int NTensorOut;
+
+    private String transformMethod;
+    private float[] nnTensorInput;
+    private Tensor tensorResult;
+    private int nnTensorOut;
 
     private String modelDir;
 
-    public NNTensorflowApplyModel() throws IOException{
-        session = loadModel(MODEL_FILE);
-        findNodeNames(modelDir);
-        setNTensorOut();
+    /**
+     * Applies a tensorflow model and provides corresponding NN output for given input.
+     *
+     * @param nnTensorInput - float[] input vector (i.e. OLCI L1 values per pixel)
+     *
+     * @throws IOException
+     */
+    NNTensorflowApplyModel(float[] nnTensorInput) throws IOException{
+        new NNTensorflowApplyModel("saved_model.pb", "sqrt", nnTensorInput);
     }
 
-    public int getNTensorOut() {
-        return NTensorOut;
+    NNTensorflowApplyModel(String modelFileName, String transformMethod, float[] nnTensorInput) throws IOException{
+        this.transformMethod = transformMethod;
+        this.nnTensorInput = nnTensorInput;
+        session = loadModel(modelFileName);
+        findNodeNames();
+        computeTensorResultShape();
     }
 
-    float[][] computeOutput(double[] inputDouble) {
-
-        float[] inputFloat = new float[inputDouble.length];
-        for (int i = 0; i < inputFloat.length; i++) {
-            inputFloat[i] = (float) inputDouble[i];
-        }
-
-        /*if(transformMethod == "sqrt"){
-            for(int i=0; i <inputFloat.length; i++) inputFloat[i] = (float) Math.sqrt(inputFloat[i]);
-        }
-        else if(transformMethod == "log"){
-            for(int i=0; i <inputFloat.length; i++) inputFloat[i] = (float) Math.log10(inputFloat[i]);
-        }*/
-
-        float[][] data = new float[1][inputFloat.length];
-        data[0] = inputFloat;
-        Tensor inputTensor = Tensor.create(data);
-
-        Tensor result = session
-                .runner()
-                .feed(firstNodeName, inputTensor)
-                .fetch(lastNodeName)
-                .run()
-                .get(0);
-
-        float[][] m = new float[1][NTensorOut];
-        result.copyTo(m);
+    /**
+     * Provides the NN result for given input and specified Tensorflow model.
+     *
+     * @return
+     */
+    float[][] getNNTensorResult() {
+        float[][] m = new float[1][nnTensorOut];
+        tensorResult.copyTo(m);
 
         return m;
     }
+
+    /**
+     * Provides the shape of the tensor result todo: clarify what this means
+     *
+     * @return int
+     */
+    int getNnTensorOut() {
+        return nnTensorOut;
+    }
+
+    ////////////////// private methods ////////////////////////////////////////////
 
     private Session loadModel(String modelFile) {
         // Load a model previously saved by tensorflow Python package
@@ -86,7 +78,7 @@ public class NNTensorflowApplyModel {
         return bundle.session();
     }
 
-    private void findNodeNames(String modelDir) throws IOException{
+    private void findNodeNames() throws IOException{
         /* wie findet man die richtige Stelle im Modell mit den entsprechenden Namen?
          aus dem .pbtxt File:
          der input-Name sollte der des ersten Nodes im Modell sein.
@@ -98,61 +90,50 @@ public class NNTensorflowApplyModel {
         	[ node.op.name for node in model.inputs]
         	[ node.op.name for node in model.outputs]*/
 
-        File[] files = new File(modelDir).listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".pbtxt");
-            }
-        });
+        File[] files = new File(modelDir).listFiles((dir, name) -> name.endsWith(".pbtxt"));
 
         boolean setFirstNodeName = true;
 
-        try(BufferedReader br = new BufferedReader(new FileReader(files[0]))) {
-            for(String line; (line = br.readLine()) != null; ) {
-                if(line.equals("node {")){
-                    line = br.readLine();
-                    if(setFirstNodeName){
-                        if(line.contains("name") && line.contains("dense")){
-                            firstNodeName = line.substring(line.indexOf("dense"),line.length()-1);
-                            setFirstNodeName = false;
-                        }
-                    }
-                    else{
-                        if(line.contains("name") && line.contains("dense")){
-                            lastNodeName = line.substring(line.indexOf("dense"),line.length()-1);
+        if (files != null) {
+            try (BufferedReader br = new BufferedReader(new FileReader(files[0]))) {
+                for (String line; (line = br.readLine()) != null; ) {
+                    if (line.equals("node {")) {
+                        line = br.readLine();
+                        if (setFirstNodeName) {
+                            if (line.contains("name") && line.contains("dense")) {
+                                firstNodeName = line.substring(line.indexOf("dense"), line.length() - 1);
+                                setFirstNodeName = false;
+                            }
+                        } else {
+                            if (line.contains("name") && line.contains("dense")) {
+                                lastNodeName = line.substring(line.indexOf("dense"), line.length() - 1);
+                            }
                         }
                     }
                 }
             }
+        } else {
+            throw new IllegalStateException("Cannot access Tensorflow NN files in specified folder: " + modelDir);
         }
     }
 
-    private void setNTensorOut(){
+    private void computeTensorResultShape(){
 
-        float[] inputFloat = new float[INPUT_1.length];
-        for (int i = 0; i < inputFloat.length; i++) {
-            inputFloat[i] = (float) INPUT_1[i];
-        }
+//        if(transformMethod == "sqrt"){
+//            for(int i=0; i <nnTensorInput.length; i++) nnTensorInput[i] = (float) Math.sqrt(nnTensorInput[i]);
+//        }
+//        else if(transformMethod == "log"){
+//            for(int i=0; i <nnTensorInput.length; i++) nnTensorInput[i] = (float) Math.log10(nnTensorInput[i]);
+//        }
 
-        /*if(transformMethod == "sqrt"){
-            for(int i=0; i <inputFloat.length; i++) inputFloat[i] = (float) Math.sqrt(inputFloat[i]);
-        }
-        else if(transformMethod == "log"){
-            for(int i=0; i <inputFloat.length; i++) inputFloat[i] = (float) Math.log10(inputFloat[i]);
-        }*/
+        float[][] inputData = new float[1][nnTensorInput.length];
+        inputData[0] = nnTensorInput;
+        Tensor inputTensor = Tensor.create(inputData);
 
-        float[][] data = new float[1][inputFloat.length];
-        data[0] = inputFloat;
-        Tensor inputTensor = Tensor.create(data);
+        // todo: check why test fails here
+        tensorResult = session.runner().feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0);
 
-        Tensor result = session
-                .runner()
-                .feed(firstNodeName, inputTensor)
-                .fetch(lastNodeName)
-                .run()
-                .get(0);
-
-        long[] ts = result.shape();
-        NTensorOut = (int) ts[1];
+        long[] ts = tensorResult.shape();
+        nnTensorOut = (int) ts[1];
     }
 }
