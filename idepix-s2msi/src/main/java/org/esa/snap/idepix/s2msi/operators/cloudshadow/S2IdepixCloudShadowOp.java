@@ -87,31 +87,31 @@ public class S2IdepixCloudShadowOp extends Operator {
         JAI.getDefaultInstance().getTileCache().setTileComparator(new Comparator() {
             @Override
             public int compare(Object o1, Object o2) {
-                return getWeight(o1) - getWeight(o2) - 1; // do not return equality as that keeps us in while loop
+                return getWeightedTimeStamp(o1) - getWeightedTimeStamp(o2);
             }
 
-            private int getWeight(Object o) {
+            private int getWeightedTimeStamp(Object o) {
                 if (!(o instanceof CachedTile)) {
                     return -1;
                 }
                 RenderedImage oOwner = ((CachedTile) o).getOwner();
                 if (oOwner instanceof OperatorImageTileStack) {
-                    String bandName = ((OperatorImageTileStack) oOwner).getTargetBand().getName();
-                    if (bandName.equals("pixel_classif_flags")) {
-                        return 4;
+                    Band targetBand = ((OperatorImageTileStack) oOwner).getTargetBand();
+                    if (targetBand != null && "pixel_classif_flags".equals(targetBand.getName())) {
+                        return 4<<16 + ((CachedTile)o).getTileTimeStamp();
                     }
-                    if (bandName.equals(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW)) {
-                        return 8;
+                    if (targetBand != null && S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW.equals(targetBand.getName())) {
+                        return 8<<16 + ((CachedTile)o).getTileTimeStamp();
                     }
                 }
                 if (oOwner instanceof OperatorImage) {
                     Band targetBand = ((OperatorImage) oOwner).getTargetBand();
                     if (targetBand != null && targetBand.getName() != null && targetBand.getName().equals("elevation")) {
-                        return 2;
+                        return 2<<16 + ((CachedTile)o).getTileTimeStamp();
                     }
                 }
 
-                return 0;
+                return 0<<16 + ((CachedTile)o).getTileTimeStamp();
             }
 
         });
@@ -311,7 +311,12 @@ public class S2IdepixCloudShadowOp extends Operator {
             if (Double.isNaN(x[i])) valid = false;
             i++;
         }
-        if (valid) {
+        if (lx == 0) {
+            logger.warning("indecesRelativMaxInArray x.length=" + lx);
+        } else if (lx == 1) {
+            logger.warning("indecesRelativMaxInArray x.length=" + lx);
+            ID.add(0);
+        } else if (valid) {
             double fac = -1.;
 
             if (fac * x[0] > fac * x[1]) ID.add(0);

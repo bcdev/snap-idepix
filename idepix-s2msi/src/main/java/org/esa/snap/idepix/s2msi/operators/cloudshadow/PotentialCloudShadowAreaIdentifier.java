@@ -125,6 +125,11 @@ class PotentialCloudShadowAreaIdentifier {
             return;
         }
 
+        if (cloudPath.length < 3) {
+            logger.warning("identifyPotentialCloudShadowPLUS: cloudPath.length=" + cloudPath.length);
+            return;
+        }
+
         int x1 = x0 + (int) cloudPath[1].getX();
         int y1 = y0 + (int) cloudPath[1].getY();
         int x2 = x0 + (int) cloudPath[2].getX();
