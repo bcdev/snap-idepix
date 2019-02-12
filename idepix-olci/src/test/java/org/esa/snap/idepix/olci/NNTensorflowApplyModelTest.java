@@ -34,7 +34,7 @@ public class NNTensorflowApplyModelTest {
                 new float[]{0.15601175f, 0.57917833f, 0.7634207f, 0.02903139f, 1.7085681f, 0.96827781f, 0.15205044f};
         NNTensorflowApplyModel nntest = new NNTensorflowApplyModel(input);
 
-        float[][] result = nntest.getNNTensorResult();
+        float[][] result = nntest.getNNResult();
         for (int i = 0; i< nntest.getNnTensorOut(); i++) {
             System.out.println(result[0][i]);
         }

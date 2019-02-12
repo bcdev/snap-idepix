@@ -34,26 +34,27 @@ public class NNTensorflowApplyModel {
      *
      * @param nnTensorInput - float[] input vector (i.e. OLCI L1 values per pixel)
      *
-     * @throws IOException
+     * @throws IOException -
      */
     NNTensorflowApplyModel(float[] nnTensorInput) throws IOException{
-        new NNTensorflowApplyModel("saved_model.pb", "sqrt", nnTensorInput);
+        this("saved_model.pb", "sqrt", nnTensorInput);
     }
 
     NNTensorflowApplyModel(String modelFileName, String transformMethod, float[] nnTensorInput) throws IOException{
         this.transformMethod = transformMethod;
         this.nnTensorInput = nnTensorInput;
-        session = loadModel(modelFileName);
+        loadModel(modelFileName);
         findNodeNames();
-        computeTensorResultShape();
     }
 
     /**
      * Provides the NN result for given input and specified Tensorflow model.
      *
-     * @return
+     * @return float[][]
      */
-    float[][] getNNTensorResult() {
+    float[][] getNNResult() {
+        computeTensorResult();
+
         float[][] m = new float[1][nnTensorOut];
         tensorResult.copyTo(m);
 
@@ -71,11 +72,11 @@ public class NNTensorflowApplyModel {
 
     ////////////////// private methods ////////////////////////////////////////////
 
-    private Session loadModel(String modelFile) {
+    private void loadModel(String modelFile) {
         // Load a model previously saved by tensorflow Python package
         modelDir = new File(getClass().getResource(modelFile).getFile()).getParent();
         SavedModelBundle bundle = SavedModelBundle.load(modelDir, "serve");
-        return bundle.session();
+        session =  bundle.session();
     }
 
     private void findNodeNames() throws IOException{
@@ -92,17 +93,17 @@ public class NNTensorflowApplyModel {
 
         File[] files = new File(modelDir).listFiles((dir, name) -> name.endsWith(".pbtxt"));
 
-        boolean setFirstNodeName = true;
+        boolean setFirstNodeName = false;
 
         if (files != null) {
             try (BufferedReader br = new BufferedReader(new FileReader(files[0]))) {
                 for (String line; (line = br.readLine()) != null; ) {
                     if (line.equals("node {")) {
                         line = br.readLine();
-                        if (setFirstNodeName) {
+                        if (!setFirstNodeName) {
                             if (line.contains("name") && line.contains("dense")) {
                                 firstNodeName = line.substring(line.indexOf("dense"), line.length() - 1);
-                                setFirstNodeName = false;
+                                setFirstNodeName = true;
                             }
                         } else {
                             if (line.contains("name") && line.contains("dense")) {
@@ -117,7 +118,7 @@ public class NNTensorflowApplyModel {
         }
     }
 
-    private void computeTensorResultShape(){
+    private void computeTensorResult(){
 
 //        if(transformMethod == "sqrt"){
 //            for(int i=0; i <nnTensorInput.length; i++) nnTensorInput[i] = (float) Math.sqrt(nnTensorInput[i]);
