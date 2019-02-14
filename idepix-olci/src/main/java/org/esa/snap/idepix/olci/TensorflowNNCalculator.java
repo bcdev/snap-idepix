@@ -111,6 +111,15 @@ public class TensorflowNNCalculator {
         return lastNodeName;
     }
 
+    /**
+     * Setter for NN input
+     *
+     * @param nnTensorInput
+     */
+    public void setNnTensorInput(float[] nnTensorInput) {
+        this.nnTensorInput = nnTensorInput;
+    }
+
     // package local for testing
     void setFirstAndLastNodeNameFromBinaryProtocolBuffer(SavedModelBundle model) throws Exception {
         // extract names of first and last relevant nodes (i.e. name contains 'dense') from binary 'saved_model.pb'

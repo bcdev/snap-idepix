@@ -1,20 +1,25 @@
 package org.esa.snap.idepix.olci;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.operators.BasisOp;
 import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
-import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.math.MathUtils;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +38,7 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Olci",
+@OperatorMetadata(alias = "Snap.Idepix.Olci.Ctp",
         category = "Optical/Pre-Processing",
         version = "1.0",
         authors = "Olaf Danne",
@@ -46,58 +51,43 @@ public class CtpOp extends BasisOp {
             description = "The OLCI L1b source product.")
     private Product sourceProduct;
 
+    @SourceProduct(alias = "rad2reflProduct",
+            label = "OLCI TOA Reflectance product",
+            optional = true,
+            description = "OLCI TOA Reflectance product generated with Rad2ReflOp.")
+    private Product rad2reflProduct;
+
+    @SourceProduct(alias = "o2CorrProduct",
+            label = "OLCI O2 Correction product",
+            optional = true,
+            description = "OLCI O2 Correction product.")
+    private Product o2CorrProduct;
+
+
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
 
-    private boolean outputRadiance;
-    private boolean outputRad2Refl;
 
-    @Parameter(description = "The list of radiance bands to write to target product.",
-            label = "Select TOA radiances to write to the target product",
-            valueSet = {
-                    "Oa01_radiance", "Oa02_radiance", "Oa03_radiance", "Oa04_radiance", "Oa05_radiance",
-                    "Oa06_radiance", "Oa07_radiance", "Oa08_radiance", "Oa09_radiance", "Oa10_radiance",
-                    "Oa11_radiance", "Oa12_radiance", "Oa13_radiance", "Oa14_radiance", "Oa15_radiance",
-                    "Oa16_radiance", "Oa17_radiance", "Oa18_radiance", "Oa19_radiance", "Oa20_radiance",
-                    "Oa21_radiance"
-            },
-            defaultValue = "")
-    private String[] radianceBandsToCopy;
+    // todo
+//    @Parameter(description = "Path to an alternative Tensorflow neuronal net. Use this to replace the standard " +
+//            "set of neuronal nets with the ones in the given directory.",
+//            label = "Alternative NN Path")
+//    private String alternativeNNPath;
 
-    @Parameter(description = "The list of reflectance bands to write to target product.",
-            label = "Select TOA reflectances to write to the target product",
-            valueSet = {
-                    "Oa01_reflectance", "Oa02_reflectance", "Oa03_reflectance", "Oa04_reflectance", "Oa05_reflectance",
-                    "Oa06_reflectance", "Oa07_reflectance", "Oa08_reflectance", "Oa09_reflectance", "Oa10_reflectance",
-                    "Oa11_reflectance", "Oa12_reflectance", "Oa13_reflectance", "Oa14_reflectance", "Oa15_reflectance",
-                    "Oa16_reflectance", "Oa17_reflectance", "Oa18_reflectance", "Oa19_reflectance", "Oa20_reflectance",
-                    "Oa21_reflectance"
-            },
-            defaultValue = "")
-    private String[] reflBandsToCopy;
+    private static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x24x24x24xO1";
 
-    @Parameter(defaultValue = "false",
-            label = " Write NN value to the target product",
-            description = " If applied, write NN value to the target product ")
-    private boolean outputSchillerNNValue;
+    private TiePointGrid szaBand;
+    private TiePointGrid ozaBand;
+    private TiePointGrid saaBand;
+    private TiePointGrid oaaBand;
 
-    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
-    private boolean computeCloudBuffer;
+    private Band refl12Band;
+    private Band tra13Band;
+    private Band tra14Band;
+    private Band tra15Band;
 
-    @Parameter(defaultValue = "2", interval = "[0,100]",
-            description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy.",
-            label = "Width of cloud buffer (# of pixels)")
-    private int cloudBufferWidth;
+    private String nnDirName;
 
-    @Parameter(defaultValue = "false",
-            label = " Use SRTM Land/Water mask",
-            description = "If selected, SRTM Land/Water mask is used instead of L1b land flag. " +
-                    "Slower, but in general more precise.")
-    private boolean useSrtmLandWaterMask;
-
-
-    private Product rad2reflProduct;
-    private Product o2CorrProduct;
 
     @Override
     public void initialize() throws OperatorException {
@@ -107,61 +97,139 @@ public class CtpOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        preProcess();
+        nnDirName = DEFAULT_TENSORFLOW_NN_DIR_NAME;
 
-        Product ctpProduct = computeCtpProduct();
-        ctpProduct.setName(sourceProduct.getName() + "_IDEPIX");
-        ctpProduct.setAutoGrouping("Oa*_radiance:Oa*_reflectance");
-
-        ProductUtils.copyFlagBands(sourceProduct, ctpProduct, true);
-
-
-
-        targetProduct = createTargetProduct(ctpProduct);
-        targetProduct.setAutoGrouping(ctpProduct.getAutoGrouping());
-
+        targetProduct = createTargetProduct();
     }
 
-    private Product computeCtpProduct() {
-        // todo
-        return null;
-    }
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        try {
+            pm.beginTask("Executing CTP processing...", 0);
+            preProcess();
 
-    private Product createTargetProduct(Product idepixProduct) {
-        Product targetProduct = new Product(idepixProduct.getName(),
-                                            idepixProduct.getProductType(),
-                                            idepixProduct.getSceneRasterWidth(),
-                                            idepixProduct.getSceneRasterHeight());
+            szaBand = sourceProduct.getTiePointGrid("SZA");
+            ozaBand = sourceProduct.getTiePointGrid("OZA");
+            saaBand = sourceProduct.getTiePointGrid("SAA");
+            oaaBand = sourceProduct.getTiePointGrid("OAA");
 
-        ProductUtils.copyMetadata(idepixProduct, targetProduct);
-        ProductUtils.copyGeoCoding(idepixProduct, targetProduct);
-        ProductUtils.copyFlagCodings(idepixProduct, targetProduct);
-        ProductUtils.copyFlagBands(idepixProduct, targetProduct, true);
-        ProductUtils.copyMasks(idepixProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(idepixProduct, targetProduct);
-        targetProduct.setStartTime(idepixProduct.getStartTime());
-        targetProduct.setEndTime(idepixProduct.getEndTime());
+            refl12Band = rad2reflProduct.getBand("Oa12_reflectance");
 
-        IdepixOlciUtils.setupOlciClassifBitmask(targetProduct);
+            tra13Band = o2CorrProduct.getBand("trans_13");
+            tra14Band = o2CorrProduct.getBand("trans_14");
+            tra15Band = o2CorrProduct.getBand("trans_15");
 
-
-        if (outputSchillerNNValue) {
-            ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
+        } catch (Exception e) {
+            throw new OperatorException(e.getMessage(), e);
+        } finally {
+            pm.done();
         }
+    }
+
+    @Override
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        final Rectangle targetRectangle = targetTile.getRectangle();
+        final String targetBandName = targetBand.getName();
+
+        final Tile szaTile = getSourceTile(szaBand, targetRectangle);
+        final Tile ozaTile = getSourceTile(ozaBand, targetRectangle);
+        final Tile saaTile = getSourceTile(saaBand, targetRectangle);
+        final Tile oaaTile = getSourceTile(oaaBand, targetRectangle);
+        final Tile refl12Tile = getSourceTile(refl12Band, targetRectangle);
+        final Tile tra13Tile = getSourceTile(tra13Band, targetRectangle);
+        final Tile tra14Tile = getSourceTile(tra14Band, targetRectangle);
+        final Tile tra15Tile = getSourceTile(tra15Band, targetRectangle);
+
+        final Tile l1FlagsTile = getSourceTile(sourceProduct.getRasterDataNode("quality_flags"), targetRectangle);
+
+        TensorflowNNCalculator nnCalculator = new TensorflowNNCalculator(nnDirName, "none", null);
+
+        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+            checkForCancellation();
+            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+
+                if (x == 1800 && y == 600) {
+                    System.out.println("x = " + x);
+                }
+
+                final boolean pixelIsValid = !l1FlagsTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
+                if (pixelIsValid) {
+                    // Preparing input data...
+                    final float sza = szaTile.getSampleFloat(x, y);
+                    final float cosSza = (float) Math.cos(sza*MathUtils.DTOR);
+                    final float oza = ozaTile.getSampleFloat(x, y);
+                    final float cosOza = (float) Math.cos(oza*MathUtils.DTOR);
+                    final float sinOza = (float) Math.sin(oza * MathUtils.DTOR);
+                    final float saa = saaTile.getSampleFloat(x, y);
+                    final float oaa = oaaTile.getSampleFloat(x, y);
+                    final float aziDiff = (float) ((saa - oaa)*MathUtils.DTOR * sinOza);
+
+                    final float refl12 = refl12Tile.getSampleFloat(x, y);
+                    final float tra13 = tra13Tile.getSampleFloat(x, y);
+                    final float mLogTra13 = (float) -Math.log(tra13);
+                    final float tra14 = tra14Tile.getSampleFloat(x, y);
+                    final float mLogTra14 = (float) -Math.log(tra14);
+                    final float tra15 = tra15Tile.getSampleFloat(x, y);
+                    final float mLogTra15 = (float) -Math.log(tra15);
+
+                    float[] nnInput = new float[]{cosSza, cosOza, aziDiff, refl12, mLogTra13, mLogTra14, mLogTra15};
+                    nnCalculator.setNnTensorInput(nnInput);
+                    final float[][] nnResult = nnCalculator.getNNResult();
+                    final float ctp = TensorflowNNCalculator.convertNNResultToCtp(nnResult[0][0]);
+
+                    if (targetBandName.equals("ctp")) {
+                        targetTile.setSample(x, y, ctp);
+                    } else {
+                        throw new OperatorException("Unexpected target band name: '" +
+                                                            targetBandName + "' - exiting.");
+                    }
+                } else {
+                    targetTile.setSample(x, y, Float.NaN);
+                }
+            }
+        }
+
+    }
+
+    private void preProcess() {
+        if (rad2reflProduct == null) {
+            rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
+        }
+
+        if (o2CorrProduct == null) {
+            Map<String, Product> o2corrSourceProducts = new HashMap<>();
+            Map<String, Object> o2corrParms = new HashMap<>();
+            o2corrParms.put("processOnlyBand13", false);
+            o2corrParms.put("writeCorrectedRadiances", false);
+            o2corrSourceProducts.put("l1bProduct", sourceProduct);
+            final String o2CorrOpName = "O2CorrOlci";
+            o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
+        }
+    }
+
+    private Product createTargetProduct() {
+        Product targetProduct = new Product(sourceProduct.getName(),
+                                            sourceProduct.getProductType(),
+                                            sourceProduct.getSceneRasterWidth(),
+                                            sourceProduct.getSceneRasterHeight());
+
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
+        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
+
+        final Band ctpBand = targetProduct.addBand("ctp", ProductData.TYPE_FLOAT32);
+        ctpBand.setNoDataValue(Float.NaN);
+        ctpBand.setNoDataValueUsed(true);
+        ctpBand.setUnit("hPa");
+        ctpBand.setDescription("Cloud Top Pressure");
 
         return targetProduct;
     }
 
-
-    private void preProcess() {
-        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
-        Map<String, Product> o2corrSourceProducts = new HashMap<>();
-        Map<String, Object> o2corrParms = new HashMap<>();
-        o2corrParms.put("processOnlyBand13", false);
-        o2corrSourceProducts.put("l1bProduct", sourceProduct);
-        final String o2CorrOpName = "O2CorrOlci";
-        o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
-    }
 
     /**
      * The Service Provider Interface (SPI) for the operator.

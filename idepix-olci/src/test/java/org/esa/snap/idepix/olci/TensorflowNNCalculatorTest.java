@@ -35,7 +35,8 @@ public class TensorflowNNCalculatorTest {
 
     @Test
     public void testNNTensorflowApplyModel() {
-        TensorflowNNCalculator nntest = new TensorflowNNCalculator("nn_training_20190131_I7x24x24x24xO1", "none", input);
+        TensorflowNNCalculator nntest = new TensorflowNNCalculator("nn_training_20190131_I7x24x24x24xO1", "none", null);
+        nntest.setNnTensorInput(input);
 
         float[][] result = nntest.getNNResult();
         for (int i = 0; i< nntest.getNnTensorOut(); i++) {

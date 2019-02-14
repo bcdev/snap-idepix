@@ -13,6 +13,16 @@
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixOlciTool"/>
             </file>
+
+            <file name="org-esa-snap-idepix-olci-CtpOpAction.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
+                <attr name="displayName" stringvalue="IdePix OLCI CTP [PLUGIN]"/>
+                <attr name="operatorName" stringvalue="Snap.Idepix.Olci.Ctp"/>
+                <attr name="dialogTitle" stringvalue="IdePix OLCI CTP - v0.8"/>
+                <attr name="targetProductNameSuffix" stringvalue="_ctp"/>
+                <attr name="helpId" stringvalue="snapIdepixOlciTool"/>
+            </file>
         </folder>
     </folder>
 
@@ -26,6 +36,13 @@
                                   stringvalue="Actions/Operators/org-esa-snap-idepix-olci-IdepixOlciOpAction.instance"/>
                             <attr name="position" intvalue="1"/>
                             <attr name="displayName" stringvalue="IdePix OLCI [PLUGIN]"/>
+                        </file>
+
+                        <file name="org-esa-snap-idepix-olci-CtpOpAction.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Operators/org-esa-snap-idepix-olci-CtpOpAction.instance"/>
+                            <attr name="position" intvalue="2"/>
+                            <attr name="displayName" stringvalue="IdePix OLCI CTP [PLUGIN]"/>
                         </file>
                     </folder>
                 </folder>
