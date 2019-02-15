@@ -26,17 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Idepix pixel classification operator for OLCI products.
- * <p>
- * Initial implementation:
- * - pure neural net approach which uses MERIS heritage bands only
- * - no auxdata available yet (such as 'L2 auxdata' for MERIS)
- * <p>
- * Currently resulting limitations:
- * - no cloud shadow flag
- * - glint flag over water just taken from 'sun_glint_risk' in L1 'quality_flags' band
- * <p>
- * Advanced algorithm to be defined which makes use of more bands.
+ *
+ * CTP for OLCI based on Tensorflow neural nets.
  *
  * @author olafd
  */
@@ -45,19 +36,13 @@ import java.util.Map;
         version = "1.0",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
-        description = "Pixel identification and classification for OLCI.")
+        description = "CTP for OLCI based on Tensorflow neural nets.")
 public class CtpOp extends BasisOp {
 
     @SourceProduct(alias = "sourceProduct",
             label = "OLCI L1b product",
             description = "The OLCI L1b source product.")
     private Product sourceProduct;
-
-//    @SourceProduct(alias = "rad2reflProduct",
-//            label = "OLCI TOA Reflectance product",
-//            optional = true,
-//            description = "OLCI TOA Reflectance product generated with Rad2ReflOp.")
-//    private Product rad2reflProduct;
 
     @SourceProduct(alias = "o2CorrProduct",
             label = "OLCI O2 Correction product",
@@ -70,13 +55,12 @@ public class CtpOp extends BasisOp {
     private Product targetProduct;
 
 
-    // todo
     @Parameter(description = "Path to alternative tensorflow neuronal net directory. Use this to replace the standard " +
-            "neuronal net '11x10x4x3x2_207.9'.",
+            "neuronal net 'nn_training_20190131_I7x30x30x30xO1'.",
             label = "Path to alternative NN to use")
     private String alternativeNNDirPath;
 
-    private static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x24x24x24xO1";
+    private static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x30x30x30xO1";
 
     private TiePointGrid szaBand;
     private TiePointGrid ozaBand;
@@ -85,12 +69,11 @@ public class CtpOp extends BasisOp {
 
     private Band rad12Band;
     private Band solarFlux12Band;
-//    private Band refl12Band;
     private Band tra13Band;
     private Band tra14Band;
     private Band tra15Band;
 
-    private String nnDirName;
+    private String modelDir;
 
 
     @Override
@@ -101,12 +84,13 @@ public class CtpOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        nnDirName = DEFAULT_TENSORFLOW_NN_DIR_NAME;
-        if (!alternativeNNDirPath.isEmpty()) {
+        if (alternativeNNDirPath != null && !alternativeNNDirPath.isEmpty()) {
             final File alternativeNNDir = new File(alternativeNNDirPath);
             if (alternativeNNDir.isDirectory()) {
-                nnDirName = alternativeNNDir.getName();
+                modelDir = alternativeNNDirPath;
             }
+        } else {
+            modelDir = new File(getClass().getResource(DEFAULT_TENSORFLOW_NN_DIR_NAME).getFile()).getAbsolutePath();
         }
 
         targetProduct = createTargetProduct();
@@ -125,7 +109,6 @@ public class CtpOp extends BasisOp {
 
             rad12Band = sourceProduct.getBand("Oa12_radiance");
             solarFlux12Band = sourceProduct.getBand("solar_flux_band_12");
-//            refl12Band = rad2reflProduct.getBand("Oa12_reflectance");
 
             tra13Band = o2CorrProduct.getBand("trans_13");
             tra14Band = o2CorrProduct.getBand("trans_14");
@@ -156,7 +139,7 @@ public class CtpOp extends BasisOp {
 
         final Tile l1FlagsTile = getSourceTile(sourceProduct.getRasterDataNode("quality_flags"), targetRectangle);
 
-        TensorflowNNCalculator nnCalculator = new TensorflowNNCalculator(nnDirName, "none", null);
+        TensorflowNNCalculator nnCalculator = new TensorflowNNCalculator(modelDir, "none", null);
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();

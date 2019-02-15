@@ -26,24 +26,25 @@ public class TensorflowNNCalculator {
     private Tensor tensorResult;
     private int nnTensorOut;
 
-    private String modelPath;
+    private String modelDir;
     private SavedModelBundle model;
 
     /**
      * Provides NN result for given input, applying a neural net which is based on a tensorflow model .
      *
-     * @param modelDirName - the name of the directory containing the Tensorflow model
+     * @param modelDir - the path of the directory containing the Tensorflow model
      *                     (e.g. 'nn_training_20190131_I7x24x24x24xO1')
      * @param transformMethod - the input transformation method. Supported values are 'sqrt' and 'log',
      *                        otherwise this is ignored.
      * @param nnTensorInput - float[] input vector (i.e. OLCI L1 values per pixel)
      *
      */
-    TensorflowNNCalculator(String modelDirName, String transformMethod, float[] nnTensorInput) {
+    TensorflowNNCalculator(String modelDir, String transformMethod, float[] nnTensorInput) {
         this.transformMethod = transformMethod;
         this.nnTensorInput = nnTensorInput;
+        this.modelDir = modelDir;
         try {
-            loadModel(modelDirName);
+            loadModel();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -161,7 +162,7 @@ public class TensorflowNNCalculator {
         	[ node.op.name for node in model.inputs]
         	[ node.op.name for node in model.outputs]*/
 
-        File[] files = new File(modelPath).listFiles((dir, name) -> name.equalsIgnoreCase("saved_model.pbtxt"));
+        File[] files = new File(modelDir).listFiles((dir, name) -> name.equalsIgnoreCase("saved_model.pbtxt"));
 
         boolean setFirstNodeName = false;
 
@@ -185,16 +186,16 @@ public class TensorflowNNCalculator {
             }
         } else {
             throw new IllegalStateException("Cannot access Tensorflow text protocol buffer file in specified folder: "
-                                                    + modelPath);
+                                                    + modelDir);
         }
     }
 
     ////////////////// private methods ////////////////////////////////////////////
 
-    private void loadModel(String modelDirName) throws Exception {
+    private void loadModel() throws Exception {
         // Load a model previously saved by tensorflow Python package
-        modelPath = new File(getClass().getResource(modelDirName).getFile()).getAbsolutePath();
-        model = SavedModelBundle.load(modelPath, "serve");
+//        modelDir = new File(getClass().getResource(modelDirPath).getFile()).getAbsolutePath();
+        model = SavedModelBundle.load(modelDir, "serve");
         setFirstAndLastNodeNameFromBinaryProtocolBuffer(model);
 //        setFirstAndLastNodeNameFromTextProtocolBuffer();
     }
