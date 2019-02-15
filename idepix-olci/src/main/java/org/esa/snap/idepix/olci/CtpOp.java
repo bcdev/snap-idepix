@@ -14,12 +14,14 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
 import java.awt.*;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,11 +53,11 @@ public class CtpOp extends BasisOp {
             description = "The OLCI L1b source product.")
     private Product sourceProduct;
 
-    @SourceProduct(alias = "rad2reflProduct",
-            label = "OLCI TOA Reflectance product",
-            optional = true,
-            description = "OLCI TOA Reflectance product generated with Rad2ReflOp.")
-    private Product rad2reflProduct;
+//    @SourceProduct(alias = "rad2reflProduct",
+//            label = "OLCI TOA Reflectance product",
+//            optional = true,
+//            description = "OLCI TOA Reflectance product generated with Rad2ReflOp.")
+//    private Product rad2reflProduct;
 
     @SourceProduct(alias = "o2CorrProduct",
             label = "OLCI O2 Correction product",
@@ -69,10 +71,10 @@ public class CtpOp extends BasisOp {
 
 
     // todo
-//    @Parameter(description = "Path to an alternative Tensorflow neuronal net. Use this to replace the standard " +
-//            "set of neuronal nets with the ones in the given directory.",
-//            label = "Alternative NN Path")
-//    private String alternativeNNPath;
+    @Parameter(description = "Path to alternative tensorflow neuronal net directory. Use this to replace the standard " +
+            "neuronal net '11x10x4x3x2_207.9'.",
+            label = "Path to alternative NN to use")
+    private String alternativeNNDirPath;
 
     private static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x24x24x24xO1";
 
@@ -81,7 +83,9 @@ public class CtpOp extends BasisOp {
     private TiePointGrid saaBand;
     private TiePointGrid oaaBand;
 
-    private Band refl12Band;
+    private Band rad12Band;
+    private Band solarFlux12Band;
+//    private Band refl12Band;
     private Band tra13Band;
     private Band tra14Band;
     private Band tra15Band;
@@ -98,6 +102,12 @@ public class CtpOp extends BasisOp {
         }
 
         nnDirName = DEFAULT_TENSORFLOW_NN_DIR_NAME;
+        if (!alternativeNNDirPath.isEmpty()) {
+            final File alternativeNNDir = new File(alternativeNNDirPath);
+            if (alternativeNNDir.isDirectory()) {
+                nnDirName = alternativeNNDir.getName();
+            }
+        }
 
         targetProduct = createTargetProduct();
     }
@@ -113,7 +123,9 @@ public class CtpOp extends BasisOp {
             saaBand = sourceProduct.getTiePointGrid("SAA");
             oaaBand = sourceProduct.getTiePointGrid("OAA");
 
-            refl12Band = rad2reflProduct.getBand("Oa12_reflectance");
+            rad12Band = sourceProduct.getBand("Oa12_radiance");
+            solarFlux12Band = sourceProduct.getBand("solar_flux_band_12");
+//            refl12Band = rad2reflProduct.getBand("Oa12_reflectance");
 
             tra13Band = o2CorrProduct.getBand("trans_13");
             tra14Band = o2CorrProduct.getBand("trans_14");
@@ -135,7 +147,9 @@ public class CtpOp extends BasisOp {
         final Tile ozaTile = getSourceTile(ozaBand, targetRectangle);
         final Tile saaTile = getSourceTile(saaBand, targetRectangle);
         final Tile oaaTile = getSourceTile(oaaBand, targetRectangle);
-        final Tile refl12Tile = getSourceTile(refl12Band, targetRectangle);
+        final Tile rad12Tile = getSourceTile(rad12Band, targetRectangle);
+        final Tile solarFlux12Tile = getSourceTile(solarFlux12Band, targetRectangle);
+//        final Tile refl12Tile = getSourceTile(refl12Band, targetRectangle);
         final Tile tra13Tile = getSourceTile(tra13Band, targetRectangle);
         final Tile tra14Tile = getSourceTile(tra14Band, targetRectangle);
         final Tile tra15Tile = getSourceTile(tra15Band, targetRectangle);
@@ -156,15 +170,17 @@ public class CtpOp extends BasisOp {
                 if (pixelIsValid) {
                     // Preparing input data...
                     final float sza = szaTile.getSampleFloat(x, y);
-                    final float cosSza = (float) Math.cos(sza*MathUtils.DTOR);
+                    final float cosSza = (float) Math.cos(sza * MathUtils.DTOR);
                     final float oza = ozaTile.getSampleFloat(x, y);
-                    final float cosOza = (float) Math.cos(oza*MathUtils.DTOR);
+                    final float cosOza = (float) Math.cos(oza * MathUtils.DTOR);
                     final float sinOza = (float) Math.sin(oza * MathUtils.DTOR);
                     final float saa = saaTile.getSampleFloat(x, y);
                     final float oaa = oaaTile.getSampleFloat(x, y);
-                    final float aziDiff = (float) ((saa - oaa)*MathUtils.DTOR * sinOza);
+                    final float aziDiff = (float) ((saa - oaa) * MathUtils.DTOR * sinOza);
 
-                    final float refl12 = refl12Tile.getSampleFloat(x, y);
+                    final float rad12 = rad12Tile.getSampleFloat(x, y);
+                    final float solarFlux12 = solarFlux12Tile.getSampleFloat(x, y);
+                    final float refl12 = rad12/solarFlux12;
                     final float tra13 = tra13Tile.getSampleFloat(x, y);
                     final float mLogTra13 = (float) -Math.log(tra13);
                     final float tra14 = tra14Tile.getSampleFloat(x, y);
@@ -192,9 +208,9 @@ public class CtpOp extends BasisOp {
     }
 
     private void preProcess() {
-        if (rad2reflProduct == null) {
-            rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
-        }
+//        if (rad2reflProduct == null) {
+//            rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
+//        }
 
         if (o2CorrProduct == null) {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
