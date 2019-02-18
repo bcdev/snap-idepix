@@ -547,6 +547,9 @@ class CloudShadowFlaggerCombination {
             sortedCluster.add(j, clusterCentroid);
         }
         double maxDist = sortedCluster.get(sortedCluster.size() - 1) - sortedCluster.get(0);
+        if (maxDist <= 0) {
+            return;
+        }
         double averageDistance = maxDist / (numberOfClusters - 1);
         for (int i = 0; i < sortedCluster.size() - 2; i++) {
             if (sortedCluster.get(i + 1) - sortedCluster.get(i) > averageDistance) {
