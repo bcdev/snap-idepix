@@ -57,6 +57,9 @@ public class IdepixOlciPostProcessOp extends Operator {
     @SourceProduct(alias = "olciCloud")
     private Product olciCloudProduct;
 
+    @SourceProduct(alias = "ctp", optional = true)
+    private Product ctpProduct;
+
     private Band origCloudFlagBand;
 
     private Band ctpBand;
@@ -90,8 +93,8 @@ public class IdepixOlciPostProcessOp extends Operator {
                                                    cloudBufferWidth, cloudBufferWidth
             );
         }
-        if (computeCloudShadow) {
-            ctpBand = olciCloudProduct.getBand("ctp");
+        if (computeCloudShadow && ctpProduct != null) {
+            ctpBand = ctpProduct.getBand("ctp");
             int extendedWidth;
             int extendedHeight;
             if (l1bProduct.getName().contains("FR____")) {
@@ -158,7 +161,7 @@ public class IdepixOlciPostProcessOp extends Operator {
             }
         }
 
-        if (computeCloudShadow) {
+        if (computeCloudShadow && ctpProduct != null) {
             Tile szaTile = getSourceTile(szaTPG, srcRectangle);
             Tile saaTile = getSourceTile(saaTPG, srcRectangle);
             Tile ctpTile = getSourceTile(ctpBand, srcRectangle);

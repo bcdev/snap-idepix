@@ -81,6 +81,21 @@ public class IdepixOlciOp extends BasisOp {
             description = " If applied, write NN value to the target product ")
     private boolean outputSchillerNNValue;
 
+    @Parameter(defaultValue = "true",
+            label = " Compute cloud shadow",
+            description = " Compute cloud shadow with the algorithm from 'Fronts' project")
+    private boolean computeCloudShadow;
+
+    @Parameter(description = "Path to alternative tensorflow neuronal net directory for CTP retrieval " +
+            "Use this to replace the standard neuronal net 'nn_training_20190131_I7x30x30x30xO1'.",
+            label = "Path to alternative NN for CTP retrieval")
+    private String alternativeNNDirPath;
+
+    @Parameter(defaultValue = "false",
+            label = " If cloud shadow is computed, write CTP value to the target product",
+            description = " If cloud shadow is computed, write CTP value to the target product ")
+    private boolean outputCtp;
+
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
 
@@ -88,6 +103,7 @@ public class IdepixOlciOp extends BasisOp {
             description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy.",
             label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
+
 
     @Parameter(defaultValue = "false",
             label = " Use SRTM Land/Water mask",
@@ -100,6 +116,7 @@ public class IdepixOlciOp extends BasisOp {
     private Product postProcessingProduct;
 
     private Product rad2reflProduct;
+    private Product ctpProduct;
     private Product waterMaskProduct;
 
     private Map<String, Product> classificationInputProducts;
@@ -168,12 +185,20 @@ public class IdepixOlciOp extends BasisOp {
             ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
         }
 
+        if (computeCloudShadow && outputCtp) {
+            ProductUtils.copyBand(IdepixConstants.CTP_OUTPUT_BAND_NAME, ctpProduct, targetProduct, true);
+        }
+
         return targetProduct;
     }
 
 
     private void preProcess() {
         rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
+
+        if (computeCloudShadow) {
+            ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct);
+        }
 
         if (useSrtmLandWaterMask) {
             HashMap<String, Object> waterMaskParameters = new HashMap<>();
@@ -207,11 +232,14 @@ public class IdepixOlciOp extends BasisOp {
     private void postProcess(Product olciIdepixProduct) {
         HashMap<String, Product> input = new HashMap<>();
         input.put("l1b", sourceProduct);
+        input.put("ctp", ctpProduct);
         input.put("olciCloud", olciIdepixProduct);
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
+        params.put("computeCloudShadow", computeCloudShadow);
+//        params.put("computeCloudShadow", false);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciPostProcessOp.class),
                                                   params, input);

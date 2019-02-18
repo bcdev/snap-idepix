@@ -60,7 +60,8 @@ public class CtpOp extends BasisOp {
             label = "Path to alternative NN to use")
     private String alternativeNNDirPath;
 
-    private static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x30x30x30xO1";
+//    private static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x30x30x30xO1";
+     private static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x32x64x64x10xO1";
 
     private TiePointGrid szaBand;
     private TiePointGrid ozaBand;
@@ -74,6 +75,7 @@ public class CtpOp extends BasisOp {
     private Band tra15Band;
 
     private String modelDir;
+    private TensorflowNNCalculator nnCalculator;
 
 
     @Override
@@ -92,6 +94,8 @@ public class CtpOp extends BasisOp {
         } else {
             modelDir = new File(getClass().getResource(DEFAULT_TENSORFLOW_NN_DIR_NAME).getFile()).getAbsolutePath();
         }
+
+        nnCalculator = new TensorflowNNCalculator(modelDir, "none", null);
 
         targetProduct = createTargetProduct();
     }
@@ -138,8 +142,6 @@ public class CtpOp extends BasisOp {
         final Tile tra15Tile = getSourceTile(tra15Band, targetRectangle);
 
         final Tile l1FlagsTile = getSourceTile(sourceProduct.getRasterDataNode("quality_flags"), targetRectangle);
-
-        TensorflowNNCalculator nnCalculator = new TensorflowNNCalculator(modelDir, "none", null);
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
