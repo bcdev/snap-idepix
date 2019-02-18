@@ -20,6 +20,7 @@ class MountainShadowFlagger {
         //GK: SunZenith is reduced to find more than the core shadow.
         double sunZenithIntermediate;
         if (SHADOW_ADAPTER_SZA) {
+            //todo reduce sun zenith even more
             sunZenithIntermediate =
                     (double) sourceSunZenith * (2. * Math.pow(((90. - (double) sourceSunZenith) / 90), 3) + 1.);
         } else {
