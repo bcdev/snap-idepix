@@ -126,6 +126,9 @@ public class S2IdepixCloudShadowOp extends Operator {
         preParams.put("computeMountainShadow", computeMountainShadow);
         preParams.put("mode", mode);
 
+        //todo: test resolution of granule. Resample necessary bands to 60m. calculate cloud shadow on 60m.
+        //todo: let mountain shadow benefit from higher resolution in DEM. Adjust sun zenith according to smoothing.
+
         //Preprocessing:
         // No flags are created, only statistics generated to find the best offset along the illumination path.
         final String operatorAlias = OperatorSpi.getOperatorAlias(S2IdepixPreCloudShadowOp.class);
