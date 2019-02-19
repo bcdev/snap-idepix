@@ -1,7 +1,6 @@
 package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.core.CloudShadowFronts;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.operators.CloudBuffer;
 import org.esa.s3tbx.idepix.core.util.IdepixIO;
@@ -65,6 +64,8 @@ public class IdepixOlciPostProcessOp extends Operator {
     private Band ctpBand;
     private TiePointGrid szaTPG;
     private TiePointGrid saaTPG;
+    private TiePointGrid slpTPG;
+    private TiePointGrid[] temperatureProfileTPGs;
     private Band altBand;
 
     private GeoCoding geoCoding;
@@ -84,8 +85,14 @@ public class IdepixOlciPostProcessOp extends Operator {
 
         szaTPG = l1bProduct.getTiePointGrid("SZA");
         saaTPG = l1bProduct.getTiePointGrid("SAA");
+        slpTPG = l1bProduct.getTiePointGrid("sea_level_pressure");
         altBand = l1bProduct.getBand("altitude");
 
+        temperatureProfileTPGs = new TiePointGrid[IdepixOlciConstants.referencePressureLevels.length];
+        for (int i = 0; i < IdepixOlciConstants.referencePressureLevels.length; i++) {
+            temperatureProfileTPGs[i] =
+                    l1bProduct.getTiePointGrid("atmospheric_temperature_profile_pressure_level_" + (i+1));
+        }
 
         if (computeCloudBuffer) {
             rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
@@ -165,38 +172,22 @@ public class IdepixOlciPostProcessOp extends Operator {
             Tile szaTile = getSourceTile(szaTPG, srcRectangle);
             Tile saaTile = getSourceTile(saaTPG, srcRectangle);
             Tile ctpTile = getSourceTile(ctpBand, srcRectangle);
+            Tile slpTile = getSourceTile(slpTPG, srcRectangle);
             Tile altTile = getSourceTile(altBand, targetRectangle);
-            CloudShadowFronts cloudShadowFronts = new CloudShadowFronts(
-                    geoCoding,
-                    srcRectangle,
-                    targetRectangle,
-                    szaTile, saaTile, ctpTile, altTile) {
 
-                @Override
-                protected boolean isCloudForShadow(int x, int y) {
-                    if (!targetTile.getRectangle().contains(x, y)) {
-                        return sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                    } else {
-                        return targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                    }
-                }
+            Tile[] temperatureProfileTPGTiles = new Tile[temperatureProfileTPGs.length];
+            for (int i = 0; i < temperatureProfileTPGTiles.length; i++) {
+                temperatureProfileTPGTiles[i] = getSourceTile(temperatureProfileTPGs[i], srcRectangle);
+            }
 
-                @Override
-                protected boolean isCloudFree(int x, int y) {
-                    return !sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                }
-
-                @Override
-                protected boolean isSurroundedByCloud(int x, int y) {
-                    return isPixelSurrounded(x, y, sourceFlagTile, IdepixConstants.IDEPIX_CLOUD);
-                }
-
-                @Override
-                protected void setCloudShadow(int x, int y) {
-                    targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, true);
-                }
-            };
-            cloudShadowFronts.computeCloudShadow();
+            // todo: make CloudShadowFronts in Idepix core more flexible to handle alternative CTH computations!
+            // Then switch back to that.
+            IdepixOlciCloudShadowFronts cloudShadowFronts = new IdepixOlciCloudShadowFronts(geoCoding,
+                                                                                            szaTile, saaTile,
+                                                                                            ctpTile, slpTile,
+                                                                                            temperatureProfileTPGTiles,
+                                                                                            altTile);
+            cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
         }
     }
 

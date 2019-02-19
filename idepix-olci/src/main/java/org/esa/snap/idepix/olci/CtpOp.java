@@ -98,32 +98,46 @@ public class CtpOp extends BasisOp {
         nnCalculator = new TensorflowNNCalculator(modelDir, "none", null);
 
         targetProduct = createTargetProduct();
+
+        preProcess();
+
+        szaBand = sourceProduct.getTiePointGrid("SZA");
+        ozaBand = sourceProduct.getTiePointGrid("OZA");
+        saaBand = sourceProduct.getTiePointGrid("SAA");
+        oaaBand = sourceProduct.getTiePointGrid("OAA");
+
+        rad12Band = sourceProduct.getBand("Oa12_radiance");
+        solarFlux12Band = sourceProduct.getBand("solar_flux_band_12");
+
+        tra13Band = o2CorrProduct.getBand("trans_13");
+        tra14Band = o2CorrProduct.getBand("trans_14");
+        tra15Band = o2CorrProduct.getBand("trans_15");
     }
 
-    @Override
-    public void doExecute(ProgressMonitor pm) throws OperatorException {
-        try {
-            pm.beginTask("Executing CTP processing...", 0);
-            preProcess();
-
-            szaBand = sourceProduct.getTiePointGrid("SZA");
-            ozaBand = sourceProduct.getTiePointGrid("OZA");
-            saaBand = sourceProduct.getTiePointGrid("SAA");
-            oaaBand = sourceProduct.getTiePointGrid("OAA");
-
-            rad12Band = sourceProduct.getBand("Oa12_radiance");
-            solarFlux12Band = sourceProduct.getBand("solar_flux_band_12");
-
-            tra13Band = o2CorrProduct.getBand("trans_13");
-            tra14Band = o2CorrProduct.getBand("trans_14");
-            tra15Band = o2CorrProduct.getBand("trans_15");
-
-        } catch (Exception e) {
-            throw new OperatorException(e.getMessage(), e);
-        } finally {
-            pm.done();
-        }
-    }
+//    @Override
+//    public void doExecute(ProgressMonitor pm) throws OperatorException {
+//        try {
+//            pm.beginTask("Executing CTP processing...", 0);
+//            preProcess();
+//
+//            szaBand = sourceProduct.getTiePointGrid("SZA");
+//            ozaBand = sourceProduct.getTiePointGrid("OZA");
+//            saaBand = sourceProduct.getTiePointGrid("SAA");
+//            oaaBand = sourceProduct.getTiePointGrid("OAA");
+//
+//            rad12Band = sourceProduct.getBand("Oa12_radiance");
+//            solarFlux12Band = sourceProduct.getBand("solar_flux_band_12");
+//
+//            tra13Band = o2CorrProduct.getBand("trans_13");
+//            tra14Band = o2CorrProduct.getBand("trans_14");
+//            tra15Band = o2CorrProduct.getBand("trans_15");
+//
+//        } catch (Exception e) {
+//            throw new OperatorException(e.getMessage(), e);
+//        } finally {
+//            pm.done();
+//        }
+//    }
 
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {

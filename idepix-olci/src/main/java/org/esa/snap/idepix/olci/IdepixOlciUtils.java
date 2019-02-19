@@ -25,7 +25,6 @@ public class IdepixOlciUtils {
      * Provides OLCI pixel classification flag coding
      *
      * @param flagId - the flag ID
-     *
      * @return - the flag coding
      */
     public static FlagCoding createOlciFlagCoding(String flagId) {
@@ -64,22 +63,34 @@ public class IdepixOlciUtils {
         return GPF.createProduct("Snap.Idepix.Olci.Ctp", GPF.NO_PARAMS, sourceProduct);
     }
 
-    public static double getRefinedHeightFromCtp(double ctp, double msl, double[] temperatures) {
-
+    public static double getRefinedHeightFromCtp(double ctp, double slp, double[] temperatures) {
+        double height = 0.0;
         final double[] prsLevels = IdepixOlciConstants.referencePressureLevels;
 
-        //  case i = 0
-        double t1 = temperatures[0];
-        double t2 = temperatures[1];
-        if (ctp > prsLevels[0]) {
-            final double ts = (t2 - t1) / (prsLevels[1] - prsLevels[0]) * (ctp - prsLevels[0]) + t1;
-
+        double t1;
+        double t2;
+        if (ctp >= prsLevels[prsLevels.length - 1]) {
+            for (int i = 0; i < prsLevels.length - 1; i++) {
+                if (ctp > prsLevels[0] || (ctp < prsLevels[i] && ctp > prsLevels[i + 1])) {
+                    t1 = temperatures[i];
+                    t2 = temperatures[i + 1];
+                    final double ts = (t2 - t1) / (prsLevels[i + 1] - prsLevels[i]) * (ctp - prsLevels[i]) + t1;
+                    height = getHeightFromCtp(ctp, slp, ts);
+                    break;
+                }
+            }
+        } else {
+            // CTP < 1 hPa? This should never happen...
+            t1 = temperatures[prsLevels.length - 2];
+            t2 = temperatures[prsLevels.length - 1];
+            final double ts = (t2 - t1) / (prsLevels[prsLevels.length - 2] - prsLevels[prsLevels.length - 1]) *
+                    (ctp - prsLevels[prsLevels.length - 1]) + t1;
+            height = getHeightFromCtp(ctp, slp, ts);
         }
+        return height;
+    }
 
-        for (int i = 1; i < prsLevels.length; i++) {
-
-        }
-
-        return 0;
+    private static double getHeightFromCtp(double ctp, double p0, double ts) {
+        return -ts * (Math.pow(ctp / p0, 1. / 5.255) - 1) / 0.0065;
     }
 }
