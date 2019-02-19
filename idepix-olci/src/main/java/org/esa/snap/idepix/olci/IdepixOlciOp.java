@@ -197,7 +197,7 @@ public class IdepixOlciOp extends BasisOp {
         rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
 
         if (computeCloudShadow) {
-            ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct);
+            ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct, alternativeNNDirPath, outputCtp);
         }
 
         if (useSrtmLandWaterMask) {

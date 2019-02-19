@@ -59,8 +59,11 @@ public class IdepixOlciUtils {
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
     }
 
-    public static Product computeCloudTopPressureProduct(Product sourceProduct) {
-        return GPF.createProduct("Snap.Idepix.Olci.Ctp", GPF.NO_PARAMS, sourceProduct);
+    public static Product computeCloudTopPressureProduct(Product sourceProduct, String alternativeNNDirPath, boolean outputCtp) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("alternativeNNDirPath", alternativeNNDirPath);
+        params.put("outputCtp", outputCtp);
+        return GPF.createProduct("Snap.Idepix.Olci.Ctp", params, sourceProduct);
     }
 
     public static double getRefinedHeightFromCtp(double ctp, double slp, double[] temperatures) {

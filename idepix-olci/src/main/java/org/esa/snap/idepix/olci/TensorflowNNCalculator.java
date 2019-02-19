@@ -43,6 +43,7 @@ public class TensorflowNNCalculator {
         this.transformMethod = transformMethod;
         this.nnTensorInput = nnTensorInput;
         this.modelDir = modelDir;
+        System.out.println("modelDir = " + modelDir);
         try {
             loadModel();
         } catch (Exception e) {
@@ -196,8 +197,8 @@ public class TensorflowNNCalculator {
         // Load a model previously saved by tensorflow Python package
 //        modelDir = new File(getClass().getResource(modelDirPath).getFile()).getAbsolutePath();
         model = SavedModelBundle.load(modelDir, "serve");
-        setFirstAndLastNodeNameFromBinaryProtocolBuffer(model);
-//        setFirstAndLastNodeNameFromTextProtocolBuffer();
+//        setFirstAndLastNodeNameFromBinaryProtocolBuffer(model);
+        setFirstAndLastNodeNameFromTextProtocolBuffer();
     }
 
     private void computeTensorResult() {
