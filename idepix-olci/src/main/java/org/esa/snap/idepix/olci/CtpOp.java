@@ -22,6 +22,7 @@ import org.esa.snap.core.util.math.MathUtils;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,12 +57,11 @@ public class CtpOp extends BasisOp {
 
 
     @Parameter(description = "Path to alternative tensorflow neuronal net directory. Use this to replace the standard " +
-            "neuronal net 'nn_training_20190131_I7x30x30x30xO1'.",
+            "neuronal net 'nn_training_20190131_I7x30x30x30x10x2xO1'.",
             label = "Path to alternative NN to use")
     private String alternativeNNDirPath;
 
-//    private static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x30x30x30xO1";
-     private static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x32x64x64x10xO1";
+    static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x30x30x30x10x2xO1";
 
     private TiePointGrid szaBand;
     private TiePointGrid ozaBand;
@@ -74,9 +74,7 @@ public class CtpOp extends BasisOp {
     private Band tra14Band;
     private Band tra15Band;
 
-    private String modelDir;
     private TensorflowNNCalculator nnCalculator;
-
 
     @Override
     public void initialize() throws OperatorException {
@@ -86,58 +84,50 @@ public class CtpOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
+        String auxdataPath;
+        try {
+            auxdataPath = IdepixOlciUtils.installAuxdataNNCtp();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new OperatorException("Cannot install CTP NN auxdata:" + e.getMessage());
+        }
+
+        String modelDir = auxdataPath + File.separator + CtpOp.DEFAULT_TENSORFLOW_NN_DIR_NAME;
         if (alternativeNNDirPath != null && !alternativeNNDirPath.isEmpty()) {
             final File alternativeNNDir = new File(alternativeNNDirPath);
             if (alternativeNNDir.isDirectory()) {
                 modelDir = alternativeNNDirPath;
             }
-        } else {
-            modelDir = new File(getClass().getResource(DEFAULT_TENSORFLOW_NN_DIR_NAME).getFile()).getAbsolutePath();
         }
 
         nnCalculator = new TensorflowNNCalculator(modelDir, "none", null);
 
         targetProduct = createTargetProduct();
-
-        preProcess();
-
-        szaBand = sourceProduct.getTiePointGrid("SZA");
-        ozaBand = sourceProduct.getTiePointGrid("OZA");
-        saaBand = sourceProduct.getTiePointGrid("SAA");
-        oaaBand = sourceProduct.getTiePointGrid("OAA");
-
-        rad12Band = sourceProduct.getBand("Oa12_radiance");
-        solarFlux12Band = sourceProduct.getBand("solar_flux_band_12");
-
-        tra13Band = o2CorrProduct.getBand("trans_13");
-        tra14Band = o2CorrProduct.getBand("trans_14");
-        tra15Band = o2CorrProduct.getBand("trans_15");
     }
 
-//    @Override
-//    public void doExecute(ProgressMonitor pm) throws OperatorException {
-//        try {
-//            pm.beginTask("Executing CTP processing...", 0);
-//            preProcess();
-//
-//            szaBand = sourceProduct.getTiePointGrid("SZA");
-//            ozaBand = sourceProduct.getTiePointGrid("OZA");
-//            saaBand = sourceProduct.getTiePointGrid("SAA");
-//            oaaBand = sourceProduct.getTiePointGrid("OAA");
-//
-//            rad12Band = sourceProduct.getBand("Oa12_radiance");
-//            solarFlux12Band = sourceProduct.getBand("solar_flux_band_12");
-//
-//            tra13Band = o2CorrProduct.getBand("trans_13");
-//            tra14Band = o2CorrProduct.getBand("trans_14");
-//            tra15Band = o2CorrProduct.getBand("trans_15");
-//
-//        } catch (Exception e) {
-//            throw new OperatorException(e.getMessage(), e);
-//        } finally {
-//            pm.done();
-//        }
-//    }
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        try {
+            pm.beginTask("Executing CTP processing...", 0);
+            preProcess();
+
+            szaBand = sourceProduct.getTiePointGrid("SZA");
+            ozaBand = sourceProduct.getTiePointGrid("OZA");
+            saaBand = sourceProduct.getTiePointGrid("SAA");
+            oaaBand = sourceProduct.getTiePointGrid("OAA");
+
+            rad12Band = sourceProduct.getBand("Oa12_radiance");
+            solarFlux12Band = sourceProduct.getBand("solar_flux_band_12");
+
+            tra13Band = o2CorrProduct.getBand("trans_13");
+            tra14Band = o2CorrProduct.getBand("trans_14");
+            tra15Band = o2CorrProduct.getBand("trans_15");
+        } catch (Exception e) {
+            throw new OperatorException(e.getMessage(), e);
+        } finally {
+            pm.done();
+        }
+    }
 
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
@@ -150,7 +140,6 @@ public class CtpOp extends BasisOp {
         final Tile oaaTile = getSourceTile(oaaBand, targetRectangle);
         final Tile rad12Tile = getSourceTile(rad12Band, targetRectangle);
         final Tile solarFlux12Tile = getSourceTile(solarFlux12Band, targetRectangle);
-//        final Tile refl12Tile = getSourceTile(refl12Band, targetRectangle);
         final Tile tra13Tile = getSourceTile(tra13Band, targetRectangle);
         final Tile tra14Tile = getSourceTile(tra14Band, targetRectangle);
         final Tile tra15Tile = getSourceTile(tra15Band, targetRectangle);
@@ -160,10 +149,6 @@ public class CtpOp extends BasisOp {
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-
-                if (x == 1800 && y == 600) {
-                    System.out.println("x = " + x);
-                }
 
                 final boolean pixelIsValid = !l1FlagsTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
                 if (pixelIsValid) {
@@ -207,10 +192,6 @@ public class CtpOp extends BasisOp {
     }
 
     private void preProcess() {
-//        if (rad2reflProduct == null) {
-//            rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
-//        }
-
         if (o2CorrProduct == null) {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
             Map<String, Object> o2corrParms = new HashMap<>();

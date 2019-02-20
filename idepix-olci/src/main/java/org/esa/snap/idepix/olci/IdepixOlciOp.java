@@ -35,7 +35,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Snap.Idepix.Olci",
         category = "Optical/Pre-Processing",
-        version = "1.0",
+        version = "0.82",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
         description = "Pixel identification and classification for OLCI.")

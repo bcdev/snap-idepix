@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.olci;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.core.IdepixFlagCoding;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
@@ -9,7 +10,11 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.ResourceInstaller;
+import org.esa.snap.core.util.SystemUtils;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +25,21 @@ import java.util.Map;
  */
 
 public class IdepixOlciUtils {
+
+    /**
+     * Installs auxiliary data, here lookup tables.
+     *
+     * @return - the auxdata path for lookup tables.
+     * @throws IOException -
+     */
+    static String installAuxdataNNCtp() throws IOException {
+        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("idepix_olci/nn_ctp");
+        final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(CtpOp.class).resolve("auxdata/nn_ctp");
+        final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
+        resourceInstaller.install(".*", ProgressMonitor.NULL);
+        return auxdataDirectory.toString();
+    }
+
 
     /**
      * Provides OLCI pixel classification flag coding

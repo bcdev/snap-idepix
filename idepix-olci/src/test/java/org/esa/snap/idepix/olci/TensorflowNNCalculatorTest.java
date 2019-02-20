@@ -16,6 +16,7 @@
 
 package org.esa.snap.idepix.olci;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -24,6 +25,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class TensorflowNNCalculatorTest {
+
+    private String auxdataPath;
 
     private final static float szaRad = 0.15601175f;
     private final static float ozaRad = 0.57917833f;
@@ -35,8 +38,28 @@ public class TensorflowNNCalculatorTest {
 
     private final static float[] input = new float[]{szaRad, ozaRad, aziDiff, refl12, logTra13, logTra14, logTra15};
 
+    @Before
+    public void setUp() throws Exception {
+        auxdataPath = IdepixOlciUtils.installAuxdataNNCtp();
+    }
+
+    @Test
+    public void testNNTensorflowApplyModel_fromAuxdataInstalled() {
+        // the standard setup
+        String modelDir = auxdataPath + File.separator + CtpOp.DEFAULT_TENSORFLOW_NN_DIR_NAME;
+        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none", null);
+        nntest.setNnTensorInput(input);
+
+        float[][] result = nntest.getNNResult();
+        assertEquals(1.2295055f, result[0][0], 1.E-6);
+        float ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
+        System.out.println("ctp for I7x24x24x24xO1 = " + ctp);
+    }
+
     @Test
     public void testNNTensorflowApplyModel() {
+        // testing results from various test NNs against DM results
+        // These NNs are stored as test resources
         String modelDir = new File(getClass().getResource("nn_training_20190131_I7x24x24x24xO1").getFile()).getAbsolutePath();
         TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none", null);
         nntest.setNnTensorInput(input);

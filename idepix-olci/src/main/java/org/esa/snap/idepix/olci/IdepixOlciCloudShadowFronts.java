@@ -214,14 +214,10 @@ public class IdepixOlciCloudShadowFronts {
                     for (int i = 0; i < temperature.length; i++) {
                         temperature[i] = temperatureProfileTPGTiles[i].getSampleDouble(xCurrent, yCurrent);
                     }
-//                    final float cloudHeight = computeHeightFromPressure(ctp);
-//                    final float cloudHeight = 1000.0f; // test
                     final float cloudHeight = (float) IdepixOlciUtils.getRefinedHeightFromCtp(ctp, slp, temperature);
                     if (cloudSearchHeight <= cloudHeight + 300) {
-                        float cloudBase = cloudHeight;
-//                        float cloudBase = getCloudBase(ctp, slp, temperature);
                         // cloud thickness should also be at least 300m (OD, 2012/08/02)
-                        cloudBase = (float) Math.min(cloudHeight - 300.0, cloudBase);
+                        float cloudBase = cloudHeight - 300.0f;
                         // cloud base should be at least at 300m
                         cloudBase = (float) Math.max(300.0, cloudBase);
                         if (cloudSearchHeight >= cloudBase - 300) {
@@ -233,32 +229,6 @@ public class IdepixOlciCloudShadowFronts {
         }
         return false;
     }
-
-
-    private float getCloudBase(float ctp, float slp, double[] temperature) {
-        float cb;
-
-        // computes the cloud base in metres
-        if (ctpTile == null) {
-            cb = 0.0f;
-        } else {
-            cb = (float) IdepixOlciUtils.getRefinedHeightFromCtp(ctp, slp, temperature);
-            // this does not seem to make much sense, but is expensive. todo: clarify
-//            for (int i = x - 1; i <= x + 1; i++) {
-//                for (int j = y - 1; j <= y + 1; j++) {
-//                    if (sourceRectangle.contains(i, j)) {
-//                        final float neighbourCloudBase = computeHeightFromPressure(ctpTile.getSampleFloat(i, j));
-//                        cb = Math.min(cb, neighbourCloudBase);
-//                    }
-//                }
-//            }
-        }
-        return cb;
-    }
-
-//    private float computeHeightFromPressure(float pressure) {
-//        return (float) (-8000 * Math.log(pressure / 1013.0f));
-//    }
 
     private double computeDistance(GeoPos geoPos1, GeoPos geoPos2) {
         final float lon1 = (float) geoPos1.getLon();

@@ -116,7 +116,7 @@ public class TensorflowNNCalculator {
     /**
      * Setter for NN input
      *
-     * @param nnTensorInput
+     * @param nnTensorInput - the array with NN input values
      */
     public void setNnTensorInput(float[] nnTensorInput) {
         this.nnTensorInput = nnTensorInput;
@@ -195,10 +195,9 @@ public class TensorflowNNCalculator {
 
     private void loadModel() throws Exception {
         // Load a model previously saved by tensorflow Python package
-//        modelDir = new File(getClass().getResource(modelDirPath).getFile()).getAbsolutePath();
         model = SavedModelBundle.load(modelDir, "serve");
-//        setFirstAndLastNodeNameFromBinaryProtocolBuffer(model);
-        setFirstAndLastNodeNameFromTextProtocolBuffer();
+        setFirstAndLastNodeNameFromBinaryProtocolBuffer(model);
+//        setFirstAndLastNodeNameFromTextProtocolBuffer();
     }
 
     private void computeTensorResult() {
