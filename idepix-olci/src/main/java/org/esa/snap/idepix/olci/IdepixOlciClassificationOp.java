@@ -1,6 +1,9 @@
 package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Polygon;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.seaice.SeaIceClassification;
 import org.esa.s3tbx.idepix.core.seaice.SeaIceClassifier;
@@ -79,12 +82,18 @@ public class IdepixOlciClassificationOp extends Operator {
     @SourceProduct(alias = "waterMask", optional = true)
     private Product waterMaskProduct;
 
+    @SourceProduct(alias = "o2Corr", optional = true)
+    private Product o2CorrProduct;
+
     @TargetProduct(description = "The target product.")
     Product targetProduct;
 
 
     private Band[] olciReflBands;
     private Band landWaterBand;
+
+    private Band surface13Band;
+    private Band trans13Band;
 
     private static final String OLCI_ALL_NET_NAME = "11x10x4x3x2_207.9.net";
 
@@ -100,6 +109,9 @@ public class IdepixOlciClassificationOp extends Operator {
     private SeaIceClassifier seaIceClassifier;
 
     private static final double SEA_ICE_CLIM_THRESHOLD = 10.0;
+    private GeometryFactory gf;
+    private Polygon greenlandPolygon;
+    private Polygon antarcticaPolygon;
 
 
     @Override
@@ -113,6 +125,16 @@ public class IdepixOlciClassificationOp extends Operator {
 
         if (waterMaskProduct != null && useSrtmLandWaterMask) {
             landWaterBand = waterMaskProduct.getBand("land_water_fraction");
+        }
+
+        if (o2CorrProduct != null) {
+            surface13Band = o2CorrProduct.getBand("surface13");
+            trans13Band = o2CorrProduct.getBand("trans13");
+            gf = new GeometryFactory();
+            greenlandPolygon =
+                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.GREENLAND_POLYGON_COORDS);
+            antarcticaPolygon =
+                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.GREENLAND_POLYGON_COORDS);
         }
     }
 
@@ -169,6 +191,14 @@ public class IdepixOlciClassificationOp extends Operator {
         if (landWaterBand != null) {
             waterFractionTile = getSourceTile(landWaterBand, rectangle);
         }
+
+        Tile surface13Tile = null;
+        Tile trans13Tile = null;
+        if (surface13Band != null && trans13Band != null) {
+            surface13Tile = getSourceTile(surface13Band, rectangle);
+            trans13Tile = getSourceTile(trans13Band, rectangle);
+        }
+
         final Band olciQualityFlagBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_QUALITY_FLAGS_BAND_NAME);
         final Tile olciQualityFlagTile = getSourceTile(olciQualityFlagBand, rectangle);
 
@@ -198,7 +228,8 @@ public class IdepixOlciClassificationOp extends Operator {
                     final boolean isCoastline = classifyCoastline(olciQualityFlagTile, y, x, waterFraction);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, isCoastline);
                     if (isOlciLandPixel(x, y, olciQualityFlagTile, waterFraction)) {
-                        classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile, y, x);
+                        classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
+                                         surface13Tile, trans13Tile, y, x);
                     } else {
                         classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
                                           cloudFlagTargetTile, nnTargetTile, y, x, waterFraction, isCoastline);
@@ -227,11 +258,14 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private void classifyOverLand(Tile[] olciReflectanceTiles,
-                                  Tile cloudFlagTargetTile, Tile nnTargetTile, int y, int x) {
+                                  Tile cloudFlagTargetTile, Tile nnTargetTile,
+                                  Tile surface13Tile, Tile trans13Tile,
+                                  int y, int x) {
         float[] olciReflectances = new float[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
         for (int i = 0; i < Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
             olciReflectances[i] = olciReflectanceTiles[i].getSampleFloat(x, y);
         }
+        final float olciReflectance21 = olciReflectances[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length - 1];
 
         SchillerNeuralNetWrapper nnWrapper = olciAllNeuralNet.get();
         double[] inputVector = nnWrapper.getInputVector();
@@ -248,15 +282,41 @@ public class IdepixOlciClassificationOp extends Operator {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
 
             // CB 20170406:
-            final boolean cloudSure = olciReflectances[2] > THRESH_LAND_MINBRIGHT1 &&
+            boolean cloudSure = olciReflectances[2] > THRESH_LAND_MINBRIGHT1 &&
                     nnInterpreter.isCloudSure(nnOutput);
             final boolean cloudAmbiguous = olciReflectances[2] > THRESH_LAND_MINBRIGHT2 &&
                     nnInterpreter.isCloudAmbiguous(nnOutput, true, false);
 
+            boolean isSnowIce = nnInterpreter.isSnowIce(nnOutput);
+
+            // cloud over snow from harmonisation approach:
+            // String expr = "pixel_classif_flags.IDEPIX_LAND && " +
+            //        "((Oa21_reflectance > 0.5 && surface_13 - trans_13 < 0.01) || Oa21_reflectance > 0.76)";
+            double surface13 = Double.NaN;
+            double trans13 = Double.NaN;
+            if (surface13Tile != null && trans13Tile != null) {
+                GeoPos geoPos = IdepixUtils.getGeoPos(sourceProduct.getSceneGeoCoding(), x, y);
+                final Coordinate coord = new Coordinate(geoPos.getLon(), geoPos.getLat());
+                final boolean isInsideGreenland =
+                        IdepixOlciUtils.isCoordinateInsideGeometry(coord, greenlandPolygon, gf);
+                final boolean isInsideAntarctica =
+                        IdepixOlciUtils.isCoordinateInsideGeometry(coord, antarcticaPolygon, gf);
+                if (isInsideGreenland || isInsideAntarctica) {
+                    surface13 = surface13Tile.getSampleDouble(x, y);
+                    trans13 = trans13Tile.getSampleDouble(x, y);
+                    final boolean isCloudOverSnow =
+                            (olciReflectance21 > 0.5 && surface13 - trans13 < 0.01) || olciReflectance21 > 0.76f;
+                    if (isCloudOverSnow) {
+                        cloudSure = true;
+                        isSnowIce = false;
+                    }
+                }
+            }
+
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, cloudAmbiguous);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, cloudSure);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, cloudAmbiguous || cloudSure);
-            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, nnInterpreter.isSnowIce(nnOutput));
+            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, isSnowIce);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, true);
         }
 

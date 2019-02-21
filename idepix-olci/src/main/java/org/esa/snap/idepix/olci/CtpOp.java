@@ -198,7 +198,7 @@ public class CtpOp extends BasisOp {
             o2corrParms.put("processOnlyBand13", false);
             o2corrParms.put("writeCorrectedRadiances", false);
             o2corrSourceProducts.put("l1bProduct", sourceProduct);
-            final String o2CorrOpName = "O2CorrOlci";
+            final String o2CorrOpName = "O2CorrOlci";        // todo: clarify how to attach the O2Corr module to Idepix
             o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
         }
     }

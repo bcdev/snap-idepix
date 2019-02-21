@@ -2,8 +2,8 @@ package org.esa.snap.idepix.olci;
 
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Tensor;
-import org.tensorflow.framework.MetaGraphDef;
-import org.tensorflow.framework.NodeDef;
+//import org.tensorflow.framework.MetaGraphDef;
+//import org.tensorflow.framework.NodeDef;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -123,30 +123,32 @@ public class TensorflowNNCalculator {
     }
 
     // package local for testing
-    void setFirstAndLastNodeNameFromBinaryProtocolBuffer(SavedModelBundle model) throws Exception {
-        // extract names of first and last relevant nodes (i.e. name contains 'dense') from binary 'saved_model.pb'
-        // rather than text file '*.pbtxt'. So we do not need the pbtxt in case it is very large.
-        MetaGraphDef m = MetaGraphDef.parseFrom(model.metaGraphDef());
-        final List<NodeDef> nodeList = m.getGraphDef().getNodeList();
-        int index = 0;
-        for (int i = 1; i < nodeList.size(); i++) {
-            NodeDef nodeDefPrev = nodeList.get(i-1);
-            NodeDef nodeDef = nodeList.get(i);
-            if (!nodeDefPrev.getName().contains("dense") && nodeDef.getName().contains("dense")) {
-                firstNodeName = nodeDef.getName();
-                index = i;
-                break;
-            }
-        }
-
-        for (int i = index; i < nodeList.size()-1; i++) {
-            NodeDef nodeDef = nodeList.get(i);
-            NodeDef nodeDefNext = nodeList.get(i+1);
-            if (nodeDef.getName().contains("dense") && !nodeDefNext.getName().contains("dense")) {
-                lastNodeName = nodeDef.getName();
-            }
-        }
-    }
+    // todo: actually this code requires protobuf-java in a version >= 3, which leads to conflicts in SNAP and at Calvalus
+    // for the moment, read from the .pbtxt file with the method below
+//    void setFirstAndLastNodeNameFromBinaryProtocolBuffer(SavedModelBundle model) throws Exception {
+//        // extract names of first and last relevant nodes (i.e. name contains 'dense') from binary 'saved_model.pb'
+//        // rather than text file '*.pbtxt'. So we do not need the pbtxt in case it is very large.
+//        MetaGraphDef m = MetaGraphDef.parseFrom(model.metaGraphDef());
+//        final List<NodeDef> nodeList = m.getGraphDef().getNodeList();
+//        int index = 0;
+//        for (int i = 1; i < nodeList.size(); i++) {
+//            NodeDef nodeDefPrev = nodeList.get(i-1);
+//            NodeDef nodeDef = nodeList.get(i);
+//            if (!nodeDefPrev.getName().contains("dense") && nodeDef.getName().contains("dense")) {
+//                firstNodeName = nodeDef.getName();
+//                index = i;
+//                break;
+//            }
+//        }
+//
+//        for (int i = index; i < nodeList.size()-1; i++) {
+//            NodeDef nodeDef = nodeList.get(i);
+//            NodeDef nodeDefNext = nodeList.get(i+1);
+//            if (nodeDef.getName().contains("dense") && !nodeDefNext.getName().contains("dense")) {
+//                lastNodeName = nodeDef.getName();
+//            }
+//        }
+//    }
 
     // package local for testing
     void setFirstAndLastNodeNameFromTextProtocolBuffer() throws IOException {
@@ -163,7 +165,8 @@ public class TensorflowNNCalculator {
         	[ node.op.name for node in model.inputs]
         	[ node.op.name for node in model.outputs]*/
 
-        File[] files = new File(modelDir).listFiles((dir, name) -> name.equalsIgnoreCase("saved_model.pbtxt"));
+        final String pbtxtFileName = (new File(modelDir)).getName() + ".pbtxt";
+        File[] files = new File(modelDir).listFiles((dir, name) -> name.equalsIgnoreCase(pbtxtFileName));
 
         boolean setFirstNodeName = false;
 
@@ -196,8 +199,8 @@ public class TensorflowNNCalculator {
     private void loadModel() throws Exception {
         // Load a model previously saved by tensorflow Python package
         model = SavedModelBundle.load(modelDir, "serve");
-        setFirstAndLastNodeNameFromBinaryProtocolBuffer(model);
-//        setFirstAndLastNodeNameFromTextProtocolBuffer();
+//        setFirstAndLastNodeNameFromBinaryProtocolBuffer(model);
+        setFirstAndLastNodeNameFromTextProtocolBuffer();
     }
 
     private void computeTensorResult() {

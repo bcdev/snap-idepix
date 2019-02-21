@@ -1,5 +1,7 @@
 package org.esa.snap.idepix.olci;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Polygon;
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.operators.BasisOp;
@@ -117,10 +119,13 @@ public class IdepixOlciOp extends BasisOp {
 
     private Product rad2reflProduct;
     private Product ctpProduct;
+    private Product o2CorrProduct;
     private Product waterMaskProduct;
 
     private Map<String, Product> classificationInputProducts;
     private Map<String, Object> classificationParameters;
+
+    private boolean considerCloudsOverSnow;
 
     @Override
     public void initialize() throws OperatorException {
@@ -128,6 +133,18 @@ public class IdepixOlciOp extends BasisOp {
         final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.OLCI);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
+        }
+
+        final Geometry productGeometry = IdepixOlciUtils.computeProductGeometry(sourceProduct);
+        if (productGeometry != null) {
+            final Polygon greenlandPolygon =
+                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.GREENLAND_POLYGON_COORDS);
+            final Polygon antarcticaPolygon =
+                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ANTARCTICA_POLYGON_COORDS);
+            considerCloudsOverSnow =
+                    productGeometry.intersects(greenlandPolygon) || productGeometry.intersects(antarcticaPolygon);
+        } else {
+            throw new OperatorException("Product geometry is null - cannot proceed.");
         }
 
         outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
@@ -196,8 +213,23 @@ public class IdepixOlciOp extends BasisOp {
     private void preProcess() {
         rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
 
+        if (considerCloudsOverSnow) {
+            Map<String, Product> o2corrSourceProducts = new HashMap<>();
+            o2corrSourceProducts.put("l1bProduct", sourceProduct);
+            final String o2CorrOpName = "O2CorrOlci";
+            Map<String, Object> o2corrParms = new HashMap<>();
+            o2corrParms.put("writeCorrectedRadiances", false);
+            if (computeCloudShadow) {
+                o2corrParms.put("processOnlyBand13", false);
+            }
+            o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
+        }
+
         if (computeCloudShadow) {
-            ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct, alternativeNNDirPath, outputCtp);
+            ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
+                                                                        o2CorrProduct,
+                                                                        alternativeNNDirPath,
+                                                                        outputCtp);
         }
 
         if (useSrtmLandWaterMask) {
@@ -227,6 +259,9 @@ public class IdepixOlciOp extends BasisOp {
         classificationInputProducts.put("l1b", sourceProduct);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
         classificationInputProducts.put("waterMask", waterMaskProduct);
+        if (considerCloudsOverSnow) {
+            classificationInputProducts.put("o2Corr", o2CorrProduct);
+        }
     }
 
     private void postProcess(Product olciIdepixProduct) {

@@ -100,7 +100,8 @@ public class TensorflowNNCalculatorTest {
         try {
             String modelDir = new File(getClass().getResource("nn_training_20190131_I7x24x24x24xO1").getFile()).getAbsolutePath();
             TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none", input);
-            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
+//            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
+            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
             String firstNodeNameFromBinary = nntest.getFirstNodeName();
             String lastNodeNameFromBinary = nntest.getLastNodeName();
             nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
@@ -113,7 +114,8 @@ public class TensorflowNNCalculatorTest {
 
             modelDir = new File(getClass().getResource("nn_training_20190131_I7x30x30x30xO1").getFile()).getAbsolutePath();
             nntest = new TensorflowNNCalculator(modelDir, "none", input);
-            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
+//            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
+            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
             firstNodeNameFromBinary = nntest.getFirstNodeName();
             lastNodeNameFromBinary = nntest.getLastNodeName();
             nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
@@ -126,7 +128,8 @@ public class TensorflowNNCalculatorTest {
 
             modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x10xO1").getFile()).getAbsolutePath();
             nntest = new TensorflowNNCalculator(modelDir, "none", input);
-            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
+//            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
+            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
             firstNodeNameFromBinary = nntest.getFirstNodeName();
             lastNodeNameFromBinary = nntest.getLastNodeName();
             nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
@@ -139,7 +142,8 @@ public class TensorflowNNCalculatorTest {
 
             modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x64xO1").getFile()).getAbsolutePath();
             nntest = new TensorflowNNCalculator(modelDir, "none", input);
-            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
+//            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
+            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
             firstNodeNameFromBinary = nntest.getFirstNodeName();
             lastNodeNameFromBinary = nntest.getLastNodeName();
             nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();

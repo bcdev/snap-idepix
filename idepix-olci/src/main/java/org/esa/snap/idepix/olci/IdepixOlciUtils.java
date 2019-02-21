@@ -1,6 +1,8 @@
 package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 import org.esa.s3tbx.idepix.core.IdepixFlagCoding;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
@@ -13,8 +15,12 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -79,12 +85,71 @@ public class IdepixOlciUtils {
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
     }
 
-    public static Product computeCloudTopPressureProduct(Product sourceProduct, String alternativeNNDirPath, boolean outputCtp) {
+    public static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct, String alternativeNNDirPath, boolean outputCtp) {
+        Map<String, Product> ctpSourceProducts = new HashMap<>();
+        ctpSourceProducts.put("l1bProduct", sourceProduct);
+        ctpSourceProducts.put("o2CorrProduct", o2CorrProduct);
         Map<String, Object> params = new HashMap<>(2);
         params.put("alternativeNNDirPath", alternativeNNDirPath);
         params.put("outputCtp", outputCtp);
-        return GPF.createProduct("Snap.Idepix.Olci.Ctp", params, sourceProduct);
+        return GPF.createProduct(OperatorSpi.getOperatorAlias(CtpOp.class), params, ctpSourceProducts);
     }
+
+    static Geometry computeProductGeometry(Product product) {
+        try {
+            final GeneralPath[] paths = ProductUtils.createGeoBoundaryPaths(product);
+            final Polygon[] polygons = new Polygon[paths.length];
+            final GeometryFactory factory = new GeometryFactory();
+            for (int i = 0; i < paths.length; i++) {
+                polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
+            }
+            final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(
+                    polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
+            return peuckerSimplifier.getResultGeometry();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static Polygon createPolygonFromCoordinateArray(double[][] coordArray) {
+        final Coordinate[] coordinates = new Coordinate[coordArray.length];
+        for (int i = 0; i < coordinates.length; i++) {
+            final double[] coord = coordArray[i];
+            coordinates[i] = new Coordinate(coord[0], coord[1]);
+        }
+        final GeometryFactory factory = new GeometryFactory();
+        return factory.createPolygon(factory.createLinearRing(coordinates), null);
+    }
+
+    public static boolean isCoordinateInsideGeometry(Coordinate coord, Geometry g, GeometryFactory gf) {
+        return gf.createPoint(coord).within(g);
+    }
+
+    private static Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
+        final PathIterator pathIterator = path.getPathIterator(null);
+        ArrayList<double[]> coordList = new ArrayList<>();
+        int lastOpenIndex = 0;
+        while (!pathIterator.isDone()) {
+            final double[] coords = new double[6];
+            final int segType = pathIterator.currentSegment(coords);
+            if (segType == PathIterator.SEG_CLOSE) {
+                // we should only detect a single SEG_CLOSE
+                coordList.add(coordList.get(lastOpenIndex));
+                lastOpenIndex = coordList.size();
+            } else {
+                coordList.add(coords);
+            }
+            pathIterator.next();
+        }
+        final Coordinate[] coordinates = new Coordinate[coordList.size()];
+        for (int i1 = 0; i1 < coordinates.length; i1++) {
+            final double[] coord = coordList.get(i1);
+            coordinates[i1] = new Coordinate(coord[0], coord[1]);
+        }
+
+        return factory.createPolygon(factory.createLinearRing(coordinates), null);
+    }
+
 
     public static double getRefinedHeightFromCtp(double ctp, double slp, double[] temperatures) {
         double height = 0.0;

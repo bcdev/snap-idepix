@@ -21,7 +21,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>idepix-olci</artifactId>
-    <version>0.82-SNAPSHOT</version>
+    <version>0.83-SNAPSHOT</version>
 
     <name>Idepix OLCI</name>
     <packaging>nbm</packaging>
@@ -132,19 +132,20 @@
             <version>1.9.0-rc1</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.tensorflow</groupId>
-            <artifactId>proto</artifactId>
-            <!--<version>1.13.0-rc0</version>-->
-            <version>1.9.0-rc1</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.tensorflow</groupId>-->
+            <!--<artifactId>proto</artifactId>-->
+            <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+            <!--<version>1.9.0-rc1</version>-->
+        <!--</dependency>-->
 
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <!--<version>1.13.0-rc0</version>-->
-            <version>3.5.1</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.google.protobuf</groupId>-->
+            <!--<artifactId>protobuf-java</artifactId>-->
+            <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+            <!--<version>3.5.1</version>-->
+            <!--&lt;!&ndash;<version>2.6.1</version>&ndash;&gt;-->
+        <!--</dependency>-->
 
     </dependencies>
 
