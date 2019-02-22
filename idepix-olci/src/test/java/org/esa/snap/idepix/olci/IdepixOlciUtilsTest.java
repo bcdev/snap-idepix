@@ -93,23 +93,32 @@ public class IdepixOlciUtilsTest {
     }
 
     @Test
-    public void testCoordinateIsInsideGreenland() {
-        final Polygon greenlandPolygon =
-                IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.GREENLAND_POLYGON_COORDS);
+    public void testCoordinateIsInsideArctica() {
+        final Polygon arcticPolygon =
+                IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ARCTIC_POLYGON_COORDS);
         final GeometryFactory gf = new GeometryFactory();
 
-        final Coordinate insideCoord = new Coordinate(-45.0, 75.0);
-        assertTrue(IdepixOlciUtils.isCoordinateInsideGeometry(insideCoord, greenlandPolygon, gf));
+        Coordinate insideCoord = new Coordinate(-45.0, 75.0);
+        assertTrue(IdepixOlciUtils.isCoordinateInsideGeometry(insideCoord, arcticPolygon, gf));
 
-        final Coordinate outsideCoord = new Coordinate(10.0, 20.0);
-        assertFalse(IdepixOlciUtils.isCoordinateInsideGeometry(outsideCoord, greenlandPolygon, gf));
+        insideCoord = new Coordinate(-90.0, 89.95);
+        assertTrue(IdepixOlciUtils.isCoordinateInsideGeometry(insideCoord, arcticPolygon, gf));
+
+        insideCoord = new Coordinate(90.0, 89.95);
+        assertTrue(IdepixOlciUtils.isCoordinateInsideGeometry(insideCoord, arcticPolygon, gf));
+
+        Coordinate outsideCoord = new Coordinate(10.0, 20.0);
+        assertFalse(IdepixOlciUtils.isCoordinateInsideGeometry(outsideCoord, arcticPolygon, gf));
+
+        outsideCoord = new Coordinate(10.0, 89.9999);
+        assertFalse(IdepixOlciUtils.isCoordinateInsideGeometry(outsideCoord, arcticPolygon, gf));
 
         // close to polygon boundary:
-        final Coordinate justInsideCoord = new Coordinate(-57.0, 73.0);
-        assertTrue(IdepixOlciUtils.isCoordinateInsideGeometry(justInsideCoord, greenlandPolygon, gf));
+        final Coordinate justInsideCoord = new Coordinate(-57.0, 71.0);
+        assertTrue(IdepixOlciUtils.isCoordinateInsideGeometry(justInsideCoord, arcticPolygon, gf));
 
-        final Coordinate justOutsideCoord = new Coordinate(-58.0, 73.0);
-        assertFalse(IdepixOlciUtils.isCoordinateInsideGeometry(justOutsideCoord, greenlandPolygon, gf));
+        final Coordinate justOutsideCoord = new Coordinate(-58.0, 71.0);
+        assertFalse(IdepixOlciUtils.isCoordinateInsideGeometry(justOutsideCoord, arcticPolygon, gf));
     }
 
     @Test
@@ -118,10 +127,19 @@ public class IdepixOlciUtilsTest {
                 IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ANTARCTICA_POLYGON_COORDS);
         final GeometryFactory gf = new GeometryFactory();
 
-        final Coordinate insideCoord = new Coordinate(-45.0, -75.0);
+        Coordinate insideCoord = new Coordinate(-45.0, -75.0);
         assertTrue(IdepixOlciUtils.isCoordinateInsideGeometry(insideCoord, antarcticaPolygon, gf));
 
-        final Coordinate outsideCoord = new Coordinate(10.0, 20.0);
+        insideCoord = new Coordinate(-45.0, -89.9);
+        assertTrue(IdepixOlciUtils.isCoordinateInsideGeometry(insideCoord, antarcticaPolygon, gf));
+
+        insideCoord = new Coordinate(45.0, -89.9);
+        assertTrue(IdepixOlciUtils.isCoordinateInsideGeometry(insideCoord, antarcticaPolygon, gf));
+
+        Coordinate outsideCoord = new Coordinate(10.0, 20.0);
+        assertFalse(IdepixOlciUtils.isCoordinateInsideGeometry(outsideCoord, antarcticaPolygon, gf));
+
+        outsideCoord = new Coordinate(10.0, -89.999);
         assertFalse(IdepixOlciUtils.isCoordinateInsideGeometry(outsideCoord, antarcticaPolygon, gf));
 
         // close to polygon boundary:
@@ -133,9 +151,9 @@ public class IdepixOlciUtilsTest {
     }
 
     @Test
-    public void testGeometryIntersectsWithGreenland() {
-        final Polygon greenlandPolygon =
-                IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.GREENLAND_POLYGON_COORDS);
+    public void testGeometryIntersectsWithArctic() {
+        final Polygon arcticPolygon =
+                IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ARCTIC_POLYGON_COORDS);
 
         double[][] outsideGeomCoordArray = new double[][]{
                 {-43.25, 55.75},
@@ -145,7 +163,7 @@ public class IdepixOlciUtilsTest {
                 {-43.25, 55.75}
         };
         final Polygon outsidePolygon = IdepixOlciUtils.createPolygonFromCoordinateArray(outsideGeomCoordArray);
-        assertFalse(outsidePolygon.intersects(greenlandPolygon));
+        assertFalse(outsidePolygon.intersects(arcticPolygon));
 
         double[][] insideGeomCoordArray = new double[][]{
                 {-40.25, 75.75},
@@ -155,7 +173,7 @@ public class IdepixOlciUtilsTest {
                 {-40.25, 75.75}
         };
         final Polygon insidePolygon = IdepixOlciUtils.createPolygonFromCoordinateArray(insideGeomCoordArray);
-        assertTrue(insidePolygon.intersects(greenlandPolygon));
+        assertTrue(insidePolygon.intersects(arcticPolygon));
 
         double[][] overlappingGeomCoordArray = new double[][]{
                 {-40.25, 75.75},
@@ -165,7 +183,7 @@ public class IdepixOlciUtilsTest {
                 {-40.25, 75.75}
         };
         final Polygon overlappingPolygon = IdepixOlciUtils.createPolygonFromCoordinateArray(overlappingGeomCoordArray);
-        assertTrue(overlappingPolygon.intersects(greenlandPolygon));
+        assertTrue(overlappingPolygon.intersects(arcticPolygon));
     }
 
     @Test

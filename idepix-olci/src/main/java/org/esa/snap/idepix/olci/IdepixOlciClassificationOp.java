@@ -110,7 +110,7 @@ public class IdepixOlciClassificationOp extends Operator {
 
     private static final double SEA_ICE_CLIM_THRESHOLD = 10.0;
     private GeometryFactory gf;
-    private Polygon greenlandPolygon;
+    private Polygon arcticPolygon;
     private Polygon antarcticaPolygon;
 
 
@@ -128,13 +128,13 @@ public class IdepixOlciClassificationOp extends Operator {
         }
 
         if (o2CorrProduct != null) {
-            surface13Band = o2CorrProduct.getBand("surface13");
-            trans13Band = o2CorrProduct.getBand("trans13");
+            surface13Band = o2CorrProduct.getBand("surface_13");
+            trans13Band = o2CorrProduct.getBand("trans_13");
             gf = new GeometryFactory();
-            greenlandPolygon =
-                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.GREENLAND_POLYGON_COORDS);
+            arcticPolygon =
+                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ARCTIC_POLYGON_COORDS);
             antarcticaPolygon =
-                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.GREENLAND_POLYGON_COORDS);
+                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ANTARCTICA_POLYGON_COORDS);
         }
     }
 
@@ -218,6 +218,9 @@ public class IdepixOlciClassificationOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
+                    if (x == 4200 && y == 300) {
+                        System.out.println("x = " + x);
+                    }
                     int waterFraction = -1;
                     if (waterFractionTile != null) {
                         waterFraction = waterFractionTile.getSampleInt(x, y);
@@ -282,10 +285,11 @@ public class IdepixOlciClassificationOp extends Operator {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
 
             // CB 20170406:
-            boolean cloudSure = olciReflectances[2] > THRESH_LAND_MINBRIGHT1 &&
+            boolean isCloudSure = olciReflectances[2] > THRESH_LAND_MINBRIGHT1 &&
                     nnInterpreter.isCloudSure(nnOutput);
-            final boolean cloudAmbiguous = olciReflectances[2] > THRESH_LAND_MINBRIGHT2 &&
+            boolean isCloudAmbiguous = olciReflectances[2] > THRESH_LAND_MINBRIGHT2 &&
                     nnInterpreter.isCloudAmbiguous(nnOutput, true, false);
+            boolean isCloud = isCloudAmbiguous || isCloudSure;
 
             boolean isSnowIce = nnInterpreter.isSnowIce(nnOutput);
 
@@ -298,7 +302,7 @@ public class IdepixOlciClassificationOp extends Operator {
                 GeoPos geoPos = IdepixUtils.getGeoPos(sourceProduct.getSceneGeoCoding(), x, y);
                 final Coordinate coord = new Coordinate(geoPos.getLon(), geoPos.getLat());
                 final boolean isInsideGreenland =
-                        IdepixOlciUtils.isCoordinateInsideGeometry(coord, greenlandPolygon, gf);
+                        IdepixOlciUtils.isCoordinateInsideGeometry(coord, arcticPolygon, gf);
                 final boolean isInsideAntarctica =
                         IdepixOlciUtils.isCoordinateInsideGeometry(coord, antarcticaPolygon, gf);
                 if (isInsideGreenland || isInsideAntarctica) {
@@ -307,15 +311,24 @@ public class IdepixOlciClassificationOp extends Operator {
                     final boolean isCloudOverSnow =
                             (olciReflectance21 > 0.5 && surface13 - trans13 < 0.01) || olciReflectance21 > 0.76f;
                     if (isCloudOverSnow) {
-                        cloudSure = true;
+                        isCloudSure = true;
+                        isCloud = true;
                         isSnowIce = false;
+                    } else {
+                        if (isCloud) {
+                            // this overrules the NN which likely classified snow/ice as cloud
+                            isSnowIce = true;
+                            isCloud = false;
+                            isCloudSure = false;
+                            isCloudAmbiguous = false;
+                        }
                     }
                 }
             }
 
-            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, cloudAmbiguous);
-            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, cloudSure);
-            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, cloudAmbiguous || cloudSure);
+            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, isCloudAmbiguous);
+            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, isCloudSure);
+            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, isCloud);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, isSnowIce);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, true);
         }

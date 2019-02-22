@@ -137,12 +137,13 @@ public class IdepixOlciOp extends BasisOp {
 
         final Geometry productGeometry = IdepixOlciUtils.computeProductGeometry(sourceProduct);
         if (productGeometry != null) {
-            final Polygon greenlandPolygon =
-                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.GREENLAND_POLYGON_COORDS);
+            final Polygon arcticPolygon =
+                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ARCTIC_POLYGON_COORDS);
             final Polygon antarcticaPolygon =
                     IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ANTARCTICA_POLYGON_COORDS);
             considerCloudsOverSnow =
-                    productGeometry.intersects(greenlandPolygon) || productGeometry.intersects(antarcticaPolygon);
+                    productGeometry.intersects(arcticPolygon) || productGeometry.intersects(antarcticaPolygon);
+            arcticPolygon.contains(productGeometry);
         } else {
             throw new OperatorException("Product geometry is null - cannot proceed.");
         }

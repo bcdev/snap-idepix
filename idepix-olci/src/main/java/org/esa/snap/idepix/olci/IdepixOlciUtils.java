@@ -87,7 +87,7 @@ public class IdepixOlciUtils {
 
     public static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct, String alternativeNNDirPath, boolean outputCtp) {
         Map<String, Product> ctpSourceProducts = new HashMap<>();
-        ctpSourceProducts.put("l1bProduct", sourceProduct);
+        ctpSourceProducts.put("sourceProduct", sourceProduct);
         ctpSourceProducts.put("o2CorrProduct", o2CorrProduct);
         Map<String, Object> params = new HashMap<>(2);
         params.put("alternativeNNDirPath", alternativeNNDirPath);
