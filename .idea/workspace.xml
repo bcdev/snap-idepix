@@ -2,11 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e6664cee-518c-47a6-944c-0dd1b4d2ac3c" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/idepix-olci/pom.xml" afterPath="$PROJECT_DIR$/idepix-olci/pom.xml" />
       <change beforePath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java" afterPath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java" />
-      <change beforePath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java" afterPath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java" />
+      <change beforePath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciCloudShadowFronts.java" afterPath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciCloudShadowFronts.java" />
       <change beforePath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java" afterPath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java" />
+      <change beforePath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java" afterPath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java" />
       <change beforePath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciUtils.java" afterPath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciUtils.java" />
+      <change beforePath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/TensorflowNNCalculator.java" afterPath="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/TensorflowNNCalculator.java" />
+      <change beforePath="$PROJECT_DIR$/idepix-olci/src/main/resources/layer.xml" afterPath="$PROJECT_DIR$/idepix-olci/src/main/resources/layer.xml" />
       <change beforePath="$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/IdepixOlciUtilsTest.java" afterPath="$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/IdepixOlciUtilsTest.java" />
     </list>
     <ignored path="$PROJECT_DIR$/s2tbx-cache/target/" />
@@ -77,9 +81,11 @@
       <file leaf-file-name="TensorflowNNCalculator.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/TensorflowNNCalculator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="9" column="26" lean-forward="false" selection-start-line="9" selection-start-column="26" selection-end-line="9" selection-end-column="26" />
-              <folding />
+            <state relative-caret-position="262">
+              <caret line="132" column="54" lean-forward="false" selection-start-line="132" selection-start-column="54" selection-end-line="132" selection-end-column="54" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -87,8 +93,8 @@
       <file leaf-file-name="IdepixOlciUtils.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciUtils.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="248">
-              <caret line="91" column="54" lean-forward="false" selection-start-line="91" selection-start-column="54" selection-end-line="91" selection-end-column="54" />
+            <state relative-caret-position="315">
+              <caret line="159" column="16" lean-forward="false" selection-start-line="159" selection-start-column="16" selection-end-line="159" selection-end-column="16" />
               <folding />
             </state>
           </provider>
@@ -97,8 +103,8 @@
       <file leaf-file-name="layer.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/resources/layer.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
-              <caret line="13" column="70" lean-forward="false" selection-start-line="13" selection-start-column="70" selection-end-line="13" selection-end-column="70" />
+            <state relative-caret-position="187">
+              <caret line="11" column="73" lean-forward="false" selection-start-line="11" selection-start-column="73" selection-end-line="11" selection-end-column="73" />
               <folding />
             </state>
           </provider>
@@ -107,9 +113,11 @@
       <file leaf-file-name="IdepixOlciUtilsTest.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/IdepixOlciUtilsTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="350">
-              <caret line="139" column="101" lean-forward="false" selection-start-line="139" selection-start-column="101" selection-end-line="139" selection-end-column="101" />
-              <folding />
+            <state relative-caret-position="260">
+              <caret line="225" column="42" lean-forward="false" selection-start-line="225" selection-start-column="42" selection-end-line="225" selection-end-column="42" />
+              <folding>
+                <marker date="1551187621921" expanded="true" signature="9704:10130" ph="{...}" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -117,8 +125,8 @@
       <file leaf-file-name="IdepixOlciClassificationOp.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="273">
-              <caret line="131" column="60" lean-forward="false" selection-start-line="131" selection-start-column="60" selection-end-line="131" selection-end-column="60" />
+            <state relative-caret-position="259">
+              <caret line="227" column="77" lean-forward="false" selection-start-line="227" selection-start-column="77" selection-end-line="227" selection-end-column="77" />
               <folding />
             </state>
           </provider>
@@ -127,7 +135,7 @@
       <file leaf-file-name="IdepixOlciConstants.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="114">
+            <state relative-caret-position="425">
               <caret line="25" column="59" lean-forward="false" selection-start-line="25" selection-start-column="35" selection-end-line="25" selection-end-column="59" />
               <folding />
             </state>
@@ -137,8 +145,8 @@
       <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="391">
-              <caret line="23" column="19" lean-forward="false" selection-start-line="23" selection-start-column="19" selection-end-line="23" selection-end-column="19" />
+            <state relative-caret-position="278">
+              <caret line="136" column="19" lean-forward="false" selection-start-line="136" selection-start-column="19" selection-end-line="136" selection-end-column="19" />
               <folding />
             </state>
           </provider>
@@ -147,18 +155,18 @@
       <file leaf-file-name="TensorflowNNCalculatorTest.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/TensorflowNNCalculatorTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1428">
-              <caret line="104" column="56" lean-forward="false" selection-start-line="104" selection-start-column="56" selection-end-line="104" selection-end-column="56" />
+            <state relative-caret-position="525">
+              <caret line="145" column="55" lean-forward="false" selection-start-line="145" selection-start-column="55" selection-end-line="145" selection-end-column="55" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="IdepixOlciOp.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="IdepixOlciOp.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="385">
-              <caret line="153" column="43" lean-forward="true" selection-start-line="153" selection-start-column="43" selection-end-line="153" selection-end-column="43" />
+            <state relative-caret-position="357">
+              <caret line="39" column="23" lean-forward="false" selection-start-line="39" selection-start-column="23" selection-end-line="39" selection-end-column="23" />
               <folding />
             </state>
           </provider>
@@ -167,8 +175,8 @@
       <file leaf-file-name="IdepixOlciPostProcessOp.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-910">
-              <caret line="50" column="38" lean-forward="false" selection-start-line="50" selection-start-column="20" selection-end-line="50" selection-end-column="38" />
+            <state relative-caret-position="261">
+              <caret line="188" column="55" lean-forward="false" selection-start-line="188" selection-start-column="55" selection-end-line="188" selection-end-column="55" />
               <folding />
             </state>
           </provider>
@@ -177,8 +185,18 @@
       <file leaf-file-name="CtpOp.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="51" column="34" lean-forward="false" selection-start-line="51" selection-start-column="34" selection-end-line="51" selection-end-column="34" />
+            <state relative-caret-position="125">
+              <caret line="151" column="0" lean-forward="false" selection-start-line="151" selection-start-column="0" selection-end-line="151" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="IdepixOlciCloudShadowFronts.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciCloudShadowFronts.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="403">
+              <caret line="139" column="30" lean-forward="false" selection-start-line="139" selection-start-column="30" selection-end-line="139" selection-end-column="30" />
               <folding />
             </state>
           </provider>
@@ -195,14 +213,11 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>refl12Band</find>
-      <find>loadModel</find>
       <find>Meris.CloudTopPressureOp</find>
       <find>postProcess</find>
       <find>getCloudShadow</find>
       <find>getCloudBase</find>
       <find>computeHeightFromPressure</find>
-      <find>szaTPG</find>
       <find>sourceRectangle</find>
       <find>slpTPG</find>
       <find>slpTile</find>
@@ -222,9 +237,12 @@
       <find>o2CorrProduct</find>
       <find>IDEPIX_CLOUD_SURE</find>
       <find>PixelPos</find>
-      <find>waterFractionTile</find>
       <find>surface13Band</find>
       <find>computeCloudShadow</find>
+      <find>computeTensorResult</find>
+      <find>szaTPG</find>
+      <find>waterFractionTile</find>
+      <find>szaTile</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -253,18 +271,18 @@
         <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/NNTensorflowApplyModel.java" />
         <option value="$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/NNTensorflowApplyModelTest.java" />
         <option value="$PROJECT_DIR$/idepix-olci/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" />
-        <option value="$PROJECT_DIR$/idepix-olci/src/main/resources/layer.xml" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciUtils.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/IdepixOlciUtilsTest.java" />
         <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/pom.xml" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/resources/layer.xml" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java" />
         <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciCloudShadowFronts.java" />
         <option value="$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/TensorflowNNCalculatorTest.java" />
         <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/TensorflowNNCalculator.java" />
-        <option value="$PROJECT_DIR$/idepix-olci/pom.xml" />
-        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java" />
-        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java" />
-        <option value="$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/IdepixOlciUtilsTest.java" />
-        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java" />
-        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciUtils.java" />
-        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java" />
       </list>
     </option>
   </component>
@@ -298,11 +316,8 @@
       <select />
     </treeState>
   </component>
-  <component name="MavenRunner">
-    <option name="skipTests" value="true" />
-  </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="32" />
+    <option name="x" value="113" />
     <option name="y" value="11" />
     <option name="width" value="1726" />
     <option name="height" value="1013" />
@@ -323,8 +338,10 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
+      <pane id="Scratches" />
       <pane id="AndroidView" />
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -335,41 +352,6 @@
             <path>
               <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="meris" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
               <item name="idepix-olci" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -415,24 +397,6 @@
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
               <item name="idepix-olci" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-              <item name="nn_training_20190131_I7x30x30x30x10x2xO1" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-olci" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-              <item name="olci" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-olci" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -451,62 +415,11 @@
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="olci" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-olci" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-olci" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-              <item name="olci" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-olci" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-              <item name="olci" type="462c0819:PsiDirectoryNode" />
-              <item name="nn_training_20190131_I7x24x24x24xO1" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Maven: org.esa.s3tbx:s3tbx-rad2refl:7.0.0-SNAPSHOT" type="70bed36:NamedLibraryElementNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Maven: org.esa.s3tbx:s3tbx-rad2refl:7.0.0-SNAPSHOT" type="70bed36:NamedLibraryElementNode" />
-              <item name="s3tbx-rad2refl-7.0.0-20190213.063309-126.jar" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Maven: org.esa.s3tbx:s3tbx-rad2refl:7.0.0-SNAPSHOT" type="70bed36:NamedLibraryElementNode" />
-              <item name="s3tbx-rad2refl-7.0.0-20190213.063309-126.jar" type="462c0819:PsiDirectoryNode" />
-              <item name="rad2refl" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -546,7 +459,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JAR Application.Idepix OLCI (SNAP GUI)">
+  <component name="RunManager" selected="JUnit.IdepixOlciUtilsTest">
     <configuration name="IdepixMerisNc4WriterTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -769,7 +682,9 @@
       <workItem from="1550568578114" duration="19826000" />
       <workItem from="1550653161003" duration="16848000" />
       <workItem from="1550739696236" duration="19312000" />
-      <workItem from="1550828553231" duration="8453000" />
+      <workItem from="1550828553231" duration="9206000" />
+      <workItem from="1551084969208" duration="2336000" />
+      <workItem from="1551175316578" duration="7368000" />
     </task>
     <task id="LOCAL-00001" summary="merging cloud and mountain shadow branch to master&#10;&#10;# Conflicts:&#10;#&#9;s2tbx-muscate-reader/pom.xml&#10;#&#9;s2tbx-muscate-reader/src/main/java/org/esa/s2tbx/dataio/muscate/MuscateProductReader.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixClassificationOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixConstants.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixUtils.java">
       <created>1538658059462</created>
@@ -890,35 +805,42 @@
       <option name="project" value="LOCAL" />
       <updated>1550770764315</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Idepix OLCI: continued integration of S3 Snow approach in case of Greenland or Antarctica">
+      <created>1550846616527</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1550846616527</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="IdepixOlciUtilsTest - 2019.02.21 at 13h 27m 32s.xml">
-      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="IdepixOlciUtilsTest - 2019.02.22 at 12h 42m 17s.xml">
-      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="IdepixOlciUtilsTest - 2019.02.22 at 12h 44m 39s.xml">
-      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="IdepixOlciUtilsTest - 2019.02.22 at 12h 45m 38s.xml">
-      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="IdepixOlciUtilsTest - 2019.02.22 at 12h 45m 48s.xml">
-      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="IdepixOlciUtilsTest - 2019.02.22 at 12h 47m 20s.xml">
-      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="IdepixOlciUtilsTest - 2019.02.22 at 12h 47m 58s.xml">
-      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="IdepixOlciUtilsTest - 2019.02.22 at 12h 48m 31s.xml">
       <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
     </history-entry>
     <history-entry file="IdepixOlciUtilsTest - 2019.02.22 at 12h 51m 14s.xml">
+      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="IdepixOlciUtilsTest - 2019.02.26 at 14h 12m 32s.xml">
+      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="IdepixOlciUtilsTest - 2019.02.26 at 14h 15m 43s.xml">
+      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="IdepixOlciUtilsTest - 2019.02.26 at 14h 18m 38s.xml">
+      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="IdepixOlciUtilsTest - 2019.02.26 at 14h 20m 59s.xml">
+      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="IdepixOlciUtilsTest - 2019.02.26 at 14h 26m 15s.xml">
+      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="IdepixOlciUtilsTest - 2019.02.26 at 14h 26m 35s.xml">
+      <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="IdepixOlciUtilsTest - 2019.02.26 at 14h 27m 08s.xml">
       <configuration name="IdepixOlciUtilsTest" configurationId="JUnit" />
     </history-entry>
     <history-entry file="TensorflowNNCalculatorTest - 2019.02.21 at 15h 06m 29s.xml">
@@ -926,37 +848,37 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="193819000" />
+    <option name="totallyTimeSpent" value="204276000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="32" y="11" width="1726" height="1013" extended-state="0" />
+    <frame x="113" y="11" width="1726" height="1013" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.52680653" sideWeight="0.502015" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14765906" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.38578087" sideWeight="0.49798504" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32983682" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.52680653" sideWeight="0.502015" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14765906" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.287515" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" x="0" y="0" width="381" height="813" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20512821" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26223776" sideWeight="0.4956822" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18648018" sideWeight="0.4956822" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2545018" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.212485" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="JProfiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.46037295" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2937063" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2937063" sideWeight="0.49798504" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.287515" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" x="0" y="0" width="381" height="813" />
     </layout>
     <layout-to-restore>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1040,7 +962,8 @@
     <MESSAGE value="continued OLCI cloud shadow from CTP" />
     <MESSAGE value="completed OLCI cloud shadow from CTP" />
     <MESSAGE value="Idepix OLCI: started integration of S3 Snow approach in case of Greenland or Antarctica" />
-    <option name="LAST_COMMIT_MESSAGE" value="Idepix OLCI: started integration of S3 Snow approach in case of Greenland or Antarctica" />
+    <MESSAGE value="Idepix OLCI: continued integration of S3 Snow approach in case of Greenland or Antarctica" />
+    <option name="LAST_COMMIT_MESSAGE" value="Idepix OLCI: continued integration of S3 Snow approach in case of Greenland or Antarctica" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1059,9 +982,15 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java</url>
-          <line>221</line>
+          <line>220</line>
           <properties />
           <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciUtils.java</url>
+          <line>142</line>
+          <properties />
+          <option name="timeStamp" value="46" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java</url>
@@ -1072,7 +1001,7 @@
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="46" />
+      <option name="time" value="47" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1142,7 +1071,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="51">
           <caret line="3" column="34" lean-forward="false" selection-start-line="3" selection-start-column="34" selection-end-line="3" selection-end-column="34" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1246,14 +1174,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciCloudShadowFronts.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3111">
-          <caret line="206" column="63" lean-forward="false" selection-start-line="206" selection-start-column="63" selection-end-line="206" selection-end-column="63" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/idepix-meris/src/main/java/org/esa/snap/idepix/meris/IdepixMerisOp.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="563">
@@ -1269,98 +1189,109 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/TensorflowNNCalculatorTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1428">
-          <caret line="104" column="56" lean-forward="false" selection-start-line="104" selection-start-column="56" selection-end-line="104" selection-end-column="56" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/TensorflowNNCalculator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="26" lean-forward="false" selection-start-line="9" selection-start-column="26" selection-end-line="9" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/resources/layer.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="13" column="70" lean-forward="false" selection-start-line="13" selection-start-column="70" selection-end-line="13" selection-end-column="70" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="23" column="19" lean-forward="false" selection-start-line="23" selection-start-column="19" selection-end-line="23" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/org/esa/s3tbx/s3tbx-rad2refl/7.0.0-SNAPSHOT/s3tbx-rad2refl-7.0.0-20190213.063309-126-sources.jar!/org/esa/s3tbx/processor/rad2refl/Rad2ReflConstants.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="188">
           <caret line="43" column="33" lean-forward="false" selection-start-line="43" selection-start-column="33" selection-end-line="43" selection-end-column="33" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/IdepixOlciUtilsTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="350">
-          <caret line="139" column="101" lean-forward="false" selection-start-line="139" selection-start-column="101" selection-end-line="139" selection-end-column="101" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="114">
+        <state relative-caret-position="425">
           <caret line="25" column="59" lean-forward="false" selection-start-line="25" selection-start-column="35" selection-end-line="25" selection-end-column="59" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="131" column="60" lean-forward="false" selection-start-line="131" selection-start-column="60" selection-end-line="131" selection-end-column="60" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-910">
-          <caret line="50" column="38" lean-forward="false" selection-start-line="50" selection-start-column="20" selection-end-line="50" selection-end-column="38" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciUtils.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="91" column="54" lean-forward="false" selection-start-line="91" selection-start-column="54" selection-end-line="91" selection-end-column="54" />
+        <state relative-caret-position="315">
+          <caret line="159" column="16" lean-forward="false" selection-start-line="159" selection-start-column="16" selection-end-line="159" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="261">
+          <caret line="188" column="55" lean-forward="false" selection-start-line="188" selection-start-column="55" selection-end-line="188" selection-end-column="55" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="259">
+          <caret line="227" column="77" lean-forward="false" selection-start-line="227" selection-start-column="77" selection-end-line="227" selection-end-column="77" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/resources/layer.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="73" lean-forward="false" selection-start-line="11" selection-start-column="73" selection-end-line="11" selection-end-column="73" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="51" column="34" lean-forward="false" selection-start-line="51" selection-start-column="34" selection-end-line="51" selection-end-column="34" />
+        <state relative-caret-position="125">
+          <caret line="151" column="0" lean-forward="false" selection-start-line="151" selection-start-column="0" selection-end-line="151" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="385">
-          <caret line="153" column="43" lean-forward="true" selection-start-line="153" selection-start-column="43" selection-end-line="153" selection-end-column="43" />
+        <state relative-caret-position="357">
+          <caret line="39" column="23" lean-forward="false" selection-start-line="39" selection-start-column="23" selection-end-line="39" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/IdepixOlciUtilsTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="260">
+          <caret line="225" column="42" lean-forward="false" selection-start-line="225" selection-start-column="42" selection-end-line="225" selection-end-column="42" />
+          <folding>
+            <marker date="1551187621921" expanded="true" signature="9704:10130" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="278">
+          <caret line="136" column="19" lean-forward="false" selection-start-line="136" selection-start-column="19" selection-end-line="136" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/TensorflowNNCalculator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="262">
+          <caret line="132" column="54" lean-forward="false" selection-start-line="132" selection-start-column="54" selection-end-line="132" selection-end-column="54" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/TensorflowNNCalculatorTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="145" column="55" lean-forward="false" selection-start-line="145" selection-start-column="55" selection-end-line="145" selection-end-column="55" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciCloudShadowFronts.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="403">
+          <caret line="139" column="30" lean-forward="false" selection-start-line="139" selection-start-column="30" selection-end-line="139" selection-end-column="30" />
           <folding />
         </state>
       </provider>

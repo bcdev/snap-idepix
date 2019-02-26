@@ -2,14 +2,14 @@ package org.esa.snap.idepix.olci;
 
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Tensor;
-//import org.tensorflow.framework.MetaGraphDef;
-//import org.tensorflow.framework.NodeDef;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
+
+//import org.tensorflow.framework.MetaGraphDef;
+//import org.tensorflow.framework.NodeDef;
 
 /**
  * Applies a tensorflow model and provides corresponding NN output for given input.
@@ -32,12 +32,11 @@ public class TensorflowNNCalculator {
     /**
      * Provides NN result for given input, applying a neural net which is based on a tensorflow model .
      *
-     * @param modelDir - the path of the directory containing the Tensorflow model
-     *                     (e.g. 'nn_training_20190131_I7x24x24x24xO1')
+     * @param modelDir        - the path of the directory containing the Tensorflow model
+     *                        (e.g. 'nn_training_20190131_I7x24x24x24xO1')
      * @param transformMethod - the input transformation method. Supported values are 'sqrt' and 'log',
      *                        otherwise this is ignored.
-     * @param nnTensorInput - float[] input vector (i.e. OLCI L1 values per pixel)
-     *
+     * @param nnTensorInput   - float[] input vector (i.e. OLCI L1 values per pixel)
      */
     TensorflowNNCalculator(String modelDir, String transformMethod, float[] nnTensorInput) {
         this.transformMethod = transformMethod;
@@ -55,7 +54,6 @@ public class TensorflowNNCalculator {
      * Converts an element of NNResult to a CTP value. Taken from DM: CTP_for_OLCI_cloud_shadow.docx, 06 Feb 2019.
      *
      * @param nnResult - a raw result value from the NNResult float[][] array
-     *
      * @return - the value converted to CTP
      */
     static float convertNNResultToCtp(float nnResult) {
@@ -123,7 +121,7 @@ public class TensorflowNNCalculator {
     }
 
     // package local for testing
-    // todo: actually this code requires protobuf-java in a version >= 3, which leads to conflicts in SNAP and at Calvalus
+    // todo: actually this code requires protobuf-java in a version >= 3, which may lead to conflicts in SNAP and at Calvalus
     // for the moment, read from the .pbtxt file with the method below
 //    void setFirstAndLastNodeNameFromBinaryProtocolBuffer(SavedModelBundle model) throws Exception {
 //        // extract names of first and last relevant nodes (i.e. name contains 'dense') from binary 'saved_model.pb'
@@ -204,12 +202,14 @@ public class TensorflowNNCalculator {
     }
 
     private void computeTensorResult() {
-
-        if(transformMethod.equals("sqrt")){
-            for(int i=0; i <nnTensorInput.length; i++) nnTensorInput[i] = (float) Math.sqrt(nnTensorInput[i]);
-        }
-        else if(transformMethod.equals("log")){
-            for(int i=0; i <nnTensorInput.length; i++) nnTensorInput[i] = (float) Math.log10(nnTensorInput[i]);
+        if (transformMethod.equals("sqrt")) {
+            for (int i = 0; i < nnTensorInput.length; i++) {
+                nnTensorInput[i] = (float) Math.sqrt(nnTensorInput[i]);
+            }
+        } else if (transformMethod.equals("log")) {
+            for (int i = 0; i < nnTensorInput.length; i++) {
+                nnTensorInput[i] = (float) Math.log10(nnTensorInput[i]);
+            }
         }
 
         float[][] inputData = new float[1][nnTensorInput.length];

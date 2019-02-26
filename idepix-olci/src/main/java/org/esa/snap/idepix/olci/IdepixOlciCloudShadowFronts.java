@@ -31,11 +31,10 @@ import java.awt.*;
 /**
  * Specific cloud shadow algorithm for OLCI based on fronts, using cloud top height computation based on
  * OLCI per-pixel atmospheric temperature profile TPG taken from L1b product.
- *
+ * <p>
  * Other functionalities are the same as in {@link org.esa.s3tbx.idepix.core.CloudShadowFronts}.
  *
  * @author olafd
- *
  */
 public class IdepixOlciCloudShadowFronts {
 
@@ -45,16 +44,24 @@ public class IdepixOlciCloudShadowFronts {
 
     private final Tile szaTile;
     private final Tile saaTile;
+    private final Tile ozaTile;
+    private final Tile oaaTile;
     private final Tile ctpTile;
     private final Tile slpTile;
     private final Tile[] temperatureProfileTPGTiles;
     private final Tile altTile;
 
-    IdepixOlciCloudShadowFronts(GeoCoding geoCoding, Tile szaTile, Tile saaTile, Tile ctpTile, Tile slpTile,
-                                Tile[] temperatureProfileTPGTiles, Tile altTile) {
+    IdepixOlciCloudShadowFronts(GeoCoding geoCoding,
+                                Tile szaTile, Tile saaTile,
+                                Tile ozaTile, Tile oaaTile,
+                                Tile ctpTile, Tile slpTile,
+                                Tile[] temperatureProfileTPGTiles,
+                                Tile altTile) {
         this.geoCoding = geoCoding;
         this.szaTile = szaTile;
         this.saaTile = saaTile;
+        this.ozaTile = ozaTile;
+        this.oaaTile = oaaTile;
         this.ctpTile = ctpTile;
         this.slpTile = slpTile;
         this.temperatureProfileTPGTiles = temperatureProfileTPGTiles;
@@ -104,7 +111,7 @@ public class IdepixOlciCloudShadowFronts {
 
     ///////////////////// end of public ///////////////////////////////////////////////////////
 
-    private static  boolean isPixelSurrounded(int x, int y, Tile sourceFlagTile, int pixelFlag) {
+    private static boolean isPixelSurrounded(int x, int y, Tile sourceFlagTile, int pixelFlag) {
         // check if pixel is surrounded by other pixels flagged as 'pixelFlag'
         int surroundingPixelCount = 0;
         Rectangle rectangle = sourceFlagTile.getRectangle();
@@ -126,15 +133,15 @@ public class IdepixOlciCloudShadowFronts {
         }
     }
 
-    private boolean isCloudFree(Tile sourceFlagTile, int x, int y){
+    private boolean isCloudFree(Tile sourceFlagTile, int x, int y) {
         return !sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
     }
 
-    private boolean isSurroundedByCloud(Tile sourceFlagTile, int x, int y){
+    private boolean isSurroundedByCloud(Tile sourceFlagTile, int x, int y) {
         return isPixelSurrounded(x, y, sourceFlagTile, IdepixConstants.IDEPIX_CLOUD);
     }
 
-    private void setCloudShadow(Tile targetTile, int x, int y){
+    private void setCloudShadow(Tile targetTile, int x, int y) {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, true);
     }
 
@@ -171,6 +178,8 @@ public class IdepixOlciCloudShadowFronts {
         final Rectangle sourceRectangle = sourceFlagTile.getRectangle();
         final double sza = szaTile.getSampleDouble(x, y);
         final double saa = saaTile.getSampleDouble(x, y);
+        final double oza = ozaTile.getSampleDouble(x, y);
+        final double oaa = oaaTile.getSampleDouble(x, y);
         double alt = 0;
         if (altTile != null) {
             alt = altTile.getSampleDouble(x, y);
@@ -178,7 +187,9 @@ public class IdepixOlciCloudShadowFronts {
                 alt = 0; // do NOT use bathimetry
             }
         }
-        final double saaRad = Math.toRadians(saa);
+//        final double saaRad = Math.toRadians(saa);
+        final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa);
+        final double saaRadApparent = Math.toRadians(saaApparent);
 
         PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
 
@@ -187,7 +198,7 @@ public class IdepixOlciCloudShadowFronts {
         final double cloudHeightMax = 12_000;
         final double cloudDistanceMax = cloudHeightMax / tanSza;
 
-        GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, saaRad + Math.PI);
+        GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, saaRadApparent + Math.PI);
         PixelPos endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
         if (endPixPoint.x == -1 || endPixPoint.y == -1) {
             return false;

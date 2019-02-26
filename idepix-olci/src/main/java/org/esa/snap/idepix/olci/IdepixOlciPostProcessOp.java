@@ -64,6 +64,8 @@ public class IdepixOlciPostProcessOp extends Operator {
     private Band ctpBand;
     private TiePointGrid szaTPG;
     private TiePointGrid saaTPG;
+    private TiePointGrid ozaTPG;
+    private TiePointGrid oaaTPG;
     private TiePointGrid slpTPG;
     private TiePointGrid[] temperatureProfileTPGs;
     private Band altBand;
@@ -85,6 +87,8 @@ public class IdepixOlciPostProcessOp extends Operator {
 
         szaTPG = l1bProduct.getTiePointGrid("SZA");
         saaTPG = l1bProduct.getTiePointGrid("SAA");
+        ozaTPG = l1bProduct.getTiePointGrid("OZA");
+        oaaTPG = l1bProduct.getTiePointGrid("OAA");
         slpTPG = l1bProduct.getTiePointGrid("sea_level_pressure");
         altBand = l1bProduct.getBand("altitude");
 
@@ -171,6 +175,8 @@ public class IdepixOlciPostProcessOp extends Operator {
         if (computeCloudShadow && ctpProduct != null) {
             Tile szaTile = getSourceTile(szaTPG, srcRectangle);
             Tile saaTile = getSourceTile(saaTPG, srcRectangle);
+            Tile ozaTile = getSourceTile(ozaTPG, srcRectangle);
+            Tile oaaTile = getSourceTile(oaaTPG, srcRectangle);
             Tile ctpTile = getSourceTile(ctpBand, srcRectangle);
             Tile slpTile = getSourceTile(slpTPG, srcRectangle);
             Tile altTile = getSourceTile(altBand, targetRectangle);
@@ -180,10 +186,12 @@ public class IdepixOlciPostProcessOp extends Operator {
                 temperatureProfileTPGTiles[i] = getSourceTile(temperatureProfileTPGs[i], srcRectangle);
             }
 
-            // todo: make CloudShadowFronts in Idepix core more flexible to handle alternative CTH computations!
-            // Then switch back to that.
+            // CloudShadowFronts was modified for OLCI:
+            // - more advanced CTH computation
+            // - use of 'apparent sun azimuth angle
             IdepixOlciCloudShadowFronts cloudShadowFronts = new IdepixOlciCloudShadowFronts(geoCoding,
                                                                                             szaTile, saaTile,
+                                                                                            ozaTile, oaaTile,
                                                                                             ctpTile, slpTile,
                                                                                             temperatureProfileTPGTiles,
                                                                                             altTile);

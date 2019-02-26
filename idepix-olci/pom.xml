@@ -21,7 +21,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>idepix-olci</artifactId>
-    <version>0.83-SNAPSHOT</version>
+    <version>0.84-SNAPSHOT</version>
 
     <name>Idepix OLCI</name>
     <packaging>nbm</packaging>

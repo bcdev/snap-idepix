@@ -1,7 +1,10 @@
 package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 import org.esa.s3tbx.idepix.core.IdepixFlagCoding;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
@@ -14,6 +17,7 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.math.MathUtils;
 
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
@@ -95,6 +99,20 @@ public class IdepixOlciUtils {
         return GPF.createProduct(OperatorSpi.getOperatorAlias(CtpOp.class), params, ctpSourceProducts);
     }
 
+    public static Polygon createPolygonFromCoordinateArray(double[][] coordArray) {
+        final Coordinate[] coordinates = new Coordinate[coordArray.length];
+        for (int i = 0; i < coordinates.length; i++) {
+            final double[] coord = coordArray[i];
+            coordinates[i] = new Coordinate(coord[0], coord[1]);
+        }
+        final GeometryFactory factory = new GeometryFactory();
+        return factory.createPolygon(factory.createLinearRing(coordinates), null);
+    }
+
+    public static boolean isCoordinateInsideGeometry(Coordinate coord, Geometry g, GeometryFactory gf) {
+        return gf.createPoint(coord).within(g);
+    }
+
     static Geometry computeProductGeometry(Product product) {
         try {
             final GeneralPath[] paths = ProductUtils.createGeoBoundaryPaths(product);
@@ -111,19 +129,39 @@ public class IdepixOlciUtils {
         }
     }
 
-    public static Polygon createPolygonFromCoordinateArray(double[][] coordArray) {
-        final Coordinate[] coordinates = new Coordinate[coordArray.length];
-        for (int i = 0; i < coordinates.length; i++) {
-            final double[] coord = coordArray[i];
-            coordinates[i] = new Coordinate(coord[0], coord[1]);
+    /**
+     * Computes apparent sun azimuth angle to be used e.g. for cloud shadow computation.
+     * Algorithm proposed by DM, 20190226.
+     *
+     * @param sza - sun zenith (deg)
+     * @param saa - sun azimuth (deg)
+     * @param oza - view zenith (deg)
+     * @param oaa - view azimuth (deg)
+     * @return the apparent saa (deg)
+     */
+    static double computeApparentSaa(double sza, double saa, double oza, double oaa) {
+        final double szaRad = sza * MathUtils.DTOR;
+        final double ozaRad = oza * MathUtils.DTOR;
+
+        double deltaPhi;
+        if (oaa < 0.0) {
+            deltaPhi = 360.0 - Math.abs(oaa) - saa;
+        } else {
+            deltaPhi = saa - oaa;
         }
-        final GeometryFactory factory = new GeometryFactory();
-        return factory.createPolygon(factory.createLinearRing(coordinates), null);
+        final double deltaPhiRad = deltaPhi * MathUtils.DTOR;
+        final double numerator = Math.tan(szaRad) - Math.tan(ozaRad) * Math.cos(deltaPhiRad);
+        final double denominator = Math.sqrt(Math.tan(ozaRad) * Math.tan(ozaRad) + Math.tan(szaRad) * Math.tan(szaRad) -
+                                                     2.0 * Math.tan(szaRad) * Math.tan(ozaRad) * Math.cos(deltaPhiRad));
+
+        final double delta = Math.acos(numerator / denominator);
+        if (oaa < 0.0) {
+            return saa - delta * MathUtils.RTOD;
+        } else {
+            return saa + delta * MathUtils.RTOD;
+        }
     }
 
-    public static boolean isCoordinateInsideGeometry(Coordinate coord, Geometry g, GeometryFactory gf) {
-        return gf.createPoint(coord).within(g);
-    }
 
     private static Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
         final PathIterator pathIterator = path.getPathIterator(null);

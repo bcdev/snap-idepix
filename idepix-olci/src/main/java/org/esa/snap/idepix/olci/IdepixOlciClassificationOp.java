@@ -218,9 +218,6 @@ public class IdepixOlciClassificationOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    if (x == 4200 && y == 300) {
-                        System.out.println("x = " + x);
-                    }
                     int waterFraction = -1;
                     if (waterFractionTile != null) {
                         waterFraction = waterFractionTile.getSampleInt(x, y);
@@ -235,7 +232,7 @@ public class IdepixOlciClassificationOp extends Operator {
                                          surface13Tile, trans13Tile, y, x);
                     } else {
                         classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
-                                          cloudFlagTargetTile, nnTargetTile, y, x, waterFraction, isCoastline);
+                                          cloudFlagTargetTile, nnTargetTile, y, x, isCoastline);
                     }
                 }
             }
@@ -251,9 +248,8 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private void classifyOverWater(Tile olciQualityFlagTile, Tile[] olciReflectanceTiles,
-                                   Tile cloudFlagTargetTile, Tile nnTargetTile, int y, int x, int waterFraction,
-                                   boolean isCoastline) {
-        classifyCloud(x, y, olciQualityFlagTile, olciReflectanceTiles, cloudFlagTargetTile, waterFraction, isCoastline);
+                                   Tile cloudFlagTargetTile, Tile nnTargetTile, int y, int x, boolean isCoastline) {
+        classifyCloud(x, y, olciQualityFlagTile, olciReflectanceTiles, cloudFlagTargetTile, isCoastline);
         if (outputSchillerNNValue) {
             final double[] nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles);
             nnTargetTile.setSample(x, y, nnOutput[0]);
@@ -296,8 +292,8 @@ public class IdepixOlciClassificationOp extends Operator {
             // cloud over snow from harmonisation approach:
             // String expr = "pixel_classif_flags.IDEPIX_LAND && " +
             //        "((Oa21_reflectance > 0.5 && surface_13 - trans_13 < 0.01) || Oa21_reflectance > 0.76)";
-            double surface13 = Double.NaN;
-            double trans13 = Double.NaN;
+            double surface13;
+            double trans13;
             if (surface13Tile != null && trans13Tile != null) {
                 GeoPos geoPos = IdepixUtils.getGeoPos(sourceProduct.getSceneGeoCoding(), x, y);
                 final Coordinate coord = new Coordinate(geoPos.getLon(), geoPos.getLat());
@@ -358,8 +354,7 @@ public class IdepixOlciClassificationOp extends Operator {
         }
     }
 
-    private void classifyCloud(int x, int y, Tile l1FlagsTile, Tile[] rhoToaTiles, Tile targetTile,
-                               int waterFraction, boolean isCoastline) {
+    private void classifyCloud(int x, int y, Tile l1FlagsTile, Tile[] rhoToaTiles, Tile targetTile, boolean isCoastline) {
 
         boolean checkForSeaIce = false;
         if (!isCoastline) {
