@@ -14,6 +14,8 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.internal.OperatorExecutor;
+import org.esa.snap.core.gpf.internal.OperatorImage;
+import org.esa.snap.core.gpf.internal.OperatorImageTileStack;
 import org.esa.snap.core.image.VectorDataMaskOpImage;
 import org.esa.snap.core.util.SystemUtils;
 import org.opengis.referencing.operation.MathTransform;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observer;
 import java.util.logging.Logger;
 
 @OperatorMetadata(alias = "CCICloudShadow",
@@ -85,20 +88,17 @@ public class S2IdepixCloudShadowOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         final TileCache tileCache = JAI.getDefaultInstance().getTileCache();
-        if (tileCache instanceof SunTileCache) {
-            ((SunTileCache) tileCache).enableDiagnostics();
-            ((SunTileCache) tileCache).addObserver((o, arg) -> {
-                if (arg instanceof CachedTile && ((CachedTile) arg).getAction() == 0) {
-                    CachedTile tile = (CachedTile) arg;
-                    RenderedImage owner = tile.getOwner();
-                    if (owner instanceof VectorDataMaskOpImage || owner instanceof PointOpImage) {
-                        int tileX = Math.round((float)tile.getTile().getMinX() / (float) owner.getTileWidth());
-                        int tileY = Math.round((float)tile.getTile().getMinY() / (float) owner.getTileHeight());
-                        tileCache.remove(owner, tileX, tileY);
-                    }
+        final Observer observer = (o, arg) -> {
+            if (arg instanceof CachedTile && ((CachedTile) arg).getAction() == 0) {
+                CachedTile tile = (CachedTile) arg;
+                RenderedImage owner = tile.getOwner();
+                if (owner instanceof VectorDataMaskOpImage || owner instanceof PointOpImage) {
+                    int tileX = Math.round((float) tile.getTile().getMinX() / (float) owner.getTileWidth());
+                    int tileY = Math.round((float) tile.getTile().getMinY() / (float) owner.getTileHeight());
+                    tileCache.remove(owner, tileX, tileY);
                 }
-            });
-        }
+            }
+        };
 
         int sourceResolution = determineSourceResolution(l1cProduct);
 
@@ -119,8 +119,15 @@ public class S2IdepixCloudShadowOp extends Operator {
 
         //trigger computation of all tiles
         logger.info("Executing Cloud Shadow Pre-Processing");
+        if (tileCache instanceof SunTileCache) {
+            ((SunTileCache) tileCache).enableDiagnostics();
+            ((SunTileCache) tileCache).addObserver(observer);
+        }
         final OperatorExecutor operatorExecutor = OperatorExecutor.create(cloudShadowPreProcessingOperator);
         operatorExecutor.execute(ProgressMonitor.NULL);
+        if (tileCache instanceof SunTileCache) {
+            ((SunTileCache) tileCache).deleteObserver(observer);
+        }
         logger.info("Executed Cloud Shadow Pre-Processing");
 
         NCloudOverLand = cloudShadowPreProcessingOperator.getNCloudOverLandPerTile();
@@ -161,7 +168,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         if (sceneGeoCoding instanceof CrsGeoCoding) {
             final MathTransform imageToMapTransform = sceneGeoCoding.getImageToMapTransform();
             if (imageToMapTransform instanceof AffineTransform) {
-                return (int)((AffineTransform) imageToMapTransform).getScaleX();
+                return (int) ((AffineTransform) imageToMapTransform).getScaleX();
             }
         }
         throw new OperatorException("Invalid product");
@@ -246,8 +253,8 @@ public class S2IdepixCloudShadowOp extends Operator {
                 boolean exclude = false;
                 List<Integer> relativeMinimum = indecesRelativMaxInArray(meanValues[j]);
                 if (relativeMinimum.contains(0)) relativeMinimum.remove(relativeMinimum.indexOf(0));
-                if (relativeMinimum.contains(meanValues[j].length-1))
-                    relativeMinimum.remove(relativeMinimum.indexOf(meanValues[j].length-1));
+                if (relativeMinimum.contains(meanValues[j].length - 1))
+                    relativeMinimum.remove(relativeMinimum.indexOf(meanValues[j].length - 1));
 
                 //smallest relative minimum is in second part of the path -> exclude
                 if (relativeMinimum.indexOf(0) > meanValues[j].length / 2.) exclude = true;
@@ -280,8 +287,8 @@ public class S2IdepixCloudShadowOp extends Operator {
         for (int j = 0; j < 3; j++) {
             List<Integer> test = indecesRelativMaxInArray(scaledTotalReflectance[j]);
             if (test.contains(0)) test.remove(test.indexOf(0));
-            if (test.contains(scaledTotalReflectance[j].length-1))
-                test.remove(test.indexOf(scaledTotalReflectance[j].length-1));
+            if (test.contains(scaledTotalReflectance[j].length - 1))
+                test.remove(test.indexOf(scaledTotalReflectance[j].length - 1));
 
             if (test.size() > 0) {
                 offset[j] = test.get(0);
