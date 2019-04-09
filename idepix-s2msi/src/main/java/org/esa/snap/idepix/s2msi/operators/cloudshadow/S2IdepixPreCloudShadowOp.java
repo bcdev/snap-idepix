@@ -128,8 +128,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         sourceBandClusterB = s2ClassifProduct.getBand(sourceBandNameClusterB);
 
         RasterDataNode sourceSunZenith = s2ClassifProduct.getBand(sourceSunZenithName);
-        // take these. They're as good as the tile dimensions from any other band and DEFINITELY more reliable than
-        // the preferred tile size of the s2ClassifProduct
         RasterDataNode sourceSunAzimuth = s2ClassifProduct.getBand(sourceSunAzimuthName);
         RasterDataNode sourceViewAzimuth = s2ClassifProduct.getBand(sourceViewAzimuthName);
         RasterDataNode sourceViewZenith = s2ClassifProduct.getBand(sourceViewZenithName);
