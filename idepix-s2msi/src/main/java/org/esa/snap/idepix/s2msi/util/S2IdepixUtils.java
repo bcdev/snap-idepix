@@ -152,7 +152,7 @@ public class S2IdepixUtils {
         int w = gaCloudProduct.getSceneRasterWidth();
         int h = gaCloudProduct.getSceneRasterHeight();
         Mask mask;
-        Random r = new Random();
+        Random r = new Random(1234567);
 
         mask = Mask.BandMathsType.create("IDEPIX_INVALID",
                                          IDEPIX_INVALID_DESCR_TEXT, w, h,
