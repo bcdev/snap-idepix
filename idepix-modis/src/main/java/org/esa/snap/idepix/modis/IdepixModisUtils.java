@@ -43,7 +43,7 @@ public class IdepixModisUtils {
         int w = classifProduct.getSceneRasterWidth();
         int h = classifProduct.getSceneRasterHeight();
         Mask mask;
-        Random r = new Random();
+        Random r = new Random(1234567);
 
         mask = Mask.BandMathsType.create("IDEPIX_MIXED_PIXEL", IdepixModisConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.IDEPIX_MIXED_PIXEL",

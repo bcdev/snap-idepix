@@ -1,7 +1,7 @@
 package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
+import com.sun.media.jai.util.SunTileCache;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -16,18 +16,21 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.internal.OperatorExecutor;
 import org.esa.snap.core.gpf.internal.OperatorImage;
 import org.esa.snap.core.gpf.internal.OperatorImageTileStack;
+import org.esa.snap.core.image.VectorDataMaskOpImage;
 import org.esa.snap.core.util.SystemUtils;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.CachedTile;
 import javax.media.jai.JAI;
+import javax.media.jai.PointOpImage;
+import javax.media.jai.TileCache;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observer;
 import java.util.logging.Logger;
 
 @OperatorMetadata(alias = "CCICloudShadow",
@@ -84,37 +87,18 @@ public class S2IdepixCloudShadowOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        JAI.getDefaultInstance().getTileCache().setTileComparator(new Comparator() {
-            @Override
-            public int compare(Object o1, Object o2) {
-                return getWeightedTimeStamp(o1) - getWeightedTimeStamp(o2);
+        final TileCache tileCache = JAI.getDefaultInstance().getTileCache();
+        final Observer observer = (o, arg) -> {
+            if (arg instanceof CachedTile && ((CachedTile) arg).getAction() == 0) {
+                CachedTile tile = (CachedTile) arg;
+                RenderedImage owner = tile.getOwner();
+                if (owner instanceof VectorDataMaskOpImage || owner instanceof PointOpImage) {
+                    int tileX = Math.round((float) tile.getTile().getMinX() / (float) owner.getTileWidth());
+                    int tileY = Math.round((float) tile.getTile().getMinY() / (float) owner.getTileHeight());
+                    tileCache.remove(owner, tileX, tileY);
+                }
             }
-
-            private int getWeightedTimeStamp(Object o) {
-                if (!(o instanceof CachedTile)) {
-                    return -1;
-                }
-                RenderedImage oOwner = ((CachedTile) o).getOwner();
-                if (oOwner instanceof OperatorImageTileStack) {
-                    Band targetBand = ((OperatorImageTileStack) oOwner).getTargetBand();
-                    if (targetBand != null && "pixel_classif_flags".equals(targetBand.getName())) {
-                        return 4<<16 + ((CachedTile)o).getTileTimeStamp();
-                    }
-                    if (targetBand != null && S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW.equals(targetBand.getName())) {
-                        return 8<<16 + ((CachedTile)o).getTileTimeStamp();
-                    }
-                }
-                if (oOwner instanceof OperatorImage) {
-                    Band targetBand = ((OperatorImage) oOwner).getTargetBand();
-                    if (targetBand != null && targetBand.getName() != null && targetBand.getName().equals("elevation")) {
-                        return 2<<16 + ((CachedTile)o).getTileTimeStamp();
-                    }
-                }
-
-                return 0<<16 + ((CachedTile)o).getTileTimeStamp();
-            }
-
-        });
+        };
 
         int sourceResolution = determineSourceResolution(l1cProduct);
 
@@ -123,8 +107,6 @@ public class S2IdepixCloudShadowOp extends Operator {
         HashMap<String, Product> preInput = new HashMap<>();
         preInput.put("s2ClassifProduct", classificationProduct);
         Map<String, Object> preParams = new HashMap<>();
-        preParams.put("computeMountainShadow", computeMountainShadow);
-        preParams.put("mode", mode);
 
         //todo: test resolution of granule. Resample necessary bands to 60m. calculate cloud shadow on 60m.
         //todo: let mountain shadow benefit from higher resolution in DEM. Adjust sun zenith according to smoothing.
@@ -136,8 +118,17 @@ public class S2IdepixCloudShadowOp extends Operator {
                 (S2IdepixPreCloudShadowOp) GPF.getDefaultInstance().createOperator(operatorAlias, preParams, preInput, null);
 
         //trigger computation of all tiles
+        logger.info("Executing Cloud Shadow Pre-Processing");
+        if (tileCache instanceof SunTileCache) {
+            ((SunTileCache) tileCache).enableDiagnostics();
+            ((SunTileCache) tileCache).addObserver(observer);
+        }
         final OperatorExecutor operatorExecutor = OperatorExecutor.create(cloudShadowPreProcessingOperator);
         operatorExecutor.execute(ProgressMonitor.NULL);
+        if (tileCache instanceof SunTileCache) {
+            ((SunTileCache) tileCache).deleteObserver(observer);
+        }
+        logger.info("Executed Cloud Shadow Pre-Processing");
 
         NCloudOverLand = cloudShadowPreProcessingOperator.getNCloudOverLandPerTile();
         NCloudOverWater = cloudShadowPreProcessingOperator.getNCloudOverWaterPerTile();
@@ -158,6 +149,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         postInput.put("s2ClassifProduct", classificationProduct);
         //put in here the input products that are required by the post-processing operator
         Map<String, Object> postParams = new HashMap<>();
+        postParams.put("computeMountainShadow", computeMountainShadow);
         postParams.put("bestOffset", bestOffset);
         postParams.put("mode", mode);
         //put in here any parameters that might be requested by the post-processing operator
@@ -176,7 +168,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         if (sceneGeoCoding instanceof CrsGeoCoding) {
             final MathTransform imageToMapTransform = sceneGeoCoding.getImageToMapTransform();
             if (imageToMapTransform instanceof AffineTransform) {
-                return (int)((AffineTransform) imageToMapTransform).getScaleX();
+                return (int) ((AffineTransform) imageToMapTransform).getScaleX();
             }
         }
         throw new OperatorException("Invalid product");
@@ -261,8 +253,8 @@ public class S2IdepixCloudShadowOp extends Operator {
                 boolean exclude = false;
                 List<Integer> relativeMinimum = indecesRelativMaxInArray(meanValues[j]);
                 if (relativeMinimum.contains(0)) relativeMinimum.remove(relativeMinimum.indexOf(0));
-                if (relativeMinimum.contains(meanValues[j].length-1))
-                    relativeMinimum.remove(relativeMinimum.indexOf(meanValues[j].length-1));
+                if (relativeMinimum.contains(meanValues[j].length - 1))
+                    relativeMinimum.remove(relativeMinimum.indexOf(meanValues[j].length - 1));
 
                 //smallest relative minimum is in second part of the path -> exclude
                 if (relativeMinimum.indexOf(0) > meanValues[j].length / 2.) exclude = true;
@@ -295,8 +287,8 @@ public class S2IdepixCloudShadowOp extends Operator {
         for (int j = 0; j < 3; j++) {
             List<Integer> test = indecesRelativMaxInArray(scaledTotalReflectance[j]);
             if (test.contains(0)) test.remove(test.indexOf(0));
-            if (test.contains(scaledTotalReflectance[j].length-1))
-                test.remove(test.indexOf(scaledTotalReflectance[j].length-1));
+            if (test.contains(scaledTotalReflectance[j].length - 1))
+                test.remove(test.indexOf(scaledTotalReflectance[j].length - 1));
 
             if (test.size() > 0) {
                 offset[j] = test.get(0);

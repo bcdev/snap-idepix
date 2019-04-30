@@ -68,6 +68,8 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
     private RasterDataNode sourceAltitude;
 
+    private boolean debug = false;
+
     private Band targetBandCloudShadow;
     private Band targetBandCloudID;
     private Band targetBandTileID;
@@ -134,10 +136,12 @@ public class S2IdepixPostCloudShadowOp extends Operator {
                 s2ClassifProduct.getSceneRasterWidth(), s2ClassifProduct.getSceneRasterHeight());
         ProductUtils.copyGeoCoding(s2ClassifProduct, targetProduct);
         targetBandCloudShadow = targetProduct.addBand(BAND_NAME_CLOUD_SHADOW, ProductData.TYPE_INT32);
-        targetBandCloudID = targetProduct.addBand(BAND_NAME_CLOUD_ID, ProductData.TYPE_INT32);
-        targetBandTileID = targetProduct.addBand(BAND_NAME_TILE_ID, ProductData.TYPE_INT8);
-        targetBandShadowID = targetProduct.addBand(BAND_NAME_SHADOW_ID, ProductData.TYPE_INT32);
-        targetBandCloudTest = targetProduct.addBand(BAND_NAME_CLOUD_TEST, ProductData.TYPE_FLOAT64);
+        if (debug) {
+            targetBandCloudID = targetProduct.addBand(BAND_NAME_CLOUD_ID, ProductData.TYPE_INT32);
+            targetBandTileID = targetProduct.addBand(BAND_NAME_TILE_ID, ProductData.TYPE_INT8);
+            targetBandShadowID = targetProduct.addBand(BAND_NAME_SHADOW_ID, ProductData.TYPE_INT32);
+            targetBandCloudTest = targetProduct.addBand(BAND_NAME_CLOUD_TEST, ProductData.TYPE_FLOAT64);
+        }
         attachFlagCoding(targetBandCloudShadow);
         setupBitmasks(targetProduct);
 
@@ -145,8 +149,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         sourceBandClusterB = s2ClassifProduct.getBand(sourceBandNameClusterB);
 
         RasterDataNode sourceSunZenith = s2ClassifProduct.getBand(sourceSunZenithName);
-        // take these. They're as good as the tile dimensions from any other band and DEFINITELY more reliable than
-        // the preferred tile size of the s2ClassifProduct
         RasterDataNode sourceSunAzimuth = s2ClassifProduct.getBand(sourceSunAzimuthName);
         sourceAltitude = s2ClassifProduct.getBand(sourceAltitudeName);
         RasterDataNode sourceViewAzimuth = s2ClassifProduct.getBand(sourceViewAzimuthName);
@@ -361,18 +363,12 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         int sourceLength = sourceRectangle.width * sourceRectangle.height;
 
         Tile targetTileCloudShadow = targetTiles.get(targetBandCloudShadow);
-        Tile targetTileCloudID = targetTiles.get(targetBandCloudID);
-        Tile targetTileTileID = targetTiles.get(targetBandTileID);
-        Tile targetTileShadowID = targetTiles.get(targetBandShadowID);
-        Tile targetTileCloudTest = targetTiles.get(targetBandCloudTest);
 
         final int[] flagArray = new int[sourceLength];
         //will be filled in SegmentationCloudClass Arrays.fill(cloudIdArray, ....);
         final int[] cloudIDArray = new int[sourceLength];
-        final int[] tileIDArray = new int[sourceLength];
         final int[] shadowIDArray = new int[sourceLength];
         final double[] cloudTestArray = new double[sourceLength];
-        Arrays.fill(tileIDArray, tileid);
 
         final float[] altitude = getSamples(sourceAltitude, sourceRectangle);
         final float[][] clusterData = {getSamples(sourceBandClusterA, sourceRectangle),
@@ -433,7 +429,9 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             //combining information. clustered shadow is analysed for continuous areas.
             // shifting the shadow is done before and a correction is included, if bestOffset > 0
             final CloudShadowFlaggerCombination cloudShadowFlagger = new CloudShadowFlaggerCombination();
-            cloudShadowFlagger.flagCloudShadowAreas(clusterData, flagArray, potentialShadowPositions, offsetAtPotentialShadow, cloudList, bestOffset, analysisMode, sourceWidth, sourceHeight, shadowIDArray, cloudShadowRelativePath);
+            cloudShadowFlagger.flagCloudShadowAreas(clusterData, flagArray, potentialShadowPositions,
+                    offsetAtPotentialShadow, cloudList, bestOffset, analysisMode, sourceWidth, sourceHeight,
+                    shadowIDArray, cloudShadowRelativePath);
 
             // shifted cloud mask in cloud gaps.
             // the sourceRectangle has to be large enough, larger than the spatial filter with 1000m radius!
@@ -447,10 +445,18 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             RecommendedCloudShadowFlagger.setRecommendedCloudShadowFlag(bestOffset, flagArray, sourceRectangle);
         }
         fillTile(flagArray, targetRectangle, sourceRectangle, targetTileCloudShadow);
-        fillTile(cloudIDArray, targetRectangle, sourceRectangle, targetTileCloudID);
-        fillTile(tileIDArray, targetRectangle, sourceRectangle, targetTileTileID);
-        fillTile(shadowIDArray, targetRectangle, sourceRectangle, targetTileShadowID);
-        fillTile(cloudTestArray, targetRectangle, sourceRectangle, targetTileCloudTest);
+        if (debug) {
+            Tile targetTileCloudID = targetTiles.get(targetBandCloudID);
+            Tile targetTileTileID = targetTiles.get(targetBandTileID);
+            Tile targetTileShadowID = targetTiles.get(targetBandShadowID);
+            Tile targetTileCloudTest = targetTiles.get(targetBandCloudTest);
+            final int[] tileIDArray = new int[sourceLength];
+            Arrays.fill(tileIDArray, tileid);
+            fillTile(cloudIDArray, targetRectangle, sourceRectangle, targetTileCloudID);
+            fillTile(tileIDArray, targetRectangle, sourceRectangle, targetTileTileID);
+            fillTile(shadowIDArray, targetRectangle, sourceRectangle, targetTileShadowID);
+            fillTile(cloudTestArray, targetRectangle, sourceRectangle, targetTileCloudTest);
+        }
     }
 
     private static class MountainShadowMaxFloatComparator implements Comparator<Float> {
