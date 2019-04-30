@@ -66,18 +66,18 @@ public class IdepixModisUtils {
         }
     }
 
-    static void validateModisWaterMaskProduct(Product sourceProduct, Product cloudMaskProduct, String cloudMaskBandName) {
-        Band cloudMaskBand = cloudMaskProduct.getBand(cloudMaskBandName);
-        if (cloudMaskBand == null) {
-            throw new OperatorException("Specified cloud mask product does not contain a band named '" +
-                                                cloudMaskBandName + "'. Please check.");
+    static void validateModisWaterMaskProduct(Product sourceProduct, Product waterMaskProduct, String waterMaskBandName) {
+        Band waterMaskBand = waterMaskProduct.getBand(waterMaskBandName);
+        if (waterMaskBand == null) {
+            throw new OperatorException("Specified water mask product does not contain a band named '" +
+                                                waterMaskBandName + "'. Please check.");
         }
-        final int cw = cloudMaskProduct.getSceneRasterWidth();
-        final int ch = cloudMaskProduct.getSceneRasterHeight();
+        final int cw = waterMaskProduct.getSceneRasterWidth();
+        final int ch = waterMaskProduct.getSceneRasterHeight();
         final int sw = sourceProduct.getSceneRasterWidth();
         final int sh = sourceProduct.getSceneRasterHeight();
         if (cw != sw || ch != sh) {
-            throw new OperatorException("Dimensions of cloud mask product differ from source product. Please check.");
+            throw new OperatorException("Dimensions of water mask product differ from source product. Please check.");
         }
     }
 

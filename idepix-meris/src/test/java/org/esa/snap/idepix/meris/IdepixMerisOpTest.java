@@ -21,9 +21,15 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.junit.Test;
 
+import java.util.Locale;
+
 import static org.junit.Assert.*;
 
 public class IdepixMerisOpTest {
+
+    static {
+        Locale.setDefault(Locale.UK);
+    }
 
     @Test
     public void testOperatorSpiIsLoaded() {

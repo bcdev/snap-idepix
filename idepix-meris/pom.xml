@@ -227,20 +227,42 @@
                 <!--</executions>-->
             <!--</plugin>-->
 
+            <!--<plugin>-->
+                <!--<artifactId>maven-surefire-plugin</artifactId>-->
+                <!--<version>2.19.1</version>-->
+                <!--<configuration>-->
+                    <!--<enableAssertions>true</enableAssertions>-->
+                    <!--&lt;!&ndash;<skip>true</skip>&ndash;&gt;-->
+                    <!--<printSummary>true</printSummary>-->
+                    <!--<useFile>false</useFile>-->
+                    <!--<argLine>-Xmx1024M -Dfile.encoding=UTF-8 -Duser.language=en -Duser.region=GB</argLine>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+
             <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
-                <configuration>
-                    <enableAssertions>true</enableAssertions>
-                    <!--<skip>true</skip>-->
-                    <printSummary>true</printSummary>
-                    <useFile>false</useFile>
-                    <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.7.1</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.0.0</version>
             </plugin>
 
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>LATEST</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <distributionManagement>
         <repository>
