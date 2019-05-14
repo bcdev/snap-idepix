@@ -1,6 +1,6 @@
 package org.esa.snap.idepix.core.util;
 
-import org.esa.s3tbx.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
