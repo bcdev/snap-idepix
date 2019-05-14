@@ -30,6 +30,7 @@
         <module>idepix-olci</module>
         <module>idepix-probav</module>
         <module>idepix-s2msi</module>
+        <module>idepix-seawifs</module>
     </modules>
 
     <dependencyManagement>
