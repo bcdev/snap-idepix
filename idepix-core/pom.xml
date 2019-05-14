@@ -3,7 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.esa.snap</groupId>
+    <parent>
+        <groupId>org.esa.snap</groupId>
+        <artifactId>snap-idepix-parent</artifactId>
+        <version>1-SNAPSHOT</version>
+    </parent>
+
     <artifactId>idepix-core</artifactId>
     <version>0.81-SNAPSHOT</version>
 
@@ -13,226 +18,27 @@
     <description>Core functionality for generic classification of pixels (cloud, snow, ice, land, water) originating from optical sensors.
     </description>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>7.0.0-SNAPSHOT</snap.version>
-        <javahelp.version>2.0.05</javahelp.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-glayer</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-jai</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-ui</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-binding</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-collocation</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-envisat-reader</artifactId>
-            <version>${snap.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-unmix</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-watermask</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
         </dependency>
-
-        <!-- todo: these dependencies to org.esa.s3tbx should be removed after sensor-specific 'algorithms'
-        have been extracted into separate plugins -->
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <version>3.14</version>
-                <extensions>true</extensions>
-                <dependencies>
-                    <dependency>
-                        <groupId>javax.help</groupId>
-                        <artifactId>javahelp</artifactId>
-                        <version>${javahelp.version}</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <licenseName>GPL 3</licenseName>
-                    <licenseFile>LICENSE.txt</licenseFile>
-                    <requiresRestart>true</requiresRestart>
-                    <!--<cluster>s3tbx</cluster>-->
-                    <cluster>s3tbx</cluster>
-                    <brandingToken>s3tbx</brandingToken>
-                    <requiresRestart>true</requiresRestart>
-                    <keystore>${project.basedir}/keystore/s3tbx.ks</keystore>
-                    <keystorealias>snap</keystorealias>
-                    <keystorepassword>snap-123</keystorepassword>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <!--<plugin>-->
-            <!--<artifactId>maven-assembly-plugin</artifactId>-->
-            <!--<configuration>-->
-            <!--<descriptors>-->
-            <!--<descriptor>src/assembly/calvalus-bundle.xml</descriptor>-->
-            <!--</descriptors>-->
-            <!--<finalName>calvalus-bundle</finalName>-->
-            <!--<attach>false</attach>-->
-            <!--</configuration>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>calvalus-bundle-assembly</id>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>single</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
-
-            <!--<plugin>-->
-            <!--<artifactId>maven-surefire-plugin</artifactId>-->
-            <!--<version>2.19.1</version>-->
-            <!--<configuration>-->
-            <!--<enableAssertions>true</enableAssertions>-->
-            <!--&lt;!&ndash;<skip>true</skip>&ndash;&gt;-->
-            <!--<printSummary>true</printSummary>-->
-            <!--<useFile>false</useFile>-->
-            <!--<argLine>-Xmx1024M -Dfile.encoding=UTF-8 -Duser.language=en -Duser.region=GB</argLine>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.7.1</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.0.0</version>
-            </plugin>
-
-        </plugins>
-    </build>
-
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>LATEST</version>
-            </plugin>
-        </plugins>
-    </reporting>
-
-    <distributionManagement>
-        <repository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-releases/</url>
-            <uniqueVersion>false</uniqueVersion>
-        </repository>
-        <snapshotRepository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Snapshot Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-snapshot/</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
 </project>
