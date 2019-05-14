@@ -2,9 +2,9 @@ package org.esa.snap.idepix.landsat8;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glayer.tools.Tools;
-import org.esa.s3tbx.idepix.core.AlgorithmSelector;
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.util.IdepixIO;
+import org.esa.snap.idepix.core.AlgorithmSelector;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.Stx;
