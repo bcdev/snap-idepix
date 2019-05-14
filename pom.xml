@@ -15,12 +15,15 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <snap.version>7.0.0-SNAPSHOT</snap.version>
+        <s3tbx.version>7.0.0-SNAPSHOT</s3tbx.version>
         <idepix.version>0.81-SNAPSHOT</idepix.version>
         <javahelp.version>2.0.05</javahelp.version>
+        <junit.version>4.12</junit.version>
     </properties>
 
     <modules>
         <module>idepix-core</module>
+        <module>idepix-avhrr</module>
         <module>idepix-landsat8</module>
         <module>idepix-meris</module>
         <module>idepix-modis</module>
@@ -86,6 +89,16 @@
                 <version>${snap.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.esa.s3tbx</groupId>
+                <artifactId>s3tbx-meris-l2auxdata</artifactId>
+                <version>${s3tbx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.s3tbx</groupId>
+                <artifactId>s3tbx-rad2refl</artifactId>
+                <version>${s3tbx.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>idepix-core</artifactId>
                 <version>${idepix.version}</version>
@@ -93,9 +106,8 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>${junit.version}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -120,6 +132,9 @@
                     <cluster>idepix</cluster>
                     <brandingToken>idepix</brandingToken>
                     <requiresRestart>true</requiresRestart>
+                    <publicPackages>
+                        <publicPackage>org.esa.snap.idepix.*</publicPackage>
+                    </publicPackages>
                 </configuration>
             </plugin>
             <plugin>
