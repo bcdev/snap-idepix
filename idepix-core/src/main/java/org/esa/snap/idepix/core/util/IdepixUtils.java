@@ -4,7 +4,6 @@ import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.util.math.MathUtils;
 
