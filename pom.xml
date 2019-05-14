@@ -15,9 +15,11 @@
 
     <modules>
         <module>idepix-core</module>
+        <module>idepix-landsat8</module>
         <module>idepix-meris</module>
         <module>idepix-modis</module>
         <module>idepix-olci</module>
         <module>idepix-s2msi</module>
     </modules>
+
 </project>   
