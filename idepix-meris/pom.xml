@@ -21,7 +21,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>idepix-meris</artifactId>
-    <version>0.81-SNAPSHOT</version>
+    <version>0.82-SNAPSHOT</version>
 
     <name>Idepix MERIS</name>
     <packaging>nbm</packaging>
@@ -187,6 +187,9 @@
                     <keystore>${project.basedir}/keystore/s3tbx.ks</keystore>
                     <keystorealias>snap</keystorealias>
                     <keystorepassword>snap-123</keystorepassword>
+                    <publicPackages>
+                        <publicPackage>org.esa.snap.idepix.meris.*</publicPackage>
+                    </publicPackages>
                 </configuration>
             </plugin>
             <plugin>
