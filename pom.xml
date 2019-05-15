@@ -28,6 +28,7 @@
         <module>idepix-meris</module>
         <module>idepix-modis</module>
         <module>idepix-olci</module>
+        <module>idepix-olcislstr</module>
         <module>idepix-probav</module>
         <module>idepix-s2msi</module>
         <module>idepix-seawifs</module>
@@ -105,6 +106,11 @@
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>idepix-core</artifactId>
+                <version>${idepix.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>idepix-olci</artifactId>
                 <version>${idepix.version}</version>
             </dependency>
             <dependency>
