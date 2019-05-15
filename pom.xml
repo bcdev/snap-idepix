@@ -32,6 +32,7 @@
         <module>idepix-s2msi</module>
         <module>idepix-seawifs</module>
         <module>idepix-spotvgt</module>
+        <module>idepix-viirs</module>
     </modules>
 
     <dependencyManagement>
