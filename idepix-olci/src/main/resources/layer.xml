@@ -34,14 +34,14 @@
                         <file name="org-esa-snap-idepix-olci-IdepixOlciOpAction.shadow">
                             <attr name="originalFile"
                                   stringvalue="Actions/Operators/org-esa-snap-idepix-olci-IdepixOlciOpAction.instance"/>
-                            <attr name="position" intvalue="1"/>
+                            <attr name="position" intvalue="25"/>
                             <attr name="displayName" stringvalue="IdePix OLCI [PLUGIN]"/>
                         </file>
 
                         <file name="org-esa-snap-idepix-olci-CtpOpAction.shadow">
                             <attr name="originalFile"
                                   stringvalue="Actions/Operators/org-esa-snap-idepix-olci-CtpOpAction.instance"/>
-                            <attr name="position" intvalue="2"/>
+                            <attr name="position" intvalue="26"/>
                             <attr name="displayName" stringvalue="IdePix OLCI CTP [PLUGIN]"/>
                         </file>
                     </folder>

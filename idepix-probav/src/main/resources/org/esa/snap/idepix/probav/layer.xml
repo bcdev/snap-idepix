@@ -11,7 +11,6 @@
                 <attr name="operatorName" stringvalue="Idepix.Probav.Vegetation"/>
                 <attr name="dialogTitle" stringvalue="IdePix ProbaV - v0.8"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
-                <!--<attr name="helpId" stringvalue="snapIdepixS2MSITool"/>-->
             </file>
         </folder>
     </folder>
@@ -24,8 +23,7 @@
                         <file name="org-esa-snap-idepix-probav-ProbaVIdepixOpAction.shadow">
                             <attr name="originalFile"
                                   stringvalue="Actions/Operators/org-esa-snap-idepix-probav-ProbaVIdepixOpAction.instance"/>
-                            <attr name="position" intvalue="11"/>
-                            <!--<attr name="displayName" stringvalue="IdePix S2 MSI [PLUGIN]"/>-->
+                            <attr name="position" intvalue="35"/>
                         </file>
                     </folder>
                 </folder>

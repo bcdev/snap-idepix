@@ -24,7 +24,7 @@
                         <file name="org-esa-snap-idepix-modis-IdepixModisOpAction.shadow">
                             <attr name="originalFile"
                                   stringvalue="Actions/Operators/org-esa-snap-idepix-modis-IdepixModisOpAction.instance"/>
-                            <attr name="position" intvalue="1"/>
+                            <attr name="position" intvalue="20"/>
                             <attr name="displayName" stringvalue="Idepix MODIS PLUGIN"/>
                         </file>
                     </folder>

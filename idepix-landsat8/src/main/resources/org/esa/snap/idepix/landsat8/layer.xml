@@ -24,7 +24,7 @@
                         <file name="org-esa-snap-idepix-landsat8-Landsat8IdepixOpAction.shadow">
                             <attr name="originalFile"
                                   stringvalue="Actions/Operators/org-esa-snap-idepix-landsat8-Landsat8IdepixOpAction.instance"/>
-                            <attr name="position" intvalue="11"/>
+                            <attr name="position" intvalue="10"/>
                             <!--<attr name="displayName" stringvalue="IdePix S2 MSI [PLUGIN]"/>-->
                         </file>
                     </folder>

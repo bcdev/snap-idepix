@@ -24,7 +24,7 @@
                         <file name="org-esa-snap-idepix-avhrr-AVHRRIdepixOpAction.shadow">
                             <attr name="originalFile"
                                   stringvalue="Actions/Operators/org-esa-snap-idepix-avhrr-AVHRRIdepixOpAction.instance"/>
-                            <attr name="position" intvalue="11"/>
+                            <attr name="position" intvalue="5"/>
                             <!--<attr name="displayName" stringvalue="IdePix S2 MSI [PLUGIN]"/>-->
                         </file>
                     </folder>
