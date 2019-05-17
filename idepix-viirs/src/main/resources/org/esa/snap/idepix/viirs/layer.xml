@@ -8,7 +8,7 @@
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="IdePix Viirs [PLUGIN]"/>
-                <attr name="operatorName" stringvalue="Idepix.Spot.Vegetation"/>
+                <attr name="operatorName" stringvalue="Idepix.SuomiNpp.Viirs"/>
                 <attr name="dialogTitle" stringvalue="IdePix Viirs - v0.8"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
             </file>
