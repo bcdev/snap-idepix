@@ -24,10 +24,10 @@
             <tocitem text="Pre-Processing">
                 <tocitem text="Masking">
                     <tocitem text="IdePix Classification of Pixels">
-                        <tocitem text="Idepix Classification of Pixels (SeaWiFS Plugin)" target="seawifsTool">
-                            <tocitem text="SeaWiFS Processor Description" target="seawifsProcessorDesc"/>
-                            <tocitem text="SeaWiFS Algorithm Specification" target="seawifsAlgorithmSpec"/>
-                            <tocitem text="SeaWiFS Command Line Processing" target="seawifsCommandLine"/>
+                        <tocitem text="Idepix Classification of Pixels (OrbView-2 SeaWiFS Plugin)" target="seawifsTool">
+                            <tocitem text="OrbView-2 SeaWiFS Processor Description" target="seawifsProcessorDesc"/>
+                            <tocitem text="OrbView-2 SeaWiFS Algorithm Specification" target="seawifsAlgorithmSpec"/>
+                            <tocitem text="OrbView-2 SeaWiFS Command Line Processing" target="seawifsCommandLine"/>
                         </tocitem>
                     </tocitem>
                 </tocitem>
