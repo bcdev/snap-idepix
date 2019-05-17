@@ -26,11 +26,13 @@
         <tocitem text="Optical">
             <tocitem text="Pre-Processing">
                 <tocitem text="Masking">
-                    <tocitem text="Idepix Classification of Pixels (MERIS Plugin)"
-                             target="snapIdepixMerisTool">
-                        <tocitem text="MERIS Processor Description" target="snapIdepixMerisProcessorDescription"/>
-                        <tocitem text="MERIS Algorithm Specification" target="snapIdepixMerisAlgorithmSpecification"/>
-                        <tocitem text="MERIS Command Line Processing" target="snapIdepixMerisCommandLine"/>
+                    <tocitem text="IdePix Classification of Pixels">
+                        <tocitem text="Idepix Classification of Pixels (MERIS Plugin)" target="snapIdepixMerisTool">
+                            <tocitem text="MERIS Processor Description" target="snapIdepixMerisProcessorDescription"/>
+                            <tocitem text="MERIS Algorithm Specification"
+                                     target="snapIdepixMerisAlgorithmSpecification"/>
+                            <tocitem text="MERIS Command Line Processing" target="snapIdepixMerisCommandLine"/>
+                        </tocitem>
                     </tocitem>
                 </tocitem>
             </tocitem>
