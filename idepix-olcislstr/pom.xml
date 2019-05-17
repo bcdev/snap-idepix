@@ -22,7 +22,7 @@
             <artifactId>ceres-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.bc.ceres</groupId>
+            <groupId>org.esa.snap</groupId>
             <artifactId>ceres-binding</artifactId>
         </dependency>
         <dependency>
