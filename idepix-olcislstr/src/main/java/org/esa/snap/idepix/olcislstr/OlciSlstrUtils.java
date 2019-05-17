@@ -1,6 +1,6 @@
 package org.esa.snap.idepix.olcislstr;
 
-import org.esa.s3tbx.idepix.core.IdepixFlagCoding;
+import org.esa.snap.idepix.core.IdepixFlagCoding;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;

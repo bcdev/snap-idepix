@@ -1,9 +1,9 @@
 package org.esa.snap.idepix.olcislstr;
 
-import org.esa.s3tbx.idepix.core.AlgorithmSelector;
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.util.IdepixIO;
-import org.esa.s3tbx.idepix.core.operators.BasisOp;
+import org.esa.snap.idepix.core.AlgorithmSelector;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.IdepixIO;
+import org.esa.snap.idepix.core.operators.BasisOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
