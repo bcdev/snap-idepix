@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>idepix-probav</artifactId>
+    <version>0.81-SNAPSHOT</version>
     <packaging>nbm</packaging>
 
     <name>Idepix ProbaV</name>

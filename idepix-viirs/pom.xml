@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>idepix-viirs</artifactId>
+    <version>0.81-SNAPSHOT</version>
     <packaging>nbm</packaging>
 
     <name>Idepix Viirs</name>
