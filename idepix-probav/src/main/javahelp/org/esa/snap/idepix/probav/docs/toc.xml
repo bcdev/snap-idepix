@@ -24,10 +24,10 @@
             <tocitem text="Pre-Processing">
                 <tocitem text="Masking">
                     <tocitem text="IdePix Classification of Pixels">
-                        <tocitem text="Idepix Classification of Pixels (Proba V Plugin)" target="probavTool">
-                            <tocitem text="Proba V Processor Description" target="probavProcessorDesc"/>
-                            <tocitem text="Proba V Algorithm Specification" target="probavAlgorithmSpec"/>
-                            <tocitem text="Proba V Command Line Processing" target="probavCommandLine"/>
+                        <tocitem text="Idepix Classification of Pixels (Proba-V Vegetation Plugin)" target="probavTool">
+                            <tocitem text="Proba-V Vegetation Processor Description" target="probavProcessorDesc"/>
+                            <tocitem text="Proba-V Vegetation Algorithm Specification" target="probavAlgorithmSpec"/>
+                            <tocitem text="Proba-V Vegetation Command Line Processing" target="probavCommandLine"/>
                         </tocitem>
                     </tocitem>
                 </tocitem>
