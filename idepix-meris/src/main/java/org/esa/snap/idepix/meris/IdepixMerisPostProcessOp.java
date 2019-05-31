@@ -1,9 +1,6 @@
 package org.esa.snap.idepix.meris;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.core.CloudShadowFronts;
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -15,6 +12,10 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
+
+import org.esa.snap.idepix.core.CloudShadowFronts;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.IdepixIO;
 
 import java.awt.*;
 

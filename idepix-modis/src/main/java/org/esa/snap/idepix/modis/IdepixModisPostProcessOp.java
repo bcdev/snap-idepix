@@ -1,8 +1,6 @@
 package org.esa.snap.idepix.modis;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.operators.BasisOp;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -13,6 +11,9 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
+
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.BasisOp;
 
 import java.awt.*;
 

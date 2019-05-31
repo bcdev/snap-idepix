@@ -17,14 +17,17 @@
 package org.esa.snap.idepix.olci;
 
 
-import org.esa.s3tbx.idepix.core.CloudShadowFronts;
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.util.Bresenham;
+//import org.esa.s3tbx.idepix.core.CloudShadowFronts;
+//import org.esa.s3tbx.idepix.core.IdepixConstants;
+//import org.esa.s3tbx.idepix.core.util.Bresenham;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.core.CloudShadowFronts;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.Bresenham;
 
 import java.awt.*;
 
@@ -32,7 +35,7 @@ import java.awt.*;
  * Specific cloud shadow algorithm for OLCI based on fronts, using cloud top height computation based on
  * OLCI per-pixel atmospheric temperature profile TPG taken from L1b product.
  * <p>
- * Other functionalities are the same as in {@link org.esa.s3tbx.idepix.core.CloudShadowFronts}.
+ * Other functionalities are the same as in {@link org.esa.snap.idepix.core.CloudShadowFronts}.
  *
  * @author olafd
  */

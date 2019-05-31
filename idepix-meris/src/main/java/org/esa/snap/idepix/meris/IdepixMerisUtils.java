@@ -1,6 +1,5 @@
 package org.esa.snap.idepix.meris;
 
-import org.esa.s3tbx.idepix.core.IdepixFlagCoding;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
@@ -11,6 +10,8 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
+
+import org.esa.snap.idepix.core.IdepixFlagCoding;
 
 import java.util.HashMap;
 import java.util.Map;

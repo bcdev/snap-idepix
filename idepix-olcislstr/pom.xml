@@ -44,6 +44,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-olci</artifactId>
+            <version>0.86-SNAPSHOT</version>
         </dependency>
     </dependencies>
     

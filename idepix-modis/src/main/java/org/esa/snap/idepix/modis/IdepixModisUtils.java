@@ -1,9 +1,9 @@
 package org.esa.snap.idepix.modis;
 
-import org.esa.s3tbx.idepix.core.IdepixFlagCoding;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.BitSetter;
+import org.esa.snap.idepix.core.IdepixFlagCoding;
 
 import java.util.Random;
 

@@ -9,7 +9,7 @@
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="IdePix OLCI [PLUGIN]"/>
                 <attr name="operatorName" stringvalue="Snap.Idepix.Olci"/>
-                <attr name="dialogTitle" stringvalue="IdePix OLCI - v0.84"/>
+                <attr name="dialogTitle" stringvalue="IdePix OLCI - v0.86"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixOlciTool"/>
             </file>
@@ -19,7 +19,7 @@
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="IdePix OLCI CTP [PLUGIN]"/>
                 <attr name="operatorName" stringvalue="Snap.Idepix.Olci.Ctp"/>
-                <attr name="dialogTitle" stringvalue="IdePix OLCI CTP - v0.84"/>
+                <attr name="dialogTitle" stringvalue="IdePix OLCI CTP - v0.86"/>
                 <attr name="targetProductNameSuffix" stringvalue="_ctp"/>
                 <attr name="helpId" stringvalue="snapIdepixOlciTool"/>
             </file>

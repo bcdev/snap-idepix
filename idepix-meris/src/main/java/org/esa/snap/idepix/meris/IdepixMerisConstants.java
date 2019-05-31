@@ -1,6 +1,6 @@
 package org.esa.snap.idepix.meris;
 
-import org.esa.s3tbx.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.IdepixConstants;
 
 /**
  * Constants for Idepix MERIS algorithm

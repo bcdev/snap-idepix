@@ -1,9 +1,5 @@
 package org.esa.snap.idepix.modis;
 
-import org.esa.s3tbx.idepix.core.AlgorithmSelector;
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.operators.BasisOp;
-import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
@@ -14,6 +10,11 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
+
+import org.esa.snap.idepix.core.AlgorithmSelector;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.BasisOp;
+import org.esa.snap.idepix.core.util.IdepixIO;
 
 import java.util.HashMap;
 import java.util.Map;

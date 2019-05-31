@@ -19,9 +19,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.esa.snap</groupId>
     <artifactId>idepix-olci</artifactId>
-    <version>0.85-SNAPSHOT</version>
+    <version>0.86-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.esa.snap</groupId>
+        <artifactId>snap-idepix-parent</artifactId>
+        <version>1-SNAPSHOT</version>
+    </parent>
 
     <name>Idepix OLCI</name>
     <packaging>nbm</packaging>
@@ -91,10 +96,10 @@
         </dependency>
 
         <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-idepix</artifactId>
-            <version>${snap.version}</version>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>idepix-core</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-rad2refl</artifactId>

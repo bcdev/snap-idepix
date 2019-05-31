@@ -1,10 +1,6 @@
 package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.core.AlgorithmSelector;
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.operators.BasisOp;
-import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -19,6 +15,11 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
+
+import org.esa.snap.idepix.core.AlgorithmSelector;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.BasisOp;
+import org.esa.snap.idepix.core.util.IdepixIO;
 
 import java.awt.*;
 import java.io.File;

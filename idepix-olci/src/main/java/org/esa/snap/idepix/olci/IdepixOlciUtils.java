@@ -6,7 +6,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
-import org.esa.s3tbx.idepix.core.IdepixFlagCoding;
+//import org.esa.s3tbx.idepix.core.IdepixFlagCoding;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
@@ -18,6 +18,7 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.core.IdepixFlagCoding;
 
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;

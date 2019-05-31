@@ -108,11 +108,11 @@
                 <artifactId>idepix-core</artifactId>
                 <version>${idepix.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.esa.snap</groupId>
-                <artifactId>idepix-olci</artifactId>
-                <version>${idepix.version}</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>org.esa.snap</groupId>-->
+                <!--<artifactId>idepix-olci</artifactId>-->
+                <!--<version>${idepix.version}</version>-->
+            <!--</dependency>-->
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>

@@ -19,9 +19,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.esa.snap</groupId>
     <artifactId>idepix-meris</artifactId>
-    <version>0.82-SNAPSHOT</version>
+    <version>0.83-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.esa.snap</groupId>
+        <artifactId>snap-idepix-parent</artifactId>
+        <version>1-SNAPSHOT</version>
+    </parent>
 
     <name>Idepix MERIS</name>
     <packaging>nbm</packaging>
@@ -37,69 +42,59 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-binding</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-jai</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-metadata</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-glayer</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-runtime</artifactId>
-            <version>${snap.version}</version>
+            <artifactId>ceres-jai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-binding</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
-            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-collocation</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-envisat-reader</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-csv-dataio</artifactId>
-            <version>${snap.version}</version>
+            <artifactId>snap-unmix</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-raster</artifactId>
-            <version>${snap.version}</version>
+            <artifactId>snap-watermask</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-idepix</artifactId>
-            <version>${snap.version}</version>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>idepix-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
 		
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-rad2refl</artifactId>
-            <version>${snap.version}</version>
         </dependency>
 
         <dependency>
@@ -108,11 +103,6 @@
             <version>${snap.version}</version>
         </dependency>
 		
-		<!--<dependency>-->
-            <!--<groupId>org.esa.s3tbx</groupId>-->
-            <!--<artifactId>s3tbx-meris-brr</artifactId>-->
-            <!--<version>${snap.version}</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-meris-sdr</artifactId>
@@ -129,11 +119,11 @@
             <version>${snap.version}</version>
         </dependency>
         
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>junit</groupId>-->
+            <!--<artifactId>junit</artifactId>-->
+            <!--<version>4.12</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.mockito</groupId>
@@ -257,62 +247,62 @@
         </plugins>
     </build>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>LATEST</version>
-            </plugin>
-        </plugins>
-    </reporting>
+    <!--<reporting>-->
+        <!--<plugins>-->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-surefire-report-plugin</artifactId>-->
+                <!--<version>LATEST</version>-->
+            <!--</plugin>-->
+        <!--</plugins>-->
+    <!--</reporting>-->
 
-    <distributionManagement>
-        <repository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Repository for SNAP</name>
-            <url>http://nexus.senbox.net/nexus/content/repositories/releases/</url>
-            <uniqueVersion>false</uniqueVersion>
-        </repository>
-        <snapshotRepository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Snapshot Repository for SNAP</name>
-            <url>http://nexus.senbox.net/nexus/content/repositories/snapshots/</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
+    <!--<distributionManagement>-->
+        <!--<repository>-->
+            <!--<id>snap-repo-public</id>-->
+            <!--<name>Public Maven Repository for SNAP</name>-->
+            <!--<url>http://nexus.senbox.net/nexus/content/repositories/releases/</url>-->
+            <!--<uniqueVersion>false</uniqueVersion>-->
+        <!--</repository>-->
+        <!--<snapshotRepository>-->
+            <!--<id>snap-repo-public</id>-->
+            <!--<name>Public Maven Snapshot Repository for SNAP</name>-->
+            <!--<url>http://nexus.senbox.net/nexus/content/repositories/snapshots/</url>-->
+            <!--<uniqueVersion>false</uniqueVersion>-->
+        <!--</snapshotRepository>-->
+    <!--</distributionManagement>-->
 
-    <repositories>
-        <repository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Repository for SNAP</name>
-            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
-    </repositories>
+    <!--<repositories>-->
+        <!--<repository>-->
+            <!--<id>snap-repo-public</id>-->
+            <!--<name>Public Maven Repository for SNAP</name>-->
+            <!--<url>http://nexus.senbox.net/nexus/content/repositories/public/</url>-->
+            <!--<releases>-->
+                <!--<enabled>true</enabled>-->
+                <!--<checksumPolicy>warn</checksumPolicy>-->
+            <!--</releases>-->
+            <!--<snapshots>-->
+                <!--<enabled>true</enabled>-->
+                <!--<checksumPolicy>warn</checksumPolicy>-->
+            <!--</snapshots>-->
+        <!--</repository>-->
+    <!--</repositories>-->
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Repository for SNAP</name>
-            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
+    <!--<pluginRepositories>-->
+        <!--<pluginRepository>-->
+            <!--<id>snap-repo-public</id>-->
+            <!--<name>Public Maven Repository for SNAP</name>-->
+            <!--<url>http://nexus.senbox.net/nexus/content/repositories/public/</url>-->
+            <!--<releases>-->
+                <!--<enabled>true</enabled>-->
+                <!--<checksumPolicy>warn</checksumPolicy>-->
+            <!--</releases>-->
+            <!--<snapshots>-->
+                <!--<enabled>true</enabled>-->
+                <!--<checksumPolicy>warn</checksumPolicy>-->
+            <!--</snapshots>-->
+        <!--</pluginRepository>-->
+    <!--</pluginRepositories>-->
 
 
 </project>

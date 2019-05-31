@@ -1,12 +1,6 @@
 package org.esa.snap.idepix.meris;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.seaice.SeaIceClassification;
-import org.esa.s3tbx.idepix.core.seaice.SeaIceClassifier;
-import org.esa.s3tbx.idepix.core.util.IdepixIO;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
-import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.s3tbx.meris.l2auxdata.L2AuxData;
 import org.esa.s3tbx.meris.l2auxdata.L2AuxDataException;
 import org.esa.s3tbx.meris.l2auxdata.L2AuxDataProvider;
@@ -25,6 +19,13 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
+
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.seaice.SeaIceClassification;
+import org.esa.snap.idepix.core.seaice.SeaIceClassifier;
+import org.esa.snap.idepix.core.util.IdepixIO;
+import org.esa.snap.idepix.core.util.IdepixUtils;
+import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 
 import java.awt.*;
 import java.io.IOException;

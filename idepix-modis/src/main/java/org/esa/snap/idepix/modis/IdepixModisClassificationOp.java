@@ -1,7 +1,5 @@
 package org.esa.snap.idepix.modis;
 
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -9,6 +7,9 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.pointop.*;
+
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 
 import java.io.IOException;
 import java.io.InputStream;

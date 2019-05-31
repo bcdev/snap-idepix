@@ -1,10 +1,10 @@
 package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.operators.CloudBuffer;
-import org.esa.s3tbx.idepix.core.util.IdepixIO;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+//import org.esa.s3tbx.idepix.core.IdepixConstants;
+//import org.esa.s3tbx.idepix.core.operators.CloudBuffer;
+//import org.esa.s3tbx.idepix.core.util.IdepixIO;
+//import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -18,6 +18,10 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.CloudBuffer;
+import org.esa.snap.idepix.core.util.IdepixIO;
+import org.esa.snap.idepix.core.util.IdepixUtils;
 
 import java.awt.*;
 

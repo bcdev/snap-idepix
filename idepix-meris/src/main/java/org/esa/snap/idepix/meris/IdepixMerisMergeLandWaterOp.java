@@ -1,8 +1,6 @@
 package org.esa.snap.idepix.meris;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -13,6 +11,9 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
+
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.IdepixIO;
 
 import java.awt.*;
 
