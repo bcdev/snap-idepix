@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.esa.snap</groupId>
-        <artifactId>snap-idepix-parent</artifactId>
-        <version>1-SNAPSHOT</version>
+        <artifactId>snap-idepix</artifactId>
+        <version>1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>idepix-spotvgt</artifactId>

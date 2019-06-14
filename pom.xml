@@ -6,8 +6,8 @@
 
     <name>snap-idepix</name>
     <groupId>org.esa.snap</groupId>
-    <artifactId>snap-idepix-parent</artifactId>
-    <version>1-SNAPSHOT</version>
+    <artifactId>snap-idepix</artifactId>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>SNAP Idepix Parent project</description>
@@ -108,11 +108,6 @@
                 <artifactId>idepix-core</artifactId>
                 <version>${idepix.version}</version>
             </dependency>
-            <!--<dependency>-->
-                <!--<groupId>org.esa.snap</groupId>-->
-                <!--<artifactId>idepix-olci</artifactId>-->
-                <!--<version>${idepix.version}</version>-->
-            <!--</dependency>-->
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
