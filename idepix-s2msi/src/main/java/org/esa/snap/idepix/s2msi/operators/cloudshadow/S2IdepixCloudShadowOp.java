@@ -37,7 +37,7 @@ import java.util.logging.Logger;
         category = "Optical",
         authors = "Grit Kirches, Michael Paperin, Olaf Danne, Tonio Fincke, Dagmar Mueller",
         copyright = "(c) Brockmann Consult GmbH",
-        version = "1.0",
+        version = "2.0",
         internal = true,
         description = "Algorithm detecting cloud shadow...")
 public class S2IdepixCloudShadowOp extends Operator {

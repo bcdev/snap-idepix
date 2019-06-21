@@ -39,7 +39,7 @@ import java.util.Map;
         category = "Optical",
         authors = "Grit Kirches, Michael Paperin, Olaf Danne, Tonio Fincke, Dagmar Müller",
         copyright = "(c) Brockmann Consult GmbH",
-        version = "1.0",
+        version = "2.0",
         internal = true,
         description = "Pre-processing for algorithm detecting cloud shadow...")
 

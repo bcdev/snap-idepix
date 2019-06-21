@@ -26,7 +26,7 @@ import java.util.Map;
  * @author Tonio Fincke
  */
 @OperatorMetadata(alias = "Idepix.Sentinel2.SlopeAspectOrientation",
-        version = "1.0",
+        version = "2.0",
         internal = true,
         authors = "Tonio Fincke",
         copyright = "(c) 2018 by Brockmann Consult",

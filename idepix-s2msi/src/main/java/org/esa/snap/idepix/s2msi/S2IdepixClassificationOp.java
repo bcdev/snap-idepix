@@ -32,7 +32,7 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Sentinel2.Classification",
-        version = "2.2",
+        version = "3.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2008, 2012 by Brockmann Consult",

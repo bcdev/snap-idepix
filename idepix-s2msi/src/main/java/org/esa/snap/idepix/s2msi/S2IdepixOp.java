@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Idepix.Sentinel2",
         category = "Optical/Pre-Processing",
-        version = "2.2",
+        version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for Sentinel-2.")
