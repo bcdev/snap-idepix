@@ -6,7 +6,6 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>idepix-s2msi</artifactId>
-    <version>0.81-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
 
