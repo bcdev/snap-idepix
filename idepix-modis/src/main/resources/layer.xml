@@ -7,9 +7,9 @@
             <file name="org-esa-snap-idepix-modis-IdepixModisOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="IdePix MODIS [PLUGIN]"/>
-                <attr name="operatorName" stringvalue="Snap.Idepix.Modis"/>
-                <attr name="dialogTitle" stringvalue="IdePix MODIS - v0.82"/>
+                <attr name="displayName" stringvalue="IdePix MODIS"/>
+                <attr name="operatorName" stringvalue="Snap.Idepix.TerraAqua.Modis"/>
+                <attr name="dialogTitle" stringvalue="IdePix MODIS"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixModisTool"/>
             </file>
@@ -25,7 +25,7 @@
                             <attr name="originalFile"
                                   stringvalue="Actions/Operators/org-esa-snap-idepix-modis-IdepixModisOpAction.instance"/>
                             <attr name="position" intvalue="20"/>
-                            <attr name="displayName" stringvalue="Idepix MODIS PLUGIN"/>
+                            <attr name="displayName" stringvalue="Idepix MODIS"/>
                         </file>
                     </folder>
                 </folder>

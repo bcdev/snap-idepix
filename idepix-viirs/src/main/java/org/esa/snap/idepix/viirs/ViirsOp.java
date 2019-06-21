@@ -24,7 +24,7 @@ import java.util.Map;
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "Idepix.SuomiNpp.Viirs",
         category = "Optical/Pre-Processing",
-        version = "2.2",
+        version = "3.0",
         authors = "Olaf Danne, Marco Zuehlke",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for VIIRS.")

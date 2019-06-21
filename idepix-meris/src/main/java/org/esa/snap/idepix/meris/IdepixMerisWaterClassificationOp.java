@@ -38,8 +38,8 @@ import java.util.Calendar;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Meris.Water",
-        version = "1.0",
+@OperatorMetadata(alias = "Snap.Idepix.Envisat.Meris.Water",
+        version = "3.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",

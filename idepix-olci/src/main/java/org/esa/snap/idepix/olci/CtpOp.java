@@ -33,9 +33,9 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Olci.Ctp",
+@OperatorMetadata(alias = "Snap.Idepix.Sentinel3.Olci.Ctp",
         category = "Optical/Pre-Processing",
-        version = "1.0",
+        version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
         description = "CTP for OLCI based on Tensorflow neural nets.")

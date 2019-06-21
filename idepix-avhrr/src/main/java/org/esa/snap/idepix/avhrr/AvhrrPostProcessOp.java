@@ -28,7 +28,7 @@ import java.awt.*;
  * @since Idepix 2.1
  */
 @OperatorMetadata(alias = "Idepix.Avhrr.Postprocess",
-                  version = "2.2",
+                  version = "3.0",
                   internal = true,
                   authors = "Marco Peters, Marco Zuehlke, Olaf Danne",
                   copyright = "(c) 2016 by Brockmann Consult",

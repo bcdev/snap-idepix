@@ -28,9 +28,9 @@ public class IdepixOlciOpTest {
     @Test
     public void testOperatorSpiIsLoaded() {
         OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
-        OperatorSpi operatorSpi = registry.getOperatorSpi("Snap.Idepix.Olci");
+        OperatorSpi operatorSpi = registry.getOperatorSpi("Snap.Idepix.Sentinel3.Olci");
         assertNotNull(operatorSpi);
-        assertEquals("Snap.Idepix.Olci", operatorSpi.getOperatorAlias());
+        assertEquals("Snap.Idepix.Sentinel3.Olci", operatorSpi.getOperatorAlias());
         assertNotNull(operatorSpi.getOperatorDescriptor());
         assertSame(operatorSpi.getOperatorClass(), operatorSpi.getOperatorDescriptor().getOperatorClass());
     }

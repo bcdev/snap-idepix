@@ -22,8 +22,8 @@ import java.awt.*;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Meris.Merge.Landwater",
-        version = "1.0",
+@OperatorMetadata(alias = "Snap.Idepix.Envisat.Meris.Merge.Landwater",
+        version = "3.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",

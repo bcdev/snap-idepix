@@ -31,8 +31,8 @@ import java.awt.*;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Olci.Postprocess",
-        version = "1.0",
+@OperatorMetadata(alias = "Snap.Idepix.Sentinel3.Olci.Postprocess",
+        version = "3.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",

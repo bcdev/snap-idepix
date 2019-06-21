@@ -4,12 +4,12 @@
 
     <folder name="Actions">
         <folder name="Operators">
-            <file name="org-esa-snap-idepix-viirs-ViirsIdepixOpAction.instance">
+            <file name="org-esa-snap-idepix-viirs-ViirsOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="IdePix Viirs [PLUGIN]"/>
+                <attr name="displayName" stringvalue="IdePix VIIRS"/>
                 <attr name="operatorName" stringvalue="Idepix.SuomiNpp.Viirs"/>
-                <attr name="dialogTitle" stringvalue="IdePix Viirs - v0.8"/>
+                <attr name="dialogTitle" stringvalue="IdePix VIIRS"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
             </file>
         </folder>
@@ -20,9 +20,9 @@
             <folder name="Preprocessing">
                 <folder name="Masking">
                     <folder name="IdePix (Clouds, Land, Water, ...)">
-                        <file name="org-esa-snap-idepix-viirs-ViirsIdepixOpAction.shadow">
+                        <file name="org-esa-snap-idepix-viirs-ViirsOpAction.shadow">
                             <attr name="originalFile"
-                                  stringvalue="Actions/Operators/org-esa-snap-idepix-viirs-ViirsIdepixOpAction.instance"/>
+                                  stringvalue="Actions/Operators/org-esa-snap-idepix-viirs-ViirsOpAction.instance"/>
                             <attr name="position" intvalue="55"/>
                         </file>
                     </folder>
@@ -31,12 +31,12 @@
         </folder>
     </folder>
 
-    <!--<folder name="Services">-->
-        <!--<folder name="JavaHelp">-->
-            <!--<file name="org-esa-snap-idepix-s2msi-helpset.xml" url="helpset.xml">-->
-                <!--<attr name="position" intvalue="4600"/>-->
-            <!--</file>-->
-        <!--</folder>-->
-    <!--</folder>-->
+    <folder name="Services">
+        <folder name="JavaHelp">
+            <file name="org-esa-snap-idepix-viirs-helpset.xml" url="helpset.xml">
+                <attr name="position" intvalue="4600"/>
+            </file>
+        </folder>
+    </folder>
 
 </filesystem>

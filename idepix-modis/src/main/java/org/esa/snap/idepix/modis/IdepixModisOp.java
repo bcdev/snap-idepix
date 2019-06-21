@@ -27,9 +27,9 @@ import static org.esa.snap.idepix.modis.IdepixModisConstants.MODIS_WATER_MASK_BA
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "Snap.Idepix.Modis",
+@OperatorMetadata(alias = "Snap.Idepix.TerraAqua.Modis",
         category = "Optical/Pre-Processing",
-        version = "2.2",
+        version = "3.0",
         authors = "Olaf Danne, Marco Zuehlke",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for MODIS.")

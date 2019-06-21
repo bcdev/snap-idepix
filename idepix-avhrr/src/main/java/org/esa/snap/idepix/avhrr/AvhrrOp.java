@@ -24,9 +24,9 @@ import java.util.Map;
  */
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "Idepix.Avhrr",
-        internal = true, // todo: remove when activated
+        internal = true, // todo: clarify if this shall be further used. Invisible for the moment.
         category = "Optical/Pre-Processing",
-        version = "1.0",
+        version = "3.0",
         authors = "Olaf Danne, Grit Kirches",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for AVHRR.")

@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Idepix.Probav.Vegetation",
         category = "Optical/Pre-Processing",
-        version = "2.2",
+        version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for PROBA-V.")

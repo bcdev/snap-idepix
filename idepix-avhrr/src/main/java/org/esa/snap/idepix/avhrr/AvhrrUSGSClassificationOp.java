@@ -28,7 +28,7 @@ import java.io.InputStream;
  * @version $Revision: $ $Date:  $
  */
 @OperatorMetadata(alias = "Idepix.Avhrr.Usgs.Classification",
-        version = "2.2",
+        version = "3.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",

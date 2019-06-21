@@ -23,7 +23,7 @@ import java.awt.*;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.OlciSlstr.Postprocess",
-        version = "1.0",
+        version = "3.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2017 by Brockmann Consult",

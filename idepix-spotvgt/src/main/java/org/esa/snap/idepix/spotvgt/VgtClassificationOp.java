@@ -30,7 +30,7 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Vgt.Classification",
-        version = "1.0",
+        version = "3.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",

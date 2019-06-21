@@ -29,9 +29,9 @@ import java.util.Map;
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "Idepix.Landsat8.OLI",
+@OperatorMetadata(alias = "Snap.Idepix.Landsat8.OLI",
         category = "Optical/Pre-Processing",
-        version = "2.2",
+        version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for Landsat-8 OLI instrument.")

@@ -27,7 +27,7 @@ import java.awt.*;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Seawifs.Postprocess",
-        version = "2.2",
+        version = "3.0",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Refines the SeaWiFS pixel classification.",
         internal = true)

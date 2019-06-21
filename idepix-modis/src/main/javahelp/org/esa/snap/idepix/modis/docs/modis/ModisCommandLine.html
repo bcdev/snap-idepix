@@ -61,9 +61,10 @@ Specific help on the Idepix processor for a given instrument can be obtained wit
 so we have here for MODIS:
 <ul>
     <li>
-        ${SNAP-INSTALL-DIR}/bin/gpt -h Snap.Idepix.MODIS
+        ${SNAP-INSTALL-DIR}/bin/gpt -h Snap.Idepix.TerraAqua.Modis
     </li>
 </ul>
+(Note that MODIS is a special case for this notation as it is flown on the two platforms AQUA and TERRA.)
 In this case, information on the usage and a list of all available parameters are given.
 
 The Idepix processor parameters can also be specified via a graph xml file.
@@ -74,7 +75,7 @@ to explicitly set parameters if default values shall be used).
     &lt;graph id="IdepixModisTest"&gt;
         &lt;version&gt;1.0&lt;/version&gt;
         &lt;node id="idepix"&gt;
-            &lt;operator&gt;Snap.Idepix.Modis&lt;/operator&gt;
+            &lt;operator&gt;Snap.Idepix.TerraAqua.Modis&lt;/operator&gt;
             &lt;sources&gt;
                 &lt;source&gt;${sourceProduct}&lt;/source&gt;
             &lt;/sources&gt;

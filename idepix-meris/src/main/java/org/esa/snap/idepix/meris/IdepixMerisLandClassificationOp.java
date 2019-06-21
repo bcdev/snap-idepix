@@ -28,8 +28,8 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Meris.Land",
-        version = "1.0",
+@OperatorMetadata(alias = "Snap.Idepix.Envisat.Meris.Land",
+        version = "3.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",

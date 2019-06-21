@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Idepix.Sentinel3.OlciSlstr",
         category = "Optical/Pre-Processing",
-        version = "1.0",
+        version = "3.0",
         authors = "Olaf Danne",
         internal = true,
         copyright = "(c) 2016 by Brockmann Consult",

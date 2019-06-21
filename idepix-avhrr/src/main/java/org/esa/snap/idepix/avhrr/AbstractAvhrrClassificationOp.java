@@ -24,7 +24,7 @@ import java.util.Calendar;
  * @version $Revision: $ $Date:  $
  */
 @OperatorMetadata(alias = "Idepix.Avhrr.Abstract.Classification",
-        version = "2.2",
+        version = "3.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",

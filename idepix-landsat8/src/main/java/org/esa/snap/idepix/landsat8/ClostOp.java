@@ -21,7 +21,7 @@ import java.awt.image.RenderedImage;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Landsat8.Clost",
-                  version = "2.2",
+                  version = "3.0",
                   internal = true,
                   authors = "Olaf Danne",
                   copyright = "(c) 2016 by Brockmann Consult",

@@ -26,9 +26,9 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Meris",
+@OperatorMetadata(alias = "Snap.Idepix.Envisat.Meris",
         category = "Optical/Pre-Processing",
-        version = "1.0",
+        version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for MERIS.")

@@ -19,8 +19,8 @@ import java.io.InputStream;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Modis.Classification",
-        version = "2.2",
+@OperatorMetadata(alias = "Snap.Idepix.TerraAqua.Modis.Classification",
+        version = "3.0",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "MODIS pixel classification operator.",
         internal = true)

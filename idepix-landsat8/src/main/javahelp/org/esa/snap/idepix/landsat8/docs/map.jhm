@@ -20,8 +20,8 @@
         "http://java.sun.com/products/javahelp/map_2_0.dtd">
 
 <map version="2.0">
-    <mapID target="landsat8OliAlgorithmSpec" url="landsat8/Landsat8OliAlgorithmSpecification.html"/>
-    <mapID target="landsat8OliProcessorDesc" url="landsat8/Landsat8OliProcessorDescription.html"/>
-    <mapID target="landsat8OliCommandLine" url="landsat8/Landsat8OliCommandLine.html"/>
-    <mapID target="landsat8OliTool" url="landsat8/Landsat8OliTool.html"/>
+    <mapID target="snapIdepixLandsat8AlgorithmSpec" url="landsat8/Landsat8OliAlgorithmSpecification.html"/>
+    <mapID target="snapIdepixLandsat8ProcessorDesc" url="landsat8/Landsat8OliProcessorDescription.html"/>
+    <mapID target="snapIdepixLandsat8CommandLine" url="landsat8/Landsat8OliCommandLine.html"/>
+    <mapID target="snapIdepixLandsat8Tool" url="landsat8/Landsat8OliTool.html"/>
 </map>

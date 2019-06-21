@@ -4,12 +4,12 @@
 
     <folder name="Actions">
         <folder name="Operators">
-            <file name="org-esa-snap-idepix-seawifs-SeaWiFSIdepixOpAction.instance">
+            <file name="org-esa-snap-idepix-spotvgt-SpotVGTOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="IdePix SeaWiFS [PLUGIN]"/>
-                <attr name="operatorName" stringvalue="Idepix.OrbView2.Seawifs"/>
-                <attr name="dialogTitle" stringvalue="IdePix SeaWiFS - v0.8"/>
+                <attr name="displayName" stringvalue="IdePix Spot VGT"/>
+                <attr name="operatorName" stringvalue="Idepix.Spot.Vegetation"/>
+                <attr name="dialogTitle" stringvalue="IdePix Spot VGT"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
             </file>
         </folder>
@@ -20,10 +20,10 @@
             <folder name="Preprocessing">
                 <folder name="Masking">
                     <folder name="IdePix (Clouds, Land, Water, ...)">
-                        <file name="org-esa-snap-idepix-seawifs-SeaWiFSIdepixOpAction.shadow">
+                        <file name="org-esa-snap-idepix-spotvgt-SpotVGTOpAction.shadow">
                             <attr name="originalFile"
-                                  stringvalue="Actions/Operators/org-esa-snap-idepix-seawifs-SeaWiFSIdepixOpAction.instance"/>
-                            <attr name="position" intvalue="45"/>
+                                  stringvalue="Actions/Operators/org-esa-snap-idepix-spotvgt-SpotVGTOpAction.instance"/>
+                            <attr name="position" intvalue="50"/>
                         </file>
                     </folder>
                 </folder>
@@ -31,12 +31,12 @@
         </folder>
     </folder>
 
-    <!--<folder name="Services">-->
-        <!--<folder name="JavaHelp">-->
-            <!--<file name="org-esa-snap-idepix-s2msi-helpset.xml" url="helpset.xml">-->
-                <!--<attr name="position" intvalue="4600"/>-->
-            <!--</file>-->
-        <!--</folder>-->
-    <!--</folder>-->
+    <folder name="Services">
+        <folder name="JavaHelp">
+            <file name="org-esa-snap-idepix-spotvgt-helpset.xml" url="helpset.xml">
+                <attr name="position" intvalue="4600"/>
+            </file>
+        </folder>
+    </folder>
 
 </filesystem>

@@ -26,8 +26,8 @@ import java.awt.*;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Meris.Postprocess",
-        version = "1.0",
+@OperatorMetadata(alias = "Snap.Idepix.Envisat.Meris.Postprocess",
+        version = "3.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",

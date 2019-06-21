@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Idepix.Spot.Vegetation",
         category = "Optical/Pre-Processing",
-        version = "1.0",
+        version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for SPOT-VGT.")

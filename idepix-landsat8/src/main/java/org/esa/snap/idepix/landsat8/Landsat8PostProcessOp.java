@@ -33,7 +33,7 @@ import java.awt.Rectangle;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Landsat8.Postprocess",
-        version = "2.2",
+        version = "3.0",
         internal = true,
         authors = "Marco Peters, Marco Zuehlke, Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
