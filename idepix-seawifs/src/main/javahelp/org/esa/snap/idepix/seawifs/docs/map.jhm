@@ -23,5 +23,5 @@
     <mapID target="seawifsAlgorithmSpec" url="seawifs/OrbView2SeawifsAlgorithmSpecification.html"/>
     <mapID target="seawifsProcessorDesc" url="seawifs/OrbView2SeawifsProcessorDescription.html"/>
     <mapID target="seawifsCommandLine" url="seawifs/OrbView2SeawifsCommandLine.html"/>
-    <mapID target="seawifsTool" url="seawifs/OrbView2SeawifsTool.html"/>
+    <mapID target="snapIdepixSeawifsTool" url="seawifs/OrbView2SeawifsTool.html"/>
 </map>

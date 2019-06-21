@@ -24,7 +24,7 @@
             <tocitem text="Pre-Processing">
                 <tocitem text="Masking">
                     <tocitem text="IdePix Classification of Pixels">
-                        <tocitem text="Idepix Classification of Pixels (SPOT Vegetation Plugin)" target="spotvgtTool">
+                        <tocitem text="Idepix Classification of Pixels (SPOT Vegetation Plugin)" target="snapIdepixSpotvgtTool">
                             <tocitem text="SPOT Vegetation Processor Description" target="spotvgtProcessorDesc"/>
                             <tocitem text="SPOT Vegetation Algorithm Specification" target="spotvgtAlgorithmSpec"/>
                             <tocitem text="SPOT Vegetation Command Line Processing" target="spotvgtCommandLine"/>

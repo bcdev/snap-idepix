@@ -11,6 +11,7 @@
                 <attr name="operatorName" stringvalue="Idepix.Spot.Vegetation"/>
                 <attr name="dialogTitle" stringvalue="IdePix Spot VGT"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
+                <attr name="helpId" stringvalue="snapIdepixSpotvgtTool"/>
             </file>
         </folder>
     </folder>

@@ -23,5 +23,5 @@
     <mapID target="viirsAlgorithmSpec" url="viirs/SuomiNppViirsAlgorithmSpecification.html"/>
     <mapID target="viirsProcessorDesc" url="viirs/SuomiNppViirsProcessorDescription.html"/>
     <mapID target="viirsCommandLine" url="viirs/SuomiNppViirsCommandLine.html"/>
-    <mapID target="viirsTool" url="viirs/SuomiNppViirsTool.html"/>
+    <mapID target="snapIdepixViirsTool" url="viirs/SuomiNppViirsTool.html"/>
 </map>

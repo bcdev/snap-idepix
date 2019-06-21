@@ -23,5 +23,5 @@
     <mapID target="probavAlgorithmSpec" url="probav/ProbavVegetationAlgorithmSpecification.html"/>
     <mapID target="probavProcessorDesc" url="probav/ProbavVegetationProcessorDescription.html"/>
     <mapID target="probavCommandLine" url="probav/ProbaVCommandLine.html"/>
-    <mapID target="probavTool" url="probav/ProbaVTool.html"/>
+    <mapID target="snapIdepixProbavTool" url="probav/ProbaVTool.html"/>
 </map>

@@ -11,6 +11,7 @@
                 <attr name="operatorName" stringvalue="Idepix.SuomiNpp.Viirs"/>
                 <attr name="dialogTitle" stringvalue="IdePix VIIRS"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
+                <attr name="helpId" stringvalue="snapIdepixViirsTool"/>
             </file>
         </folder>
     </folder>

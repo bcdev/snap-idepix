@@ -23,5 +23,5 @@
     <mapID target="spotvgtAlgorithmSpec" url="spotvgt/SpotVegetationAlgorithmSpecification.html"/>
     <mapID target="spotvgtProcessorDesc" url="spotvgt/SpotVegetationProcessorDescription.html"/>
     <mapID target="spotvgtCommandLine" url="spotvgt/SpotVegetationCommandLine.html"/>
-    <mapID target="spotvgtTool" url="spotvgt/SpotVegetationTool.html"/>
+    <mapID target="snapIdepixSpotvgtTool" url="spotvgt/SpotVegetationTool.html"/>
 </map>
