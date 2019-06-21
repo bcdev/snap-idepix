@@ -4,19 +4,19 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.esa.snap</groupId>
+    <parent>
+        <groupId>org.esa.snap</groupId>
+        <artifactId>snap-idepix</artifactId>
+        <version>7.0.0-SNAPSHOT</version>
+    </parent>
+
     <artifactId>idepix-s2msi</artifactId>
-
     <packaging>nbm</packaging>
-
     <name>Idepix S2-MSI</name>
     <description>Generic classification of pixels (cloud, snow, ice, land, water) originating from S2-MSI instrument.
     </description>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>7.0.0-SNAPSHOT</snap.version>
-        <javahelp.version>2.0.05</javahelp.version>
         <netbeans.version>RELEASE82</netbeans.version>
     </properties>
 
@@ -24,27 +24,22 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-glayer</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-jai</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-ui</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-binding</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <!--include this dependency to run SNAP Desktop in IDE.-->
         <dependency>
@@ -56,7 +51,6 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -66,12 +60,10 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-watermask</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
