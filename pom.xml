@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <snap.version>7.0.0-SNAPSHOT</snap.version>
         <s3tbx.version>7.0.0-SNAPSHOT</s3tbx.version>
-        <idepix.version>0.81-SNAPSHOT</idepix.version>
+        <idepix.version>7.0.0-SNAPSHOT</idepix.version>
         <javahelp.version>2.0.05</javahelp.version>
         <junit.version>4.12</junit.version>
     </properties>
