@@ -26,7 +26,7 @@ import java.awt.*;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Postprocess",
-        version = "2.2",
+        version = "3.0",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Refines the Idepix pixel classification.",
         internal = true)

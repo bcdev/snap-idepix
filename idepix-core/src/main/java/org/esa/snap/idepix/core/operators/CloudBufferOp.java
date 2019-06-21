@@ -25,7 +25,7 @@ import java.awt.*;
 @OperatorMetadata(alias = "Idepix.Cloudbuffer",
         category = "Optical/Pre-Processing",
         internal = true, // todo: remove when activated
-        version = "1.0",
+        version = "2.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Idepix cloud buffer operator.")
