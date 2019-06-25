@@ -32,8 +32,8 @@
         <snap.version>7.0.0-SNAPSHOT</snap.version>
         <s3tbx.version>7.0.0-SNAPSHOT</s3tbx.version>
         <idepix.version>7.0.0-SNAPSHOT</idepix.version>
+        <netbeans.version>RELEASE82</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
-        <junit.version>4.12</junit.version>
     </properties>
 
     <!-- AVHRR and OLCI/SLSTR currently deactivated, 20190621 -->
@@ -125,9 +125,19 @@
                 <version>${idepix.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-netbeans-api-progress-nb</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>23.0</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
+                <version>4.12</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

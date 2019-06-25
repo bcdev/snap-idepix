@@ -31,9 +31,6 @@
     <description>Performs IdePix pixel classification for MERIS.</description>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>7.0.0-SNAPSHOT</snap.version>
-        <javahelp.version>2.0.05</javahelp.version>
         <netcdf.version>4.3.22</netcdf.version>
     </properties>
 
@@ -121,7 +118,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>18.0</version>
         </dependency>
 
     </dependencies>
