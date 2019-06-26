@@ -23,12 +23,12 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Sentinel2",
+@OperatorMetadata(alias = "Snap.Idepix.Sentinel2.Msi",
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Pixel identification and classification for Sentinel-2.")
+        description = "Pixel identification and classification for Sentinel-2 MSI.")
 public class S2IdepixOp extends Operator {
 
     private static final int LAND_WATER_MASK_RESOLUTION = 50;
