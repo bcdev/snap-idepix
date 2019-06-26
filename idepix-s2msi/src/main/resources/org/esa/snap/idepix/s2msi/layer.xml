@@ -25,7 +25,6 @@
                             <attr name="originalFile"
                                   stringvalue="Actions/Operators/org-esa-snap-idepix-s2msi-S2IdepixOpAction.instance"/>
                             <attr name="position" intvalue="40"/>
-                            <!--<attr name="displayName" stringvalue="IdePix S2 MSI [PLUGIN]"/>-->
                         </file>
                     </folder>
                 </folder>
