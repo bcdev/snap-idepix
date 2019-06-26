@@ -2,6 +2,7 @@ package org.esa.snap.idepix.olci;
 
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Tensor;
+import org.tensorflow.TensorFlow;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,6 +40,15 @@ public class TensorflowNNCalculator {
      * @param nnTensorInput   - float[] input vector (i.e. OLCI L1 values per pixel)
      */
     TensorflowNNCalculator(String modelDir, String transformMethod, float[] nnTensorInput) {
+        // init of TensorFlow can fail, so we should handle this and give appropriate error message
+        try {
+            TensorFlow.version(); // triggers init of TensorFlow
+        } catch (LinkageError e) {
+            throw new IllegalStateException("TensorFlow could not be initialised. " +
+                                                    "Make sure that your CPU supports 64Bit and AVX instruction set " +
+                                                    "(Are you running in a VM?).", e);
+        }
+
         this.transformMethod = transformMethod;
         this.nnTensorInput = nnTensorInput;
         this.modelDir = modelDir;
