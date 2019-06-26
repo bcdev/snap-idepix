@@ -27,7 +27,7 @@
                     <tocitem text="IdePix Classification of Pixels">
                         <tocitem text="Idepix Classification of Pixels (S2 MSI Plugin)" target="snapIdepixS2MsiTool">
                             <tocitem text="OLCI Processor Description" target="snapIdepixS2MsiProcessorDescription"/>
-                            <tocitem text="OLCI Algorithm Specification" target="snapIdepixS2MsiAlgorithmSpecification"/>
+                            <!--<tocitem text="OLCI Algorithm Specification" target="snapIdepixS2MsiAlgorithmSpecification"/>-->
                             <tocitem text="OLCI Command Line Processing" target="snapIdepixS2MsiCommandLine"/>
                         </tocitem>
                     </tocitem>
