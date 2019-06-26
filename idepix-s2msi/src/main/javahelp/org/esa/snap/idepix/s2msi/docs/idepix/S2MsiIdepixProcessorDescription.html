@@ -27,8 +27,10 @@
         <td class="header">&nbsp;
             S2 MSI - Processor Description
         </td>
-        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
-                                                                                                                                                       border=0></a>
+        <td class="header" align="right"><a
+                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg"
+                border=0></a>
         </td>
     </tr>
 </table>
@@ -37,12 +39,12 @@
 
 <h4>I/O Parameters Tab</h4>
 
-<p align="center"><img src="images/IdepixPathsModis.png"></p>
+<p align="center"><img src="images/IdepixPathsSen2Msi.png"></p>
 
 <h5>Source Product Group</h5>
 
 <p class="i1">
-    <b>Name: </b>
+    <b>Sentinel-2 MSI L1C product: </b>
     Used to select the spectral source product. The source product shall
     contain spectral bands providing a source spectrum at each pixel. Use the <b>...</b> button to
     open a data product currently not opened in the Sentinel Toolbox.
@@ -72,45 +74,125 @@ For product descriptions and file naming conventions see the Sentinel-2 MSI Prod
 
 <h3>The Processing Parameters</h3>
 
-<p align="center"><img src="images/IdepixParameterModis.png"></p>
+<p align="center"><img src="images/IdepixParameterSen2.png"></p>
 
 <p class="i1">
-    <b>Strength of cloud flagging: </b><br>
-    The strength of the cloud flagging.
-    The processor currently supports CLEAR_SKY_CONSERVATIVE and CLOUD_CONSERVATIVE.
-    In case of 'CLOUD_CONSERVATIVE', more pixels might be flagged as cloud.
-    The value must be selected from the drop-down menu. The default value is 'CLEAR_SKY_CONSERVATIVE'.
+    <b>Write TOA reflectances to the target product: </b><br>
+    Whether to add the TOA reflectance bands from the source L1C product to the target idepix product
+</p>
+
+<p class="i1">
+    <b>Write feature values to the target product: </b><br>
+    If true, the following bands will additionally be written to the target product:
+<ul>
+    <li>
+        bright_value: Brightness
+    </li>
+    <li>
+        bright_white_value: Whiteness
+    </li>
+    <li>
+        bright_value: Brightwhiteness
+    </li>
+    <li>
+        spectral_flatness_value: Spectral Flatness
+    </li>
+    <li>
+        ndvi_value: NDVI
+    </li>
+    <li>
+        ndsi_value: NDSI
+    </li>
+    <li>
+        radiometric_land_value: Radiometric Land Value
+    </li>
+    <li>
+        radiometric_water_value: Radiometric Water Value
+    </li>
+    <li>
+        b3b11_value: B3 B11 Value
+    </li>
+    <li>
+        tc1_value: TC1 Value
+    </li>
+    <li>
+        tc4_value: TC4 Value
+    </li>
+    <li>
+        tc4cirrus_water_value: TC4 Cirrus Value
+    </li>
+    <li>
+        ndwi_value: NDWI Value
+    </li>
+</ul>
+
+<p class="i1">
+    <b>Compute mountain shadow: </b><br>
+    Whether to additionally compute a mountain shadow flag.
+</p>
+
+<p class="i1">
+    <b>Compute cloud shadow: </b><br>
+    Whether to additionally compute a cloud shadow flag.
+</p>
+
+<p class="i1">
+    <b>Compute a cloud buffer: </b><br>
+    Whether to leave an additional buffer around cluds during computation.
+    This buffer will be displayed as an extra flag and will be considered during the computation of, e.g., cloud shadow.
+</p>
+
+<p class="i1">
+    <b>Compute a cloud buffer also for cloud ambiguous pixles: </b><br>
+    Whether the buffer shall also be applied to pixels that have not unambiguously been identified as cloud.
 </p>
 
 <p class="i1">
     <b>Width of cloud buffer (# of pixels): </b><br>
-    The width of the cloud buffer in # of pixels. The default value is 1.
+    The width of the cloud buffer in pixels.
+    This value is only considered when cloud buffer computation has been selected.
 </p>
 
 <p class="i1">
-    <b>Resolution of land-water mask (m/pixel): </b><br>
-    The resolution of the used land-water mask in meters per pixel. The default value is 150.
+    <b>Digital Elevation Model: </b><br>
+    The IdePix processor will compute an elevation band and add it to the target product.
+    Here, you can specify which Digital Elevation Model shall be used for this.
+    Applicable Models are:
 </p>
-
-<p class="i1">
-    <b>Write reflective solar bands: </b><br>
-    If set, all reflective solar bands from the source product are written to target product.
-    The default value is 'true'.
-</p>
-
-<p class="i1">
-    <b>Write emissive bands: </b><br>
-    If set, all emissive bands from the source product are written to target product.
-    The default value is 'false'.
-</p>
+<ul>
+    <li>
+        ACE2_5Min
+    </li>
+    <li>
+        ACE30
+    </li>
+    <li>
+        ASTER 1sec GDEM
+    </li>
+    <li>
+        CDEM
+    </li>
+    <li>
+        GETASSE30
+    </li>
+    <li>
+        SRTM 1Sec Grid
+    </li>
+    <li>
+        SRTM 1Sec Hgt
+    </li>
+    <li>
+        SRTM 3Sec (Default)
+    </li>
+</ul>
 <br>
 
 <h3>The Processing Result</h3>
 The Idepix classification result is written into the target product as a flag band named 'pixel_classif_flags'.
-This band holds integer values which for MODIS follow the flag coding shown below.
+This band holds integer values which for Sentinel-2 MSI follow the flag coding shown below.
 
 <p align="center">
-    <img src="images/ModisFlagCoding.png" border="0">
+    <img src="images/Sen2MsiFlagCoding.png" border="0">
 </p>
 <br>
 
@@ -118,7 +200,7 @@ The target product also provides a corresponding flag mask to visualize the pixe
 SNAP Mask Manager:
 
 <p align="center">
-    <img src="images/ModisMaskManager.png" border="0">
+    <img src="images/Sen2MsiMaskManager.png" border="0">
 </p>
 
 
