@@ -1,3 +1,18 @@
+<!--
+  ~ Copyright (C) 2019 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -17,8 +32,8 @@
         <snap.version>7.0.0-SNAPSHOT</snap.version>
         <s3tbx.version>7.0.0-SNAPSHOT</s3tbx.version>
         <idepix.version>7.0.0-SNAPSHOT</idepix.version>
+        <netbeans.version>RELEASE82</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
-        <junit.version>4.12</junit.version>
     </properties>
 
     <!-- AVHRR and OLCI/SLSTR currently deactivated, 20190621 -->
@@ -110,9 +125,19 @@
                 <version>${idepix.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-netbeans-api-progress-nb</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>23.0</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
+                <version>4.12</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -120,60 +145,98 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <version>3.14</version>
-                <extensions>true</extensions>
-                <dependencies>
-                    <dependency>
-                        <groupId>javax.help</groupId>
-                        <artifactId>javahelp</artifactId>
-                        <version>${javahelp.version}</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <licenseName>GPL 3</licenseName>
-                    <licenseFile>LICENSE.txt</licenseFile>
-                    <requiresRestart>true</requiresRestart>
-                    <cluster>idepix</cluster>
-                    <brandingToken>idepix</brandingToken>
-                    <requiresRestart>true</requiresRestart>
-                    <publicPackages>
-                        <publicPackage>org.esa.snap.idepix.*</publicPackage>
-                    </publicPackages>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.7.1</version>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.0.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
 
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.6.0</version>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>nbm-maven-plugin</artifactId>
+                    <version>4.1</version>
+                    <extensions>true</extensions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>javax.help</groupId>
+                            <artifactId>javahelp</artifactId>
+                            <version>${javahelp.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <licenseName>GPL 3</licenseName>
+                        <licenseFile>LICENSE.txt</licenseFile>
+                        <requiresRestart>true</requiresRestart>
+                        <cluster>idepix</cluster>
+                        <brandingToken>idepix</brandingToken>
+                        <requiresRestart>true</requiresRestart>
+                        <keystore>${project.basedir}/../keystore/snap.ks</keystore>
+                        <keystorealias>snap</keystorealias>
+                        <keystorepassword>snap-123</keystorepassword>
+                        <publicPackages>
+                            <publicPackage>org.esa.snap.idepix.*</publicPackage>
+                        </publicPackages>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.0.2</version>
+                    <configuration>
+                        <archive>
+                            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                        </archive>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <enableAssertions>true</enableAssertions>
+                        <!--<skip>true</skip>-->
+                        <printSummary>true</printSummary>
+                        <useFile>false</useFile>
+                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.7.1</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
     <reporting>

@@ -218,9 +218,9 @@ public class IdepixOlciOp extends BasisOp {
         if (considerCloudsOverSnow) {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
             o2corrSourceProducts.put("l1bProduct", sourceProduct);
-            final String o2CorrOpName = "O2CorrOlci";
+            final String o2CorrOpName = "OlciO2aHarmonisation";
             Map<String, Object> o2corrParms = new HashMap<>();
-            o2corrParms.put("writeCorrectedRadiances", false);
+            o2corrParms.put("writeHarmonisedRadiances", false);
             if (computeCloudShadow) {
                 o2corrParms.put("processOnlyBand13", false);
             }

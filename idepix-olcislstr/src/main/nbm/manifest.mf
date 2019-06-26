@@ -1,3 +1,12 @@
 Manifest-Version: 1.0
-OpenIDE-Module-Display-Category: Sentinel-3 Toolbox
+AutoUpdate-Show-In-Client: true
+AutoUpdate-Essential-Module: false
+OpenIDE-Module-Java-Dependencies: Java > 1.8
+OpenIDE-Module-Display-Category: SNAP Idepix
+OpenIDE-Module-Long-Description: <p>Classification of pixels (cloud, snow, ice, land, water) originating from OLCI/SLSTR Synergy products</p>
+ <p><b>Vendor:</b> Brockmann Consult GmbH</p>
+ <p><b>Contact address:</b> Chrysanderstr. 1, 21029 Hamburg (
+ Germany)</p><p><b>Copyright:</b> (C) 2017 by Brockmann Consult GmbH</
+ p><p><b>Vendor:</b> Brockmann Consult GmbH</p><p><b>License:</b> http
+ ://www.gnu.org/licenses/gpl.html</p>
 OpenIDE-Module-Layer: layer.xml

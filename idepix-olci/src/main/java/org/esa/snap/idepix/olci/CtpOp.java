@@ -197,9 +197,9 @@ public class CtpOp extends BasisOp {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
             Map<String, Object> o2corrParms = new HashMap<>();
             o2corrParms.put("processOnlyBand13", false);
-            o2corrParms.put("writeCorrectedRadiances", false);
+            o2corrParms.put("writeHarmonisedRadiances", false);
             o2corrSourceProducts.put("l1bProduct", sourceProduct);
-            final String o2CorrOpName = "O2CorrOlci";        // todo: clarify how to attach the O2Corr module to Idepix
+            final String o2CorrOpName = "OlciO2aHarmonisation";
             o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
         }
     }

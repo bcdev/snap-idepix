@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-  ~ Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~ Copyright (C) 2019 Brockmann Consult GmbH (info@brockmann-consult.de)
   ~
   ~ This program is free software; you can redistribute it and/or modify it
   ~ under the terms of the GNU General Public License as published by the Free
@@ -28,12 +28,9 @@
 
     <name>Idepix MERIS</name>
     <packaging>nbm</packaging>
-    <description>Performs IdePix pixel classification for MERIS.</description>
+    <description>Classification of pixels (cloud, snow, ice, land, water) originating from MERIS.</description>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>7.0.0-SNAPSHOT</snap.version>
-        <javahelp.version>2.0.05</javahelp.version>
         <netcdf.version>4.3.22</netcdf.version>
     </properties>
 
@@ -121,7 +118,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>18.0</version>
         </dependency>
 
     </dependencies>
@@ -131,59 +127,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
-                <version>3.14</version>
-                <extensions>true</extensions>
-                <dependencies>
-                    <dependency>
-                        <groupId>javax.help</groupId>
-                        <artifactId>javahelp</artifactId>
-                        <version>${javahelp.version}</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <licenseName>GPL 3</licenseName>
-                    <licenseFile>LICENSE.txt</licenseFile>
-                    <requiresRestart>true</requiresRestart>
-                    <cluster>s3tbx</cluster>
-                    <brandingToken>s3tbx</brandingToken>
-                    <requiresRestart>true</requiresRestart>
-                    <keystore>${project.basedir}/keystore/s3tbx.ks</keystore>
-                    <keystorealias>snap</keystorealias>
-                    <keystorepassword>snap-123</keystorepassword>
-                    <publicPackages>
-                        <publicPackage>org.esa.snap.idepix.meris.*</publicPackage>
-                    </publicPackages>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.7.1</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.0.0</version>
             </plugin>
 
         </plugins>

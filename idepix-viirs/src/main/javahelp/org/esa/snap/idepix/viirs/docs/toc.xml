@@ -24,7 +24,7 @@
             <tocitem text="Pre-Processing">
                 <tocitem text="Masking">
                     <tocitem text="IdePix Classification of Pixels">
-                        <tocitem text="Idepix Classification of Pixels (Suomi NPP VIIRS Plugin)" target="snapIdepixViirsTool">
+                        <tocitem text="Idepix Classification of Pixels (Suomi NPP VIIRS)" target="snapIdepixViirsTool">
                             <tocitem text="Suomi NPP VIIRS Processor Description" target="viirsProcessorDesc"/>
                             <tocitem text="Suomi NPP VIIRS Algorithm Specification" target="viirsAlgorithmSpec"/>
                             <tocitem text="Suomi NPP VIIRS Command Line Processing" target="viirsCommandLine"/>

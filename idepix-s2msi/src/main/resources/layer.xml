@@ -7,9 +7,9 @@
             <file name="org-esa-snap-idepix-s2msi-S2IdepixOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="IdePix S2 MSI [PLUGIN]"/>
+                <attr name="displayName" stringvalue="IdePix S2 MSI"/>
                 <attr name="operatorName" stringvalue="Idepix.Sentinel2"/>
-                <attr name="dialogTitle" stringvalue="IdePix S2 MSI - v0.8"/>
+                <attr name="dialogTitle" stringvalue="IdePix S2 MSI"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
             </file>
         </folder>
