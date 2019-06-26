@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: true
 AutoUpdate-Essential-Module: false
 OpenIDE-Module-Java-Dependencies: Java > 1.8
-OpenIDE-Module-Display-Category: Idepix Toolbox
+OpenIDE-Module-Display-Category: SNAP Idepix
 OpenIDE-Module-Specification-Version: 0.81
 OpenIDE-Module-Long-Description: <p>Classification of pixels (cloud, cloud shadow, mountain shadow, snow, ice, land, water) originating from S2 MSI data.</p><p><b>Vendor:</b> Brockmann Consult Gmb
  H</p><p><b>Contact address:</b> Max-Planck-Str. 2, 21502 Geesthacht (
