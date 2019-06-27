@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Idepix pixel classification operator for OLCI/SLSTR synergy products.
+ * The IdePix pixel classification operator for OLCI/SLSTR synergy products.
  *
  * @author olafd
  */

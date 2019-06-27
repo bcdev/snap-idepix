@@ -13,7 +13,7 @@ import java.awt.Color;
 import java.util.Random;
 
 /**
- * Utility class for Idepix Landsat 8
+ * Utility class for IdePix Landsat 8
  *
  * @author olafd
  */

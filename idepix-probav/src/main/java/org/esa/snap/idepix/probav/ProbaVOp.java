@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Idepix pixel classification for PROBA-V Synthesis products
+ * The IdePix pixel classification for PROBA-V Synthesis products
  *
  * @author olafd
  */

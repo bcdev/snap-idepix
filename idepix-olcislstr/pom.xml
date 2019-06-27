@@ -27,7 +27,7 @@
     <artifactId>idepix-olcislstr</artifactId>
     <packaging>nbm</packaging>
 
-    <name>Idepix Olci/Slstr</name>
+    <name>IdePix Olci/Slstr</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from OLCI/SLSTR Synergy products.
     </description>
 

@@ -20,7 +20,7 @@ import org.esa.snap.idepix.core.util.IdepixIO;
 import java.awt.*;
 
 /**
- * Operator used to consolidate Idepix classification flag for MERIS:
+ * Operator used to consolidate IdePix classification flag for MERIS:
  * - coastline refinement
  * - cloud shadow (from Fronts)
  *

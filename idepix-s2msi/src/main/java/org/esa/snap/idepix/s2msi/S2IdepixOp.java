@@ -19,15 +19,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Idepix operator for pixel identification and classification for Sentinel-2 (MSI instrument)
+ * IdePix operator for pixel identification and classification for Sentinel-2 (MSI instrument)
  *
- * @author olafd
+ * @author Tonio Fincke
+ * @author Olaf Danne
  */
 @OperatorMetadata(alias = "Snap.Idepix.Sentinel2.Msi",
         category = "Optical/Pre-Processing",
         version = "3.0",
-        authors = "Olaf Danne",
-        copyright = "(c) 2016 by Brockmann Consult",
+        authors = "Tonio Fincke, Olaf Danne",
+        copyright = "(c) 2019 by Brockmann Consult",
         description = "Pixel identification and classification for Sentinel-2 MSI.")
 public class S2IdepixOp extends Operator {
 

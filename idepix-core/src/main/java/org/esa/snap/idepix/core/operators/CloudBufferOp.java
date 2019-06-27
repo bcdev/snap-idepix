@@ -18,7 +18,7 @@ import org.esa.snap.core.util.RectangleExtender;
 import java.awt.*;
 
 /**
- * Idepix cloud buffer operator.
+ * IdePix cloud buffer operator.
  *
  * @author olafd
  */
@@ -28,7 +28,7 @@ import java.awt.*;
         version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Idepix cloud buffer operator.")
+        description = "IdePix cloud buffer operator.")
 public class CloudBufferOp extends Operator {
     @Parameter(defaultValue = "2", label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;

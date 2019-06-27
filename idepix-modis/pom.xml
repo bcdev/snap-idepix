@@ -27,7 +27,7 @@
 
     <artifactId>idepix-modis</artifactId>
 
-    <name>Idepix MODIS</name>
+    <name>IdePix MODIS</name>
     <packaging>nbm</packaging>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from MODIS.</description>
 

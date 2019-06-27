@@ -27,7 +27,7 @@
     <artifactId>idepix-viirs</artifactId>
     <packaging>nbm</packaging>
 
-    <name>Idepix Viirs</name>
+    <name>IdePix Viirs</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from Viirs.
     </description>
 

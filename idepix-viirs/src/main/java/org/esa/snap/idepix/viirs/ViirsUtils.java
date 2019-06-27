@@ -9,7 +9,7 @@ import org.esa.snap.core.util.BitSetter;
 import java.util.Random;
 
 /**
- * Utility class for Idepix VIIRS
+ * Utility class for IdePix VIIRS
  *
  * @author olafd
  */

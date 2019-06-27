@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Utility class for Idepix MERIS
+ * Utility class for IdePix MERIS
  *
  * @author olafd
  */

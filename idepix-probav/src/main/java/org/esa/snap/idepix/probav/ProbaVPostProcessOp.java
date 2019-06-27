@@ -19,7 +19,7 @@ import org.esa.snap.core.util.RectangleExtender;
 import java.awt.*;
 
 /**
- * Operator used to consolidate Idepix classification flag for Proba-V, currently:
+ * Operator used to consolidate IdePix classification flag for Proba-V, currently:
  * - basic flag consolidation following GK
  * - cloud shadow
  * - cloud buffer

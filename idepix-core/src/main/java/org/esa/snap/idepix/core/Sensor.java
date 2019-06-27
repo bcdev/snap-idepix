@@ -1,7 +1,7 @@
 package org.esa.snap.idepix.core;
 
 /**
- * Idepix sensor enumeration
+ * IdePix sensor enumeration
  *
  * @author olafd
  */

@@ -25,7 +25,7 @@ import java.awt.*;
  * - cloud shadow (from Fronts)
  *
  * @author olafd
- * @since Idepix 2.1
+ * @since IdePix 2.1
  */
 @OperatorMetadata(alias = "Idepix.Avhrr.Postprocess",
                   version = "3.0",

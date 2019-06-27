@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Utility class for Idepix OLCI
+ * Utility class for IdePix OLCI
  *
  * @author olafd
  */

@@ -27,7 +27,7 @@
     <artifactId>idepix-seawifs</artifactId>
     <packaging>nbm</packaging>
 
-    <name>Idepix SeaWiFS</name>
+    <name>IdePix SeaWiFS</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from SeaWiFS.
     </description>
 

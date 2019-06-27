@@ -3,7 +3,7 @@ package org.esa.snap.idepix.modis;
 import org.esa.snap.idepix.core.IdepixConstants;
 
 /**
- * Idepix MODIS consztants
+ * IdePix MODIS consztants
  *
  * @author olafd
  */

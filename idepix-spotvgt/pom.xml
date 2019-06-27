@@ -27,7 +27,7 @@
     <artifactId>idepix-spotvgt</artifactId>
     <packaging>nbm</packaging>
 
-    <name>Idepix Spot VGT</name>
+    <name>IdePix Spot VGT</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from Spot VGT.
     </description>
 

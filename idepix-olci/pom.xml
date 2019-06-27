@@ -27,7 +27,7 @@
 
     <artifactId>idepix-olci</artifactId>
 
-    <name>Idepix OLCI</name>
+    <name>IdePix OLCI</name>
     <packaging>nbm</packaging>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from OLCI.</description>
 

@@ -19,7 +19,7 @@ import org.esa.snap.core.util.RectangleExtender;
 import java.awt.*;
 
 /**
- * Operator used to consolidate Idepix classification flag for VGT, currently:
+ * Operator used to consolidate IdePix classification flag for VGT, currently:
  * - basic flag consolidation following GK
  * - cloud shadow
  *

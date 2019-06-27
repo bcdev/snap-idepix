@@ -3,7 +3,7 @@ package org.esa.snap.idepix.spotvgt;
 import org.esa.snap.idepix.core.IdepixConstants;
 
 /**
- * Constants for Idepix VGT algorithm
+ * Constants for IdePix VGT algorithm
  *
  * @author olafd
  */

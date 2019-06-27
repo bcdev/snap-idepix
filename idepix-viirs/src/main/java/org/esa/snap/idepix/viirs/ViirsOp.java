@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Idepix operator for pixel identification and classification for VIIRS
+ * IdePix operator for pixel identification and classification for VIIRS
  *
  * @author olafd
  */

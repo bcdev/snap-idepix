@@ -4,7 +4,7 @@
         "http://java.sun.com/products/javahelp/helpset_2_0.dtd">
 
 <helpset version="2.0">
-    <title>IdePix OLCI Generic Classification of Pixels Help</title>
+    <title>IdePix OLCI Help</title>
     <maps>
         <homeID>top</homeID>
         <mapref location="map.jhm"/>

@@ -26,7 +26,7 @@ import org.esa.snap.idepix.core.util.IdepixUtils;
 import java.awt.*;
 
 /**
- * Operator used to consolidate Idepix classification flag for OLCI:
+ * Operator used to consolidate IdePix classification flag for OLCI:
  * - cloud buffer
  *
  * @author olafd

@@ -27,7 +27,7 @@
     <artifactId>idepix-probav</artifactId>
     <packaging>nbm</packaging>
 
-    <name>Idepix ProbaV</name>
+    <name>IdePix ProbaV</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from ProbaV.
     </description>
 

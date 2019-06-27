@@ -27,7 +27,7 @@
 
     <packaging>nbm</packaging>
 
-    <name>Idepix Landsat 8</name>
+    <name>IdePix Landsat 8</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from Landsat 8.
     </description>
 

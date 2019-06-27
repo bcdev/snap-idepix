@@ -22,7 +22,7 @@ import java.util.Map;
 import static org.esa.snap.idepix.modis.IdepixModisConstants.MODIS_WATER_MASK_BAND_NAME;
 
 /**
- * Idepix operator for pixel identification and classification for MODIS
+ * IdePix operator for pixel identification and classification for MODIS
  *
  * @author olafd
  */

@@ -27,7 +27,7 @@
     <artifactId>idepix-avhrr</artifactId>
     <packaging>nbm</packaging>
 
-    <name>Idepix AVHRR</name>
+    <name>IdePix AVHRR</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from AVHRR.
     </description>
 

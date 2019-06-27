@@ -28,7 +28,7 @@ import java.awt.*;
 @OperatorMetadata(alias = "Idepix.Postprocess",
         version = "3.0",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Refines the Idepix pixel classification.",
+        description = "Refines the IdePix pixel classification.",
         internal = true)
 public class IdepixPostProcessingOp extends BasisOp{
 

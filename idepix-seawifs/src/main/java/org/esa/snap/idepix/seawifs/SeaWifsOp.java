@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Idepix pixel classification for SeaWiFS products
+ * The IdePix pixel classification for SeaWiFS products
  *
  * @author olafd
  */

@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Idepix operator for pixel identification and classification for Landsat-8 OLI instrument
+ * IdePix operator for pixel identification and classification for Landsat-8 OLI instrument
  *
  * @author olafd
  */
@@ -252,7 +252,7 @@ public class Landsat8Op extends Operator {
     private void checkIfLandsatIsReadAsReflectance() {
         if (!sourceProduct.getBandAt(0).getDescription().toLowerCase().contains("reflectance")) {
             throw new OperatorException("The landsat source product must provide reflectances. " +
-                                                "For configuration instructions see Idepix help documentation, Processor description for Landsat-8.");
+                                                "For configuration instructions see IdePix help documentation, Processor description for Landsat-8.");
         }
     }
 

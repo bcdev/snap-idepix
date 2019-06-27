@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * VGT pixel classification operator.
- * Pixels are classified from NN approach (following BEAM Idepix algorithm).
+ * Pixels are classified from NN approach (following BEAM IdePix algorithm).
  *
  * @author olafd
  */
@@ -34,7 +34,7 @@ import java.util.Map;
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Idepix land pixel classification operator for VGT.")
+        description = "IdePix land pixel classification operator for VGT.")
 public class VgtClassificationOp extends Operator {
 
     @Parameter(defaultValue = "true",

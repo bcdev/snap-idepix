@@ -1,7 +1,7 @@
 package org.esa.snap.idepix.olci;
 
 /**
- * Constants for Idepix OLCI algorithm
+ * Constants for IdePix OLCI algorithm
  *
  * @author olafd
  */

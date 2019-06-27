@@ -8,7 +8,7 @@ import org.esa.snap.idepix.core.IdepixFlagCoding;
 import java.util.Random;
 
 /**
- * Utility class for Idepix MODIS
+ * Utility class for IdePix MODIS
  *
  * @author olafd
  */

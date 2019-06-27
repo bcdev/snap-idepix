@@ -24,12 +24,10 @@
         <tocitem text="Optical">
             <tocitem text="Pre-Processing">
                 <tocitem text="Masking">
-                    <tocitem text="IdePix Classification of Pixels">
-                        <tocitem text="Idepix Classification of Pixels (S2 MSI Plugin)" target="snapIdepixS2MsiTool">
-                            <tocitem text="OLCI Processor Description" target="snapIdepixS2MsiProcessorDescription"/>
-                            <!--<tocitem text="OLCI Algorithm Specification" target="snapIdepixS2MsiAlgorithmSpecification"/>-->
-                            <tocitem text="OLCI Command Line Processing" target="snapIdepixS2MsiCommandLine"/>
-                        </tocitem>
+                    <tocitem text="IdePix (Sentinel-2 MSI)" target="snapIdepixS2MsiTool">
+                        <tocitem text="Sentinel-2 MSI Processor Description" target="snapIdepixS2MsiProcessorDescription"/>
+                        <!--<tocitem text="Sentinel-2 MSI Algorithm Specification" target="snapIdepixS2MsiAlgorithmSpecification"/>-->
+                        <tocitem text="Sentinel-2 MSI Command Line Processing" target="snapIdepixS2MsiCommandLine"/>
                     </tocitem>
                 </tocitem>
             </tocitem>

@@ -23,12 +23,10 @@
         <tocitem text="Optical">
             <tocitem text="Pre-Processing">
                 <tocitem text="Masking">
-                    <tocitem text="IdePix Classification of Pixels">
-                        <tocitem text="Idepix Classification of Pixels (Landsat-8 OLI)" target="snapIdepixLandsat8Tool">
-                            <tocitem text="Landsat-8 OLI Processor Description" target="snapIdepixLandsat8ProcessorDesc"/>
-                            <tocitem text="Landsat-8 OLI Algorithm Specification" target="snapIdepixLandsat8AlgorithmSpec"/>
-                            <tocitem text="Landsat-8 OLI Command Line Processing" target="snapIdepixLandsat8CommandLine"/>
-                        </tocitem>
+                    <tocitem text="IdePix (Landsat-8 OLI)" target="snapIdepixLandsat8Tool">
+                        <tocitem text="Landsat-8 OLI Processor Description" target="snapIdepixLandsat8ProcessorDesc"/>
+                        <tocitem text="Landsat-8 OLI Algorithm Specification" target="snapIdepixLandsat8AlgorithmSpec"/>
+                        <tocitem text="Landsat-8 OLI Command Line Processing" target="snapIdepixLandsat8CommandLine"/>
                     </tocitem>
                 </tocitem>
             </tocitem>

@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Idepix pixel classification for AVHRR products
+ * The IdePix pixel classification for AVHRR products
  *
  * @author olafd
  */

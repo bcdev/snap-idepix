@@ -9,3 +9,4 @@ OpenIDE-Module-Long-Description: <p>Core Functionality for generic classificatio
  Germany)</p><p><b>Copyright:</b> (C) 2014 by Brockmann Consult GmbH</
  p><p><b>Vendor:</b> Brockmann Consult GmbH</p><p><b>License:</b> http
  ://www.gnu.org/licenses/gpl.html</p>
+OpenIDE-Module-Layer: layer.xml

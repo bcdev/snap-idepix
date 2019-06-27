@@ -3,7 +3,7 @@ package org.esa.snap.idepix.seawifs;
 import org.esa.snap.idepix.core.IdepixConstants;
 
 /**
- * Constants for Idepix SeaWiFS algorithm
+ * Constants for IdePix SeaWiFS algorithm
  *
  * @author olafd
  */

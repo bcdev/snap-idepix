@@ -7,9 +7,9 @@
             <file name="org-esa-snap-idepix-meris-IdepixMerisOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="IdePix MERIS"/>
+                <attr name="displayName" stringvalue="IdePix Envisat MERIS"/>
                 <attr name="operatorName" stringvalue="Snap.Idepix.Envisat.Meris"/>
-                <attr name="dialogTitle" stringvalue="IdePix MERIS"/>
+                <attr name="dialogTitle" stringvalue="IdePix Envisat MERIS"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixMerisTool"/>
             </file>

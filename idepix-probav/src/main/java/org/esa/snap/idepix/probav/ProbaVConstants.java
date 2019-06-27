@@ -3,7 +3,7 @@ package org.esa.snap.idepix.probav;
 import org.esa.snap.idepix.core.IdepixConstants;
 
 /**
- * Constants for Idepix Proba-V algorithm
+ * Constants for IdePix Proba-V algorithm
  *
  * @author olafd
  */

@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Idepix pixel classification operator for OLCI products.
+ * The IdePix pixel classification operator for OLCI products.
  * <p>
  * Initial implementation:
  * - pure neural net approach which uses MERIS heritage bands only

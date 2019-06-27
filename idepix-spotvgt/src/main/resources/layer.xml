@@ -7,9 +7,9 @@
             <file name="org-esa-snap-idepix-spotvgt-SpotVGTOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="IdePix Spot VGT"/>
+                <attr name="displayName" stringvalue="IdePix SPOT Vegetation"/>
                 <attr name="operatorName" stringvalue="Idepix.Spot.Vegetation"/>
-                <attr name="dialogTitle" stringvalue="IdePix Spot VGT"/>
+                <attr name="dialogTitle" stringvalue="IdePix SPOT Vegetation"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixSpotvgtTool"/>
             </file>

@@ -36,7 +36,7 @@ import java.util.Map;
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Idepix land pixel classification operator for Proba-V.")
+        description = "IdePix land pixel classification operator for Proba-V.")
 public class ProbaVClassificationOp extends Operator {
 
     @Parameter(defaultValue = "false",

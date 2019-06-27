@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Idepix pixel classification for SPOT-VGT products
+ * The IdePix pixel classification for SPOT-VGT products
  *
  * @author olafd
  */

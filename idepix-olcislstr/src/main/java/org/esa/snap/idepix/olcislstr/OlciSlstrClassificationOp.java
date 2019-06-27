@@ -32,7 +32,7 @@ import java.util.Map;
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Idepix pixel classification operator for OLCI/SLSTR synergy.")
+        description = "IdePix pixel classification operator for OLCI/SLSTR synergy.")
 public class OlciSlstrClassificationOp extends Operator {
 
     @Parameter(defaultValue = "false",

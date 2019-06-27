@@ -28,7 +28,7 @@
 
     <packaging>nbm</packaging>
 
-    <name>Idepix Core</name>
+    <name>IdePix Core</name>
     <description>Core functionality for generic classification of pixels (cloud, snow, ice, land, water) originating from optical sensors.
     </description>
 

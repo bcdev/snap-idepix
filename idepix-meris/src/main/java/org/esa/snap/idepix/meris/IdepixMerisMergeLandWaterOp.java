@@ -18,7 +18,7 @@ import org.esa.snap.idepix.core.util.IdepixIO;
 import java.awt.*;
 
 /**
- * Idepix water/land merge operator for MERIS.
+ * IdePix water/land merge operator for MERIS.
  *
  * @author olafd
  */
@@ -27,7 +27,7 @@ import java.awt.*;
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Idepix water/land merge operator for MERIS.")
+        description = "IdePix water/land merge operator for MERIS.")
 public class IdepixMerisMergeLandWaterOp extends Operator {
     @SourceProduct(alias = "landClassif")
     private Product landClassifProduct;

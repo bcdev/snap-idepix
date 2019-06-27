@@ -3,7 +3,7 @@ package org.esa.snap.idepix.meris;
 import org.esa.snap.idepix.core.IdepixConstants;
 
 /**
- * Constants for Idepix MERIS algorithm
+ * Constants for IdePix MERIS algorithm
  *
  * @author olafd
  */

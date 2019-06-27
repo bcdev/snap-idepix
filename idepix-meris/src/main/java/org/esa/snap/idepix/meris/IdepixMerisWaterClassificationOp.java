@@ -43,7 +43,7 @@ import java.util.Calendar;
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Idepix water pixel classification operator for OLCI.")
+        description = "IdePix water pixel classification operator for OLCI.")
 public class IdepixMerisWaterClassificationOp extends Operator {
 
     private Band cloudFlagBand;

@@ -19,7 +19,7 @@ import java.util.Random;
 public class IdepixFlagCoding {
 
     /**
-     * Provides Idepix default flag coding
+     * Provides IdePix default flag coding
      *
      * @param flagId - the flag ID
      *

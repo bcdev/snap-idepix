@@ -3,7 +3,7 @@ package org.esa.snap.idepix.viirs;
 import org.esa.snap.idepix.core.IdepixConstants;
 
 /**
- * Constants for Idepix VIIRS algorithm
+ * Constants for IdePix VIIRS algorithm
  *
  * @author olafd
  */

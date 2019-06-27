@@ -14,7 +14,7 @@ import java.util.Random;
 import java.util.TimeZone;
 
 /**
- * Utility class for Idepix AVHRR-AC
+ * Utility class for IdePix AVHRR-AC
  *
  * @author olafd
  */
