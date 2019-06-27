@@ -46,7 +46,7 @@ public class TensorflowNNCalculator {
         } catch (LinkageError e) {
             throw new IllegalStateException("TensorFlow could not be initialised. " +
                                                     "Make sure that your CPU supports 64Bit and AVX instruction set " +
-                                                    "(Are you running in a VM?).", e);
+                                                    "(Possible reason could be the usage of a VM).", e);
         }
 
         this.transformMethod = transformMethod;
