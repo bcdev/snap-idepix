@@ -24,7 +24,6 @@ import java.util.Map;
  */
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "Idepix.Avhrr",
-        internal = true, // todo: clarify if this shall be further used. Invisible for the moment.
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne, Grit Kirches",
@@ -37,8 +36,8 @@ public class AvhrrOp extends BasisOp {
     private static final int OVERSAMPLING_FACTOR_Y = 3;
 
     @SourceProduct(alias = "sourceProduct",
-            label = "Landsat 8 product",
-            description = "The Landsat 8 source product.")
+            label = "AVHRR product",
+            description = "The AVHRR source product.")
     private Product sourceProduct;
 
     @TargetProduct(description = "The target product.")
