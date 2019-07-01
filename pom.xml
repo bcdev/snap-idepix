@@ -50,6 +50,7 @@
         <module>idepix-seawifs</module>
         <module>idepix-spotvgt</module>
         <module>idepix-viirs</module>
+        <module>idepix-assembly</module>
     </modules>
 
     <dependencyManagement>
@@ -161,8 +162,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-
         </plugins>
+        
         <pluginManagement>
             <plugins>
                 <plugin>
