@@ -304,6 +304,7 @@ public class AvhrrPostProcessOp extends Operator {
         final double ratio21 = refl2/refl1;
 
         final boolean firstCrit = rt3 > 0.08;
+        //TODO check ATBD CCI LC ATBD v3 / Part II: Pre-processing -p90
         final boolean secondCrit = (-40.15 < bt4 && bt4 < 1.35) &&
                 refl1 > 0.25 && (0.85 < ratio21 && ratio21 < 1.15) && rt3 < 0.02;
 

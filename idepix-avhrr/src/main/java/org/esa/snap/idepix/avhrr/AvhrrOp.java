@@ -23,8 +23,8 @@ import java.util.Map;
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "Idepix.Avhrr",
-        internal = true, // todo: clarify if this shall be further used. Invisible for the moment.
+@OperatorMetadata(alias = "Idepix.Noaa.Avhrr",
+        internal = false, // todo: clarify if this shall be further used. Invisible for the moment.
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne, Grit Kirches",
@@ -37,8 +37,8 @@ public class AvhrrOp extends BasisOp {
     private static final int OVERSAMPLING_FACTOR_Y = 3;
 
     @SourceProduct(alias = "sourceProduct",
-            label = "Landsat 8 product",
-            description = "The Landsat 8 source product.")
+            label = "AVHRR2 product",
+            description = "The AVHRR source product.")
     private Product sourceProduct;
 
     @TargetProduct(description = "The target product.")
@@ -59,10 +59,11 @@ public class AvhrrOp extends BasisOp {
     @Parameter(defaultValue = "2", label = " Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
-    @Parameter(defaultValue = "true",
-            label = " Refine pixel classification near coastlines",
-            description = "Refine pixel classification near coastlines. ")
-    private boolean refineClassificationNearCoastlines;
+//    @Parameter(defaultValue = "true",
+//            label = " Refine pixel classification near coastlines",
+//            description = "Refine pixel classification near coastlines. ")
+//    private boolean refineClassificationNearCoastlines;
+    private boolean refineClassificationNearCoastlines = false;
 
     @Parameter(defaultValue = "2.15",
             label = " Schiller NN cloud ambiguous lower boundary ",
@@ -89,7 +90,12 @@ public class AvhrrOp extends BasisOp {
         }
 
         aacCloudClassificationParameters = createAacCloudClassificationParameters();
-        processAvhrrAc();
+        if (sourceProduct.getDescription().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_TIMELINE_DESCRIPTION)){
+            processAvhrrTimeLineAc();
+        } else {
+            processAvhrrAc();
+        }
+
     }
 
     private Map<String, Object> createAacCloudClassificationParameters() {
@@ -109,6 +115,28 @@ public class AvhrrOp extends BasisOp {
     }
 
 
+    private void processAvhrrTimeLineAc() {
+        AbstractAvhrrClassificationOp acClassificationOp = new AvhrrTimelineClassificationOp();
+
+        acClassificationOp.setParameterDefaultValues();
+        for (String key : aacCloudClassificationParameters.keySet()) {
+            acClassificationOp.setParameter(key, aacCloudClassificationParameters.get(key));
+        }
+        acClassificationOp.setSourceProduct("aacl1b", sourceProduct);
+        createWaterMaskProduct();
+        acClassificationOp.setSourceProduct("waterMask", waterMaskProduct);
+
+        classificationProduct = acClassificationOp.getTargetProduct();
+        postProcess();
+
+        targetProduct = IdepixIO.cloneProduct(classificationProduct, true);
+        targetProduct.setName(sourceProduct.getName() + ".idepix");
+
+        Band cloudFlagBand;
+        cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
+
+    }
     private void processAvhrrAc() {
         AbstractAvhrrClassificationOp acClassificationOp = new AvhrrUSGSClassificationOp();
 
@@ -131,7 +159,6 @@ public class AvhrrOp extends BasisOp {
         cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
 
     }
-
     private void postProcess() {
         HashMap<String, Product> input = new HashMap<>();
         input.put("l1b", sourceProduct);

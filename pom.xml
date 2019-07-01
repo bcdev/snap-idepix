@@ -39,7 +39,7 @@
     <!-- AVHRR and OLCI/SLSTR currently deactivated, 20190621 -->
     <modules>
         <module>idepix-core</module>
-        <!--<module>idepix-avhrr</module>-->
+        <module>idepix-avhrr</module>
         <module>idepix-landsat8</module>
         <module>idepix-meris</module>
         <module>idepix-modis</module>

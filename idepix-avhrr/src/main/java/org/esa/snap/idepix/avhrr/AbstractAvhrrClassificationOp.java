@@ -106,6 +106,10 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
     static final int ALBEDO_TO_RADIANCE = 0;
     static final int RADIANCE_TO_ALBEDO = 1;
 
+    static final int BT_TO_RADIANCE = 0;
+    static final int RADIANCE_TO_BT = 1;
+
+
     static final String AVHRRAC_NET_NAME = "6x3_114.1.net";
 
     ThreadLocal<SchillerNeuralNetWrapper> avhrracNeuralNet;

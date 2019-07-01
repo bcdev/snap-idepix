@@ -50,6 +50,8 @@ public class IdepixConstants {
     public static final String AVHRR_L1b_PRODUCT_TYPE = "AVHRR";
     public static final String AVHRR_L1b_USGS_PRODUCT_TYPE = "NOAA_POD_AVHRR_HRPT";
 
+    public static final String AVHRR_L1b_TIMELINE_DESCRIPTION = "AVHRR FCDR";
+
     public static final String VGT_RADIANCE_0_BAND_NAME = "B0";
     public static final String VGT_RADIANCE_2_BAND_NAME = "B2";
     public static final String VGT_RADIANCE_3_BAND_NAME = "B3";

@@ -26,6 +26,7 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
 
     double rho3b;
     double emissivity3b;
+    //todo calculation of ndsi
     double ndsi;
 
     String noaaId;

@@ -166,8 +166,9 @@ public class IdepixIO {
     }
 
     public static boolean isValidAvhrrProduct(Product product) {
-        return product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_PRODUCT_TYPE) ||
-                product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_USGS_PRODUCT_TYPE);
+//        return product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_PRODUCT_TYPE) ||
+//                product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_USGS_PRODUCT_TYPE);
+        return product.getDescription().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_TIMELINE_DESCRIPTION);
     }
 
     public static boolean isValidLandsat8Product(Product product) {

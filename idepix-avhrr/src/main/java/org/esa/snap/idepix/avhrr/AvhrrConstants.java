@@ -32,6 +32,28 @@ public class AvhrrConstants {
             AVHRR_AC_RADIANCE_5_BAND_NAME
     };
 
+    public static final String AVHRR_AC_TL_ALBEDO_1_BAND_NAME = "albedo_1";
+    public static final String AVHRR_AC_TL_ALBEDO_2_BAND_NAME = "albedo_2";
+
+    public static final String[] AVHRR_AC_TL_ALBEDO_BAND_NAMES = {
+            AVHRR_AC_TL_ALBEDO_1_BAND_NAME,
+            AVHRR_AC_TL_ALBEDO_2_BAND_NAME,
+    };
+
+    public static final String AVHRR_AC_TL_RADIANCE_1_BAND_NAME = "radiance_1";
+    public static final String AVHRR_AC_TL_RADIANCE_2_BAND_NAME = "radiance_2";
+    public static final String AVHRR_AC_TL_RADIANCE_4_BAND_NAME = "radiance_4";
+    public static final String AVHRR_AC_TL_RADIANCE_5_BAND_NAME = "radiance_5";
+
+
+    public static final String[] AVHRR_AC_TL_RADIANCE_BAND_NAMES = {
+            AVHRR_AC_TL_RADIANCE_1_BAND_NAME,
+            AVHRR_AC_TL_RADIANCE_2_BAND_NAME,
+            AVHRR_AC_TL_RADIANCE_4_BAND_NAME,
+            AVHRR_AC_TL_RADIANCE_5_BAND_NAME
+    };
+
+
     static final int SRC_USGS_SZA = 0;
     static final int SRC_USGS_LAT = 1;
     static final int SRC_USGS_LON = 2;
@@ -41,6 +63,18 @@ public class AvhrrConstants {
     static final int SRC_USGS_RADIANCE_4 = 6;
     static final int SRC_USGS_RADIANCE_5 = 7;
     static final int SRC_USGS_WATERFRACTION = 8;
+
+    static final int SRC_TIMELINE_SZA = 0;
+    static final int SRC_TIMELINE_SAA = 1;
+    static final int SRC_TIMELINE_VZA = 2;
+    static final int SRC_TIMELINE_VAA = 3;
+    static final int SRC_TIMELINE_ALBEDO_1 = 5;
+    static final int SRC_TIMELINE_ALBEDO_2 = 6;
+    static final int SRC_TIMELINE_ALBEDO_3a = 7;
+    static final int SRC_TIMELINE_BT_3b = 8;
+    static final int SRC_TIMELINE_BT_4 = 9;
+    static final int SRC_TIMELINE_BT_5 = 10;
+    static final int SRC_TIMELINE_WATERFRACTION = 8;
 
     public static final double SOLAR_3b = 4.448;
     // first value of the following constants is for NOAA11, second value for NOAA14
