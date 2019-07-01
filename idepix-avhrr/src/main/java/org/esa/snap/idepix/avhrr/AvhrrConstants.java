@@ -64,17 +64,27 @@ public class AvhrrConstants {
     static final int SRC_USGS_RADIANCE_5 = 7;
     static final int SRC_USGS_WATERFRACTION = 8;
 
+//    sampleConfigurer.defineSample(index++, "sun_zenith");
+//    sampleConfigurer.defineSample(index++, "sun_azimuth");
+//    sampleConfigurer.defineSample(index++, "sat_zenith");
+//    sampleConfigurer.defineSample(index++, "sat_azimuth");
+//    sampleConfigurer.defineSample(index++, "avhrr_b1");
+//    sampleConfigurer.defineSample(index++, "avhrr_b2");
+//    sampleConfigurer.defineSample(index++, "avhrr_b3a");
+//    sampleConfigurer.defineSample(index++, "avhrr_b3b");
+//    sampleConfigurer.defineSample(index++, "avhrr_b4");
+//    sampleConfigurer.defineSample(index++, "avhrr_b5");
+
     static final int SRC_TIMELINE_SZA = 0;
     static final int SRC_TIMELINE_SAA = 1;
     static final int SRC_TIMELINE_VZA = 2;
     static final int SRC_TIMELINE_VAA = 3;
-    static final int SRC_TIMELINE_ALBEDO_1 = 5;
-    static final int SRC_TIMELINE_ALBEDO_2 = 6;
-    static final int SRC_TIMELINE_ALBEDO_3a = 7;
-    static final int SRC_TIMELINE_BT_3b = 8;
-    static final int SRC_TIMELINE_BT_4 = 9;
-    static final int SRC_TIMELINE_BT_5 = 10;
-    static final int SRC_TIMELINE_WATERFRACTION = 8;
+    static final int SRC_TIMELINE_ALBEDO_1 = 4;
+    static final int SRC_TIMELINE_ALBEDO_2 = 5;
+    static final int SRC_TIMELINE_ALBEDO_3a = 6;
+    static final int SRC_TIMELINE_BT_3b = 7;
+    static final int SRC_TIMELINE_BT_4 = 8;
+    static final int SRC_TIMELINE_BT_5 = 9;
 
     public static final double SOLAR_3b = 4.448;
     // first value of the following constants is for NOAA11, second value for NOAA14
