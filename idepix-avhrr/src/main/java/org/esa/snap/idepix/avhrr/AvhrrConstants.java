@@ -40,20 +40,6 @@ public class AvhrrConstants {
             AVHRR_AC_TL_ALBEDO_2_BAND_NAME,
     };
 
-    public static final String AVHRR_AC_TL_RADIANCE_1_BAND_NAME = "radiance_1";
-    public static final String AVHRR_AC_TL_RADIANCE_2_BAND_NAME = "radiance_2";
-    public static final String AVHRR_AC_TL_RADIANCE_4_BAND_NAME = "radiance_4";
-    public static final String AVHRR_AC_TL_RADIANCE_5_BAND_NAME = "radiance_5";
-
-
-    public static final String[] AVHRR_AC_TL_RADIANCE_BAND_NAMES = {
-            AVHRR_AC_TL_RADIANCE_1_BAND_NAME,
-            AVHRR_AC_TL_RADIANCE_2_BAND_NAME,
-            AVHRR_AC_TL_RADIANCE_4_BAND_NAME,
-            AVHRR_AC_TL_RADIANCE_5_BAND_NAME
-    };
-
-
     static final int SRC_USGS_SZA = 0;
     static final int SRC_USGS_LAT = 1;
     static final int SRC_USGS_LON = 2;
@@ -64,16 +50,15 @@ public class AvhrrConstants {
     static final int SRC_USGS_RADIANCE_5 = 7;
     static final int SRC_USGS_WATERFRACTION = 8;
 
-//    sampleConfigurer.defineSample(index++, "sun_zenith");
-//    sampleConfigurer.defineSample(index++, "sun_azimuth");
-//    sampleConfigurer.defineSample(index++, "sat_zenith");
-//    sampleConfigurer.defineSample(index++, "sat_azimuth");
-//    sampleConfigurer.defineSample(index++, "avhrr_b1");
-//    sampleConfigurer.defineSample(index++, "avhrr_b2");
-//    sampleConfigurer.defineSample(index++, "avhrr_b3a");
-//    sampleConfigurer.defineSample(index++, "avhrr_b3b");
-//    sampleConfigurer.defineSample(index++, "avhrr_b4");
-//    sampleConfigurer.defineSample(index++, "avhrr_b5");
+    static final String[] SRC_TIMELINE_SPECTRAL_BAND_NAMES = {
+            "avhrr_b1", "avhrr_b2", "avhrr_b3b", "avhrr_b4", "avhrr_b5"
+    };
+
+    static final String SRC_TIMELINE_SZA_BAND_NAME = "sun_zenith";
+    static final String SRC_TIMELINE_VZA_BAND_NAME = "sun_azimuth";
+    static final String SRC_TIMELINE_SAA_BAND_NAME = "sat_zenith";
+    static final String SRC_TIMELINE_VAA_BAND_NAME = "sat_azimuth";
+    static final String SRC_TIMELINE_ALTITUDE_BAND_NAME = "altitude";
 
     static final int SRC_TIMELINE_SZA = 0;
     static final int SRC_TIMELINE_SAA = 1;
@@ -81,10 +66,10 @@ public class AvhrrConstants {
     static final int SRC_TIMELINE_VAA = 3;
     static final int SRC_TIMELINE_ALBEDO_1 = 4;
     static final int SRC_TIMELINE_ALBEDO_2 = 5;
-    static final int SRC_TIMELINE_ALBEDO_3a = 6;
-    static final int SRC_TIMELINE_BT_3b = 7;
-    static final int SRC_TIMELINE_BT_4 = 8;
-    static final int SRC_TIMELINE_BT_5 = 9;
+    static final int SRC_TIMELINE_RAD_3b = 6;
+    static final int SRC_TIMELINE_RAD_4 = 7;
+    static final int SRC_TIMELINE_RAD_5 = 8;
+    static final int SRC_TIMELINE_WATERFRACTION = 9;
 
     public static final double SOLAR_3b = 4.448;
     // first value of the following constants is for NOAA11, second value for NOAA14

@@ -119,6 +119,7 @@ public class AvhrrAcUtils {
         double nuFinal = nuStart;
         switch (noaaId) {
             case "11":
+            case "7":     // todo: get correct values from GK
                 if (tRef < 225.0) {
                     nuFinal = rad2BTTable.getNuLow(ch);
                 } else if (tRef >= 225.0 && tRef < 275.0) {
@@ -138,6 +139,7 @@ public class AvhrrAcUtils {
                 }
                 break;
             case "14":
+            case "15":
                 if (tRef < 230.0) {
                     nuFinal = rad2BTTable.getNuLow(ch);
                 } else if (tRef >= 230.0 && tRef < 270.0) {
@@ -171,6 +173,7 @@ public class AvhrrAcUtils {
         double nuFinal = nuStart;
         switch (noaaId) {
             case "11":
+            case "7":
                 if (tRef < 225.0) {
                     nuFinal = rad2BTTable.getNuLow(ch);
                 } else if (tRef >= 225.0 && tRef < 275.0) {
@@ -190,6 +193,7 @@ public class AvhrrAcUtils {
                 }
                 break;
             case "14":
+            case "15":
                 if (tRef < 230.0) {
                     nuFinal = rad2BTTable.getNuLow(ch);
                 } else if (tRef >= 230.0 && tRef < 270.0) {

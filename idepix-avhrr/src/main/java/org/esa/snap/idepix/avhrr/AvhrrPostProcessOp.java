@@ -113,11 +113,6 @@ public class AvhrrPostProcessOp extends Operator {
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
         final Tile waterFractionTile = getSourceTile(landWaterBand, srcRectangle);
 
-        final Tile rt3Tile = getSourceTile(rt3Band, srcRectangle);
-        final Tile bt4Tile = getSourceTile(bt4Band, srcRectangle);
-        final Tile refl1Tile = getSourceTile(refl1Band, srcRectangle);
-        final Tile refl2Tile = getSourceTile(refl2Band, srcRectangle);
-
         for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
             checkForCancellation();
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {

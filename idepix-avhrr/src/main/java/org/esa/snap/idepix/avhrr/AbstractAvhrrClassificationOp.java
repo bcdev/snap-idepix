@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.avhrr;
 
+import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.idepix.core.util.*;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
@@ -31,7 +32,7 @@ import java.util.Calendar;
         description = "Abstract basic operator for pixel classification from AVHRR L1b data.")
 public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 
-    @SourceProduct(alias = "aacl1b", description = "The source product.")
+    @SourceProduct(alias = "l1b", description = "The source product.")
     Product sourceProduct;
 
     @SourceProduct(alias = "waterMask")
@@ -41,17 +42,20 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
     Product targetProduct;
 
     @Parameter(defaultValue = "false", label = " Copy input radiance bands (with albedo1/2 converted)")
-    boolean aacCopyRadiances = false;
+    boolean copyRadiances = false;
+
+    @Parameter(defaultValue = "false", label = " Copy geometry bands")
+    boolean copyGeometries = false;
 
     @Parameter(defaultValue = "2", label = " Width of cloud buffer (# of pixels)")
-    int aacCloudBufferWidth;
+    int cloudBufferWidth;
 
     @Parameter(defaultValue = "50", valueSet = {"50", "150"}, label = " Resolution of used land-water mask in m/pixel",
             description = "Resolution in m/pixel")
     int wmResolution;
 
     @Parameter(defaultValue = "true", label = " Consider water mask fraction")
-    boolean aacUseWaterMaskFraction = true;
+    boolean useWaterMaskFraction = true;
 
     @Parameter(defaultValue = "false", label = " Flip source images (check before if needed!)")
     boolean flipSourceImages;
@@ -59,17 +63,17 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
     @Parameter(defaultValue = "2.15",
             label = " Schiller NN cloud ambiguous lower boundary ",
             description = " Schiller NN cloud ambiguous lower boundary ")
-    double avhrracSchillerNNCloudAmbiguousLowerBoundaryValue;
+    double avhrrNNCloudAmbiguousLowerBoundaryValue;
 
     @Parameter(defaultValue = "3.45",
             label = " Schiller NN cloud ambiguous/sure separation value ",
             description = " Schiller NN cloud ambiguous cloud ambiguous/sure separation value ")
-    double avhrracSchillerNNCloudAmbiguousSureSeparationValue;
+    double avhrrNNCloudAmbiguousSureSeparationValue;
 
     @Parameter(defaultValue = "4.45",
             label = " Schiller NN cloud sure/snow separation value ",
             description = " Schiller NN cloud ambiguous cloud sure/snow separation value ")
-    double avhrracSchillerNNCloudSureSnowSeparationValue;
+    double avhrrNNCloudSureSnowSeparationValue;
 
 
     @Parameter(defaultValue = "20.0",
@@ -102,6 +106,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
             description = " Channel 5 brightness temperature threshold (C)")
     double btCh5Thresh;
 
+    ElevationModel getasseElevationModel;
 
     static final int ALBEDO_TO_RADIANCE = 0;
     static final int RADIANCE_TO_ALBEDO = 1;
@@ -112,7 +117,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 
     static final String AVHRRAC_NET_NAME = "6x3_114.1.net";
 
-    ThreadLocal<SchillerNeuralNetWrapper> avhrracNeuralNet;
+    ThreadLocal<SchillerNeuralNetWrapper> avhrrNeuralNet;
 
     AvhrrAuxdata.Line2ViewZenithTable vzaTable;
     AvhrrAuxdata.Rad2BTTable rad2BTTable;
@@ -128,12 +133,12 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        runAvhrrAcAlgorithm(x, y, sourceSamples, targetSamples);
+        runAvhrrAlgorithm(x, y, sourceSamples, targetSamples);
     }
 
     void readSchillerNets() {
         try (InputStream is = getClass().getResourceAsStream(AVHRRAC_NET_NAME)) {
-            avhrracNeuralNet = SchillerNeuralNetWrapper.create(is);
+            avhrrNeuralNet = SchillerNeuralNetWrapper.create(is);
         } catch (IOException e) {
             throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
         }
@@ -148,7 +153,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         sunPosition = SunPositionCalculator.calculate(calendar);
     }
 
-    int getDoy() {
+    private int getDoy() {
         return IdepixUtils.getDoyFromYYMMDD(getProductDatestring());
     }
 
@@ -181,14 +186,16 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 
         switch (noaaId) {
             case "11":
+            case "7":  // todo: get correct values from GK
                 // NOAA 11
                 sensorId = 0;
                 frequenz=0;
                 break;
             case "14":
+            case "15":
                 // NOAA 14
-                sensorId = 0;
-                frequenz=0;
+                sensorId = 1;    // this was wrong?!?!
+                frequenz=0;      // what about this??
                 break;
             default:
                 throw new OperatorException("Cannot parse source product name " + sourceProduct.getName() + " properly.");
@@ -228,14 +235,13 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         return result;
     }
 
-
-
     double convertBetweenAlbedoAndRadiance(double input, double sza, int mode, int bandIndex) {
         // follows GK formula
         float[] integrSolarSpectralIrrad = new float[2];     // F
         float[] spectralResponseWidth = new float[2];        // W
         switch (noaaId) {
             case "11":
+            case "7":  // todo: get correct values from GK
                 // NOAA 11
                 integrSolarSpectralIrrad[0] = 184.1f;
                 integrSolarSpectralIrrad[1] = 241.1f;
@@ -243,6 +249,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
                 spectralResponseWidth[1] = 0.229f;
                 break;
             case "14":
+            case "15":
                 // NOAA 14
                 integrSolarSpectralIrrad[0] = 221.42f;
                 integrSolarSpectralIrrad[1] = 252.29f;
@@ -273,7 +280,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 
     abstract void setClassifFlag(WritableSample[] targetSamples, AvhrrAlgorithm algorithm);
 
-    abstract void runAvhrrAcAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples);
+    abstract void runAvhrrAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples);
 
     abstract void setNoaaId();
 

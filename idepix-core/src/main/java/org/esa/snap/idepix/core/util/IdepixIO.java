@@ -35,7 +35,7 @@ public class IdepixIO {
     /**
      * Copies the tie point data.
      */
-    public static void copyTiePoints(Product sourceProduct,
+    private static void copyTiePoints(Product sourceProduct,
                                      Product targetProduct, boolean copyAllTiePoints) {
         if (copyAllTiePoints) {
             // copy all tie point grids to output product
@@ -105,7 +105,7 @@ public class IdepixIO {
         return clonedProduct;
     }
 
-    public static boolean isIdepixSpectralBand(Band b) {
+    private static boolean isIdepixSpectralBand(Band b) {
         return b.getName().startsWith("radiance") || b.getName().startsWith("refl") ||
                 b.getName().startsWith("brr") || b.getName().startsWith("rho_toa");
     }
@@ -115,7 +115,7 @@ public class IdepixIO {
         return isInputValid(inputProduct) && isInputConsistentWithAlgorithm(inputProduct, algorithm);
     }
 
-    public static boolean isInputValid(Product inputProduct) {
+    private static boolean isInputValid(Product inputProduct) {
         if (!isValidAvhrrProduct(inputProduct) &&
                 !isValidLandsat8Product(inputProduct) &&
                 !isValidProbavProduct(inputProduct) &&
@@ -133,7 +133,7 @@ public class IdepixIO {
         return true;
     }
 
-    public static boolean isValidMerisProduct(Product product) {
+    private static boolean isValidMerisProduct(Product product) {
         final boolean merisL1TypePatternMatches = EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(product.getProductType()).matches();
         // accept also ICOL L1N products...
         final boolean merisIcolTypePatternMatches = isValidMerisIcolL1NProduct(product);
@@ -141,12 +141,12 @@ public class IdepixIO {
         return merisL1TypePatternMatches || merisIcolTypePatternMatches || merisCCL1PTypePatternMatches;
     }
 
-    public static boolean isValidOlciProduct(Product product) {
+    private static boolean isValidOlciProduct(Product product) {
 //        return product.getProductType().startsWith("S3A_OL_");  // todo: clarify
         return product.getProductType().contains("OL_1");  // new products have product type 'OL_1_ERR'
     }
 
-    public static boolean isValidOlciSlstrSynergyProduct(Product product) {
+    private static boolean isValidOlciSlstrSynergyProduct(Product product) {
         return product.getName().contains("S3A_SY_1");  // todo: clarify
     }
 
@@ -165,13 +165,15 @@ public class IdepixIO {
         return IdepixConstants.MERIS_CCL1P_TYPE_PATTERN.matcher(product.getProductType()).matches();
     }
 
-    public static boolean isValidAvhrrProduct(Product product) {
+    private static boolean isValidAvhrrProduct(Product product) {
 //        return product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_PRODUCT_TYPE) ||
 //                product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_USGS_PRODUCT_TYPE);
-        return product.getDescription().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_TIMELINE_DESCRIPTION);
+        return (product.getDescription() != null &&
+                product.getDescription().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_TIMELINE_DESCRIPTION)) ||
+                product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_USGS_PRODUCT_TYPE);
     }
 
-    public static boolean isValidLandsat8Product(Product product) {
+    static boolean isValidLandsat8Product(Product product) {
         return product.containsBand("coastal_aerosol") &&
                 product.containsBand("blue") &&
                 product.containsBand("green") &&
@@ -186,7 +188,7 @@ public class IdepixIO {
 
     }
 
-    public static boolean isValidModisProduct(Product product) {
+    private static boolean isValidModisProduct(Product product) {
         //        return (product.getName().matches("MOD021KM.A[0-9]{7}.[0-9]{4}.[0-9]{3}.[0-9]{13}.(?i)(hdf)") ||
         //                product.getName().matches("MOD021KM.A[0-9]{7}.[0-9]{4}.[0-9]{3}.[0-9]{13}") ||
         //                product.getName().matches("A[0-9]{13}.(?i)(L1B_LAC)"));
@@ -195,13 +197,13 @@ public class IdepixIO {
                 product.getName().contains("L1B_"));  // seems that we have various extensions :-(
     }
 
-    public static boolean isValidSeawifsProduct(Product product) {
+    private static boolean isValidSeawifsProduct(Product product) {
         return (product.getName().matches("S[0-9]{13}.(?i)(L1B_HRPT)") ||
                 product.getName().matches("S[0-9]{13}.(?i)(L1B_GAC)") ||
                 product.getName().matches("S[0-9]{13}.(?i)(L1C)"));
     }
 
-    public static boolean isValidViirsProduct(Product product) {
+    private static boolean isValidViirsProduct(Product product) {
         String[] expectedBandNames = new String[]{"rhot_410", "rhot_443", "rhot_486", "rhot_551", "rhot_671",
                 "rhot_745", "rhot_862", "rhot_1238", "rhot_1601", "rhot_2257"};
         for (String expectedBandName : expectedBandNames) {
@@ -219,11 +221,11 @@ public class IdepixIO {
     }
 
 
-    public static boolean isValidProbavProduct(Product product) {
+    private static boolean isValidProbavProduct(Product product) {
         return product.getProductType().startsWith(IdepixConstants.PROBAV_PRODUCT_TYPE_PREFIX);
     }
 
-    public static boolean isValidVgtProduct(Product product) {
+    private static boolean isValidVgtProduct(Product product) {
         return product.getProductType().startsWith(IdepixConstants.SPOT_VGT_PRODUCT_TYPE_PREFIX);
     }
 

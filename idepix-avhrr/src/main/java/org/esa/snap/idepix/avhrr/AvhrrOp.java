@@ -24,17 +24,17 @@ import java.util.Map;
  */
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "Idepix.Noaa.Avhrr",
-        internal = false, // todo: clarify if this shall be further used. Invisible for the moment.
+        internal = false,
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne, Grit Kirches",
-        copyright = "(c) 2016 by Brockmann Consult",
+        copyright = "(c) 2016, 2019 Brockmann Consult",
         description = "Pixel identification and classification for AVHRR.")
 public class AvhrrOp extends BasisOp {
 
-    private static final int LAND_WATER_MASK_RESOLUTION = 50;
-    private static final int OVERSAMPLING_FACTOR_X = 3;
-    private static final int OVERSAMPLING_FACTOR_Y = 3;
+    private static final int LAND_WATER_MASK_RESOLUTION = 1000;
+    private static final int SUBSAMPLING_FACTOR_X = 1;
+    private static final int SUBSAMPLING_FACTOR_Y = 1;
 
     @SourceProduct(alias = "sourceProduct",
             label = "AVHRR2 product",
@@ -46,11 +46,15 @@ public class AvhrrOp extends BasisOp {
 
     private Product classificationProduct;
     private Product postProcessingProduct;
+
     private Product waterMaskProduct;
 
 
     @Parameter(defaultValue = "false", label = " Copy input radiance/reflectance bands")
-    private boolean aacCopyRadiances = false;
+    private boolean copyRadiances = false;
+
+    @Parameter(defaultValue = "false", label = " Copy geometry bands")
+    private boolean copyGeometries = false;
 
     @Parameter(defaultValue = "true",
             label = " Compute a cloud buffer")
@@ -59,28 +63,22 @@ public class AvhrrOp extends BasisOp {
     @Parameter(defaultValue = "2", label = " Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
-//    @Parameter(defaultValue = "true",
-//            label = " Refine pixel classification near coastlines",
-//            description = "Refine pixel classification near coastlines. ")
-//    private boolean refineClassificationNearCoastlines;
-    private boolean refineClassificationNearCoastlines = false;
-
     @Parameter(defaultValue = "2.15",
-            label = " Schiller NN cloud ambiguous lower boundary ",
-            description = " Schiller NN cloud ambiguous lower boundary ")
-    double avhrracSchillerNNCloudAmbiguousLowerBoundaryValue;
+            label = " NN cloud ambiguous lower boundary ",
+            description = " NN cloud ambiguous lower boundary ")
+    private double avhrrNNCloudAmbiguousLowerBoundaryValue;
 
     @Parameter(defaultValue = "3.45",
-            label = " Schiller NN cloud ambiguous/sure separation value ",
-            description = " Schiller NN cloud ambiguous cloud ambiguous/sure separation value ")
-    double avhrracSchillerNNCloudAmbiguousSureSeparationValue;
+            label = " NN cloud ambiguous/sure separation value ",
+            description = " NN cloud ambiguous cloud ambiguous/sure separation value ")
+    private double avhrrNNCloudAmbiguousSureSeparationValue;
 
     @Parameter(defaultValue = "4.45",
-            label = " Schiller NN cloud sure/snow separation value ",
-            description = " Schiller NN cloud ambiguous cloud sure/snow separation value ")
-    double avhrracSchillerNNCloudSureSnowSeparationValue;
+            label = " NN cloud sure/snow separation value ",
+            description = " NN cloud ambiguous cloud sure/snow separation value ")
+    private double avhrrNNCloudSureSnowSeparationValue;
 
-    private Map<String, Object> aacCloudClassificationParameters;
+    private Map<String, Object> cloudClassificationParameters;
 
     @Override
     public void initialize() throws OperatorException {
@@ -89,44 +87,43 @@ public class AvhrrOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        aacCloudClassificationParameters = createAacCloudClassificationParameters();
-        if (sourceProduct.getDescription().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_TIMELINE_DESCRIPTION)){
-            processAvhrrTimeLineAc();
+        cloudClassificationParameters = createCloudClassificationParameters();
+        if (sourceProduct.getDescription() != null &&
+                sourceProduct.getDescription().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_TIMELINE_DESCRIPTION)){
+            processAvhrrTimeLine();
         } else {
-            processAvhrrAc();
+            processAvhrr();
         }
-
     }
 
-    private Map<String, Object> createAacCloudClassificationParameters() {
-        Map<String, Object> aacCloudClassificationParameters = new HashMap<>(1);
-        aacCloudClassificationParameters.put("aacCopyRadiances", aacCopyRadiances);
-        aacCloudClassificationParameters.put("aacCloudBufferWidth", cloudBufferWidth);
-//        aacCloudClassificationParameters.put("wmResolution", 50);
-//        aacCloudClassificationParameters.put("aacUseWaterMaskFraction", true);
-        aacCloudClassificationParameters.put("avhrracSchillerNNCloudAmbiguousLowerBoundaryValue",
-                                             avhrracSchillerNNCloudAmbiguousLowerBoundaryValue);
-        aacCloudClassificationParameters.put("avhrracSchillerNNCloudAmbiguousSureSeparationValue",
-                                             avhrracSchillerNNCloudAmbiguousSureSeparationValue);
-        aacCloudClassificationParameters.put("avhrracSchillerNNCloudSureSnowSeparationValue",
-                                             avhrracSchillerNNCloudSureSnowSeparationValue);
+    private Map<String, Object> createCloudClassificationParameters() {
+        Map<String, Object> cloudClassificationParameters = new HashMap<>(1);
+        cloudClassificationParameters.put("copyRadiances", copyRadiances);
+        cloudClassificationParameters.put("copyGeometries", copyGeometries);
+        cloudClassificationParameters.put("cloudBufferWidth", cloudBufferWidth);
+        cloudClassificationParameters.put("avhrrNNCloudAmbiguousLowerBoundaryValue",
+                                             avhrrNNCloudAmbiguousLowerBoundaryValue);
+        cloudClassificationParameters.put("avhrrNNCloudAmbiguousSureSeparationValue",
+                                             avhrrNNCloudAmbiguousSureSeparationValue);
+        cloudClassificationParameters.put("avhrrNNCloudSureSnowSeparationValue",
+                                             avhrrNNCloudSureSnowSeparationValue);
 
-        return aacCloudClassificationParameters;
+        return cloudClassificationParameters;
     }
 
 
-    private void processAvhrrTimeLineAc() {
-        AbstractAvhrrClassificationOp acClassificationOp = new AvhrrTimelineClassificationOp();
+    private void processAvhrrTimeLine() {
+        AbstractAvhrrClassificationOp timelineClassificationOp = new AvhrrTimelineClassificationOp();
 
-        acClassificationOp.setParameterDefaultValues();
-        for (String key : aacCloudClassificationParameters.keySet()) {
-            acClassificationOp.setParameter(key, aacCloudClassificationParameters.get(key));
+        timelineClassificationOp.setParameterDefaultValues();
+        for (String key : cloudClassificationParameters.keySet()) {
+            timelineClassificationOp.setParameter(key, cloudClassificationParameters.get(key));
         }
-        acClassificationOp.setSourceProduct("aacl1b", sourceProduct);
+        timelineClassificationOp.setSourceProduct("l1b", sourceProduct);
         createWaterMaskProduct();
-        acClassificationOp.setSourceProduct("waterMask", waterMaskProduct);
+        timelineClassificationOp.setSourceProduct("waterMask", waterMaskProduct);
 
-        classificationProduct = acClassificationOp.getTargetProduct();
+        classificationProduct = timelineClassificationOp.getTargetProduct();
         postProcess();
 
         targetProduct = IdepixIO.cloneProduct(classificationProduct, true);
@@ -137,18 +134,18 @@ public class AvhrrOp extends BasisOp {
         cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
 
     }
-    private void processAvhrrAc() {
-        AbstractAvhrrClassificationOp acClassificationOp = new AvhrrUSGSClassificationOp();
+    private void processAvhrr() {
+        AbstractAvhrrClassificationOp usgsClassificationOp = new AvhrrUSGSClassificationOp();
 
-        acClassificationOp.setParameterDefaultValues();
-        for (String key : aacCloudClassificationParameters.keySet()) {
-            acClassificationOp.setParameter(key, aacCloudClassificationParameters.get(key));
+        usgsClassificationOp.setParameterDefaultValues();
+        for (String key : cloudClassificationParameters.keySet()) {
+            usgsClassificationOp.setParameter(key, cloudClassificationParameters.get(key));
         }
-        acClassificationOp.setSourceProduct("aacl1b", sourceProduct);
+        usgsClassificationOp.setSourceProduct("l1b", sourceProduct);
         createWaterMaskProduct();
-        acClassificationOp.setSourceProduct("waterMask", waterMaskProduct);
+        usgsClassificationOp.setSourceProduct("waterMask", waterMaskProduct);
 
-        classificationProduct = acClassificationOp.getTargetProduct();
+        classificationProduct = usgsClassificationOp.getTargetProduct();
         postProcess();
 
         targetProduct = IdepixIO.cloneProduct(classificationProduct, true);
@@ -168,23 +165,16 @@ public class AvhrrOp extends BasisOp {
         params.put("cloudBufferWidth", cloudBufferWidth);
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("computeCloudShadow", false);     // todo: we need algo
-        params.put("refineClassificationNearCoastlines", refineClassificationNearCoastlines);  // always an improvement, but time consuming
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(AvhrrPostProcessOp.class), params, input);
     }
 
     private void createWaterMaskProduct() {
-//        HashMap<String, Object> waterParameters = new HashMap<>();
-//        waterParameters.put("resolution", 50);
-//        waterParameters.put("subSamplingFactorX", 3);
-//        waterParameters.put("subSamplingFactorY", 3);
-//        waterMaskProduct = GPF.createProduct("LandWaterMask", waterParameters, sourceProduct);
-        HashMap<String, Object> waterMaskParameters = new HashMap<>();
-        final String[] sourceBandNames = {AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME};
-        waterMaskParameters.put("sourceBandNames", sourceBandNames);
-        waterMaskParameters.put("landMask", false);
-        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
+        HashMap<String, Object> waterParameters = new HashMap<>();
+        waterParameters.put("resolution", LAND_WATER_MASK_RESOLUTION);
+        waterParameters.put("subSamplingFactorX", SUBSAMPLING_FACTOR_X);
+        waterParameters.put("subSamplingFactorY", SUBSAMPLING_FACTOR_Y);
+        waterMaskProduct = GPF.createProduct("LandWaterMask", waterParameters, sourceProduct);
     }
-
 
     /**
      * The Service Provider Interface (SPI) for the operator.
