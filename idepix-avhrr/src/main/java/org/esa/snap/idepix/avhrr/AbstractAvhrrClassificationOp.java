@@ -193,6 +193,8 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
                 break;
             case "14":
             case "15":
+            case "16":
+            case "17":
                 // NOAA 14
                 sensorId = 1;    // this was wrong?!?!
                 frequenz=0;      // what about this??
@@ -240,8 +242,14 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         float[] integrSolarSpectralIrrad = new float[2];     // F
         float[] spectralResponseWidth = new float[2];        // W
         switch (noaaId) {
-            case "11":
-            case "7":  // todo: get correct values from GK
+            case "7":
+                // NOAA 7, NOAA POD Guide 2001, p. 3-23
+                integrSolarSpectralIrrad[0] = 177.5f;  // F
+                integrSolarSpectralIrrad[1] = 261.9f;  // F
+                spectralResponseWidth[0] = 0.108f;  // W
+                spectralResponseWidth[1] = 0.249f;  // W
+                break;
+            case "11":  // todo: get correct values from GK
                 // NOAA 11
                 integrSolarSpectralIrrad[0] = 184.1f;
                 integrSolarSpectralIrrad[1] = 241.1f;
@@ -249,8 +257,15 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
                 spectralResponseWidth[1] = 0.229f;
                 break;
             case "14":
-            case "15":
                 // NOAA 14
+                integrSolarSpectralIrrad[0] = 221.42f;
+                integrSolarSpectralIrrad[1] = 252.29f;
+                spectralResponseWidth[0] = 0.136f;
+                spectralResponseWidth[1] = 0.245f;
+            case "15":
+            case "16":
+            case "17":
+                // use NOAA 14 for the moment. todo: GK to provide numbers for 15, 17 (and more??)
                 integrSolarSpectralIrrad[0] = 221.42f;
                 integrSolarSpectralIrrad[1] = 252.29f;
                 spectralResponseWidth[0] = 0.136f;

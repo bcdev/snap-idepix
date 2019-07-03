@@ -140,6 +140,8 @@ public class AvhrrAcUtils {
                 break;
             case "14":
             case "15":
+            case "16":
+            case "17":
                 if (tRef < 230.0) {
                     nuFinal = rad2BTTable.getNuLow(ch);
                 } else if (tRef >= 230.0 && tRef < 270.0) {
@@ -194,6 +196,8 @@ public class AvhrrAcUtils {
                 break;
             case "14":
             case "15":
+            case "16":
+            case "17":
                 if (tRef < 230.0) {
                     nuFinal = rad2BTTable.getNuLow(ch);
                 } else if (tRef >= 230.0 && tRef < 270.0) {

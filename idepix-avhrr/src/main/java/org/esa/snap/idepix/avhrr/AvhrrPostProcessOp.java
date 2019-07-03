@@ -45,10 +45,11 @@ public class AvhrrPostProcessOp extends Operator {
 //            description = " Compute cloud shadow with latest 'fronts' algorithm")
     private boolean computeCloudShadow = false;   // todo: we have no info at all for this (pressure, height, temperature)
 
-    @Parameter(defaultValue = "true",
-               label = " Refine pixel classification near coastlines",
-               description = "Refine pixel classification near coastlines. ")
-    private boolean refineClassificationNearCoastlines;
+//    @Parameter(defaultValue = "true",
+//               label = " Refine pixel classification near coastlines",
+//               description = "Refine pixel classification near coastlines. ")
+//    private boolean refineClassificationNearCoastlines;
+    private boolean refineClassificationNearCoastlines = false;
 
     @SourceProduct(alias = "l1b")
     private Product l1bProduct;
@@ -59,10 +60,6 @@ public class AvhrrPostProcessOp extends Operator {
 
     private Band landWaterBand;
     private Band origCloudFlagBand;
-    private Band rt3Band;
-    private Band bt4Band;
-    private Band refl1Band;
-    private Band refl2Band;
     private GeoCoding geoCoding;
 
     private RectangleExtender rectCalculator;
@@ -76,20 +73,11 @@ public class AvhrrPostProcessOp extends Operator {
             Product postProcessedCloudProduct = OperatorUtils.createCompatibleProduct(avhrrCloudProduct,
                                                                     "postProcessedCloud", "postProcessedCloud");
 
-            // BEAM: todo reactivate this once we have our SRTM mask in SNAP
-            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
-
-            // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
-//            landWaterBand = waterMaskProduct.getBand(AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME);
+//            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
 
             geoCoding = l1bProduct.getSceneGeoCoding();
 
             origCloudFlagBand = avhrrCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
-            rt3Band = avhrrCloudProduct.getBand("rt_3");
-            bt4Band = avhrrCloudProduct.getBand("bt_4");
-            refl1Band = avhrrCloudProduct.getBand("refl_1");
-            refl2Band = avhrrCloudProduct.getBand("refl_2");
-
 
             int extendedWidth = 64;
             int extendedHeight = 64; // todo: what do we need?
@@ -111,32 +99,26 @@ public class AvhrrPostProcessOp extends Operator {
         final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
 
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
-        final Tile waterFractionTile = getSourceTile(landWaterBand, srcRectangle);
+//        final Tile waterFractionTile = getSourceTile(landWaterBand, srcRectangle);
 
         for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
             checkForCancellation();
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
                 if (targetRectangle.contains(x, y)) {
-                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                    boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
+//                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+//                    boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
                     combineFlags(x, y, sourceFlagTile, targetTile);
 
-                    // snow/ice filter refinement for AVHRR (GK 20150922):
-                    // GK/JM don't want this any more after complete snow/ice revision, 20151028
-//                    if (isSnowIce) {
-//                        refineSnowIceCloudFlagging(x, y, rt3Tile, bt4Tile, refl1Tile, refl2Tile, targetTile);
+//                    if (refineClassificationNearCoastlines) {
+//                        if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
+//                            targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, true);
+//                            refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
+//                            if (isCloud) {
+//                                refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, waterFractionTile, targetTile, srcRectangle);
+//                            }
+//                        }
 //                    }
-
-                    if (refineClassificationNearCoastlines) {
-                        if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
-                            targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, true);
-                            refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
-                            if (isCloud) {
-                                refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, waterFractionTile, targetTile, srcRectangle);
-                            }
-                        }
-                    }
                     boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     if (isCloudAfterRefinement) {
                         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
@@ -284,30 +266,6 @@ public class AvhrrPostProcessOp extends Operator {
     private void refineSnowIceFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile) {
         final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
         if (isSnowIce) {
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
-        }
-    }
-
-    private void refineSnowIceCloudFlagging(int x, int y,
-                                            Tile rt3Tile, Tile bt4Tile, Tile refl1Tile, Tile refl2Tile,
-                                            Tile targetTile) {
-
-        final double rt3 = rt3Tile.getSampleDouble(x, y);
-        final double bt4 = bt4Tile.getSampleDouble(x, y);
-        final double refl1 = refl1Tile.getSampleDouble(x, y);
-        final double refl2 = refl2Tile.getSampleDouble(x, y);
-        final double ratio21 = refl2/refl1;
-
-        final boolean firstCrit = rt3 > 0.08;
-        //TODO check ATBD CCI LC ATBD v3 / Part II: Pre-processing -p90
-        final boolean secondCrit = (-40.15 < bt4 && bt4 < 1.35) &&
-                refl1 > 0.25 && (0.85 < ratio21 && ratio21 < 1.15) && rt3 < 0.02;
-
-        if (firstCrit || !secondCrit) {
-            // reset snow_ice to cloud todo: check with a test product from GK if this makes sense at all
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
         }
     }

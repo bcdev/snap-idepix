@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
+import static org.esa.snap.core.util.SystemUtils.LOG;
+
 /**
  * todo: add comment
  * To change this template use File | Settings | File Templates.
@@ -37,6 +39,7 @@ public class AvhrrAuxdata {
 
     public Line2ViewZenithTable createLine2ViewZenithTable() throws IOException {
         final InputStream inputStream = getClass().getResourceAsStream(VZA_FILE_NAME);
+//        final InputStream inputStream = AvhrrAuxdata.class.getResourceAsStream(VZA_FILE_NAME);
         Line2ViewZenithTable vzaTable = new Line2ViewZenithTable();
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -69,7 +72,10 @@ public class AvhrrAuxdata {
     public Rad2BTTable createRad2BTTable(String noaaId) throws IOException {
 
         final String filename = RAD2BT_FILE_NAME_PREFIX + noaaId + ".txt";
+        LOG.info("createRad2BTTable filename: " + filename);
+        System.out.println("createRad2BTTable filename = " + filename);
         final InputStream inputStream = getClass().getResourceAsStream(filename);
+//        final InputStream inputStream = AvhrrAuxdata.class.getResourceAsStream(filename);
         Rad2BTTable rad2BTTable = new Rad2BTTable();
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));

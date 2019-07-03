@@ -116,9 +116,9 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
                 waterFraction = sourceSamples[AvhrrConstants.SRC_TIMELINE_WATERFRACTION].getFloat();
             }
 
-            if (x == 260 && y == 575) {
-                System.out.println("x = " + x);
-            }
+//            if (x == 260 && y == 575) {
+//                System.out.println("x = " + x);
+//            }
 
             avhrrAlgorithm.setLatitude(getGeoPos(x, y).lat);
             avhrrAlgorithm.setLongitude(getGeoPos(x, y).lon);
