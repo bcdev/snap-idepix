@@ -118,8 +118,26 @@ public class AvhrrAcUtils {
 
         double nuFinal = nuStart;
         switch (noaaId) {
+            case "7":
+                if (tRef < 225.0) {
+                    nuFinal = rad2BTTable.getNuLow(ch);
+                } else if (tRef >= 225.0 && tRef < 275.0) {
+                    if (waterFraction == 100.0f && tRef > 270.0) {
+                        // water
+                        nuFinal = rad2BTTable.getNuHighWater(ch);
+                    } else {
+                        nuFinal = rad2BTTable.getNuMid(ch);
+                    }
+                } else if (tRef >= 275.0 && tRef < 320.0) {
+                    if (waterFraction == 100.0f && tRef < 310.0) {
+                        // water
+                        nuFinal = rad2BTTable.getNuHighWater(ch);
+                    } else {
+                        nuFinal = rad2BTTable.getNuHighLand(ch);
+                    }
+                }
+                break;
             case "11":
-            case "7":     // todo: get correct values from GK
                 if (tRef < 225.0) {
                     nuFinal = rad2BTTable.getNuLow(ch);
                 } else if (tRef >= 225.0 && tRef < 275.0) {
@@ -139,9 +157,6 @@ public class AvhrrAcUtils {
                 }
                 break;
             case "14":
-            case "15":
-            case "16":
-            case "17":
                 if (tRef < 230.0) {
                     nuFinal = rad2BTTable.getNuLow(ch);
                 } else if (tRef >= 230.0 && tRef < 270.0) {
@@ -230,8 +245,8 @@ public class AvhrrAcUtils {
 
         double rad = (c1* nuFinal * nuFinal * nuFinal)/(Math.exp(c2 * nuFinal/bt) -1.0);
 
-        double radOri1= -rad2BTTable.getA(ch)- Math.sqrt((rad2BTTable.getA(ch) *rad2BTTable.getA(ch))- (4* rad2BTTable.getB(ch)* (rad2BTTable.getD(ch) - rad)))/(2.0 * rad2BTTable.getB(ch) );
-        double radOri2= -rad2BTTable.getA(ch)+ Math.sqrt((rad2BTTable.getA(ch) *rad2BTTable.getA(ch))- (4* rad2BTTable.getB(ch)* (rad2BTTable.getD(ch) - rad)))/(2.0 * rad2BTTable.getB(ch) );
+        double radOri1= -rad2BTTable.getA(ch)- Math.sqrt((rad2BTTable.getA(ch) * rad2BTTable.getA(ch)) - (4* rad2BTTable.getB(ch)* (rad2BTTable.getD(ch) - rad)))/(2.0 * rad2BTTable.getB(ch) );
+        double radOri2= -rad2BTTable.getA(ch)+ Math.sqrt((rad2BTTable.getA(ch) * rad2BTTable.getA(ch)) - (4* rad2BTTable.getB(ch)* (rad2BTTable.getD(ch) - rad)))/(2.0 * rad2BTTable.getB(ch) );
 
          if (Math.max(radOri1, radOri2)>= 0) {
              return Math.max(radOri1, radOri2);
