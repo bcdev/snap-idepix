@@ -1,12 +1,12 @@
 package org.esa.snap.idepix.avhrr;
 
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.IdepixFlagCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.BitSetter;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.IdepixFlagCoding;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -243,35 +243,42 @@ public class AvhrrAcUtils {
                 throw new OperatorException("AVHRR version " + noaaId + " not supported.");
         }
 
-        double rad = (c1* nuFinal * nuFinal * nuFinal)/(Math.exp(c2 * nuFinal/bt) -1.0);
+        double rad = (c1 * nuFinal * nuFinal * nuFinal) / (Math.exp(c2 * nuFinal / bt) - 1.0);
 
-        double radOri1=Double.NaN;
-        double radOri2=Double.NaN;
+        // for the moment return rad. todo: check the commented part which should work as in other direction
 
-        switch (noaaId) {
-            case "11":
-            case "7":
-                radOri1= rad;
-                radOri2 = radOri1;
-                break;
-            case "14":
-                radOri1=  (rad2BTTable.getD(ch)-rad)/rad2BTTable.getA(ch);
-                radOri2 = radOri1;
-                break;
-            default:
-                throw new OperatorException("AVHRR version " + noaaId + " not supported.");
-        }
+//        double radOri1 = Double.NaN;
+//        double radOri2 = Double.NaN;
+//
+//        switch (noaaId) {
+//            case "11":
+//            case "7":
+//                radOri1 = rad;
+//                radOri2 = radOri1;
+//                break;
+//            case "14":
+//                radOri1 = (rad2BTTable.getD(ch) - rad) / rad2BTTable.getA(ch);
+//                radOri2 = radOri1;
+//                break;
+//            default:
+//                throw new OperatorException("AVHRR version " + noaaId + " not supported.");
+//        }
+//
+//        if (ch > 3) {
+//            radOri1 = -rad2BTTable.getA(ch) -
+//                    Math.sqrt((rad2BTTable.getA(ch) * rad2BTTable.getA(ch)) -
+//                                      (4 * rad2BTTable.getB(ch) * (rad2BTTable.getD(ch) - rad))) / (2.0 * rad2BTTable.getB(ch));
+//            radOri2 = -rad2BTTable.getA(ch) +
+//                    Math.sqrt((rad2BTTable.getA(ch) * rad2BTTable.getA(ch)) -
+//                                      (4 * rad2BTTable.getB(ch) * (rad2BTTable.getD(ch) - rad))) / (2.0 * rad2BTTable.getB(ch));
+//        }
 
-        if   (ch > 3) {
-            radOri1 = -rad2BTTable.getA(ch) - Math.sqrt((rad2BTTable.getA(ch) * rad2BTTable.getA(ch)) - (4 * rad2BTTable.getB(ch) * (rad2BTTable.getD(ch) - rad))) / (2.0 * rad2BTTable.getB(ch));
-            radOri2 = -rad2BTTable.getA(ch) + Math.sqrt((rad2BTTable.getA(ch) * rad2BTTable.getA(ch)) - (4 * rad2BTTable.getB(ch) * (rad2BTTable.getD(ch) - rad))) / (2.0 * rad2BTTable.getB(ch));
-        }
-
-        if (Math.max(radOri1, radOri2)>= 0) {
-             return Math.max(radOri1, radOri2);
-        }else {
-            return rad;
-        }
+//        if (Math.max(radOri1, radOri2) >= 0) {
+//            return Math.max(radOri1, radOri2);
+//        } else {
+//            return rad;
+//        }
+        return rad;
     }
 
 }

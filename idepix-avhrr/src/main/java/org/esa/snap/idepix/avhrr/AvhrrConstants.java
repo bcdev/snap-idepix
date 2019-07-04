@@ -55,8 +55,8 @@ public class AvhrrConstants {
     };
 
     static final String SRC_TIMELINE_SZA_BAND_NAME = "sun_zenith";
-    static final String SRC_TIMELINE_VZA_BAND_NAME = "sun_azimuth";
-    static final String SRC_TIMELINE_SAA_BAND_NAME = "sat_zenith";
+    static final String SRC_TIMELINE_SAA_BAND_NAME = "sun_azimuth";
+    static final String SRC_TIMELINE_VZA_BAND_NAME = "sat_zenith";
     static final String SRC_TIMELINE_VAA_BAND_NAME = "sat_azimuth";
     static final String SRC_TIMELINE_ALTITUDE_BAND_NAME = "altitude";
 
