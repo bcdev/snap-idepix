@@ -73,13 +73,13 @@ public class AvhrrConstants {
 
     public static final double SOLAR_3b = 4.448;
     // first value of the following constants is for NOAA11, second value for NOAA14  third value for NOAA7
-    public static final double[] FREQUENZ_3B = {278.85792,284.69366};
-    public static final double[] EW_3b = {278.85792,284.69366};
-    public static final double[] A0 = {6.34384,4.00162};
-    public static final double[] B0 = {2.68468,0.98107};
-    public static final double[] C0 = {-1.70931,1.9789};
-    public static final double[] a1_3b = {-1.738973,-1.88533};
-    public static final double[] a2_3b = {1.003354,1.003839};
+    public static final double[] FREQUENZ_3B = {3.743,3.779, 3.743};
+    public static final double[] EW_3b = {278.85792,284.69366, 278.85792};
+    public static final double[] A0 = {6.34384,4.00162, 6.34384};
+    public static final double[] B0 = {2.68468,0.98107, 2.68468};
+    public static final double[] C0 = {-1.70931,1.9789, -1.70931};
+    public static final double[] a1_3b = {-1.738973,-1.88533, -1.738973};
+    public static final double[] a2_3b = {1.003354,1.003839, 1.003354};
     public static final double c1 = 1.1910659*1.E-5; // mW/(m^2 sr cm^-4)
     public static final double c2 = 1.438833;
 
