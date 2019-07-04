@@ -72,7 +72,8 @@ public class AvhrrConstants {
     static final int SRC_TIMELINE_WATERFRACTION = 9;
 
     public static final double SOLAR_3b = 4.448;
-    // first value of the following constants is for NOAA11, second value for NOAA14
+    // first value of the following constants is for NOAA11, second value for NOAA14  third value for NOAA7
+    public static final double[] FREQUENZ_3B = {278.85792,284.69366};
     public static final double[] EW_3b = {278.85792,284.69366};
     public static final double[] A0 = {6.34384,4.00162};
     public static final double[] B0 = {2.68468,0.98107};

@@ -157,6 +157,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
             avhrrAlgorithm.setBtCh5(bt5);
             avhrrAlgorithm.setElevation(altitude);
 
+
             final double albedo3 = calculateReflectancePartChannel3b(avhrrRadiance[2], bt4, bt5, sza);
             avhrrAlgorithm.setReflCh3(albedo3); // on [0,1]
 

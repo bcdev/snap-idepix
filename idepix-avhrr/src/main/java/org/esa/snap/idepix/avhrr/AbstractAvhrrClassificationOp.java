@@ -185,19 +185,20 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 
 
         switch (noaaId) {
+            case "7":
+                // NOAA 7
+                sensorId = 2;
+                frequenz=AvhrrConstants.FREQUENZ_3B[sensorId];
+                break;
             case "11":
-            case "7":  // todo: get correct values from GK
                 // NOAA 11
                 sensorId = 0;
-                frequenz=0;
+                frequenz=AvhrrConstants.FREQUENZ_3B[sensorId];
                 break;
             case "14":
-            case "15":
-            case "16":
-            case "17":
                 // NOAA 14
-                sensorId = 1;    // this was wrong?!?!
-                frequenz=0;      // what about this??
+                sensorId = 1;
+                frequenz=AvhrrConstants.FREQUENZ_3B[sensorId];
                 break;
             default:
                 throw new OperatorException("Cannot parse source product name " + sourceProduct.getName() + " properly.");
@@ -249,7 +250,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
                 spectralResponseWidth[0] = 0.108f;  // W
                 spectralResponseWidth[1] = 0.249f;  // W
                 break;
-            case "11":  // todo: get correct values from GK
+            case "11":  //
                 // NOAA 11
                 integrSolarSpectralIrrad[0] = 184.1f;
                 integrSolarSpectralIrrad[1] = 241.1f;
@@ -263,13 +264,51 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
                 spectralResponseWidth[0] = 0.136f;
                 spectralResponseWidth[1] = 0.245f;
             case "15":
+                // NOAA 15 - NOAA_KLM_Users_Guide - APPENDIX D: Table D.1-7 p.10
+                integrSolarSpectralIrrad[0] = 138.7f;
+                integrSolarSpectralIrrad[1] = 235.4f;
+                spectralResponseWidth[0] = 0.084f;
+                spectralResponseWidth[1] = 0.228f;
             case "16":
+                // NOAA 16 - NOAA_KLM_Users_Guide - APPENDIX D: Table D.2-8 p.83
+                integrSolarSpectralIrrad[0] = 133.2f;
+                integrSolarSpectralIrrad[1] = 243.1f;
+                spectralResponseWidth[0] = 0.081f;
+                spectralResponseWidth[1] = 0.235f;
             case "17":
-                // use NOAA 14 for the moment. todo: GK to provide numbers for 15, 17 (and more??)
-                integrSolarSpectralIrrad[0] = 221.42f;
-                integrSolarSpectralIrrad[1] = 252.29f;
-                spectralResponseWidth[0] = 0.136f;
-                spectralResponseWidth[1] = 0.245f;
+                // NOAA 17 - NOAA_KLM_Users_Guide - APPENDIX D: Table D.3-6 p.118
+                integrSolarSpectralIrrad[0] = 136.212f;
+                integrSolarSpectralIrrad[1] = 240.558f;
+                spectralResponseWidth[0] = 0.0830f;
+                spectralResponseWidth[1] = 0.2332f;
+                break;
+            case "18":
+                // NOAA 18 - NOAA_KLM_Users_Guide - APPENDIX D: Table D.4-6 p.186
+                integrSolarSpectralIrrad[0] = 130.3f;
+                integrSolarSpectralIrrad[1] = 246.0f;
+                spectralResponseWidth[0] = 0.0793f;
+                spectralResponseWidth[1] = 0.2465f;
+                break;
+            case "METOP-A":
+                // METOP-A - NOAA_KLM_Users_Guide - APPENDIX D: Table D.5-6 p.490
+                integrSolarSpectralIrrad[0] = 139.873215f;
+                integrSolarSpectralIrrad[1] = 232.919556f;
+                spectralResponseWidth[0] = 0.084877f;
+                spectralResponseWidth[1] = 0.229421f;
+                break;
+            case "19":
+                // NOAA 19 - NOAA_KLM_Users_Guide - APPENDIX D: Table D.6-6 p.779
+                integrSolarSpectralIrrad[0] = 126.773f;
+                integrSolarSpectralIrrad[1] = 225.698f;
+                spectralResponseWidth[0] = 0.077580f;
+                spectralResponseWidth[1] = 0.217591f;
+                break;
+            case "METOP-B":
+                // METOP-B - NOAA_KLM_Users_Guide - APPENDIX D: Table D.7-6 p.1061
+                integrSolarSpectralIrrad[0] = 140.3147f;
+                integrSolarSpectralIrrad[1] = 245.0039f;
+                spectralResponseWidth[0] = 0.086698f;
+                spectralResponseWidth[1] = 0.242643f;
                 break;
             default:
                 throw new OperatorException("Cannot parse source product name " + sourceProduct.getName() + " properly.");
