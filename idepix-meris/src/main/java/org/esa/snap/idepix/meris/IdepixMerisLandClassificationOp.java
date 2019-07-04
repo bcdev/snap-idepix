@@ -28,7 +28,7 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Envisat.Meris.Land",
+@OperatorMetadata(alias = "Idepix.Meris.Land",
         version = "3.0",
         internal = true,
         authors = "Olaf Danne",

@@ -23,7 +23,7 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Spot.Vegetation",
+@OperatorMetadata(alias = "Idepix.Vgt",
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne",

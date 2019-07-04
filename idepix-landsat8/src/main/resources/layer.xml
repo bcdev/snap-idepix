@@ -8,7 +8,7 @@
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="IdePix Landsat-8 OLI"/>
-                <attr name="operatorName" stringvalue="Snap.Idepix.Landsat8.OLI"/>
+                <attr name="operatorName" stringvalue="Idepix.L8.OLI"/>
                 <attr name="dialogTitle" stringvalue="IdePix Landsat-8 OLI"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixLandsat8Tool"/>

@@ -32,7 +32,7 @@ import java.awt.Rectangle;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Landsat8.Postprocess",
+@OperatorMetadata(alias = "Idepix.L8.Postprocess",
         version = "3.0",
         internal = true,
         authors = "Marco Peters, Marco Zuehlke, Olaf Danne",

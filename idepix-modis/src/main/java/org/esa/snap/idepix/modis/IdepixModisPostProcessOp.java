@@ -26,7 +26,7 @@ import java.awt.*;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.TerraAqua.Modis.Postprocess",
+@OperatorMetadata(alias = "Idepix.Modis.Postprocess",
         version = "3.0",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Refines the MODIS pixel classification.",

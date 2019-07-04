@@ -27,7 +27,7 @@ import static org.esa.snap.idepix.modis.IdepixModisConstants.MODIS_WATER_MASK_BA
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "Snap.Idepix.TerraAqua.Modis",
+@OperatorMetadata(alias = "Idepix.Modis",
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne, Marco Zuehlke",

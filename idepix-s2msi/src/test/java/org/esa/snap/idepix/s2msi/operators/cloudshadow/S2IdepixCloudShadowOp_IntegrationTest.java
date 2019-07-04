@@ -56,7 +56,7 @@ public class S2IdepixCloudShadowOp_IntegrationTest {
         for (String mode : modes) {
             final HashMap<String, Object> parameters = new HashMap<>();
             parameters.put("mode", mode);
-            final Product cloudShadowProduct = GPF.createProduct("CCICloudShadow", parameters, productsMap);
+            final Product cloudShadowProduct = GPF.createProduct("Idepix.S2.CloudShadow", parameters, productsMap);
             final String targetFilePath = targetDirectory.getPath() + File.separator + "largeTestScene" + mode + ".dim";
             ProductIO.writeProduct(cloudShadowProduct, targetFilePath, "BEAM-DIMAP");
         }

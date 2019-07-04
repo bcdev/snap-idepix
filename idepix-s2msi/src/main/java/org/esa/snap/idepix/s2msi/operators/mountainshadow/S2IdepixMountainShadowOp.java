@@ -18,7 +18,7 @@ import org.esa.snap.core.gpf.pointop.WritableSample;
 /**
  * @author Tonio Fincke
  */
-@OperatorMetadata(alias = "Idepix.Sentinel2.MountainShadow",
+@OperatorMetadata(alias = "Idepix.S2.MountainShadow",
         version = "2.0",
         internal = true,
         authors = "Tonio Fincke",

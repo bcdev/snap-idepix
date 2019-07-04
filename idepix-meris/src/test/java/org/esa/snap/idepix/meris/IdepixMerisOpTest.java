@@ -34,9 +34,9 @@ public class IdepixMerisOpTest {
     @Test
     public void testOperatorSpiIsLoaded() {
         OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
-        OperatorSpi operatorSpi = registry.getOperatorSpi("Snap.Idepix.Envisat.Meris");
+        OperatorSpi operatorSpi = registry.getOperatorSpi("Idepix.Meris");
         assertNotNull(operatorSpi);
-        assertEquals("Snap.Idepix.Envisat.Meris", operatorSpi.getOperatorAlias());
+        assertEquals("Idepix.Meris", operatorSpi.getOperatorAlias());
         assertNotNull(operatorSpi.getOperatorDescriptor());
         assertSame(operatorSpi.getOperatorClass(), operatorSpi.getOperatorDescriptor().getOperatorClass());
     }

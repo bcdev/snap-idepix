@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Landsat8.Classification",
+@OperatorMetadata(alias = "Idepix.L8.Classification",
         version = "3.0",
         internal = true,
         authors = "Olaf Danne",

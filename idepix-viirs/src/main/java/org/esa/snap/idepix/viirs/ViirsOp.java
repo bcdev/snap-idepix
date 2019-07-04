@@ -22,7 +22,7 @@ import java.util.Map;
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "Idepix.SuomiNpp.Viirs",
+@OperatorMetadata(alias = "Idepix.Viirs",
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne, Marco Zuehlke",

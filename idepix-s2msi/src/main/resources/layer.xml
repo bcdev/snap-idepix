@@ -8,7 +8,7 @@
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="IdePix Sentinel-2 MSI"/>
-                <attr name="operatorName" stringvalue="Snap.Idepix.Sentinel2.Msi"/>
+                <attr name="operatorName" stringvalue="Idepix.S2"/>
                 <attr name="dialogTitle" stringvalue="IdePix Sentinel-2 MSI"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixS2MsiTool"/>

@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Sentinel2.Classification",
+@OperatorMetadata(alias = "Idepix.S2.Classification",
         version = "3.0",
         internal = true,
         authors = "Olaf Danne",

@@ -8,7 +8,7 @@
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="IdePix OrbView-2 SeaWiFS"/>
-                <attr name="operatorName" stringvalue="Idepix.OrbView2.Seawifs"/>
+                <attr name="operatorName" stringvalue="Idepix.Seawifs"/>
                 <attr name="dialogTitle" stringvalue="IdePix SeaWiFS"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixSeawifsTool"/>

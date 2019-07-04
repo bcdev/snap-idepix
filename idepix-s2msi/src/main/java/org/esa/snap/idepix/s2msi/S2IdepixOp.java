@@ -24,7 +24,7 @@ import java.util.Map;
  * @author Tonio Fincke
  * @author Olaf Danne
  */
-@OperatorMetadata(alias = "Snap.Idepix.Sentinel2.Msi",
+@OperatorMetadata(alias = "Idepix.S2",
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Tonio Fincke, Olaf Danne",

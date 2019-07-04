@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Observer;
 import java.util.logging.Logger;
 
-@OperatorMetadata(alias = "CCICloudShadow",
+@OperatorMetadata(alias = "Idepix.S2.CloudShadow",
         category = "Optical",
         authors = "Grit Kirches, Michael Paperin, Olaf Danne, Tonio Fincke, Dagmar Mueller",
         copyright = "(c) Brockmann Consult GmbH",
@@ -158,7 +158,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         //Postprocessing
         //
         //Generation of all cloud shadow flags
-        Product postProduct = GPF.createProduct("Idepix.Sentinel2.CloudShadow.Postprocess", postParams, postInput);
+        Product postProduct = GPF.createProduct("Idepix.S2.CloudShadow.Postprocess", postParams, postInput);
 
         setTargetProduct(prepareTargetProduct(sourceResolution, postProduct));
     }
@@ -198,7 +198,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         classificationParams.put("clThresh", clThresh);
         classificationParams.put("demName", demName);
 
-        return GPF.createProduct("Idepix.Sentinel2", classificationParams, classificationInput);
+        return GPF.createProduct("Idepix.S2", classificationParams, classificationInput);
     }
 
     private Product prepareTargetProduct(int resolution, Product postProcessedProduct) {

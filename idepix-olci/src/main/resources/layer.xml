@@ -8,7 +8,7 @@
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="IdePix Sentinel-3 OLCI"/>
-                <attr name="operatorName" stringvalue="Snap.Idepix.Sentinel3.Olci"/>
+                <attr name="operatorName" stringvalue="Idepix.Olci"/>
                 <attr name="dialogTitle" stringvalue="IdePix Sentinel-3 OLCI"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixOlciTool"/>
@@ -18,7 +18,7 @@
                 <!--<attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>-->
                 <!--<attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>-->
                 <!--<attr name="displayName" stringvalue="IdePix OLCI CTP"/>-->
-                <!--<attr name="operatorName" stringvalue="Snap.Idepix.Sentinel3.Olci.Ctp"/>-->
+                <!--<attr name="operatorName" stringvalue="Idepix.Olci.Ctp"/>-->
                 <!--<attr name="dialogTitle" stringvalue="IdePix OLCI CTP"/>-->
                 <!--<attr name="targetProductNameSuffix" stringvalue="_ctp"/>-->
                 <!--<attr name="helpId" stringvalue="snapIdepixOlciTool"/>-->

@@ -33,7 +33,7 @@ import java.io.IOException;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Landsat8.Otsu",
+@OperatorMetadata(alias = "Idepix.L8.Otsu",
         version = "3.0",
         internal = true,
         authors = "Olaf Danne",

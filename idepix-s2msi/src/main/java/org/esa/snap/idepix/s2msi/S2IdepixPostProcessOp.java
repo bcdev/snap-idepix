@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Sentinel2.Postprocess",
+@OperatorMetadata(alias = "Idepix.S2.Postprocess",
         version = "3.0",
         internal = true,
         authors = "Olaf Danne",

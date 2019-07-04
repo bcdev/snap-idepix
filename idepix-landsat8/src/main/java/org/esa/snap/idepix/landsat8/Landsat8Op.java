@@ -29,7 +29,7 @@ import java.util.Map;
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "Snap.Idepix.Landsat8.OLI",
+@OperatorMetadata(alias = "Idepix.L8.OLI",
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne",

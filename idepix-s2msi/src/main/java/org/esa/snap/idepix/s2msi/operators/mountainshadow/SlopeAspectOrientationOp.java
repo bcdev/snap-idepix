@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * @author Tonio Fincke
  */
-@OperatorMetadata(alias = "Idepix.Sentinel2.SlopeAspectOrientation",
+@OperatorMetadata(alias = "Idepix.S2.Terrain",
         version = "2.0",
         internal = true,
         authors = "Tonio Fincke",

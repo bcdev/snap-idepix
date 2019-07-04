@@ -84,7 +84,7 @@ public class S2IdepixMountainShadowOp_IntegrationTest {
         product.addBand(saaBand);
 
         final Map<String, Object> parameters = new HashMap<>();
-        final Product targetProduct = GPF.createProduct("Idepix.Sentinel2.MountainShadow", parameters, product);
+        final Product targetProduct = GPF.createProduct("Idepix.S2.MountainShadow", parameters, product);
         final String targetFilePath = targetDirectory.getPath() + File.separator + "ms_test.dim";
         ProductIO.writeProduct(targetProduct, targetFilePath, "BEAM-DIMAP");
 
@@ -154,7 +154,7 @@ public class S2IdepixMountainShadowOp_IntegrationTest {
         product.addBand(saaBand);
 
         final Map<String, Object> parameters = new HashMap<>();
-        final Product targetProduct = GPF.createProduct("Idepix.Sentinel2.MountainShadow", parameters, product);
+        final Product targetProduct = GPF.createProduct("Idepix.S2.MountainShadow", parameters, product);
         final String targetFilePath = targetDirectory.getPath() + File.separator + "ms_test.dim";
         ProductIO.writeProduct(targetProduct, targetFilePath, "BEAM-DIMAP");
 

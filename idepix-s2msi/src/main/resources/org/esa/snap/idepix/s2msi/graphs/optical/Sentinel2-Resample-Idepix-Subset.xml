@@ -23,8 +23,8 @@
       <resampleOnPyramidLevels>true</resampleOnPyramidLevels>
     </parameters>
   </node>
-  <node id="Idepix.Sentinel2">
-    <operator>Idepix.Sentinel2</operator>
+  <node id="Idepix.S2">
+    <operator>Idepix.S2</operator>
     <sources>
       <sourceProduct refid="Resample"/>
     </sources>
@@ -42,7 +42,7 @@
   <node id="Subset">
     <operator>Subset</operator>
     <sources>
-      <sourceProduct refid="Idepix.Sentinel2"/>
+      <sourceProduct refid="Idepix.S2"/>
     </sources>
     <parameters class="com.bc.ceres.binding.dom.XppDomElement">
       <sourceBands/>
@@ -73,7 +73,7 @@
     <node id="Resample">
       <displayPosition x="140.0" y="105.0"/>
     </node>
-    <node id="Idepix.Sentinel2">
+    <node id="Idepix.S2">
       <displayPosition x="251.0" y="105.0"/>
     </node>
     <node id="Subset">

@@ -20,7 +20,7 @@ import java.awt.image.RenderedImage;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Landsat8.Clost",
+@OperatorMetadata(alias = "Idepix.L8.Clost",
                   version = "3.0",
                   internal = true,
                   authors = "Olaf Danne",

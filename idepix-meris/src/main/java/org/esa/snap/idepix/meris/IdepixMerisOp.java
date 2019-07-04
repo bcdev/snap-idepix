@@ -26,7 +26,7 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Envisat.Meris",
+@OperatorMetadata(alias = "Idepix.Meris",
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne",

@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * @author Tonio Fincke, Dagmar Müller
  */
-@OperatorMetadata(alias = "Idepix.Sentinel2.CloudShadow.Postprocess",
+@OperatorMetadata(alias = "Idepix.S2.CloudShadow.Postprocess",
         category = "Optical",
         authors = "Grit Kirches, Michael Paperin, Olaf Danne, Tonio Fincke, Dagmar Müller",
         copyright = "(c) Brockmann Consult GmbH",

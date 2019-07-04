@@ -22,7 +22,7 @@ import java.awt.*;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Envisat.Meris.Merge.Landwater",
+@OperatorMetadata(alias = "Idepix.Meris.Merge.Landwater",
         version = "3.0",
         internal = true,
         authors = "Olaf Danne",

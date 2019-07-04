@@ -36,7 +36,7 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Snap.Idepix.Sentinel3.Olci",
+@OperatorMetadata(alias = "Idepix.Olci",
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne",

@@ -22,7 +22,7 @@ import java.util.Map;
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "Idepix.OrbView2.Seawifs",
+@OperatorMetadata(alias = "Idepix.Seawifs",
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne, Marco Zuehlke",

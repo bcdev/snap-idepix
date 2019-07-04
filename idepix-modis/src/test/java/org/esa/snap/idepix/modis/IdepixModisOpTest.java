@@ -28,9 +28,9 @@ public class IdepixModisOpTest {
     @Test
     public void testOperatorSpiIsLoaded() {
         OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
-        OperatorSpi operatorSpi = registry.getOperatorSpi("Snap.Idepix.TerraAqua.Modis");
+        OperatorSpi operatorSpi = registry.getOperatorSpi("Idepix.Modis");
         assertNotNull(operatorSpi);
-        assertEquals("Snap.Idepix.TerraAqua.Modis", operatorSpi.getOperatorAlias());
+        assertEquals("Idepix.Modis", operatorSpi.getOperatorAlias());
         assertNotNull(operatorSpi.getOperatorDescriptor());
         assertSame(operatorSpi.getOperatorClass(), operatorSpi.getOperatorDescriptor().getOperatorClass());
     }

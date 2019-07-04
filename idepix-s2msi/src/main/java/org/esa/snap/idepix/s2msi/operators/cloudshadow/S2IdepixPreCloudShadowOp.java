@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * @author Tonio Fincke, Dagmar Müller
  */
-@OperatorMetadata(alias = "Idepix.Sentinel2.CloudShadow.Preprocess",
+@OperatorMetadata(alias = "Idepix.S2.CloudShadow.Preprocess",
         category = "Optical",
         authors = "Grit Kirches, Michael Paperin, Olaf Danne, Tonio Fincke, Dagmar Müller",
         copyright = "(c) Brockmann Consult GmbH",
