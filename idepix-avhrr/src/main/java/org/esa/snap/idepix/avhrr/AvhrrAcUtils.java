@@ -245,14 +245,33 @@ public class AvhrrAcUtils {
 
         double rad = (c1* nuFinal * nuFinal * nuFinal)/(Math.exp(c2 * nuFinal/bt) -1.0);
 
-        double radOri1= -rad2BTTable.getA(ch)- Math.sqrt((rad2BTTable.getA(ch) * rad2BTTable.getA(ch)) - (4* rad2BTTable.getB(ch)* (rad2BTTable.getD(ch) - rad)))/(2.0 * rad2BTTable.getB(ch) );
-        double radOri2= -rad2BTTable.getA(ch)+ Math.sqrt((rad2BTTable.getA(ch) * rad2BTTable.getA(ch)) - (4* rad2BTTable.getB(ch)* (rad2BTTable.getD(ch) - rad)))/(2.0 * rad2BTTable.getB(ch) );
+        double radOri1=Double.NaN;
+        double radOri2=Double.NaN;
 
-         if (Math.max(radOri1, radOri2)>= 0) {
+        switch (noaaId) {
+            case "11":
+            case "7":
+                radOri1= rad;
+                radOri2 = radOri1;
+                break;
+            case "14":
+                radOri1=  (rad2BTTable.getD(ch)-rad)/rad2BTTable.getA(ch);
+                radOri2 = radOri1;
+                break;
+            default:
+                throw new OperatorException("AVHRR version " + noaaId + " not supported.");
+        }
+
+        if   (ch > 3) {
+            radOri1 = -rad2BTTable.getA(ch) - Math.sqrt((rad2BTTable.getA(ch) * rad2BTTable.getA(ch)) - (4 * rad2BTTable.getB(ch) * (rad2BTTable.getD(ch) - rad))) / (2.0 * rad2BTTable.getB(ch));
+            radOri2 = -rad2BTTable.getA(ch) + Math.sqrt((rad2BTTable.getA(ch) * rad2BTTable.getA(ch)) - (4 * rad2BTTable.getB(ch) * (rad2BTTable.getD(ch) - rad))) / (2.0 * rad2BTTable.getB(ch));
+        }
+
+        if (Math.max(radOri1, radOri2)>= 0) {
              return Math.max(radOri1, radOri2);
-         }else {
+        }else {
             return rad;
-         }
+        }
     }
 
 }
