@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>7.0.0</version>
     </parent>
 
     <artifactId>idepix-olcislstr</artifactId>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-olci</artifactId>
-            <version>0.86-SNAPSHOT</version>
+            <version>7.0.0</version>
         </dependency>
     </dependencies>
 
