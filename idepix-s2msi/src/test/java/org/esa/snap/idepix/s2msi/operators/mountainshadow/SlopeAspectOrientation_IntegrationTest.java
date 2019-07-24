@@ -66,7 +66,7 @@ public class SlopeAspectOrientation_IntegrationTest {
         product.addBand(elevationBand);
 
         final Map<String, Object> parameters = new HashMap<>();
-        final Product targetProduct = GPF.createProduct("Idepix.S2.SlopeAspectOrientation", parameters, product);
+        final Product targetProduct = GPF.createProduct("Idepix.S2.Terrain", parameters, product);
         final String targetFilePath = targetDirectory.getPath() + File.separator + "sao_test.dim";
         ProductIO.writeProduct(targetProduct, targetFilePath, "BEAM-DIMAP");
 
