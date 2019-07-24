@@ -7,9 +7,12 @@
         <groupId>org.esa.snap</groupId>
         <version>7.0.0</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>idepix-assembly</artifactId>
+    <version>7.0.0</version>
+
     <description>Collects NBM modules in one directory for uploading to SNAP repository</description>
     <packaging>pom</packaging>
     

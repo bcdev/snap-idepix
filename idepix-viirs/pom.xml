@@ -25,6 +25,8 @@
     </parent>
 
     <artifactId>idepix-viirs</artifactId>
+    <version>7.0.0</version>
+
     <packaging>nbm</packaging>
 
     <name>IdePix Viirs</name>

@@ -25,6 +25,7 @@
     </parent>
 
     <artifactId>idepix-core</artifactId>
+    <version>7.0.0</version>
 
     <packaging>nbm</packaging>
 

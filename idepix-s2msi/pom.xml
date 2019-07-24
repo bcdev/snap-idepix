@@ -26,7 +26,10 @@
     </parent>
 
     <artifactId>idepix-s2msi</artifactId>
+    <version>7.0.0</version>
+
     <packaging>nbm</packaging>
+    
     <name>IdePix S2-MSI</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from S2-MSI.
     </description>
