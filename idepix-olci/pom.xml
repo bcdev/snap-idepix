@@ -100,11 +100,6 @@
             <artifactId>s3tbx-rad2refl</artifactId>
             <version>${s3tbx.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-o2a-harmonisation</artifactId>
-            <version>${s3tbx.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
