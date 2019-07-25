@@ -199,7 +199,7 @@ public class CtpOp extends BasisOp {
             o2corrParms.put("processOnlyBand13", false);
             o2corrParms.put("writeHarmonisedRadiances", false);
             o2corrSourceProducts.put("l1bProduct", sourceProduct);
-            final String o2CorrOpName = "OlciO2aHarmonisation";
+            final String o2CorrOpName = "OlciHarmonisation";
             o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
         }
     }
