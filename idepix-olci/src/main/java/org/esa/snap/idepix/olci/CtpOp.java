@@ -107,6 +107,12 @@ public class CtpOp extends BasisOp {
     }
 
     @Override
+    public void dispose() {
+        super.dispose();
+        nnCalculator.getModel().close();
+    }
+
+    @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
         try {
             pm.beginTask("Executing CTP processing...", 0);
@@ -174,8 +180,9 @@ public class CtpOp extends BasisOp {
                     final float mLogTra15 = (float) -Math.log(tra15);
 
                     float[] nnInput = new float[]{cosSza, cosOza, aziDiff, refl12, mLogTra13, mLogTra14, mLogTra15};
-                    nnCalculator.setNnTensorInput(nnInput);
-                    final float[][] nnResult = nnCalculator.getNNResult();
+                    //nnCalculator.setNnTensorInput(nnInput);
+                    //final float[][] nnResult = nnCalculator.getNNResult();
+                    final float[][] nnResult = nnCalculator.calculate(nnInput);
                     final float ctp = TensorflowNNCalculator.convertNNResultToCtp(nnResult[0][0]);
 
                     if (targetBandName.equals("ctp")) {

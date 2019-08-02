@@ -80,6 +80,7 @@ public class TensorflowNNCalculator {
 
         float[][] m = new float[1][nnTensorOut];
         tensorResult.copyTo(m);
+        tensorResult.close();
 
         return m;
     }
@@ -224,11 +225,44 @@ public class TensorflowNNCalculator {
 
         float[][] inputData = new float[1][nnTensorInput.length];
         inputData[0] = nnTensorInput;
-        Tensor inputTensor = Tensor.create(inputData);
-
-        tensorResult = model.session().runner().feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0);
-
-        long[] ts = tensorResult.shape();
-        nnTensorOut = (int) ts[1];
+        try (Tensor inputTensor = Tensor.create(inputData)) {
+            tensorResult = model.session().runner().feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0);
+            long[] ts = tensorResult.shape();
+            nnTensorOut = (int) ts[1];
+        }
     }
+
+    /**
+     * Applies NN to vector and returns converted array.
+     * Functional implementation of setNnTensorInput(.) plus getNNResult().
+     * Makes sure the Tensors are closed after use.
+     * Requires that loadModel() is run once before.
+     * @param nnInput
+     * @return
+     */
+    public float[][] calculate(float[] nnInput) {
+        if (transformMethod.equals("sqrt")) {
+            for (int i = 0; i < nnInput.length; i++) {
+                nnInput[i] = (float) Math.sqrt(nnInput[i]);
+            }
+        } else if (transformMethod.equals("log")) {
+            for (int i = 0; i < nnInput.length; i++) {
+                nnInput[i] = (float) Math.log10(nnInput[i]);
+            }
+        }
+        float[][] inputData = new float[1][nnInput.length];
+        inputData[0] = nnInput;
+        try (
+            Tensor inputTensor = Tensor.create(inputData);
+            Tensor outputTensor = model.session().runner().feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0);
+        ) {
+            long[] ts = outputTensor.shape();
+            int dimension = (int) ts[1];
+            float[][] m = new float[1][dimension];
+            outputTensor.copyTo(m);
+            return m;
+        }
+    }
+
+
 }
