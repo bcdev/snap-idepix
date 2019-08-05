@@ -47,10 +47,9 @@ public class TensorflowNNCalculatorTest {
     public void testNNTensorflowApplyModel_fromAuxdataInstalled() {
         // the standard setup
         String modelDir = auxdataPath + File.separator + CtpOp.DEFAULT_TENSORFLOW_NN_DIR_NAME;
-        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none", null);
-        nntest.setNnTensorInput(input);
+        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none");
 
-        float[][] result = nntest.getNNResult();
+        float[][] result = nntest.calculate(input);
         assertEquals(1.2295055f, result[0][0], 1.E-6);
         float ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
         System.out.println("ctp for I7x24x24x24xO1 = " + ctp);
@@ -61,11 +60,10 @@ public class TensorflowNNCalculatorTest {
         // testing results from various test NNs against DM results
         // These NNs are stored as test resources
         String modelDir = new File(getClass().getResource("nn_training_20190131_I7x24x24x24xO1").getFile()).getAbsolutePath();
-        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none", null);
-        nntest.setNnTensorInput(input);
+        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none");
 
-        float[][] result = nntest.getNNResult();
-        for (int i = 0; i< nntest.getNnTensorOut(); i++) {
+        float[][] result = nntest.calculate(input);
+        for (int i = 0; i< result[0].length; i++) {
             System.out.println(result[0][i]);
         }
         // from DM: static float[] EXPECTED_OUTPUT_1 = {1.3985262F};
@@ -74,22 +72,22 @@ public class TensorflowNNCalculatorTest {
         System.out.println("ctp for I7x24x24x24xO1 = " + ctp);
 
         modelDir = new File(getClass().getResource("nn_training_20190131_I7x30x30x30xO1").getFile()).getAbsolutePath();
-        nntest = new TensorflowNNCalculator(modelDir, "none", input);
-        result = nntest.getNNResult();
+        nntest = new TensorflowNNCalculator(modelDir, "none");
+        result = nntest.calculate(input);
         assertEquals(1.60261976f, result[0][0], 1.E-6);
         ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
         System.out.println("ctp for I7x30x30x30xO1 = " + ctp);
 
         modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x10xO1").getFile()).getAbsolutePath();
-        nntest = new TensorflowNNCalculator(modelDir, "none", input);
-        result = nntest.getNNResult();
+        nntest = new TensorflowNNCalculator(modelDir, "none");
+        result = nntest.calculate(input);
         assertEquals(0.9555169f, result[0][0], 1.E-6);
         ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
         System.out.println("ctp for I7x32x64x64x10xO1 = " + ctp);
 
         modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x64xO1").getFile()).getAbsolutePath();
-        nntest = new TensorflowNNCalculator(modelDir, "none", input);
-        result = nntest.getNNResult();
+        nntest = new TensorflowNNCalculator(modelDir, "none");
+        result = nntest.calculate(input);
         assertEquals(1.2884411f, result[0][0], 1.E-6);
         ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
         System.out.println("ctp for I7x32x64x64x64xO1 = " + ctp);
@@ -99,7 +97,7 @@ public class TensorflowNNCalculatorTest {
     public void testSetFirstAndLastNodeName() {
         try {
             String modelDir = new File(getClass().getResource("nn_training_20190131_I7x24x24x24xO1").getFile()).getAbsolutePath();
-            TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none", input);
+            TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none");
 //            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
             nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
             String firstNodeNameFromBinary = nntest.getFirstNodeName();
@@ -113,7 +111,7 @@ public class TensorflowNNCalculatorTest {
             assertEquals(lastNodeNameFromText, lastNodeNameFromBinary);
 
             modelDir = new File(getClass().getResource("nn_training_20190131_I7x30x30x30xO1").getFile()).getAbsolutePath();
-            nntest = new TensorflowNNCalculator(modelDir, "none", input);
+            nntest = new TensorflowNNCalculator(modelDir, "none");
 //            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
             nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
             firstNodeNameFromBinary = nntest.getFirstNodeName();
@@ -127,7 +125,7 @@ public class TensorflowNNCalculatorTest {
             assertEquals(lastNodeNameFromText, lastNodeNameFromBinary);
 
             modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x10xO1").getFile()).getAbsolutePath();
-            nntest = new TensorflowNNCalculator(modelDir, "none", input);
+            nntest = new TensorflowNNCalculator(modelDir, "none");
 //            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
             nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
             firstNodeNameFromBinary = nntest.getFirstNodeName();
@@ -141,7 +139,7 @@ public class TensorflowNNCalculatorTest {
             assertEquals(lastNodeNameFromText, lastNodeNameFromBinary);
 
             modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x64xO1").getFile()).getAbsolutePath();
-            nntest = new TensorflowNNCalculator(modelDir, "none", input);
+            nntest = new TensorflowNNCalculator(modelDir, "none");
 //            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
             nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
             firstNodeNameFromBinary = nntest.getFirstNodeName();

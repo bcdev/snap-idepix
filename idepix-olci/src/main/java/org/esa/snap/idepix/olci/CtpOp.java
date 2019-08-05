@@ -101,7 +101,7 @@ public class CtpOp extends BasisOp {
             }
         }
 
-        nnCalculator = new TensorflowNNCalculator(modelDir, "none", null);
+        nnCalculator = new TensorflowNNCalculator(modelDir, "none");
 
         targetProduct = createTargetProduct();
     }
@@ -180,8 +180,6 @@ public class CtpOp extends BasisOp {
                     final float mLogTra15 = (float) -Math.log(tra15);
 
                     float[] nnInput = new float[]{cosSza, cosOza, aziDiff, refl12, mLogTra13, mLogTra14, mLogTra15};
-                    //nnCalculator.setNnTensorInput(nnInput);
-                    //final float[][] nnResult = nnCalculator.getNNResult();
                     final float[][] nnResult = nnCalculator.calculate(nnInput);
                     final float ctp = TensorflowNNCalculator.convertNNResultToCtp(nnResult[0][0]);
 

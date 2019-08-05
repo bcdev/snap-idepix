@@ -17,15 +17,12 @@ import java.io.IOException;
  *
  * @author olafd
  */
-public class TensorflowNNCalculator {
+class TensorflowNNCalculator {
 
     private String firstNodeName;
     private String lastNodeName;
 
     private String transformMethod;
-    private float[] nnTensorInput;
-    private Tensor tensorResult;
-    private int nnTensorOut;
 
     private String modelDir;
     private SavedModelBundle model;
@@ -37,9 +34,8 @@ public class TensorflowNNCalculator {
      *                        (e.g. 'nn_training_20190131_I7x24x24x24xO1')
      * @param transformMethod - the input transformation method. Supported values are 'sqrt' and 'log',
      *                        otherwise this is ignored.
-     * @param nnTensorInput   - float[] input vector (i.e. OLCI L1 values per pixel)
      */
-    TensorflowNNCalculator(String modelDir, String transformMethod, float[] nnTensorInput) {
+    TensorflowNNCalculator(String modelDir, String transformMethod) {
         // init of TensorFlow can fail, so we should handle this and give appropriate error message
         try {
             TensorFlow.version(); // triggers init of TensorFlow
@@ -50,7 +46,6 @@ public class TensorflowNNCalculator {
         }
 
         this.transformMethod = transformMethod;
-        this.nnTensorInput = nnTensorInput;
         this.modelDir = modelDir;
         System.out.println("modelDir = " + modelDir);
         try {
@@ -59,6 +54,7 @@ public class TensorflowNNCalculator {
             e.printStackTrace();
         }
     }
+
 
     /**
      * Converts an element of NNResult to a CTP value. Taken from DM: CTP_for_OLCI_cloud_shadow.docx, 06 Feb 2019.
@@ -71,45 +67,20 @@ public class TensorflowNNCalculator {
     }
 
     /**
-     * Provides the NN result for given input and specified Tensorflow model.
-     *
-     * @return float[][]
-     */
-    float[][] getNNResult() {
-        computeTensorResult();
-
-        float[][] m = new float[1][nnTensorOut];
-        tensorResult.copyTo(m);
-        tensorResult.close();
-
-        return m;
-    }
-
-    /**
-     * Provides the shape of the tensor result
-     *
-     * @return int
-     */
-    int getNnTensorOut() {
-        return nnTensorOut;
-    }
-
-    /**
      * Getter for the Tensorflow model
      *
      * @return model
      */
-    public SavedModelBundle getModel() {
+    SavedModelBundle getModel() {
         return model;
     }
-
 
     /**
      * Getter for the first node name
      *
      * @return firstNodeName
      */
-    public String getFirstNodeName() {
+    String getFirstNodeName() {
         return firstNodeName;
     }
 
@@ -118,17 +89,8 @@ public class TensorflowNNCalculator {
      *
      * @return lastNodeName
      */
-    public String getLastNodeName() {
+    String getLastNodeName() {
         return lastNodeName;
-    }
-
-    /**
-     * Setter for NN input
-     *
-     * @param nnTensorInput - the array with NN input values
-     */
-    public void setNnTensorInput(float[] nnTensorInput) {
-        this.nnTensorInput = nnTensorInput;
     }
 
     // package local for testing
@@ -184,14 +146,15 @@ public class TensorflowNNCalculator {
                 for (String line; (line = br.readLine()) != null; ) {
                     if (line.equals("node {")) {
                         line = br.readLine();
+                        final String denseSubstring = line.substring(line.indexOf("dense"), line.length() - 1);
                         if (!setFirstNodeName) {
                             if (line.contains("name") && line.contains("dense")) {
-                                firstNodeName = line.substring(line.indexOf("dense"), line.length() - 1);
+                                firstNodeName = denseSubstring;
                                 setFirstNodeName = true;
                             }
                         } else {
                             if (line.contains("name") && line.contains("dense")) {
-                                lastNodeName = line.substring(line.indexOf("dense"), line.length() - 1);
+                                lastNodeName = denseSubstring;
                             }
                         }
                     }
@@ -212,35 +175,17 @@ public class TensorflowNNCalculator {
         setFirstAndLastNodeNameFromTextProtocolBuffer();
     }
 
-    private void computeTensorResult() {
-        if (transformMethod.equals("sqrt")) {
-            for (int i = 0; i < nnTensorInput.length; i++) {
-                nnTensorInput[i] = (float) Math.sqrt(nnTensorInput[i]);
-            }
-        } else if (transformMethod.equals("log")) {
-            for (int i = 0; i < nnTensorInput.length; i++) {
-                nnTensorInput[i] = (float) Math.log10(nnTensorInput[i]);
-            }
-        }
-
-        float[][] inputData = new float[1][nnTensorInput.length];
-        inputData[0] = nnTensorInput;
-        try (Tensor inputTensor = Tensor.create(inputData)) {
-            tensorResult = model.session().runner().feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0);
-            long[] ts = tensorResult.shape();
-            nnTensorOut = (int) ts[1];
-        }
-    }
-
     /**
      * Applies NN to vector and returns converted array.
      * Functional implementation of setNnTensorInput(.) plus getNNResult().
      * Makes sure the Tensors are closed after use.
      * Requires that loadModel() is run once before.
-     * @param nnInput
-     * @return
+     *
+     * @param nnInput - input vector for neural net
+     *
+     * @return float[][] - the converted result array
      */
-    public float[][] calculate(float[] nnInput) {
+    float[][] calculate(float[] nnInput) {
         if (transformMethod.equals("sqrt")) {
             for (int i = 0; i < nnInput.length; i++) {
                 nnInput[i] = (float) Math.sqrt(nnInput[i]);
@@ -253,8 +198,9 @@ public class TensorflowNNCalculator {
         float[][] inputData = new float[1][nnInput.length];
         inputData[0] = nnInput;
         try (
+                // Tensor class implements java.lang.Autocloseable
             Tensor inputTensor = Tensor.create(inputData);
-            Tensor outputTensor = model.session().runner().feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0);
+            Tensor outputTensor = model.session().runner().feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
         ) {
             long[] ts = outputTensor.shape();
             int dimension = (int) ts[1];
