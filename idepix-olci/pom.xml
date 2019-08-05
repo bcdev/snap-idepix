@@ -103,7 +103,7 @@
         
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-olci-harmonisation</artifactId>
+            <artifactId>s3tbx-o2a-harmonisation</artifactId>
             <version>${s3tbx.version}</version>
         </dependency>
 
