@@ -254,13 +254,13 @@
         <repository>
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-releases/</url>
+            <url>http://nexus.senbox.net/nexus/content/repositories/releases/</url>
             <uniqueVersion>false</uniqueVersion>
         </repository>
         <snapshotRepository>
             <id>snap-repo-public</id>
             <name>Public Maven Snapshot Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-snapshot/</url>
+            <url>http://nexus.senbox.net/nexus/content/repositories/snapshots/</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
@@ -269,19 +269,6 @@
         <repository>
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>bc-nexus-repo</id>
-            <name>Public Nexus Repository for BC</name>
             <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
             <releases>
                 <enabled>true</enabled>
@@ -298,7 +285,7 @@
         <pluginRepository>
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
+            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
             <releases>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
