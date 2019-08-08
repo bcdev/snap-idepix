@@ -90,10 +90,11 @@ public class IdepixOlciUtils {
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
     }
 
-    public static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct, String alternativeNNDirPath, boolean outputCtp) {
+    public static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct, Product idepixProduct, String alternativeNNDirPath, boolean outputCtp) {
         Map<String, Product> ctpSourceProducts = new HashMap<>();
         ctpSourceProducts.put("sourceProduct", sourceProduct);
         ctpSourceProducts.put("o2CorrProduct", o2CorrProduct);
+        ctpSourceProducts.put("idepixProduct", idepixProduct);
         Map<String, Object> params = new HashMap<>(2);
         params.put("alternativeNNDirPath", alternativeNNDirPath);
         params.put("outputCtp", outputCtp);
