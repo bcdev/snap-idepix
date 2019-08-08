@@ -52,6 +52,11 @@ public class CtpOp extends BasisOp {
             description = "OLCI O2 Correction product.")
     private Product o2CorrProduct;
 
+    @SourceProduct(alias = "idepixProduct",
+            label = "Idepix Classification product",
+            optional = true,
+            description = "OLCI IDEPIX Classification product.")
+    private Product idepixProduct;
 
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
@@ -74,6 +79,7 @@ public class CtpOp extends BasisOp {
     private Band tra13Band;
     private Band tra14Band;
     private Band tra15Band;
+    private Band idepixBand;
 
     private TensorflowNNCalculator nnCalculator;
 
@@ -129,6 +135,9 @@ public class CtpOp extends BasisOp {
             tra13Band = o2CorrProduct.getBand("trans_13");
             tra14Band = o2CorrProduct.getBand("trans_14");
             tra15Band = o2CorrProduct.getBand("trans_15");
+            if (idepixProduct!=null){
+                idepixBand = idepixProduct.getBand("pixel_classif_flags");
+            }
         } catch (Exception e) {
             throw new OperatorException(e.getMessage(), e);
         } finally {
@@ -153,11 +162,16 @@ public class CtpOp extends BasisOp {
 
         final Tile l1FlagsTile = getSourceTile(sourceProduct.getRasterDataNode("quality_flags"), targetRectangle);
 
+        Tile idepixTile = null;
+        if (idepixBand!=null){
+             idepixTile = getSourceTile(idepixBand, targetRectangle);
+        }
+
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
 
-                final boolean pixelIsValid = !l1FlagsTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
+                final boolean pixelIsValid = !l1FlagsTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID) && (idepixTile==null || idepixTile.getSampleBit(x,y,IdepixConstants.IDEPIX_CLOUD)) ;
                 if (pixelIsValid) {
                     // Preparing input data...
                     final float sza = szaTile.getSampleFloat(x, y);

@@ -49,6 +49,12 @@ public class IdepixOlciOp extends BasisOp {
             description = "The OLCI L1b source product.")
     private Product sourceProduct;
 
+    @SourceProduct(alias = "reflectanceProduct",
+            label = "reflectance product",
+            description = "Reflectance product",
+            optional = true)
+    private Product rad2reflProduct;
+
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
 
@@ -118,7 +124,7 @@ public class IdepixOlciOp extends BasisOp {
     private Product classificationProduct;
     private Product postProcessingProduct;
 
-    private Product rad2reflProduct;
+    //private Product rad2reflProduct;
     private Product ctpProduct;
     private Product o2CorrProduct;
 
@@ -163,6 +169,14 @@ public class IdepixOlciOp extends BasisOp {
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
         if (computeCloudBuffer) {
+            if (computeCloudShadow) {
+                ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
+                        o2CorrProduct,
+                        olciIdepixProduct,
+                        alternativeNNDirPath,
+                        outputCtp);
+            }
+
             postProcess(olciIdepixProduct);
         }
 
@@ -212,8 +226,9 @@ public class IdepixOlciOp extends BasisOp {
 
 
     private void preProcess() {
-        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
-
+        if (rad2reflProduct==null) {
+            rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
+        }
         if (considerCloudsOverSnow) {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
             o2corrSourceProducts.put("l1bProduct", sourceProduct);
@@ -226,14 +241,6 @@ public class IdepixOlciOp extends BasisOp {
             o2corrParms.put("processOnlyBand13", false); // test!
             o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
         }
-
-        if (computeCloudShadow) {
-            ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
-                                                                        o2CorrProduct,
-                                                                        alternativeNNDirPath,
-                                                                        outputCtp);
-        }
-
     }
 
     private void setClassificationParameters() {
