@@ -432,7 +432,7 @@ public class IdepixOlciClassificationOp extends Operator {
         // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
         // is always 0 or 100!! (TS, OD, 20140502)
         return IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y).lat > -58f &&
-                waterFraction <= 100 && waterFraction < 100 && waterFraction > 0;
+                waterFraction < 100 && waterFraction > 0;
     }
 
     private boolean isGlintPixel(int x, int y, Tile l1FlagsTile) {
