@@ -29,7 +29,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>7.0.0</snap.version>
+        <snap.version>8.0.0-SNAPSHOT</snap.version>
         <s3tbx.version>7.0.0</s3tbx.version>
         <idepix.version>7.0.0</idepix.version>
         <netbeans.version>RELEASE82</netbeans.version>

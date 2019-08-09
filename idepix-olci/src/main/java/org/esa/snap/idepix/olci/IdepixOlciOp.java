@@ -11,6 +11,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.gpf.internal.TileCacheOp;
 import org.esa.snap.core.util.ProductUtils;
 
 import org.esa.snap.idepix.core.AlgorithmSelector;
@@ -162,6 +163,7 @@ public class IdepixOlciOp extends BasisOp {
 
         setClassificationInputProducts();
         computeCloudProduct();
+        classificationProduct = computeTileCacheProduct(classificationProduct,(2)*80);
 
         Product olciIdepixProduct = classificationProduct;
         olciIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
@@ -175,6 +177,7 @@ public class IdepixOlciOp extends BasisOp {
                         o2CorrProduct,olciIdepixProduct,
                         alternativeNNDirPath,
                         outputCtp);
+                ctpProduct = computeTileCacheProduct(ctpProduct,300);
             }
 
             postProcess(olciIdepixProduct);
@@ -182,6 +185,7 @@ public class IdepixOlciOp extends BasisOp {
 
         targetProduct = createTargetProduct(olciIdepixProduct);
         targetProduct.setAutoGrouping(olciIdepixProduct.getAutoGrouping());
+        postProcessingProduct = computeTileCacheProduct(postProcessingProduct,300);
 
         if (postProcessingProduct != null) {
             Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
@@ -262,6 +266,15 @@ public class IdepixOlciOp extends BasisOp {
         setClassificationParameters();
         classificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciClassificationOp.class),
                                                   classificationParameters, classificationInputProducts);
+    }
+
+    private Product computeTileCacheProduct(Product inputProduct,int cacheSize) {
+        TileCacheOp tileCacheOp = new TileCacheOp();
+        tileCacheOp.setSourceProduct("source",inputProduct);
+        tileCacheOp.setParameterDefaultValues();
+        tileCacheOp.setParameter("cacheSize",cacheSize);
+        inputProduct = tileCacheOp.getTargetProduct();
+        return inputProduct;
     }
 
     private void setClassificationInputProducts() {
