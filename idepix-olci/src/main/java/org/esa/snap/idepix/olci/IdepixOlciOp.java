@@ -163,7 +163,7 @@ public class IdepixOlciOp extends BasisOp {
 
         setClassificationInputProducts();
         computeCloudProduct();
-        classificationProduct = computeTileCacheProduct(classificationProduct,(2)*80);
+        classificationProduct = computeTileCacheProduct(classificationProduct,40);
 
         Product olciIdepixProduct = classificationProduct;
         olciIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
@@ -177,7 +177,7 @@ public class IdepixOlciOp extends BasisOp {
                         o2CorrProduct,olciIdepixProduct,
                         alternativeNNDirPath,
                         outputCtp);
-                ctpProduct = computeTileCacheProduct(ctpProduct,300);
+                ctpProduct = computeTileCacheProduct(ctpProduct,72);
             }
 
             postProcess(olciIdepixProduct);
@@ -185,7 +185,6 @@ public class IdepixOlciOp extends BasisOp {
 
         targetProduct = createTargetProduct(olciIdepixProduct);
         targetProduct.setAutoGrouping(olciIdepixProduct.getAutoGrouping());
-        postProcessingProduct = computeTileCacheProduct(postProcessingProduct,300);
 
         if (postProcessingProduct != null) {
             Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
