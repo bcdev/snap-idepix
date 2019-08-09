@@ -1,8 +1,6 @@
 package org.esa.snap.idepix.s2msi;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
-import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
@@ -21,9 +19,13 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dem.gpf.AddElevationOp;
+import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
+import org.esa.snap.watermask.operator.WatermaskClassifier;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -41,6 +43,10 @@ public class S2IdepixClassificationOp extends Operator {
 
     public static final double DELTA_RHO_TOA_442_THRESHOLD = 0.03;
     public static final double RHO_TOA_442_THRESHOLD = 0.03;
+    private static final int LAND_WATER_MASK_RESOLUTION = 50;
+    private static final int OVERSAMPLING_FACTOR_X = 3;
+    private static final int OVERSAMPLING_FACTOR_Y = 3;
+
 
     private static final float WATER_MASK_SOUTH_BOUND = -58.0f;
 //    private static final String VALID_PIXEL_EXPRESSION = "detector_footprint_B1 " +
@@ -145,8 +151,8 @@ public class S2IdepixClassificationOp extends Operator {
     @SourceProduct(alias = "l1c", description = "The MSI L1C source product.")
     Product sourceProduct;
 
-    @SourceProduct(alias = "waterMask", optional = true)
-    private Product waterMaskProduct;
+//    @SourceProduct(alias = "waterMask", optional = true)
+//    private Product waterMaskProduct;
 
     @TargetProduct(description = "The target product.")
     Product targetProduct;
@@ -200,10 +206,6 @@ public class S2IdepixClassificationOp extends Operator {
 //        readSchillerNeuralNets();
         createTargetProduct();
 
-        if (waterMaskProduct != null) {
-            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
-        }
-
         if (sourceProduct.containsBand(S2IdepixConstants.ELEVATION_BAND_NAME)) {
             elevationProduct = sourceProduct;
         } else {
@@ -226,12 +228,7 @@ public class S2IdepixClassificationOp extends Operator {
             s2ReflectanceTiles[i] = getSourceTile(s2MsiReflBands[i], rectangle);
         }
 
-        Tile waterFractionTile = null;
-        if (waterMaskProduct != null) {
-            waterFractionTile = getSourceTile(landWaterBand, rectangle);
-        }
 
-        GeoPos geoPos = null;
         final Band cloudFlagTargetBand = targetProduct.getBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS);
         final Tile cloudFlagTargetTile = targetTiles.get(cloudFlagTargetBand);
 
@@ -268,7 +265,6 @@ public class S2IdepixClassificationOp extends Operator {
                     // set up pixel properties for given instruments...
                     S2IdepixAlgorithm s2MsiAlgorithm = createS2MsiAlgorithm(s2ReflectanceTiles,
                                                                             szaTile, vzaTile, saaTile, vaaTile,
-                                                                            waterFractionTile,
                                                                             elevationTile,
                                                                             validPixelTile,
                                                                             s2MsiReflectance,
@@ -409,12 +405,11 @@ public class S2IdepixClassificationOp extends Operator {
 
     private S2IdepixAlgorithm createS2MsiAlgorithm(Tile[] s2MsiReflectanceTiles,
                                                    Tile szaTile, Tile vzaTile, Tile saaTile, Tile vaaTile,
-                                                   Tile waterFractionTile,
                                                    Tile elevationTile,
                                                    Tile validPixelTile,
                                                    float[] s2MsiReflectances,
                                                    int y,
-                                                   int x) {
+                                                   int x) throws IOException {
         S2IdepixAlgorithm s2MsiAlgorithm = new S2IdepixAlgorithm();
 
         for (int i = 0; i < S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES.length; i++) {
@@ -422,11 +417,17 @@ public class S2IdepixClassificationOp extends Operator {
         }
         s2MsiAlgorithm.setRefl(s2MsiReflectances);
 
-        boolean isLand = false;
-        if (waterMaskProduct != null) {
-            final int waterFraction = waterFractionTile.getSampleInt(x, y);
-            isLand = isLandPixel(x, y, waterFraction, s2MsiAlgorithm);
-        }
+        boolean isHigherResolutionInput = sourceProduct.getBand("B2") != null
+                && sourceProduct.getBand("B2").getGeoCoding().getMapCRS().getName().toString().contains("UTM")
+                && sourceProduct.getBand("B2").getImageToModelTransform().getScaleX() < LAND_WATER_MASK_RESOLUTION;
+
+
+        WatermaskClassifier classifier = new WatermaskClassifier(LAND_WATER_MASK_RESOLUTION,
+                                                                 isHigherResolutionInput ? 1 : OVERSAMPLING_FACTOR_X,
+                                                                 isHigherResolutionInput ? 1 : OVERSAMPLING_FACTOR_Y);
+        final byte waterFraction = classifier.getWaterMaskFraction(sourceProduct.getSceneGeoCoding(), x, y);
+
+        boolean isLand = isLandPixel(x, y, waterFraction, s2MsiAlgorithm);
         s2MsiAlgorithm.setIsLand(isLand);
 
         final double sza = szaTile.getSampleDouble(x, y);
