@@ -1,13 +1,15 @@
 package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
-import org.geotools.xml.xsi.XSISimpleTypes;
 
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -27,8 +29,8 @@ class PotentialCloudShadowAreaIdentifier {
                                                    float[] sourceAltitude, int[] flagArray, int[] cloudIDArray,
                                                    Point2D[] cloudPath) {
         double sunZenithCloudRad = (double) sourceSunZenith * MathUtils.DTOR;
-        final Map<Integer, List<Integer>> indexToPositions = new HashMap<>();
-        final Map<Integer, List<Integer>> offsetAtPositions = new HashMap<>();
+        final Map<Integer, List<Integer>> indexToPositions = new TreeMap<>();
+        final Map<Integer, List<Integer>> offsetAtPositions = new TreeMap<>();
 
         int i = 0;
         int sourceWidth = sourceRectangle.width;
@@ -89,7 +91,7 @@ class PotentialCloudShadowAreaIdentifier {
             List<Integer> noduplicatesPositions = new ArrayList<>(new LinkedHashSet<>(positions));
 
             if (noduplicatesPositions.size() < positions.size()) {
-                int test[] = new int[flagArray.length];
+                int[] test = new int[flagArray.length];
                 for (int k = 0; k < positions.size(); k++) {
                     int off = offsetAtPos.get(k);
                     int ind = positions.get(k);
