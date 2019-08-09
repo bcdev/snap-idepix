@@ -28,6 +28,10 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.Map;
 
+import static org.esa.snap.idepix.core.IdepixConstants.LAND_WATER_MASK_RESOLUTION;
+import static org.esa.snap.idepix.core.IdepixConstants.OVERSAMPLING_FACTOR_X;
+import static org.esa.snap.idepix.core.IdepixConstants.OVERSAMPLING_FACTOR_Y;
+
 /**
  * Sentinel-2 (MSI) pixel classification operator.
  *
@@ -43,9 +47,6 @@ public class S2IdepixClassificationOp extends Operator {
 
     public static final double DELTA_RHO_TOA_442_THRESHOLD = 0.03;
     public static final double RHO_TOA_442_THRESHOLD = 0.03;
-    private static final int LAND_WATER_MASK_RESOLUTION = 50;
-    private static final int OVERSAMPLING_FACTOR_X = 3;
-    private static final int OVERSAMPLING_FACTOR_Y = 3;
 
 
     private static final float WATER_MASK_SOUTH_BOUND = -58.0f;
@@ -186,6 +187,7 @@ public class S2IdepixClassificationOp extends Operator {
     Band ndwiBand;
 
     private Product elevationProduct;
+    private WatermaskClassifier watermaskClassifier;
 
 
 //    public static final String NN_NAME = "20x4x2_1012.9.net";    // Landsat 'all' NN
@@ -202,6 +204,17 @@ public class S2IdepixClassificationOp extends Operator {
                                                    VALID_PIXEL_EXPRESSION,
                                                    Color.GREEN, 0.0);
         validPixelMask.setOwner(getSourceProduct());
+
+        boolean isHigherResolutionInput = sourceProduct.getBand("B2") != null
+                && sourceProduct.getBand("B2").getGeoCoding().getMapCRS().getName().toString().contains("UTM")
+                && sourceProduct.getBand("B2").getImageToModelTransform().getScaleX() < LAND_WATER_MASK_RESOLUTION;
+        try {
+            watermaskClassifier = new WatermaskClassifier(LAND_WATER_MASK_RESOLUTION,
+                                                          isHigherResolutionInput ? 1 : OVERSAMPLING_FACTOR_X,
+                                                          isHigherResolutionInput ? 1 : OVERSAMPLING_FACTOR_Y);
+        } catch (IOException e) {
+            throw new OperatorException("Could not initialise SRTM land-water mask", e);
+        }
 
 //        readSchillerNeuralNets();
         createTargetProduct();
@@ -247,6 +260,7 @@ public class S2IdepixClassificationOp extends Operator {
         final Tile elevationTile = getSourceTile(elevationBand, rectangle);
         final Tile validPixelTile = getSourceTile(validPixelMask, rectangle);
 
+
         try {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
@@ -267,6 +281,7 @@ public class S2IdepixClassificationOp extends Operator {
                                                                             szaTile, vzaTile, saaTile, vaaTile,
                                                                             elevationTile,
                                                                             validPixelTile,
+                                                                            watermaskClassifier,
                                                                             s2MsiReflectance,
                                                                             y,
                                                                             x);
@@ -407,9 +422,9 @@ public class S2IdepixClassificationOp extends Operator {
                                                    Tile szaTile, Tile vzaTile, Tile saaTile, Tile vaaTile,
                                                    Tile elevationTile,
                                                    Tile validPixelTile,
-                                                   float[] s2MsiReflectances,
+                                                   WatermaskClassifier classifier, float[] s2MsiReflectances,
                                                    int y,
-                                                   int x) throws IOException {
+                                                   int x) {
         S2IdepixAlgorithm s2MsiAlgorithm = new S2IdepixAlgorithm();
 
         for (int i = 0; i < S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES.length; i++) {
@@ -417,14 +432,6 @@ public class S2IdepixClassificationOp extends Operator {
         }
         s2MsiAlgorithm.setRefl(s2MsiReflectances);
 
-        boolean isHigherResolutionInput = sourceProduct.getBand("B2") != null
-                && sourceProduct.getBand("B2").getGeoCoding().getMapCRS().getName().toString().contains("UTM")
-                && sourceProduct.getBand("B2").getImageToModelTransform().getScaleX() < LAND_WATER_MASK_RESOLUTION;
-
-
-        WatermaskClassifier classifier = new WatermaskClassifier(LAND_WATER_MASK_RESOLUTION,
-                                                                 isHigherResolutionInput ? 1 : OVERSAMPLING_FACTOR_X,
-                                                                 isHigherResolutionInput ? 1 : OVERSAMPLING_FACTOR_Y);
         final byte waterFraction = classifier.getWaterMaskFraction(sourceProduct.getSceneGeoCoding(), x, y);
 
         boolean isLand = isLandPixel(x, y, waterFraction, s2MsiAlgorithm);
