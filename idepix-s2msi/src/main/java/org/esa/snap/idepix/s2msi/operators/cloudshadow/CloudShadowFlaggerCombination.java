@@ -82,7 +82,7 @@ class CloudShadowFlaggerCombination {
             //caution! the cloud list has a different length!
             this.cloud = cloudList.get(key);
             this.cloudSize = cloud.size();
-            this.meanReflShift = setMeanRefl(cloud, bestOffset, sourceBands[1], cloudPath);
+            this.meanReflShift = computeMeanRefl(cloud, bestOffset, sourceBands[1], cloudPath);
 
 
             analyzerMode.initArrays(positions.size());
@@ -121,7 +121,7 @@ class CloudShadowFlaggerCombination {
 
     }
 
-    private double setMeanRefl(List<Integer> cloud, int bestOffset, float[] sourceBand, Point2D[] cloudPath) {
+    private double computeMeanRefl(List<Integer> cloud, int bestOffset, float[] sourceBand, Point2D[] cloudPath) {
         int N = 0;
         double refl = 0.;
 
@@ -618,7 +618,7 @@ class CloudShadowFlaggerCombination {
                 for (int i : listShadowID.keySet()) {
 
                     List<Integer> pos = listShadowID.get(i);
-                    double meanRefl = 0.;
+//                    double meanShadowRefl = 0.;
                     int meanOffset = 0;
                     int N = 0;
                     for (int j : pos) {
@@ -627,7 +627,7 @@ class CloudShadowFlaggerCombination {
                         int k = shadowIndex.indexOf(j);
                         if (k > 0) {
                             meanOffset += shadowOffset.get(k);
-                            meanRefl += shadowRefl.get(k);
+//                            meanShadowRefl += shadowRefl.get(k);
                             N += 1;
                         }
                     }
@@ -641,7 +641,7 @@ class CloudShadowFlaggerCombination {
                 double minRefl = 0.;
                 for (int i : meanOffsetClust.keySet()) {
 
-                    double meanRefl = setMeanRefl(cloud, meanOffsetClust.get(i), sourceBand, cloudPath);
+                    double meanRefl = computeMeanRefl(cloud, meanOffsetClust.get(i), sourceBand, cloudPath);
                     clusterTest.put(i, meanRefl);
 
                     if (minRefl == 0 || meanRefl < minRefl) minRefl = meanRefl;
