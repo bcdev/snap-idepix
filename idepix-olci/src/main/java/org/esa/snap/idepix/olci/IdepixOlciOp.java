@@ -177,7 +177,7 @@ public class IdepixOlciOp extends BasisOp {
                         o2CorrProduct,olciIdepixProduct,
                         alternativeNNDirPath,
                         outputCtp);
-                ctpProduct = computeTileCacheProduct(ctpProduct,72);
+                ctpProduct = computeTileCacheProduct(ctpProduct,76);
             }
 
             postProcess(olciIdepixProduct);
@@ -268,11 +268,13 @@ public class IdepixOlciOp extends BasisOp {
     }
 
     private Product computeTileCacheProduct(Product inputProduct,int cacheSize) {
-        TileCacheOp tileCacheOp = new TileCacheOp();
-        tileCacheOp.setSourceProduct("source",inputProduct);
-        tileCacheOp.setParameterDefaultValues();
-        tileCacheOp.setParameter("cacheSize",cacheSize);
-        inputProduct = tileCacheOp.getTargetProduct();
+        if (Boolean.getBoolean("snap.gpf.disableTileCache")) {
+            TileCacheOp tileCacheOp = new TileCacheOp();
+            tileCacheOp.setSourceProduct("source", inputProduct);
+            tileCacheOp.setParameterDefaultValues();
+            tileCacheOp.setParameter("cacheSize", cacheSize);
+            inputProduct = tileCacheOp.getTargetProduct();
+        }
         return inputProduct;
     }
 
