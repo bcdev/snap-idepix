@@ -315,7 +315,9 @@ public class S2IdepixUtils {
     public static void removeReflectancesForCloudShadow(Product product) {
         for (int i = 0; i < S2IdepixConstants.S2_MSI_CLOUD_SHADOW_REFLECTANCE_BAND_NAMES.length; i++) {
             final Band b = product.getBand(S2IdepixConstants.S2_MSI_CLOUD_SHADOW_REFLECTANCE_BAND_NAMES[i]);
-            product.removeBand(b);
+            if (b != null) {
+                product.removeBand(b);
+            }
         }
     }
 
