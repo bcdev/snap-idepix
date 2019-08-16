@@ -83,7 +83,7 @@ public class IdepixOlciCloudShadowFronts {
                 if (isCloudFree(sourceFlagTile, x, y)) {
                     isCloudShadow[x - x0][y - y0] = getCloudShadow(sourceFlagTile, targetTile, x, y);
                     if (isCloudShadow[x - x0][y - y0]) {
-                        setCloudShadow(sourceFlagTile, x, y);
+                        setCloudShadow(targetTile, x, y);
                     }
                 }
             }
@@ -97,7 +97,7 @@ public class IdepixOlciCloudShadowFronts {
                             isPixelSurroundedByCloudShadow(targetRectangle, x, y, isCloudShadow);
 
                     if (pixelSurroundedByClouds || pixelSurroundedByCloudShadow) {
-                        setCloudShadow(sourceFlagTile, x, y);
+                        setCloudShadow(targetTile, x, y);
                     }
                 }
             }
