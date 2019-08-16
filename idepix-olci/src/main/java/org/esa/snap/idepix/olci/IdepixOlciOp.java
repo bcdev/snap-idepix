@@ -128,7 +128,6 @@ public class IdepixOlciOp extends BasisOp {
     //private Product rad2reflProduct;
     private Product ctpProduct;
     private Product o2CorrProduct;
-    private Product waterMaskProduct;
 
     private Map<String, Product> classificationInputProducts;
     private Map<String, Object> classificationParameters;
@@ -244,14 +243,6 @@ public class IdepixOlciOp extends BasisOp {
             o2corrParms.put("processOnlyBand13", false); // test!
             o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
         }
-
-        if (useSrtmLandWaterMask) {
-            HashMap<String, Object> waterMaskParameters = new HashMap<>();
-            waterMaskParameters.put("resolution", IdepixConstants.LAND_WATER_MASK_RESOLUTION);
-            waterMaskParameters.put("subSamplingFactorX", IdepixConstants.OVERSAMPLING_FACTOR_X);
-            waterMaskParameters.put("subSamplingFactorY", IdepixConstants.OVERSAMPLING_FACTOR_Y);
-            waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
-        }
     }
 
     private void setClassificationParameters() {
@@ -282,7 +273,6 @@ public class IdepixOlciOp extends BasisOp {
         classificationInputProducts = new HashMap<>();
         classificationInputProducts.put("l1b", sourceProduct);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
-        classificationInputProducts.put("waterMask", waterMaskProduct);
         if (considerCloudsOverSnow) {
             classificationInputProducts.put("o2Corr", o2CorrProduct);
         }
