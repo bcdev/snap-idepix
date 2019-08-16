@@ -22,12 +22,17 @@ import org.esa.snap.idepix.core.seaice.SeaIceClassifier;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
+import org.esa.snap.watermask.operator.WatermaskClassifier;
 
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Map;
+
+import static org.esa.snap.idepix.core.IdepixConstants.LAND_WATER_MASK_RESOLUTION;
+import static org.esa.snap.idepix.core.IdepixConstants.OVERSAMPLING_FACTOR_X;
+import static org.esa.snap.idepix.core.IdepixConstants.OVERSAMPLING_FACTOR_Y;
 
 /**
  * OLCI pixel classification operator.
@@ -80,9 +85,6 @@ public class IdepixOlciClassificationOp extends Operator {
     @SourceProduct(alias = "rhotoa")
     private Product rad2reflProduct;
 
-    @SourceProduct(alias = "waterMask", optional = true)
-    private Product waterMaskProduct;
-
     @SourceProduct(alias = "o2Corr", optional = true)
     private Product o2CorrProduct;
 
@@ -91,7 +93,6 @@ public class IdepixOlciClassificationOp extends Operator {
 
 
     private Band[] olciReflBands;
-    private Band landWaterBand;
 
     private Band surface13Band;
     private Band trans13Band;
@@ -113,6 +114,7 @@ public class IdepixOlciClassificationOp extends Operator {
     private GeometryFactory gf;
     private Polygon arcticPolygon;
     private Polygon antarcticaPolygon;
+    private WatermaskClassifier watermaskClassifier;
 
 
     @Override
@@ -121,12 +123,17 @@ public class IdepixOlciClassificationOp extends Operator {
         nnInterpreter = IdepixOlciCloudNNInterpreter.create();
         readSchillerNeuralNets();
         createTargetProduct();
+        if (useSrtmLandWaterMask) {
+            try {
+                watermaskClassifier = new WatermaskClassifier(LAND_WATER_MASK_RESOLUTION,
+                                                              OVERSAMPLING_FACTOR_X,
+                                                              OVERSAMPLING_FACTOR_Y);
+            } catch (IOException e) {
+                throw new OperatorException("Could not initialise SRTM land-water mask", e);
+            }
+        }
 
         initSeaIceClassifier();
-
-        if (waterMaskProduct != null && useSrtmLandWaterMask) {
-            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
-        }
 
         if (o2CorrProduct != null) {
             surface13Band = o2CorrProduct.getBand("surface_13");
@@ -188,10 +195,6 @@ public class IdepixOlciClassificationOp extends Operator {
 
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle rectangle, ProgressMonitor pm) throws OperatorException {
-        Tile waterFractionTile = null;
-        if (landWaterBand != null) {
-            waterFractionTile = getSourceTile(landWaterBand, rectangle);
-        }
 
         Tile surface13Tile = null;
         Tile trans13Tile = null;
@@ -216,13 +219,15 @@ public class IdepixOlciClassificationOp extends Operator {
             nnTargetTile = targetTiles.get(targetProduct.getBand(IdepixConstants.NN_OUTPUT_BAND_NAME));
         }
         try {
+            GeoCoding geoCoding = sourceProduct.getSceneGeoCoding();
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
                     int waterFraction = -1;
-                    if (waterFractionTile != null) {
-                        waterFraction = waterFractionTile.getSampleInt(x, y);
+                    if (useSrtmLandWaterMask) {
+                        waterFraction = watermaskClassifier.getWaterMaskFraction(geoCoding, x, y);
                     }
+
                     initCloudFlag(olciQualityFlagTile, targetTiles.get(cloudFlagTargetBand), olciReflectanceTiles, y, x);
                     final boolean isBright = olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_BRIGHT);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, isBright);
