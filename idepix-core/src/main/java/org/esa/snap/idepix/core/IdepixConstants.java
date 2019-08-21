@@ -60,6 +60,8 @@ public class IdepixConstants {
     public static final String PROBAV_NIR_BAND_NAME = "TOA_REFL_NIR";
     public static final String PROBAV_SWIR_BAND_NAME = "TOA_REFL_SWIR";
 
+    public static final int OLCI_NUM_SPECTRAL_BANDS = 21;
+
     public static final int NO_DATA_VALUE = -1;
 
     public static final String NN_OUTPUT_BAND_NAME = "nn_value";

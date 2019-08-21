@@ -142,8 +142,14 @@ public class IdepixIO {
     }
 
     public static boolean isValidOlciProduct(Product product) {
-//        return product.getProductType().startsWith("S3A_OL_");  // todo: clarify
-        return product.getProductType().contains("OL_1");  // new products have product type 'OL_1_ERR'
+        // check for existence of all bands required by Idepix (all radiances bands 1 to 21)
+        for (int i = 0; i < IdepixConstants.OLCI_NUM_SPECTRAL_BANDS; i++) {
+            final String radianceBandName = "Oa" + String.format("%02d", i+1) + "_radiance";
+            if (!(product.containsBand(radianceBandName))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static boolean isValidOlciSlstrSynergyProduct(Product product) {
