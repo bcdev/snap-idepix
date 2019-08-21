@@ -7,9 +7,9 @@
             <file name="org-esa-snap-idepix-olci-IdepixOlciOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="IdePix Sentinel-3 OLCI"/>
+                <attr name="displayName" stringvalue="IdePix Sentinel-3 OLCI for C2RCC"/>
                 <attr name="operatorName" stringvalue="Idepix.Olci"/>
-                <attr name="dialogTitle" stringvalue="IdePix Sentinel-3 OLCI"/>
+                <attr name="dialogTitle" stringvalue="IdePix Sentinel-3 OLCI for C2RCC"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
                 <attr name="helpId" stringvalue="snapIdepixOlciTool"/>
             </file>
@@ -35,7 +35,7 @@
                             <attr name="originalFile"
                                   stringvalue="Actions/Operators/org-esa-snap-idepix-olci-IdepixOlciOpAction.instance"/>
                             <attr name="position" intvalue="25"/>
-                            <attr name="displayName" stringvalue="IdePix OLCI"/>
+                            <attr name="displayName" stringvalue="IdePix OLCI for C2RCC"/>
                         </file>
 
                         <!--<file name="org-esa-snap-idepix-olci-CtpOpAction.shadow">-->

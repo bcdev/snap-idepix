@@ -203,8 +203,22 @@ public class IdepixOlciClassificationOp extends Operator {
             trans13Tile = getSourceTile(trans13Band, rectangle);
         }
 
-        final Band olciQualityFlagBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_QUALITY_FLAGS_BAND_NAME);
-        final Tile olciQualityFlagTile = getSourceTile(olciQualityFlagBand, rectangle);
+        // we do not have the quality flag band in a C2RCC matchup input product, but separate bands for each flag:
+        // 'quality_flags.invalid', 'quality_flags.land', etc.
+//        final Band olciQualityFlagBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_QUALITY_FLAGS_INVALID_BAND_NAME);
+//        final Tile olciQualityFlagTile = getSourceTile(olciQualityFlagBand, rectangle);
+
+        final Band olciQualityFlagInvalidBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_QUALITY_FLAGS_INVALID_BAND_NAME);
+        final Band olciQualityFlagLandBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_QUALITY_FLAGS_LAND_BAND_NAME);
+        final Band olciQualityFlagCoastlineBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_QUALITY_FLAGS_COASTLINE_BAND_NAME);
+        final Band olciQualityFlagBrightBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_QUALITY_FLAGS_BRIGHT_BAND_NAME);
+        final Band olciQualityFlagGlintBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_QUALITY_FLAGS_GLINT_BAND_NAME);
+
+        final Tile olciQualityFlagInvalidTile = getSourceTile(olciQualityFlagInvalidBand, rectangle);
+        final Tile olciQualityFlagLandTile = getSourceTile(olciQualityFlagLandBand, rectangle);
+        final Tile olciQualityFlagCoastlineTile = getSourceTile(olciQualityFlagCoastlineBand, rectangle);
+        final Tile olciQualityFlagBrightTile = getSourceTile(olciQualityFlagBrightBand, rectangle);
+        final Tile olciQualityFlagGlintTile = getSourceTile(olciQualityFlagGlintBand, rectangle);
 
         Tile[] olciReflectanceTiles = new Tile[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
         for (int i = 0; i < Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
@@ -228,16 +242,17 @@ public class IdepixOlciClassificationOp extends Operator {
                         waterFraction = watermaskClassifier.getWaterMaskFraction(geoCoding, x, y);
                     }
 
-                    initCloudFlag(olciQualityFlagTile, targetTiles.get(cloudFlagTargetBand), olciReflectanceTiles, y, x);
-                    final boolean isBright = olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_BRIGHT);
+                    initCloudFlag(olciQualityFlagInvalidTile, targetTiles.get(cloudFlagTargetBand), olciReflectanceTiles, y, x);
+//                    final boolean isBright = olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_BRIGHT);
+                    final boolean isBright = olciQualityFlagBrightTile.getSampleDouble(x, y) == 1.0;
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, isBright);
-                    final boolean isCoastline = classifyCoastline(olciQualityFlagTile, y, x, waterFraction);
+                    final boolean isCoastline = classifyCoastline(olciQualityFlagCoastlineTile, y, x, waterFraction);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, isCoastline);
-                    if (isOlciLandPixel(x, y, olciQualityFlagTile, waterFraction)) {
+                    if (isOlciLandPixel(x, y, olciQualityFlagLandTile, waterFraction)) {
                         classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
                                          surface13Tile, trans13Tile, y, x);
                     } else {
-                        classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
+                        classifyOverWater(olciQualityFlagGlintTile, olciReflectanceTiles,
                                           cloudFlagTargetTile, nnTargetTile, y, x, isCoastline);
                     }
                 }
@@ -247,15 +262,15 @@ public class IdepixOlciClassificationOp extends Operator {
         }
     }
 
-    private boolean classifyCoastline(Tile olciQualityFlagTile, int y, int x, int waterFraction) {
+    private boolean classifyCoastline(Tile olciQualityFlagCoastlineTile, int y, int x, int waterFraction) {
         return waterFraction < 0 ?
-                olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_COASTLINE) :
+                olciQualityFlagCoastlineTile.getSampleDouble(x, y) == 1.0 :
                 isCoastlinePixel(x, y, waterFraction);
     }
 
-    private void classifyOverWater(Tile olciQualityFlagTile, Tile[] olciReflectanceTiles,
+    private void classifyOverWater(Tile olciQualityFlagGlintTile, Tile[] olciReflectanceTiles,
                                    Tile cloudFlagTargetTile, Tile nnTargetTile, int y, int x, boolean isCoastline) {
-        classifyCloud(x, y, olciQualityFlagTile, olciReflectanceTiles, cloudFlagTargetTile, isCoastline);
+        classifyCloud(x, y, olciQualityFlagGlintTile, olciReflectanceTiles, cloudFlagTargetTile, isCoastline);
         if (outputSchillerNNValue) {
             final double[] nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles);
             nnTargetTile.setSample(x, y, nnOutput[0]);
@@ -340,9 +355,9 @@ public class IdepixOlciClassificationOp extends Operator {
         }
     }
 
-    private boolean isOlciLandPixel(int x, int y, Tile olciL1bFlagTile, int waterFraction) {
+    private boolean isOlciLandPixel(int x, int y, Tile olciQualityFlagLandTile, int waterFraction) {
         if (waterFraction < 0) {
-            return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
+            return olciQualityFlagLandTile.getSampleDouble(x, y) == 1.0;
         } else {
             // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
             if (IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y).lat > -58f) {
@@ -352,15 +367,15 @@ public class IdepixOlciClassificationOp extends Operator {
                     // is always 0 or 100!! (TS, OD, 20140502)
                     return waterFraction == 0;
                 } else {
-                    return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
+                    return olciQualityFlagLandTile.getSampleDouble(x, y) == 1.0;
                 }
             } else {
-                return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
+                return olciQualityFlagLandTile.getSampleDouble(x, y) == 1.0;
             }
         }
     }
 
-    private void classifyCloud(int x, int y, Tile l1FlagsTile, Tile[] rhoToaTiles, Tile targetTile, boolean isCoastline) {
+    private void classifyCloud(int x, int y, Tile olciQualityFlagGlintTile, Tile[] rhoToaTiles, Tile targetTile, boolean isCoastline) {
 
         boolean checkForSeaIce = false;
         if (!isCoastline) {
@@ -378,7 +393,7 @@ public class IdepixOlciClassificationOp extends Operator {
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, false);
 
-            final boolean isGlint = isGlintPixel(x, y, l1FlagsTile);
+            final boolean isGlint = isGlintPixel(x, y, olciQualityFlagGlintTile);
             // CB 20170406:
             final boolean cloudSure = rhoToaTiles[16].getSampleFloat(x, y) > THRESH_WATER_MINBRIGHT1 &&
                     nnInterpreter.isCloudSure(nnOutput);
@@ -440,18 +455,19 @@ public class IdepixOlciClassificationOp extends Operator {
                 waterFraction <= 100 && waterFraction < 100 && waterFraction > 0;
     }
 
-    private boolean isGlintPixel(int x, int y, Tile l1FlagsTile) {
-        return l1FlagsTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_GLINT);
+    private boolean isGlintPixel(int x, int y, Tile olciQualityFlagGlintTile) {
+        return olciQualityFlagGlintTile.getSampleDouble(x, y) == 1.0;
     }
 
-    private void initCloudFlag(Tile olciL1bFlagTile, Tile targetTile, Tile[] olciReflectanceTiles, int y, int x) {
+    private void initCloudFlag(Tile olciQualityFlagInvalidTile, Tile targetTile, Tile[] olciReflectanceTiles, int y, int x) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
         float[] olciReflectances = new float[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
         for (int i = 0; i < Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
             olciReflectances[i] = olciReflectanceTiles[i].getSampleFloat(x, y);
         }
 
-        final boolean l1Invalid = olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
+//        final boolean l1Invalid = olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
+        final boolean l1Invalid = olciQualityFlagInvalidTile.getSampleDouble(x, y) == 1.0;
         final boolean reflectancesValid = IdepixIO.areAllReflectancesValid(olciReflectances);
 
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l1Invalid || !reflectancesValid);

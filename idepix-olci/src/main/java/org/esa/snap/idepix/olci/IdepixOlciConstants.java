@@ -10,13 +10,18 @@ public class IdepixOlciConstants {
     /* Level 1 Quality Flags Positions */
     public static final int L1_F_LAND = 31;
     public static final int L1_F_COASTLINE = 30;
-    //    public static final int L1_F_FRESH_INLAND_WATER = 29;
     public static final int L1_F_BRIGHT = 27;
     public static final int L1_F_INVALID = 25;
     public static final int L1_F_GLINT = 22;
 
 
     public static final String OLCI_QUALITY_FLAGS_BAND_NAME = "quality_flags";
+
+    public static final String OLCI_QUALITY_FLAGS_INVALID_BAND_NAME = "quality_flags.invalid";
+    public static final String OLCI_QUALITY_FLAGS_LAND_BAND_NAME = "quality_flags.land";
+    public static final String OLCI_QUALITY_FLAGS_COASTLINE_BAND_NAME = "quality_flags.coastline";
+    public static final String OLCI_QUALITY_FLAGS_BRIGHT_BAND_NAME = "quality_flags.bright";
+    public static final String OLCI_QUALITY_FLAGS_GLINT_BAND_NAME = "quality_flags.sun_glint_risk";
 
     public static final double[] referencePressureLevels = {
             1000., 950., 925., 900., 850., 800., 700.,
