@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.s2msi;
 
+import org.esa.snap.core.gpf.internal.TileCacheOp;
 import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudBufferOp;
 import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
@@ -153,6 +154,7 @@ public class S2IdepixOp extends Operator {
 
         s2ClassifProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixClassificationOp.class),
                                              pixelClassificationParameters, inputProducts);
+        s2ClassifProduct = computeTileCacheProduct(s2ClassifProduct,1600);
 
         if (computeCloudShadow || computeCloudBuffer || computeMountainShadow) {
             // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
@@ -229,7 +231,16 @@ public class S2IdepixOp extends Operator {
         return gaCloudClassificationParameters;
     }
 
-
+    private Product computeTileCacheProduct(Product inputProduct,int cacheSize) {
+        if (Boolean.getBoolean("snap.gpf.disableTileCache")) {
+            TileCacheOp tileCacheOp = new TileCacheOp();
+            tileCacheOp.setSourceProduct("source", inputProduct);
+            tileCacheOp.setParameterDefaultValues();
+            tileCacheOp.setParameter("cacheSize", cacheSize);
+            inputProduct = tileCacheOp.getTargetProduct();
+        }
+        return inputProduct;
+    }
     /**
      * The Service Provider Interface (SPI) for the operator.
      * It provides operator meta-data and is a factory for new operator instances.
