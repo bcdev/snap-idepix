@@ -16,10 +16,10 @@ import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.BasisOp;
 import org.esa.snap.idepix.core.util.IdepixIO;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.esa.snap.idepix.modis.IdepixModisConstants.MODIS_WATER_MASK_BAND_NAME;
+import java.util.logging.Logger;
 
 /**
  * IdePix operator for pixel identification and classification for MODIS
@@ -31,6 +31,7 @@ import static org.esa.snap.idepix.modis.IdepixModisConstants.MODIS_WATER_MASK_BA
         category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne, Marco Zuehlke",
+//        autoWriteDisabled = true,
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for MODIS.")
 public class IdepixModisOp extends BasisOp {
@@ -144,6 +145,12 @@ public class IdepixModisOp extends BasisOp {
     private boolean outputRad2Refl;
     private boolean outputEmissive;
 
+    private static final Logger logger;
+
+    static {
+        logger = Logger.getLogger(IdepixModisOp.class.getName());
+    }
+
     // former user options, now fix
 
 //    private final double glintThresh859 = 0.15;
@@ -154,6 +161,7 @@ public class IdepixModisOp extends BasisOp {
     @Override
     public void initialize() throws OperatorException {
         applyOrLogicInCloudTest = cloudFlaggingStrength.equals("CLOUD_CONSERVATIVE");
+        logger.info("IdepixModisOp: entering initialize()...");
 
         final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.MODIS);
         if (!inputProductIsValid) {
@@ -162,12 +170,20 @@ public class IdepixModisOp extends BasisOp {
 
         if (processDayProductsOnly) {
             IdepixModisUtils.checkIfDayProduct(sourceProduct);
+//            logger.info("checkIfDayProduct(sourceProduct)...");
+//            if (!IdepixModisUtils.checkIfDayProduct(sourceProduct, logger)) {
+//                // in this case we will not process Idepix nor write a target product
+//                System.out.println("Product '" + sourceProduct.getName() +
+//                        "' does not seem to be a MODIS L1b Day product - will exit IdePix.");
+//                setTargetProduct(new Product("dummy", "dummy", 1, 1));
+//                return;
+//            }
         }
 
         if (modisWaterMaskProduct != null) {
             IdepixModisUtils.validateModisWaterMaskProduct(sourceProduct,
-                                                           modisWaterMaskProduct,
-                                                           MODIS_WATER_MASK_BAND_NAME);
+                                                           modisWaterMaskProduct
+            );
         }
 
         outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;

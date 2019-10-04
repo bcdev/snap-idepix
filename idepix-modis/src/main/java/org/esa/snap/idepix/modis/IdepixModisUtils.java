@@ -6,6 +6,7 @@ import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 
 import java.util.Random;
+import java.util.logging.Logger;
 
 /**
  * Utility class for IdePix MODIS
@@ -66,17 +67,36 @@ public class IdepixModisUtils {
         }
     }
 
-    static void validateModisWaterMaskProduct(Product sourceProduct, Product waterMaskProduct, String waterMaskBandName) {
-        Band waterMaskBand = waterMaskProduct.getBand(waterMaskBandName);
+//    static boolean checkIfDayProduct(Product product, Logger logger) {
+//        final MetadataAttribute dayNightAttr = product.getMetadataRoot().getElement("Global_Attributes").
+//                getAttribute("DayNightFlag");
+//        logger.info("dayNightAttr: " + dayNightAttr);
+//        if (dayNightAttr != null) {
+//            logger.info("dayNightAttr.getData().getElemString(): " + dayNightAttr.getData().getElemString());
+//        }
+//
+//        final MetadataAttribute daymodeScansAttr = product.getMetadataRoot().getElement("Global_Attributes").
+//                getAttribute("Number_of_Day_mode_scans");
+//        logger.info("dayNightAttr: " + dayNightAttr);
+//        if (daymodeScansAttr != null) {
+//            logger.info("daymodeScansAttr.getData().getElemString(): " + daymodeScansAttr.getData().getElemString());
+//        }
+//
+//        return dayNightAttr == null || dayNightAttr.getData().getElemString().equals("Day");
+//    }
+
+
+    static void validateModisWaterMaskProduct(Product sourceProduct, Product waterMaskProduct) {
+        Band waterMaskBand = waterMaskProduct.getBand(IdepixModisConstants.MODIS_WATER_MASK_BAND_NAME);
         if (waterMaskBand == null) {
             throw new OperatorException("Specified water mask product does not contain a band named '" +
-                                                waterMaskBandName + "'. Please check.");
+                    IdepixModisConstants.MODIS_WATER_MASK_BAND_NAME + "'. Please check.");
         }
         final int cw = waterMaskProduct.getSceneRasterWidth();
         final int ch = waterMaskProduct.getSceneRasterHeight();
         final int sw = sourceProduct.getSceneRasterWidth();
         final int sh = sourceProduct.getSceneRasterHeight();
-        if (cw != sw || ch != sh) {
+        if (cw != sw || ch != sh) {  // todo: this is not sufficient! Compare date/time from filenames!
             throw new OperatorException("Dimensions of water mask product differ from source product. Please check.");
         }
     }

@@ -1,0 +1,1319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d13b59b2-bee3-414a-9903-e8208704ca31" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisConstants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java" beforeDir="false" afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisUtils.java" afterDir="false" />
+    </list>
+    <ignored path="$PROJECT_DIR$/s2tbx-cache/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-jp2-writer/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters-help/target/" />
+    <ignored path="$PROJECT_DIR$/lib-gdal/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-idepix-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-cc/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-spot-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-deimos-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-rapideye-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-radiometric-indices/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/sen2three/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-resampler/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/pansharpening-bayes/target/" />
+    <ignored path="$PROJECT_DIR$/lib-openjpeg/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-land-cover/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-meanshift/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-cache-ui/target/" />
+    <ignored path="$PROJECT_DIR$/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/sen2cor/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-muscate-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/sfstextureextraction/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-mosaic-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/pansharpening-rcs/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-commons/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-watershed/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/pansharpening-lmvm/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-biophysical/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-aerosol-retrieval/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-gdal-reader-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/maintenance/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-mci/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/multivariate-alteration-detector/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/segmentation-mprofiles/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/s2tbx-otb-adapters-kit/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-kit/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-preferences-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-mci-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-sta-adapters/orfeotoolbox/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-spot6-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-jp2-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-mosaic/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-idepix/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-gdal-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-reflectance-to-radiance/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-reflectance-to-radiance-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-s2msi-reader-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-pleiades-reader/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-grm-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-radiometric-indices-ui/target/" />
+    <ignored path="$PROJECT_DIR$/s2tbx-grm/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-s2msi/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-olci/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-modis/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-meris/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-probav/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-assembly/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-viirs/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-spotvgt/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-seawifs/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-landsat8/target/" />
+    <ignored path="$PROJECT_DIR$/idepix-core/target/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/snap_idepix_parent$NNTensorflowApplyModelTest.ic" NAME="NNTensorflowApplyModelTest Coverage Results" MODIFIED="1550010736355" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>org.esa.snap.idepix.olci.*</FILTER>
+    </SUITE>
+  </component>
+  <component name="FUSProjectUsageTrigger">
+    <session id="1864120922">
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="class" value="2" />
+          <entry key="java" value="23" />
+          <entry key="net" value="1" />
+          <entry key="xml" value="2" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="CLASS" value="2" />
+          <entry key="JAVA" value="23" />
+          <entry key="PLAIN_TEXT" value="1" />
+          <entry key="XML" value="2" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="java" value="586" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="JAVA" value="586" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="11" />
+          <entry key="project.open.time.0" value="1" />
+          <entry key="project.open.time.1" value="5" />
+          <entry key="project.open.time.2" value="1" />
+          <entry key="project.open.time.6" value="4" />
+          <entry key="project.opened" value="11" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/idepix-modis/pom.xml">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="340">
+              <caret line="52" column="72" selection-start-line="52" selection-start-column="72" selection-end-line="52" selection-end-column="72" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-gpf/7.0.0/snap-gpf-7.0.0.jar!/org/esa/snap/core/gpf/Operator.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="323">
+              <caret line="36" column="25" selection-start-line="36" selection-start-column="25" selection-end-line="36" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisConstants.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1836">
+              <caret line="108" column="1" selection-start-line="108" selection-start-column="1" selection-end-line="108" selection-end-column="1" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1615">
+              <caret line="107" column="41" selection-start-line="107" selection-start-column="20" selection-end-line="107" selection-end-column="41" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisAlgorithm.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="4352">
+              <caret line="258" column="38" selection-start-line="258" selection-start-column="19" selection-end-line="258" selection-end-column="38" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisUtils.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="34">
+              <caret line="8" column="32" lean-forward="true" selection-start-line="8" selection-start-column="32" selection-end-line="8" selection-end-column="32" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>NTensorOut</find>
+      <find>getRes</find>
+      <find>dense_36/bias</find>
+      <find>MODEL_DIR</find>
+      <find>hasNext</find>
+      <find>session</find>
+      <find>transformMethod</find>
+      <find>nnTensorInput</find>
+      <find>Idepix</find>
+      <find>Idepix.Olci</find>
+      <find>Ctp</find>
+      <find>refl12Band</find>
+      <find>loadModel</find>
+      <find>Meris.CloudTopPressureOp</find>
+      <find>computeCloudShadow</find>
+      <find>ctpTile</find>
+      <find>getSourceTile</find>
+      <find>postProcess</find>
+      <find>ctpBand</find>
+      <find>protobuf</find>
+      <find>1x10x4</find>
+      <find>ctpProduct</find>
+      <find>tensorResult</find>
+      <find>computeTensorResult</find>
+      <find>B8</find>
+      <find>sourceBandClusterA</find>
+      <find>sourceProduct</find>
+      <find>NETCDF4</find>
+      <find>modisWaterMaskvalue</find>
+      <find>modisWaterMaskProduct</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="UPDATE_TYPE" value="REBASE" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="cloud_and_mountain_shadow" />
+      </map>
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/s2tbx-s2msi-idepix/pom.xml" />
+        <option value="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisAlgorithm.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java" />
+        <option value="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/pom.xml" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/NNTensorflowApplyModel.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/NNTensorflowApplyModelTest.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/TensorflowNNCalculatorTest.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/resources/layer.xml" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciUtils.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/TensorflowNNCalculator.java" />
+        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java" />
+        <option value="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisConstants.java" />
+        <option value="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisUtils.java" />
+        <option value="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+        <option name="lookForNested" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="MavenProjectNavigator">
+    <treeState>
+      <expand>
+        <path>
+          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
+          <item name="IdePix Core" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+        </path>
+        <path>
+          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
+          <item name="IdePix Core" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+          <item name="Lifecycle" type="58874e2:MavenProjectsStructure$LifecycleNode" />
+        </path>
+        <path>
+          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
+          <item name="IdePix MODIS" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+        </path>
+        <path>
+          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
+          <item name="IdePix MODIS" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+          <item name="Lifecycle" type="58874e2:MavenProjectsStructure$LifecycleNode" />
+        </path>
+        <path>
+          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
+          <item name="snap-idepix" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+        </path>
+        <path>
+          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
+          <item name="snap-idepix" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+          <item name="Lifecycle" type="58874e2:MavenProjectsStructure$LifecycleNode" />
+        </path>
+      </expand>
+      <select />
+    </treeState>
+  </component>
+  <component name="MavenRunner">
+    <option name="skipTests" value="true" />
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="87" />
+    <option name="y" value="10" />
+    <option name="width" value="1726" />
+    <option name="height" value="1013" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <autoscrollFromSource ProjectPane="true" />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
+      <pane id="AndroidView" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-core" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-core" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-core" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="modis" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Maven: org.esa.snap:snap-gpf:7.0.0" type="70bed36:NamedLibraryElementNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Maven: org.esa.snap:snap-gpf:7.0.0" type="70bed36:NamedLibraryElementNode" />
+              <item name="snap-gpf-7.0.0.jar" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Maven: org.esa.snap:snap-gpf:7.0.0" type="70bed36:NamedLibraryElementNode" />
+              <item name="snap-gpf-7.0.0.jar" type="462c0819:PsiDirectoryNode" />
+              <item name="gpf" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="snap-idepix-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Maven: org.esa.snap:snap-gpf:7.0.0" type="70bed36:NamedLibraryElementNode" />
+              <item name="snap-gpf-7.0.0.jar" type="462c0819:PsiDirectoryNode" />
+              <item name="gpf" type="462c0819:PsiDirectoryNode" />
+              <item name="annotations" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1570143293453" />
+    <property name="extract.method.default.visibility" value="private" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../calvalus-instances" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\olafd\workspaces\git\snap-idepix\idepix-olci\src\test\resources\org\esa\snap\idepix\olci\nn_training_20190131_I7x24x24x24xO1\" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.esa.snap.idepix.olci" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\olafd\workspaces\git\snap-idepix\idepix-olci\src\main\resources\org\esa\snap\idepix\olci" />
+      <recent name="C:\Users\olafd\workspaces\git\snap-idepix\idepix-olci\src\test\resources\org\esa\snap\idepix\olci" />
+      <recent name="C:\Users\olafd\workspaces\git\snap-idepix\.idea" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="JAR Application.Idepix MODIS (SNAP installed)">
+    <configuration name="IdepixMerisNc4WriterTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="org.esa.snap.idepix.meris.dataio.nc4.IdepixMerisNc4WriterTest" />
+      <module name="idepix-meris" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.esa.snap.idepix.meris.dataio.nc4.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TensorflowNNCalculatorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="idepix-olci" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.esa.snap.idepix.olci.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.esa.snap.idepix.olci" />
+      <option name="MAIN_CLASS_NAME" value="org.esa.snap.idepix.olci.TensorflowNNCalculatorTest" />
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Idepix OLCI (SNAP GUI)" type="JarApplication" factoryName="JAR Application">
+      <option name="JAR_PATH" value="$PROJECT_DIR$/../../snap-snapshots/7.0-release//snap/snap/modules/ext/org.esa.snap.snap-rcp/org-esa-snap/snap-main.jar" />
+      <option name="VM_PARAMETERS" value="-Dsun.awt.nopixfmt=true -Dsun.java2d.noddraw=true -Dsun.java2d.dpiaware=false -Dsnap.pythonModuleDir=C:\Users\olafd\workspaces\git\senbox-org -Dsnap.log.level=ALL -Ds3tbx.landsat.readAs=reflectance -Dorg.netbeans.modules.javahelp.level=100 -Dorg.netbeans.modules.javahelp=0" />
+      <option name="PROGRAM_PARAMETERS" value="--clusters &quot;D:\olaf\bc\workspace\snap-idepix\idepix-olci\target\nbm\netbeans\s3tbx&quot; --patches &quot;D:\olaf\bc\workspace\snap-idepix\idepix-olci\$\target\classes&quot; --userdir &quot;C:\Users\olafd\.snap&quot;" />
+      <option name="WORKING_DIRECTORY" value="D:\olaf\bc\snap-snapshots\7.0-release\\snap" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="TestNG" factoryName="TestNG">
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="JAR Application.Idepix MODIS (SNAP installed)" />
+      <item itemvalue="JAR Application.Idepix OLCI (SNAP GUI)" />
+      <item itemvalue="Application.IdepixMerisNc4WriterTest" />
+      <item itemvalue="JUnit.TensorflowNNCalculatorTest" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.TensorflowNNCalculatorTest" />
+        <item itemvalue="Application.IdepixMerisNc4WriterTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d13b59b2-bee3-414a-9903-e8208704ca31" name="Default Changelist" comment="" />
+      <created>1538657159496</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1538657159496</updated>
+      <workItem from="1538657162555" duration="1594000" />
+      <workItem from="1539076653376" duration="32000" />
+      <workItem from="1539076703710" duration="163000" />
+      <workItem from="1539076876939" duration="5651000" />
+      <workItem from="1539609357159" duration="686000" />
+      <workItem from="1539691780524" duration="7505000" />
+      <workItem from="1539946372684" duration="1588000" />
+      <workItem from="1541670310030" duration="67000" />
+      <workItem from="1542031995064" duration="885000" />
+      <workItem from="1542275682314" duration="4967000" />
+      <workItem from="1542358964634" duration="3994000" />
+      <workItem from="1542725741491" duration="1919000" />
+      <workItem from="1544197413889" duration="766000" />
+      <workItem from="1544435000399" duration="1812000" />
+      <workItem from="1544532897031" duration="1601000" />
+      <workItem from="1544606155023" duration="1676000" />
+      <workItem from="1545059771809" duration="1611000" />
+      <workItem from="1545384044870" duration="1578000" />
+      <workItem from="1546526762115" duration="3185000" />
+      <workItem from="1546594666744" duration="4044000" />
+      <workItem from="1547736795364" duration="823000" />
+      <workItem from="1547817355898" duration="1823000" />
+      <workItem from="1549623426171" duration="606000" />
+      <workItem from="1549624862812" duration="1199000" />
+      <workItem from="1549640224466" duration="128000" />
+      <workItem from="1549882556145" duration="9883000" />
+      <workItem from="1550047710836" duration="12613000" />
+      <workItem from="1550063095770" duration="10522000" />
+      <workItem from="1550135989341" duration="12111000" />
+      <workItem from="1550222902028" duration="12531000" />
+      <workItem from="1550482886199" duration="21661000" />
+    </task>
+    <task id="LOCAL-00001" summary="merging cloud and mountain shadow branch to master&#10;&#10;# Conflicts:&#10;#&#9;s2tbx-muscate-reader/pom.xml&#10;#&#9;s2tbx-muscate-reader/src/main/java/org/esa/s2tbx/dataio/muscate/MuscateProductReader.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixClassificationOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixConstants.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixUtils.java">
+      <created>1538658059462</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1538658059462</updated>
+    </task>
+    <task id="LOCAL-00002" summary="adapted to master">
+      <created>1538658096537</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1538658096537</updated>
+    </task>
+    <task id="LOCAL-00003" summary="added check for missing lat and lon tiepoints in input L1b HDF files">
+      <created>1539096590002</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1539096590002</updated>
+    </task>
+    <task id="LOCAL-00004" summary="added optional MOD03 land mask product as input in Idepix MODIS">
+      <created>1539701503924</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1539701503924</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fix: coastline was not determined from OLCI L1b flag if pixel was classified as l1b_land (only in case of water). Reported by CL.">
+      <created>1542299714825</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1542299714825</updated>
+    </task>
+    <task id="LOCAL-00006" summary="fixed issue in day/night product detection for MODIS">
+      <created>1547747591451</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1547747591451</updated>
+    </task>
+    <task id="LOCAL-00007" summary="started tensorflow NN support fpr Idepix OLCI">
+      <created>1549906769958</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1549906769958</updated>
+    </task>
+    <task id="LOCAL-00008" summary="more tests, cleanup and renamings in tensorflow NN support for Idepix OLCI">
+      <created>1550068814435</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1550068814435</updated>
+    </task>
+    <task id="LOCAL-00009" summary="more tests, cleanup and renamings in tensorflow NN support for Idepix OLCI">
+      <created>1550068887176</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1550068887176</updated>
+    </task>
+    <task id="LOCAL-00010" summary="started with OLCI CTP Op">
+      <created>1550074882854</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1550074882854</updated>
+    </task>
+    <task id="LOCAL-00011" summary="started with OLCI CTP Op">
+      <created>1550165819438</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1550165819438</updated>
+    </task>
+    <task id="LOCAL-00012" summary="started with OLCI CTP Op">
+      <created>1550233657536</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1550233657536</updated>
+    </task>
+    <task id="LOCAL-00013" summary="continued OLCI CTP Op">
+      <created>1550254906524</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1550254906524</updated>
+    </task>
+    <task id="LOCAL-00014" summary="continued OLCI CTP Op">
+      <created>1550615287909</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1550615287909</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
+    <servers />
+  </component>
+  <component name="TestHistory">
+    <history-entry file="NNTensorflowApplyModelTest - 2019.02.13 at 14h 57m 30s.xml">
+      <configuration name="NNTensorflowApplyModelTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="NNTensorflowApplyModelTest - 2019.02.13 at 14h 57m 52s.xml">
+      <configuration name="NNTensorflowApplyModelTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="NNTensorflowApplyModelTest - 2019.02.13 at 14h 58m 39s.xml">
+      <configuration name="NNTensorflowApplyModelTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="NNTensorflowApplyModelTest - 2019.02.13 at 14h 59m 07s.xml">
+      <configuration name="NNTensorflowApplyModelTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="NNTensorflowApplyModelTest - 2019.02.13 at 14h 59m 44s.xml">
+      <configuration name="NNTensorflowApplyModelTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="NNTensorflowApplyModelTest - 2019.02.13 at 15h 00m 05s.xml">
+      <configuration name="NNTensorflowApplyModelTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="NNTensorflowApplyModelTest - 2019.02.13 at 15h 00m 39s.xml">
+      <configuration name="NNTensorflowApplyModelTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="NNTensorflowApplyModelTest - 2019.02.13 at 15h 01m 08s.xml">
+      <configuration name="NNTensorflowApplyModelTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="NNTensorflowApplyModelTest - 2019.02.13 at 15h 10m 51s.xml">
+      <configuration name="NNTensorflowApplyModelTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="TensorflowNNCalculatorTest - 2019.02.15 at 13h 36m 27s.xml">
+      <configuration name="TensorflowNNCalculatorTest" configurationId="JUnit" />
+    </history-entry>
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="129313000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="87" y="10" width="1726" height="1013" extended-state="0" />
+    <layout>
+      <window_info id="Designer" order="0" />
+      <window_info id="Project" order="1" visible="true" weight="0.22028811" />
+      <window_info id="Structure" order="2" side_tool="true" />
+      <window_info id="Image Layers" order="3" />
+      <window_info id="Capture Tool" order="4" />
+      <window_info id="UI Designer" order="5" />
+      <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="bottom" id="Version Control" order="0" sideWeight="0.49879953" weight="0.33488914" />
+      <window_info anchor="bottom" id="TODO" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4956822" weight="0.25437573" />
+      <window_info anchor="bottom" id="JProfiler" order="3" />
+      <window_info anchor="bottom" id="Terminal" order="4" />
+      <window_info anchor="bottom" id="Event Log" order="5" sideWeight="0.50240093" side_tool="true" weight="0.24854143" />
+      <window_info anchor="bottom" id="Debug" order="6" sideWeight="0.49759904" weight="0.3815636" />
+      <window_info anchor="bottom" id="Find" order="7" sideWeight="0.49939975" weight="0.27887982" />
+      <window_info anchor="bottom" id="Messages" order="8" weight="0.32983682" />
+      <window_info anchor="right" id="Palette" order="0" />
+      <window_info anchor="right" id="Capture Analysis" order="1" />
+      <window_info anchor="right" id="Ant Build" order="2" />
+      <window_info anchor="right" id="Theme Preview" order="3" />
+      <window_info anchor="right" id="Database" order="4" />
+      <window_info anchor="right" id="Palette&#9;" order="5" />
+      <window_info anchor="right" id="SciView" order="6" />
+      <window_info anchor="right" id="Maven Projects" order="7" visible="true" weight="0.2004802" />
+      <window_info anchor="right" x="0" y="0" width="381" height="813" id="Documentation" order="8" />
+    </layout>
+    <layout-to-restore>
+      <window_info id="Image Layers" order="0" />
+      <window_info id="Capture Tool" order="1" />
+      <window_info id="Designer" order="2" />
+      <window_info id="Project" order="3" visible="true" weight="0.2364706" />
+      <window_info id="Structure" order="4" side_tool="true" />
+      <window_info id="UI Designer" order="5" />
+      <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="bottom" id="TODO" order="0" />
+      <window_info anchor="bottom" id="Event Log" order="1" side_tool="true" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.38228437" />
+      <window_info anchor="bottom" id="Version Control" order="3" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Terminal" order="4" />
+      <window_info anchor="bottom" id="JProfiler" order="5" />
+      <window_info anchor="bottom" id="Debug" order="6" />
+      <window_info anchor="right" id="Palette" order="0" />
+      <window_info anchor="right" id="Palette&#9;" order="1" />
+      <window_info anchor="right" id="Capture Analysis" order="2" />
+      <window_info anchor="right" id="Maven Projects" order="3" visible="true" />
+      <window_info anchor="right" id="Database" order="4" />
+      <window_info anchor="right" id="SciView" order="5" />
+      <window_info anchor="right" id="Ant Build" order="6" />
+      <window_info anchor="right" id="Theme Preview" order="7" />
+    </layout-to-restore>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="merging cloud and mountain shadow branch to master&#10;&#10;# Conflicts:&#10;#&#9;s2tbx-muscate-reader/pom.xml&#10;#&#9;s2tbx-muscate-reader/src/main/java/org/esa/s2tbx/dataio/muscate/MuscateProductReader.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixClassificationOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixConstants.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixUtils.java" />
+    <MESSAGE value="adapted to master" />
+    <MESSAGE value="added check for missing lat and lon tiepoints in input L1b HDF files" />
+    <MESSAGE value="added optional MOD03 land mask product as input in Idepix MODIS" />
+    <MESSAGE value="fix: coastline was not determined from OLCI L1b flag if pixel was classified as l1b_land (only in case of water). Reported by CL." />
+    <MESSAGE value="fixed issue in day/night product detection for MODIS" />
+    <MESSAGE value="started tensorflow NN support fpr Idepix OLCI" />
+    <MESSAGE value="more tests, cleanup and renamings in tensorflow NN support for Idepix OLCI" />
+    <MESSAGE value="started with OLCI CTP Op" />
+    <MESSAGE value="continued OLCI CTP Op" />
+    <option name="LAST_COMMIT_MESSAGE" value="continued OLCI CTP Op" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisUtils.java</url>
+          <line>61</line>
+          <properties />
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-meris/src/test/java/org/esa/snap/idepix/meris/dataio/nc4/IdepixMerisNc4WriterTest.java</url>
+          <line>13</line>
+          <properties />
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java</url>
+          <line>103</line>
+          <properties />
+          <option name="timeStamp" value="28" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/TensorflowNNCalculator.java</url>
+          <line>213</line>
+          <properties />
+          <option name="timeStamp" value="35" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java</url>
+          <line>159</line>
+          <properties />
+          <option name="timeStamp" value="36" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java</url>
+          <line>229</line>
+          <properties />
+          <option name="timeStamp" value="37" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java</url>
+          <line>82</line>
+          <properties />
+          <option name="timeStamp" value="38" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java</url>
+          <line>117</line>
+          <properties />
+          <option name="timeStamp" value="39" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java</url>
+          <line>140</line>
+          <properties />
+          <option name="timeStamp" value="40" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java</url>
+          <line>183</line>
+          <properties />
+          <option name="timeStamp" value="41" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java</url>
+          <line>171</line>
+          <properties />
+          <option name="timeStamp" value="42" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java</url>
+          <line>183</line>
+          <properties />
+          <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java</url>
+          <line>175</line>
+          <properties class="org.esa.snap.idepix.modis.IdepixModisClassificationOp" method="configureTargetProduct">
+            <option name="EMULATED" value="true" />
+          </properties>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>new File(getClass().getResource(DEFAULT_TENSORFLOW_NN_DIR_NAME).getFile())</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>m.getGraphDef().getNodeList()</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>m.getGraphDef().getNodeCount()</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>m.getGraphDef().toString()</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>m.toString()</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>m.getAllFields()</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>bundle.graph().toString()</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>bundle.metaGraphDef.toString()</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>((byte[]) bundle.metaGraphDef).toString()</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="jar://$MAVEN_REPOSITORY$/org/tensorflow/libtensorflow/1.9.0-rc1/libtensorflow-1.9.0-rc1.jar!/org/tensorflow/SavedModelBundle.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="362">
+          <caret line="45" column="45" selection-start-line="45" selection-start-column="45" selection-end-line="45" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/tensorflow/libtensorflow/1.9.0-rc1/libtensorflow-1.9.0-rc1-sources.jar!/org/tensorflow/SavedModelBundle.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1292">
+          <caret line="97" column="41" selection-start-line="97" selection-start-column="41" selection-end-line="97" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/resources/org/esa/snap/idepix/olci/nn_training_20190131_I7x24x24x24xO1/saved_model.pbtxt" />
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/resources/org/esa/snap/idepix/olci/nn_training_20190131_I7x30x30x30xO1/saved_model.pbtxt" />
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/resources/org/esa/snap/idepix/olci/nn_training_20190131_I7x32x64x64x10xO1/saved_model.pbtxt" />
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/resources/org/esa/snap/idepix/olci/nn_training_20190131_I7x32x64x64x64xO1/saved_model.pbtxt" />
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/s3tbx/s3tbx-rad2refl/7.0.0-SNAPSHOT/s3tbx-rad2refl-7.0.0-20190213.063309-126.jar!/org/esa/s3tbx/processor/rad2refl/Rad2ReflOp.class" />
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/s3tbx/s3tbx-rad2refl/7.0.0-SNAPSHOT/s3tbx-rad2refl-7.0.0-20190213.063309-126-sources.jar!/org/esa/s3tbx/processor/rad2refl/Rad2ReflConstants.java" />
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" column="34" selection-start-line="3" selection-start-column="34" selection-end-line="3" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/s3tbx/s3tbx-rad2refl/7.0.0-SNAPSHOT/s3tbx-rad2refl-7.0.0-20190213.063309-126-sources.jar!/org/esa/s3tbx/processor/rad2refl/Rad2ReflOp.java" />
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-gpf/7.0.0-SNAPSHOT/snap-gpf-7.0.0-20190212.104930-87.jar!/org/esa/snap/core/gpf/annotations/Parameter.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="197">
+          <caret line="51" column="31" selection-start-line="51" selection-start-column="31" selection-end-line="51" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/ceres-binding/7.0.0-SNAPSHOT/ceres-binding-7.0.0-20190212.104740-101.jar!/com/bc/ceres/binding/dom/DefaultDomConverter.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-748">
+          <caret line="27" column="13" selection-start-line="27" selection-start-column="13" selection-end-line="27" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-gpf/7.0.0-SNAPSHOT/snap-gpf-7.0.0-20190212.104930-87-sources.jar!/org/esa/snap/core/gpf/annotations/ParameterBlockConverter.java" />
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-gpf/7.0.0-SNAPSHOT/snap-gpf-7.0.0-20190212.104930-87-sources.jar!/org/esa/snap/core/gpf/annotations/Parameter.java" />
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_102/src.zip!/java/lang/String.java" />
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/s3tbx/s3tbx-idepix/7.0.0-SNAPSHOT/s3tbx-idepix-7.0.0-20190213.063323-125.jar!/org/esa/s3tbx/idepix/core/CloudShadowFronts.class" />
+    <entry file="file://$PROJECT_DIR$/idepix-meris/src/main/java/org/esa/snap/idepix/meris/IdepixMerisUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="611">
+          <caret line="84" column="5" selection-start-line="82" selection-start-column="4" selection-end-line="84" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_102/src.zip!/java/lang/ClassLoader.java" />
+    <entry file="file://$PROJECT_DIR$/idepix-meris/src/main/java/org/esa/snap/idepix/meris/IdepixMerisOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1142">
+          <caret line="233" column="102" selection-start-line="233" selection-start-column="102" selection-end-line="233" selection-end-column="102" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-meris/src/main/java/org/esa/snap/idepix/meris/IdepixMerisPostProcessOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="205">
+          <caret line="140" column="30" selection-start-line="140" selection-start-column="12" selection-end-line="140" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/s3tbx/s3tbx-idepix/7.0.0-SNAPSHOT/s3tbx-idepix-7.0.0-20190213.063323-125-sources.jar!/org/esa/s3tbx/idepix/core/IdepixConstants.java" />
+    <entry file="file://$PROJECT_DIR$/idepix-olci/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="23" column="36" selection-start-line="23" selection-start-column="36" selection-end-line="23" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/s3tbx/s3tbx-idepix/7.0.0-SNAPSHOT/s3tbx-idepix-7.0.0-20190213.063323-125-sources.jar!/org/esa/s3tbx/idepix/core/CloudShadowFronts.java" />
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="23" column="47" selection-start-line="23" selection-start-column="47" selection-end-line="23" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciCloudNNInterpreter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="14" column="44" selection-start-line="14" selection-start-column="44" selection-end-line="14" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/TensorflowNNCalculator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1054">
+          <caret line="71" column="20" selection-start-line="71" selection-start-column="20" selection-end-line="71" selection-end-column="20" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#2286#2287#0" expanded="true" />
+            <element signature="e#2342#2343#0" expanded="true" />
+            <element signature="e#2460#2461#0" expanded="true" />
+            <element signature="e#2488#2489#0" expanded="true" />
+            <element signature="e#2611#2612#0" expanded="true" />
+            <element signature="e#2647#2648#0" expanded="true" />
+            <element signature="e#2767#2768#0" expanded="true" />
+            <element signature="e#2802#2803#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixAlgorithm.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2669">
+          <caret line="173" column="16" selection-start-line="173" selection-start-column="16" selection-end-line="173" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/S2IdepixPreCloudShadowOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4539">
+          <caret line="297" column="37" selection-start-line="297" selection-start-column="37" selection-end-line="297" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixPostProcessOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1547">
+          <caret line="111" column="102" selection-start-line="111" selection-start-column="102" selection-end-line="111" selection-end-column="102" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/S2IdepixCloudShadowOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="42" column="13" selection-start-line="42" selection-start-column="13" selection-end-line="42" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/tensorflow/libtensorflow/1.9.0-rc1/libtensorflow-1.9.0-rc1-sources.jar!/org/tensorflow/Tensor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="44" column="19" selection-start-line="44" selection-start-column="19" selection-end-line="44" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/test/java/org/esa/snap/idepix/olci/TensorflowNNCalculatorTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="748">
+          <caret line="64" column="34" selection-start-line="64" selection-start-column="34" selection-end-line="64" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/resources/layer.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="425">
+          <caret line="25" column="17" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciPostProcessOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="969">
+          <caret line="80" column="13" selection-start-line="80" selection-start-column="13" selection-end-line="80" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/CtpOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2686">
+          <caret line="183" column="59" selection-start-line="183" selection-start-column="59" selection-end-line="183" selection-end-column="59" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/CloudBulkShifter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="15" column="9" selection-start-line="15" selection-start-column="9" selection-end-line="15" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1105">
+          <caret line="92" column="26" selection-start-line="92" selection-start-column="26" selection-end-line="92" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="510">
+          <caret line="49" column="33" selection-start-line="49" selection-start-column="20" selection-end-line="49" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-core/src/main/java/org/esa/snap/idepix/core/util/IdepixIO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2346">
+          <caret line="143" column="26" selection-start-line="143" selection-start-column="26" selection-end-line="143" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciClassificationOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6239">
+          <caret line="399" column="21" selection-start-line="399" selection-start-column="21" selection-end-line="399" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-olci/src/main/resources/org/esa/snap/idepix/olci/11x10x4x3x2_207.9.net">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-gpf/7.0.0/snap-gpf-7.0.0.jar!/org/esa/snap/core/gpf/annotations/OperatorMetadata.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="314">
+          <caret line="33" column="12" selection-start-line="33" selection-start-column="12" selection-end-line="33" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-modis/pom.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/esa/snap/snap-gpf/7.0.0/snap-gpf-7.0.0.jar!/org/esa/snap/core/gpf/Operator.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="36" column="25" selection-start-line="36" selection-start-column="25" selection-end-line="36" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisConstants.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1836">
+          <caret line="108" column="1" selection-start-line="108" selection-start-column="1" selection-end-line="108" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1615">
+          <caret line="107" column="41" selection-start-line="107" selection-start-column="20" selection-end-line="107" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisAlgorithm.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4352">
+          <caret line="258" column="38" selection-start-line="258" selection-start-column="19" selection-end-line="258" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="8" column="32" lean-forward="true" selection-start-line="8" selection-start-column="32" selection-end-line="8" selection-end-column="32" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisOp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="52" column="72" selection-start-line="52" selection-start-column="72" selection-end-line="52" selection-end-column="72" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ArtifactsStructureConfigurable.UI">
+        <settings>
+          <artifact-editor />
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="FacetStructureConfigurable.UI">
+        <settings>
+          <last-edited>No facets are configured</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="GlobalLibrariesConfigurable.UI">
+        <settings>
+          <last-edited>jdk1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="JdkListConfigurable.UI">
+        <settings>
+          <last-edited>1.6</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ModuleStructureConfigurable.UI">
+        <settings>
+          <last-edited>idepix-meris</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+                <option value="0.6" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.8 (1)</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectLibrariesConfigurable.UI">
+        <settings>
+          <last-edited>Maven: c3p0:c3p0:0.9.1.1</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

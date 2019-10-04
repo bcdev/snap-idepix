@@ -104,5 +104,6 @@ class IdepixModisConstants {
     public static final String IDEPIX_MIXED_PIXEL_DESCR_TEXT = "Mixed pixel";
     public static final String IDEPIX_CLOUD_B_NIR_DESCR_TEXT = "Cloudy pixel (from 'b_nir test')";
 
-    public static final String MODIS_WATER_MASK_BAND_NAME = "Land_SeaMask";
+//    public static final String MODIS_WATER_MASK_BAND_NAME = "Land_SeaMask";
+    public static final String MODIS_WATER_MASK_BAND_NAME = "Land_SeaMask_MODIS_Swath_Type_GEO/Data_Fields";
 }
