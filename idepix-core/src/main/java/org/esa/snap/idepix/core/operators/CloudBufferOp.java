@@ -48,8 +48,8 @@ public class CloudBufferOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        Product cloudBufferProduct = createTargetProduct(classifiedProduct,
-                                                         "postProcessedCloudBuffer", "postProcessedCloudBuffer");
+        Product cloudBufferProduct = createTargetProduct(classifiedProduct
+        );
 
         rectCalculator = new RectangleExtender(new Rectangle(classifiedProduct.getSceneRasterWidth(),
                                                              classifiedProduct.getSceneRasterHeight()),
@@ -60,11 +60,13 @@ public class CloudBufferOp extends Operator {
         setTargetProduct(cloudBufferProduct);
     }
 
-    private Product createTargetProduct(Product sourceProduct, String name, String type) {
+    private Product createTargetProduct(Product sourceProduct) {
         final int sceneWidth = sourceProduct.getSceneRasterWidth();
         final int sceneHeight = sourceProduct.getSceneRasterHeight();
 
-        Product targetProduct = new Product(name, type, sceneWidth, sceneHeight);
+        Product targetProduct = new Product("postProcessedCloudBuffer",
+                                            "postProcessedCloudBuffer",
+                                            sceneWidth, sceneHeight);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
@@ -90,7 +92,7 @@ public class CloudBufferOp extends Operator {
                 boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                 if (isCloud) {
                     if (useLcCloudBuffer) {
-                        CloudBuffer.computeCloudBufferLC(targetTile, IdepixConstants.IDEPIX_CLOUD, IdepixConstants.IDEPIX_CLOUD_BUFFER);
+                        CloudBuffer.computeCloudBufferLC(targetTile);
                     } else {
                         CloudBuffer.computeSimpleCloudBuffer(x, y,
                                                              targetTile,

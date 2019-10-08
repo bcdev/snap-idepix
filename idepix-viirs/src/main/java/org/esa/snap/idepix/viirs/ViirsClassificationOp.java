@@ -44,8 +44,8 @@ public class ViirsClassificationOp extends PixelOperator {
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
-    public static final String VIIRS_NET_NAME = "6x5x4x3x2_204.8.net";
-    ThreadLocal<SchillerNeuralNetWrapper> viirsNeuralNet;
+    private static final String VIIRS_NET_NAME = "6x5x4x3x2_204.8.net";
+    private ThreadLocal<SchillerNeuralNetWrapper> viirsNeuralNet;
 
 
     @Override

@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.olcislstr;
 
+import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
@@ -19,17 +20,15 @@ import java.util.Map;
  * @author olafd
  */
 
-public class OlciSlstrUtils {
+class OlciSlstrUtils {
 
     /**
      * Provides OLCI pixel classification flag coding
      *
-     * @param flagId - the flag ID
-     *
      * @return - the flag coding
      */
-    public static FlagCoding createOlciFlagCoding(String flagId) {
-        return IdepixFlagCoding.createDefaultFlagCoding(flagId);
+    static FlagCoding createOlciFlagCoding() {
+        return IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
     }
 
     /**
@@ -37,11 +36,11 @@ public class OlciSlstrUtils {
      *
      * @param classifProduct - the pixel classification product
      */
-    public static void setupOlciClassifBitmask(Product classifProduct) {
+    static void setupOlciClassifBitmask(Product classifProduct) {
         IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
     }
 
-    public static void addOlciRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
+    static void addOlciRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
         for (int i = 1; i <= Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
             for (String bandname : reflBandsToCopy) {
                 // e.g. Oa01_reflectance
@@ -53,7 +52,7 @@ public class OlciSlstrUtils {
         }
     }
 
-    public static void addSlstrRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
+    static void addSlstrRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
         for (int i = 1; i <= Rad2ReflConstants.SLSTR_REFL_BAND_NAMES.length; i++) {
             for (String bandname : reflBandsToCopy) {
                 // e.g. S1_reflectance_an
@@ -65,7 +64,7 @@ public class OlciSlstrUtils {
         }
     }
 
-    public static Product computeRadiance2ReflectanceProduct(Product sourceProduct, Sensor sensor) {
+    static Product computeRadiance2ReflectanceProduct(Product sourceProduct, Sensor sensor) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("sensor", sensor);
         params.put("copyNonSpectralBands", false);

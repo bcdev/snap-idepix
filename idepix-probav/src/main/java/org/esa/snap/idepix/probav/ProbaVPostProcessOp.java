@@ -88,9 +88,9 @@ public class ProbaVPostProcessOp extends Operator {
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Rectangle targetRectangle = targetTile.getRectangle();
 
-        Rectangle extendedRectangle = null;
+        Rectangle srcRectangle = null;
         if (computeCloudBuffer) {
-            extendedRectangle = rectCalculator.extend(targetRectangle);
+            srcRectangle = rectCalculator.extend(targetRectangle);
         }
 
         final Tile cloudFlagTile = getSourceTile(origCloudFlagBand, targetRectangle);
@@ -111,21 +111,7 @@ public class ProbaVPostProcessOp extends Operator {
 
         // cloud buffer:
         if (computeCloudBuffer) {
-            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
-                checkForCancellation();
-                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-
-                    final boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                    if (isCloud) {
-                        CloudBuffer.computeSimpleCloudBuffer(x, y,
-                                                             targetTile,
-                                                             extendedRectangle,
-                                                             cloudBufferWidth,
-                                                             IdepixConstants.IDEPIX_CLOUD_BUFFER);
-                    }
-                }
-            }
-
+            CloudBuffer.setCloudBuffer(targetTile, srcRectangle, cloudFlagTile, cloudBufferWidth);
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
                 checkForCancellation();
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {

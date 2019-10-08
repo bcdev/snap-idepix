@@ -14,36 +14,36 @@ public class SeaWifsAlgorithm {
     private static final double THRESH_BRIGHT_CLOUD_AMBIGUOUS = 0.07;
     private static final double THRESH_BRIGHT_CLOUD_SURE = 0.15;
 
-    float waterFraction;
-    double[] refl;
-    double[] nnOutput;
+    private float waterFraction;
+    private double[] refl;
+    private double[] nnOutput;
 
-    public boolean isInvalid() {
+    boolean isInvalid() {
         // todo: define if needed
         return false;
     }
 
-    public boolean isCoastline() {
+    boolean isCoastline() {
         // NOTE that this does not work if we have a PixelGeocoding. In that case, waterFraction
         // is always 0 or 100!! (TS, OD, 20140502). If so, get a coastline in post processing approach.
         return waterFraction < 100 && waterFraction > 0;
     }
 
-    public boolean isLand() {
+    boolean isLand() {
         return waterFraction == 0;
     }
 
 
-    public boolean isSnowIce() {
+    boolean isSnowIce() {
         // we don't have anything for SeaWiFS...
         return false;
     }
 
-    public boolean isCloud() {
+    boolean isCloud() {
         return isCloudAmbiguous() || isCloudSure();
     }
 
-    public boolean isCloudAmbiguous() {
+    boolean isCloudAmbiguous() {
         if (isLand() || isCloudSure()) {   // this check has priority
             return false;
         }
@@ -62,7 +62,7 @@ public class SeaWifsAlgorithm {
         }
     }
 
-    public boolean isCloudSure() {
+    boolean isCloudSure() {
         if (isLand() || isSnowIce()) {   // this check has priority
             return false;
         }
@@ -80,17 +80,17 @@ public class SeaWifsAlgorithm {
         }
     }
 
-    public boolean isCloudBuffer() {
+    boolean isCloudBuffer() {
         // is applied in post processing!
         return false;
     }
 
-    public boolean isCloudShadow() {
+    boolean isCloudShadow() {
         // will be applied in post processing once we have an appropriate algorithm
         return false;
     }
 
-    public boolean isMixedPixel() {
+    boolean isMixedPixel() {
         // todo
         // unmixing using MERIS bands 7, 9, 10, 12
         return false;
@@ -103,13 +103,8 @@ public class SeaWifsAlgorithm {
         return false;
     }
 
-    public boolean isBright() {
+    boolean isBright() {
         return false;   // todo
-    }
-
-    public float brightValue() {
-        // use L_865
-        return (float) refl[7];
     }
 
     public float whiteValue(int numeratorIndex, int denominatorIndex) {
@@ -121,16 +116,21 @@ public class SeaWifsAlgorithm {
         return 0;
     }
 
-    public void setWaterFraction(float waterFraction) {
+    void setWaterFraction(float waterFraction) {
         this.waterFraction = waterFraction;
     }
 
-    public void setRefl(double[] reflectance) {
+    void setRefl(double[] reflectance) {
         refl = reflectance;
     }
 
-    public void setNnOutput(double[] nnOutput) {
+    void setNnOutput(double[] nnOutput) {
         this.nnOutput = nnOutput;
+    }
+
+    private float brightValue() {
+        // use L_865
+        return (float) refl[7];
     }
 
 }

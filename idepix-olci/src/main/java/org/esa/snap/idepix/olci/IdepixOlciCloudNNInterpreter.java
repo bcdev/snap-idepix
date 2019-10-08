@@ -5,7 +5,7 @@ import com.bc.ceres.binding.ValueRange;
 /**
  * @author Marco Peters
  */
-public class IdepixOlciCloudNNInterpreter {
+class IdepixOlciCloudNNInterpreter {
 
     private static final ValueRange CLEAR_SNOW_ICE_BOUNDS = new ValueRange(0.0, 1.1, true, false);
     private static final ValueRange OPAQUE_CLOUD_BOUNDS = new ValueRange(1.1, 2.75, true, false);
@@ -22,7 +22,7 @@ public class IdepixOlciCloudNNInterpreter {
     }
 
     // Here we might add the nn as parameter to decide which valueRanges to load
-    public static IdepixOlciCloudNNInterpreter create() {
+    static IdepixOlciCloudNNInterpreter create() {
         return new IdepixOlciCloudNNInterpreter();
     }
 

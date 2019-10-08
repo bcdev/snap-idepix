@@ -22,17 +22,17 @@ public class IdepixModisAlgorithm {
     private double nnCloudAmbiguousSureSeparationValue;
     private double nnCloudSureSnowSeparationValue;
 
-    float srtmWaterFraction;
-    int modisWaterMaskvalue;
-    double[] refl;
-    double[] nnOutput;
+    private float srtmWaterFraction;
+    private int modisWaterMaskvalue;
+    private double[] refl;
+    private double[] nnOutput;
 
     /**
      * Provides snow/ice identification (still experimental)
      *
      * @return boolean
      */
-    public boolean isSnowIce() {
+    boolean isSnowIce() {
 
         // for MODIS ALL NN, nnOutput has one element:
         // nnOutput[0] =
@@ -80,7 +80,7 @@ public class IdepixModisAlgorithm {
      *
      * @return boolean
      */
-    public boolean isCloud() {
+    boolean isCloud() {
         return isCloudAmbiguous() || isCloudSure();
     }
 
@@ -89,7 +89,7 @@ public class IdepixModisAlgorithm {
      *
      * @return boolean
      */
-    public boolean isCloudAmbiguous() {
+    boolean isCloudAmbiguous() {
         return isCloudSure(); // todo: discuss and decide finally
 
 //        if (isLand()) {
@@ -153,7 +153,7 @@ public class IdepixModisAlgorithm {
      *
      * @return boolean
      */
-    public boolean isCloudSure() {
+    boolean isCloudSure() {
         if (isSnowIce()) {   // this has priority
             return false;
         }
@@ -205,7 +205,7 @@ public class IdepixModisAlgorithm {
         }
     }
 
-    public boolean isCloudBNir() {
+    boolean isCloudBNir() {
         // a new MODIS test for water  (CB/CL, 20161128)
         if (isLand()) {
             // over land, cloud_sure works very well, and the BNir test does not really work here
@@ -216,17 +216,17 @@ public class IdepixModisAlgorithm {
     }
 
 
-    public boolean isCloudBuffer() {
+    boolean isCloudBuffer() {
         // is applied in post processing!
         return false;
     }
 
-    public boolean isCloudShadow() {
+    boolean isCloudShadow() {
         // will be applied in post processing once we have an appropriate algorithm
         return false;
     }
 
-    public boolean isMixedPixel() {
+    boolean isMixedPixel() {
         // todo
         // unmixing using MERIS bands 7, 9, 10, 12
         return false;
@@ -240,18 +240,18 @@ public class IdepixModisAlgorithm {
         return false;
     }
 
-    public boolean isInvalid() {
+    boolean isInvalid() {
         // todo: define if needed
         return false;
     }
 
-    public boolean isCoastline() {
+    boolean isCoastline() {
         // NOTE that this does not work if we have a PixelGeocoding. In that case, waterFraction
         // is always 0 or 100!! (TS, OD, 20140502). If so, get a coastline in post processing approach.
         return srtmWaterFraction < 100 && srtmWaterFraction > 0;
     }
 
-    public boolean isLand() {
+    boolean isLand() {
         if (!Float.isNaN(srtmWaterFraction)) {
             return srtmWaterFraction == 0;
         } else {
@@ -260,83 +260,83 @@ public class IdepixModisAlgorithm {
         }
     }
 
-    public boolean isBright() {
+    boolean isBright() {
         return brightValue() > modisBrightnessThreshCloudSure;
     }
 
     ///////////////// feature values ////////////////////////////////////////
 
-    public float brightValue() {
+    private float brightValue() {
         return (float) refl[0];   //  EV_250_Aggr1km_RefSB_1 (645nm)
 //        return (float) refl[1];   //  EV_250_Aggr1km_RefSB_2 (859nm)
 //        return (float) refl[4];   //  EV_250_Aggr1km_RefSB_5 (1240nm)
     }
 
-    public float whiteValue(int numeratorIndex, int denominatorIndex) {
+    private float whiteValue(int numeratorIndex, int denominatorIndex) {
         return (float) (refl[numeratorIndex] / refl[denominatorIndex]);
     }
 
-    public float ndsiValue() {
+    private float ndsiValue() {
         // use EV_250_Aggr1km_RefSB_1, EV_500_Aggr1km_RefSB_7
         return (float) ((refl[0] - refl[6]) / (refl[0] + refl[6]));
     }
 
     
     ///////////////// further setter methods ////////////////////////////////////////
-    public void setSrtmWaterFraction(float srtmWaterFraction) {
+    void setSrtmWaterFraction(float srtmWaterFraction) {
         this.srtmWaterFraction = srtmWaterFraction;
     }
 
-    public void setModisWaterMaskvalue(int modisWaterMaskvalue) {
+    void setModisWaterMaskvalue(int modisWaterMaskvalue) {
         this.modisWaterMaskvalue = modisWaterMaskvalue;
     }
 
-    public void setRefl(double[] reflectance) {
+    void setRefl(double[] reflectance) {
         refl = reflectance;
     }
 
-    public void setNnOutput(double[] nnOutput) {
+    void setNnOutput(double[] nnOutput) {
         this.nnOutput = nnOutput;
     }
     
-    public void setModisApplyBrightnessTest(boolean modisApplyBrightnessTest) {
+    void setModisApplyBrightnessTest(boolean modisApplyBrightnessTest) {
         this.modisApplyBrightnessTest = modisApplyBrightnessTest;
     }
 
-    public void setModisBrightnessThreshCloudSure(double modisBrightnessThresh) {
+    void setModisBrightnessThreshCloudSure(double modisBrightnessThresh) {
         this.modisBrightnessThreshCloudSure = modisBrightnessThresh;
     }
 
-    public void setModisBNirThresh859(double modisBNirThresh859) {
+    void setModisBNirThresh859(double modisBNirThresh859) {
         this.modisBNirThresh859 = modisBNirThresh859;
     }
 
-    public void setModisBrightnessThreshCloudAmbiguous(double modisBrightnessThreshCloudAmbiguous) {
+    void setModisBrightnessThreshCloudAmbiguous(double modisBrightnessThreshCloudAmbiguous) {
         this.modisBrightnessThreshCloudAmbiguous = modisBrightnessThreshCloudAmbiguous;
     }
 
-    public void setModisGlintThresh859forCloudSure(double modisGlintThresh859forCloudSure) {
+    void setModisGlintThresh859forCloudSure(double modisGlintThresh859forCloudSure) {
         this.modisGlintThresh859forCloudSure = modisGlintThresh859forCloudSure;
     }
 
-    public void setModisGlintThresh859forCloudAmbiguous(double modisGlintThresh859forCloudAmbiguous) {
+    void setModisGlintThresh859forCloudAmbiguous(double modisGlintThresh859forCloudAmbiguous) {
         this.modisGlintThresh859forCloudAmbiguous = modisGlintThresh859forCloudAmbiguous;
     }
 
 
-    public void setModisApplyOrLogicInCloudTest(boolean modisApplyOrLogicInCloudTest) {
+    void setModisApplyOrLogicInCloudTest(boolean modisApplyOrLogicInCloudTest) {
         this.modisApplyOrLogicInCloudTest = modisApplyOrLogicInCloudTest;
     }
 
-    public void setNnCloudAmbiguousLowerBoundaryValue(double nnCloudAmbiguousLowerBoundaryValue) {
+    void setNnCloudAmbiguousLowerBoundaryValue(double nnCloudAmbiguousLowerBoundaryValue) {
         this.nnCloudAmbiguousLowerBoundaryValue = nnCloudAmbiguousLowerBoundaryValue;
     }
 
-    public void setNnCloudAmbiguousSureSeparationValue(double nnCloudAmbiguousSureSeparationValue) {
+    void setNnCloudAmbiguousSureSeparationValue(double nnCloudAmbiguousSureSeparationValue) {
         this.nnCloudAmbiguousSureSeparationValue = nnCloudAmbiguousSureSeparationValue;
     }
 
-    public void setNnCloudSureSnowSeparationValue(double nnCloudSureSnowSeparationValue) {
+    void setNnCloudSureSnowSeparationValue(double nnCloudSureSnowSeparationValue) {
         this.nnCloudSureSnowSeparationValue = nnCloudSureSnowSeparationValue;
     }
 }

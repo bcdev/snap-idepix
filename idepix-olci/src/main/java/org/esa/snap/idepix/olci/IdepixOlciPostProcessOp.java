@@ -1,10 +1,6 @@
 package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
-//import org.esa.s3tbx.idepix.core.IdepixConstants;
-//import org.esa.s3tbx.idepix.core.operators.CloudBuffer;
-//import org.esa.s3tbx.idepix.core.util.IdepixIO;
-//import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -24,6 +20,11 @@ import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 
 import java.awt.*;
+
+//import org.esa.s3tbx.idepix.core.IdepixConstants;
+//import org.esa.s3tbx.idepix.core.operators.CloudBuffer;
+//import org.esa.s3tbx.idepix.core.util.IdepixIO;
+//import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 
 /**
  * Operator used to consolidate IdePix classification flag for OLCI:
@@ -99,7 +100,7 @@ public class IdepixOlciPostProcessOp extends Operator {
         temperatureProfileTPGs = new TiePointGrid[IdepixOlciConstants.referencePressureLevels.length];
         for (int i = 0; i < IdepixOlciConstants.referencePressureLevels.length; i++) {
             temperatureProfileTPGs[i] =
-                    l1bProduct.getTiePointGrid("atmospheric_temperature_profile_pressure_level_" + (i+1));
+                    l1bProduct.getTiePointGrid("atmospheric_temperature_profile_pressure_level_" + (i + 1));
         }
 
         if (computeCloudBuffer) {
@@ -152,22 +153,7 @@ public class IdepixOlciPostProcessOp extends Operator {
         }
 
         if (computeCloudBuffer) {
-            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
-                checkForCancellation();
-                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                    if (targetRectangle.contains(x, y)) {
-                        final boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                        if (isCloud) {
-                            CloudBuffer.computeSimpleCloudBuffer(x, y,
-                                                                 targetTile,
-                                                                 srcRectangle,
-                                                                 cloudBufferWidth,
-                                                                 IdepixConstants.IDEPIX_CLOUD_BUFFER);
-                        }
-                    }
-                }
-            }
-
+            CloudBuffer.setCloudBuffer(targetTile, srcRectangle, sourceFlagTile, cloudBufferWidth);
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
                 checkForCancellation();
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {

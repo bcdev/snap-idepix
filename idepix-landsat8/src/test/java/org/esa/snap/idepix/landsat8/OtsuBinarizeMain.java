@@ -1,12 +1,5 @@
 package org.esa.snap.idepix.landsat8;
 
-/**
- * Image binarization - Otsu algorithm
- *
- * Author: Bostjan Cigan (http://zerocool.is-a-geek.net)
- *
- */
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,16 +7,22 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
+/**
+ * Image binarization - Otsu algorithm
+ *
+ * Author: Bostjan Cigan (http://zerocool.is-a-geek.net)
+ *
+ */
 public class OtsuBinarizeMain {
 
-    private static BufferedImage original, grayscale, binarized;
+    private static BufferedImage binarized;
 
     public static void main(String[] args) throws IOException {
         final OtsuBinarizeMain ob = new OtsuBinarizeMain();
         final File original_f = ob.getInputFile(args[0] + ".jpg");
         final String output_f = original_f.getParentFile().getAbsolutePath() + File.separator + "gray_bin";
-        original = ImageIO.read(original_f);
-        grayscale = toGray(original);
+        BufferedImage original = ImageIO.read(original_f);
+        BufferedImage grayscale = toGray(original);
         binarized = binarize(grayscale);
         writeImage(output_f);
     }
@@ -39,7 +38,7 @@ public class OtsuBinarizeMain {
     }
 
     // Return histogram of grayscale image
-    public static int[] imageHistogram(BufferedImage input) {
+    private static int[] imageHistogram(BufferedImage input) {
 
         int[] histogram = new int[256];
 
@@ -98,7 +97,7 @@ public class OtsuBinarizeMain {
 
         float sumB = 0;
         int wB = 0;
-        int wF = 0;
+        int wF;
 
         float varMax = 0;
         int threshold = 0;

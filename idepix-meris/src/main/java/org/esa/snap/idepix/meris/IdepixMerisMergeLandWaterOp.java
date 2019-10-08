@@ -54,7 +54,7 @@ public class IdepixMerisMergeLandWaterOp extends Operator {
         waterClassifBand = waterClassifProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
 
         mergedClassifBand = mergedClassifProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
-        FlagCoding flagCoding = IdepixMerisUtils.createMerisFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = IdepixMerisUtils.createMerisFlagCoding();
         mergedClassifBand.setSampleCoding(flagCoding);
         mergedClassifProduct.getFlagCodingGroup().add(flagCoding);
 

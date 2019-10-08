@@ -1,40 +1,15 @@
 package org.esa.snap.idepix.landsat8;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+
 /**
- * Image binarization - Otsu algorithm
+ * Image binarisation - Otsu algorithm
  *
  * Author: Bostjan Cigan (http://zerocool.is-a-geek.net)
  *
  */
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-
-public class OtsuBinarize {
-
-    /**
-     * Provides a histogram of the grayscale image
-     *
-     * @param input - the grayscale image
-     *
-     * @return - the histogram
-     */
-    public static int[] imageHistogram(BufferedImage input) {
-
-        int[] histogram = new int[256];
-
-        for (int i = 0; i < histogram.length; i++) histogram[i] = 0;
-
-        for (int i = 0; i < input.getWidth(); i++) {
-            for (int j = 0; j < input.getHeight(); j++) {
-                int red = new Color(input.getRGB(i, j)).getRed();
-                histogram[red]++;
-            }
-        }
-
-        return histogram;
-
-    }
+class OtsuBinarize {
 
     /**
      * Provides grayscale from original image (luminance method)
@@ -43,7 +18,7 @@ public class OtsuBinarize {
      *
      * @return - grayscale image
      */
-    public static BufferedImage toGray(BufferedImage original) {
+    static BufferedImage toGray(BufferedImage original) {
 
         int alpha, red, green, blue;
         int newPixel;
@@ -80,7 +55,7 @@ public class OtsuBinarize {
      *
      * @return - binarized image
      */
-    public static BufferedImage binarize(BufferedImage original) {
+    static BufferedImage binarize(BufferedImage original) {
 
         int red;
         int newPixel;
@@ -107,6 +82,30 @@ public class OtsuBinarize {
         }
 
         return binarized;
+
+    }
+
+    /**
+     * Provides a histogram of the grayscale image
+     *
+     * @param input - the grayscale image
+     *
+     * @return - the histogram
+     */
+    private static int[] imageHistogram(BufferedImage input) {
+
+        int[] histogram = new int[256];
+
+        for (int i = 0; i < histogram.length; i++) histogram[i] = 0;
+
+        for (int i = 0; i < input.getWidth(); i++) {
+            for (int j = 0; j < input.getHeight(); j++) {
+                int red = new Color(input.getRGB(i, j)).getRed();
+                histogram[red]++;
+            }
+        }
+
+        return histogram;
 
     }
 

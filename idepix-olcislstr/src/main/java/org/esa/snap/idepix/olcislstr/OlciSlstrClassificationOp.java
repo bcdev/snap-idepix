@@ -1,7 +1,6 @@
 package org.esa.snap.idepix.olcislstr;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.idepix.olci.IdepixOlciConstants;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
@@ -115,7 +114,7 @@ public class OlciSlstrClassificationOp extends Operator {
 
         // shall be the only target band!!
         cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
-        FlagCoding flagCoding = OlciSlstrUtils.createOlciFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = OlciSlstrUtils.createOlciFlagCoding();
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -168,7 +167,7 @@ public class OlciSlstrClassificationOp extends Operator {
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
                     initCloudFlag(targetTiles.get(cloudFlagTargetBand), y, x);
                     final int waterFraction = waterFractionTile.getSampleInt(x, y);
-                    final boolean isL1bLand = olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
+                    final boolean isL1bLand = olciQualityFlagTile.getSampleBit(x, y, OlciSlstrConstants.L1_F_LAND);
                     final boolean isLand =
                             IdepixUtils.isLandPixel(x, y, sourceProduct.getSceneGeoCoding(), isL1bLand, waterFraction);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLand);
@@ -208,7 +207,7 @@ public class OlciSlstrClassificationOp extends Operator {
                             final boolean cloudSure = olciReflectance[2] > THRESH_LAND_MINBRIGHT1 &&
                                     nnInterpreter.isCloudSure(nnOutput);
                             final boolean cloudAmbiguous = olciReflectance[2] > THRESH_LAND_MINBRIGHT2 &&
-                                    nnInterpreter.isCloudAmbiguous(nnOutput, true, false);
+                                    nnInterpreter.isCloudAmbiguous(nnOutput);
 
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, cloudAmbiguous);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, cloudSure);

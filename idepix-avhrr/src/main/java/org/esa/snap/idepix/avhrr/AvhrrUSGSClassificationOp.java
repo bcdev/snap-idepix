@@ -1,8 +1,5 @@
 package org.esa.snap.idepix.avhrr;
 
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
-import org.esa.snap.idepix.core.util.SunPosition;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
@@ -17,6 +14,9 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.pointop.*;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.core.util.math.RsMathUtils;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
+import org.esa.snap.idepix.core.util.SunPosition;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -186,15 +186,15 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
     @Override
     void runAvhrrAcAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         AvhrrAlgorithm aacAlgorithm = new AvhrrAlgorithm();
-        aacAlgorithm.setNoaaId(noaaId);
-        aacAlgorithm.setDistanceCorr(getDistanceCorr());
+//        aacAlgorithm.setNoaaId(noaaId);
+//        aacAlgorithm.setDistanceCorr(getDistanceCorr());
 
         final double sza = sourceSamples[AvhrrConstants.SRC_USGS_SZA].getDouble();
         final double latitude = sourceSamples[AvhrrConstants.SRC_USGS_LAT].getDouble();
         final double longitude = sourceSamples[AvhrrConstants.SRC_USGS_LON].getDouble();
         aacAlgorithm.setLatitude(latitude);
         aacAlgorithm.setLongitude(longitude);
-        aacAlgorithm.setSza(sza);
+//        aacAlgorithm.setSza(sza);
         double vza = Math.abs(vzaTable.getVza(x));  // !!!
 
         final GeoPos satPosition = computeSatPosition(y);
@@ -409,7 +409,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
 
         classifFlagBand.setDescription("Pixel classification flag");
         classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = AvhrrAcUtils.createAvhrrAcFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = AvhrrAcUtils.createAvhrrAcFlagCoding();
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 

@@ -11,10 +11,7 @@ import javax.swing.JOptionPane;
 import java.util.Calendar;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 20.10.2016
- * Time: 13:44
+ * Idepix utility class
  *
  * @author olafd
  */
@@ -22,7 +19,7 @@ public class IdepixUtils {
 
     private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("idepix");
 
-    public static void logErrorMessage(String msg) {
+    static void logErrorMessage(String msg) {
         if (System.getProperty("gpfMode") != null && "GUI".equals(System.getProperty("gpfMode"))) {
             JOptionPane.showOptionDialog(null, msg, "IDEPIX - Error Message", JOptionPane.DEFAULT_OPTION,
                                          JOptionPane.ERROR_MESSAGE, null, null, null);
@@ -67,7 +64,7 @@ public class IdepixUtils {
         return correctedReflectance;
     }
 
-    public static double convertGeophysicalToMathematicalAngle(double inAngle) {
+    static double convertGeophysicalToMathematicalAngle(double inAngle) {
         if (0.0 <= inAngle && inAngle < 90.0) {
             return (90.0 - inAngle);
         } else if (90.0 <= inAngle && inAngle < 360.0) {
@@ -78,7 +75,7 @@ public class IdepixUtils {
         }
     }
 
-    public static boolean isNoReflectanceValid(float[] reflectance) {
+    static boolean isNoReflectanceValid(float[] reflectance) {
         for (float aReflectance : reflectance) {
             if (!Float.isNaN(aReflectance) && aReflectance > 0.0f) {
                 return false;
@@ -102,7 +99,7 @@ public class IdepixUtils {
         return doy;
     }
 
-    public static boolean isLeapYear(int year) {
+    static boolean isLeapYear(int year) {
         return ((year % 400) == 0) || (((year % 4) == 0) && ((year % 100) != 0));
     }
 

@@ -1,7 +1,5 @@
 package org.esa.snap.idepix.seawifs;
 
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -9,6 +7,9 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.pointop.*;
+import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,13 +38,13 @@ public class SeaWifsClassificationOp extends PixelOperator {
     private int waterMaskResolution;
 
 
-    @SourceProduct(alias = "refl", description = "MODIS L1b reflectance product")
+    @SourceProduct(alias = "refl", description = "SeaWiFS L1b reflectance product")
     private Product reflProduct;
 
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
-    public static final String SEAWIFS_NET_NAME = "6x3_166.0.net";
+    private static final String SEAWIFS_NET_NAME = "6x3_166.0.net";
 
     private static final int earthSunDistance = 1;
 
@@ -51,7 +52,7 @@ public class SeaWifsClassificationOp extends PixelOperator {
     private static final double[] nasaSolarFluxes =
             {1735.518167, 1858.404314, 1981.076667, 1881.566829, 1874.005, 1537.254783, 1230.04, 957.6122143};
 
-    ThreadLocal<SchillerNeuralNetWrapper> seawifsNeuralNet;
+    private ThreadLocal<SchillerNeuralNetWrapper> seawifsNeuralNet;
 
     @Override
     public Product getSourceProduct() {
@@ -100,7 +101,7 @@ public class SeaWifsClassificationOp extends PixelOperator {
 
         classifFlagBand.setDescription("Pixel classification flag");
         classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = SeaWifsUtils.createSeawifsFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = SeaWifsUtils.createSeawifsFlagCoding();
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 
@@ -142,10 +143,11 @@ public class SeaWifsClassificationOp extends PixelOperator {
 
         SeaWifsAlgorithm occciAlgorithm = new SeaWifsAlgorithm();
         double[] seawifsNeuralNetInput = seawifsNeuralNet.get().getInputVector();
+        final float sza = sourceSamples[SeaWifsConstants.SRC_SZA].getFloat();
         for (int i = 0; i < SeaWifsConstants.SEAWIFS_L1B_NUM_SPECTRAL_BANDS; i++) {
             reflectance[i] = sourceSamples[SeaWifsConstants.SEAWIFS_SRC_RAD_OFFSET+ i].getFloat();
             if (!radianceBandPrefix.equals("rhot_")) {  // L1C are already reflectances
-                scaleInputSpectralDataToReflectance(reflectance, 0);
+                scaleInputSpectralDataToReflectance(reflectance, sza);
             }
             seawifsNeuralNetInput[i] = Math.sqrt(reflectance[i]);
         }
@@ -165,14 +167,13 @@ public class SeaWifsClassificationOp extends PixelOperator {
         return occciAlgorithm;
     }
 
-    private void scaleInputSpectralDataToReflectance(double[] inputs, int offset) {
+    private void scaleInputSpectralDataToReflectance(double[] inputs, float sza) {
         // first scale to consistent radiances:
-        scaleInputSpectralDataToRadiance(inputs, offset);
+        scaleInputSpectralDataToRadiance(inputs, 0);
         final double oneDivEarthSunDistanceSquare = 1.0 / (earthSunDistance * earthSunDistance);
         for (int i = 0; i < SeaWifsConstants.SEAWIFS_L1B_NUM_SPECTRAL_BANDS; i++) {
-            final int index = offset + i;
             // this is rad2refl:
-            inputs[index] = inputs[index] * Math.PI  / (nasaSolarFluxes[i] * oneDivEarthSunDistanceSquare);
+            inputs[i] = inputs[i] * Math.PI  / (nasaSolarFluxes[i] * Math.cos(sza*MathUtils.DTOR) * oneDivEarthSunDistanceSquare);
         }
     }
 

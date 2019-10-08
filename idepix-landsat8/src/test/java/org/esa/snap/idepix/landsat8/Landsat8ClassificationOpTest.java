@@ -18,7 +18,6 @@ package org.esa.snap.idepix.landsat8;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.idepix.landsat8.Landsat8Utils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -27,16 +26,16 @@ import org.junit.Test;
 public class Landsat8ClassificationOpTest {
 
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
     }
 
     @Test
@@ -44,7 +43,7 @@ public class Landsat8ClassificationOpTest {
         // todo: continue
         Band b = createTestBand(ProductData.TYPE_FLOAT32, 100, 100);
         final Stx stx = new StxFactory().create(b, ProgressMonitor.NULL);
-        final double at3PercentOfMaximum = Landsat8Utils.getHistogramBinAtNPercentOfMaximum(stx, 3.0);
+        final double at3PercentOfMaximum = Landsat8Utils.getHistogramBinAtNPercentOfMaximum(stx);
         System.out.println("at3PercentOfMaximum = " + at3PercentOfMaximum);
 //        assertEquals(6.0, at3PercentOfMaximum);
     }

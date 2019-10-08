@@ -16,6 +16,8 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
+import org.esa.snap.idepix.core.operators.CloudBuffer;
+import org.esa.snap.idepix.core.util.IdepixUtils;
 
 import java.awt.*;
 
@@ -99,11 +101,16 @@ public class ViirsPostProcessOp extends BasisOp {
                             refineCloudFlaggingForCoastlines(x, y, classifFlagSourceTile, waterFractionTile, targetTile, targetRectangle);
                         }
                     }
-
-                    if (isCloud) {
-                        computeCloudBuffer(x, y, classifFlagSourceTile, targetTile);
-                    }
                 }
+            }
+        }
+
+        // cloud buffer:
+        CloudBuffer.setCloudBuffer(targetTile, extendedRectangle, classifFlagSourceTile, cloudBufferWidth);
+        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+            checkForCancellation();
+            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                IdepixUtils.consolidateCloudAndBuffer(targetTile, x, y);
             }
         }
     }
@@ -254,23 +261,6 @@ public class ViirsPostProcessOp extends BasisOp {
         int computedFlags = targetTile.getSampleInt(x, y);
         targetTile.setSample(x, y, sourceFlags | computedFlags);
     }
-
-    private void computeCloudBuffer(int x, int y, Tile sourceFlagTile, Tile targetTile) {
-        Rectangle rectangle = targetTile.getRectangle();
-        final int LEFT_BORDER = Math.max(x - cloudBufferWidth, rectangle.x);
-        final int RIGHT_BORDER = Math.min(x + cloudBufferWidth, rectangle.x + rectangle.width - 1);
-        final int TOP_BORDER = Math.max(y - cloudBufferWidth, rectangle.y);
-        final int BOTTOM_BORDER = Math.min(y + cloudBufferWidth, rectangle.y + rectangle.height - 1);
-        for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
-            for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                boolean is_already_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
-                if (!is_already_cloud && rectangle.contains(i, j)) {
-                    targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_BUFFER, true);
-                }
-            }
-        }
-    }
-
 
     /**
      * The Service Provider Interface (SPI) for the operator.

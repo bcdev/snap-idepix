@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.spotvgt;
 
+import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
@@ -13,10 +14,10 @@ import java.util.Random;
  *
  * @author olafd
  */
-public class VgtUtils {
+class VgtUtils {
 
-    public static FlagCoding createVgtFlagCoding(String flagId) {
-        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(flagId);
+    static FlagCoding createVgtFlagCoding() {
+        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
         flagCoding.addFlag("IDEPIX_WATER", BitSetter.setFlag(0, VgtConstants.IDEPIX_WATER),
                            VgtConstants.IDEPIX_WATER_DESCR_TEXT);
@@ -28,7 +29,7 @@ public class VgtUtils {
         return flagCoding;
     }
 
-    public static void setupVgtBitmasks(Product classifProduct) {
+    static void setupVgtBitmasks(Product classifProduct) {
 
         int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
 

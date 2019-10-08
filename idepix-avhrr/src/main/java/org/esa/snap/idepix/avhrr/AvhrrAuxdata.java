@@ -9,24 +9,21 @@ import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 01.12.2014
- * Time: 18:00
+ * AVHRR auxiliary data utility class
  *
  * @author olafd
  */
-public class AvhrrAuxdata {
+class AvhrrAuxdata {
 
-    public static final int VZA_TABLE_LENGTH = 2048;
-    public static final String VZA_FILE_NAME = "view_zenith.txt";
+    private static final int VZA_TABLE_LENGTH = 2048;
+    private static final String VZA_FILE_NAME = "view_zenith.txt";
 
-    public static final int RAD2BT_TABLE_LENGTH = 3;
-    public static final String RAD2BT_FILE_NAME_PREFIX = "rad2bt_noaa";
+    private static final int RAD2BT_TABLE_LENGTH = 3;
+    private static final String RAD2BT_FILE_NAME_PREFIX = "rad2bt_noaa";
 
     private static AvhrrAuxdata instance;
 
-    public static AvhrrAuxdata getInstance() {
+    static AvhrrAuxdata getInstance() {
         if (instance == null) {
             instance = new AvhrrAuxdata();
         }
@@ -35,7 +32,7 @@ public class AvhrrAuxdata {
     }
 
 
-    public Line2ViewZenithTable createLine2ViewZenithTable() throws IOException {
+    Line2ViewZenithTable createLine2ViewZenithTable() throws IOException {
         final InputStream inputStream = getClass().getResourceAsStream(VZA_FILE_NAME);
         Line2ViewZenithTable vzaTable = new Line2ViewZenithTable();
 
@@ -66,7 +63,7 @@ public class AvhrrAuxdata {
         return vzaTable;
     }
 
-    public Rad2BTTable createRad2BTTable(String noaaId) throws IOException {
+    Rad2BTTable createRad2BTTable(String noaaId) throws IOException {
 
         final String filename = RAD2BT_FILE_NAME_PREFIX + noaaId + ".txt";
         final InputStream inputStream = getClass().getResourceAsStream(filename);
@@ -127,19 +124,19 @@ public class AvhrrAuxdata {
     /**
      * Class providing a temperature-radiance conversion data table
      */
-    public class Line2ViewZenithTable {
+    class Line2ViewZenithTable {
         private int[] xIndex = new int[VZA_TABLE_LENGTH];
         private double[] vza = new double[VZA_TABLE_LENGTH];
 
-        public void setxIndex(int index, int xIndex) {
+        void setxIndex(int index, int xIndex) {
             this.xIndex[index] = xIndex;
         }
 
-        public double getVza(int index) {
+        double getVza(int index) {
             return vza[index];
         }
 
-        public void setVza(int index, double vza) {
+        void setVza(int index, double vza) {
             this.vza[index] = vza;
         }
 
@@ -148,7 +145,7 @@ public class AvhrrAuxdata {
     /**
      *  Class providing a radiance-to-BT coefficients table
      */
-    public class Rad2BTTable {
+    class Rad2BTTable {
         private final int OFFSET = 3;
 
         private double[] A = new double[RAD2BT_TABLE_LENGTH];
@@ -159,59 +156,59 @@ public class AvhrrAuxdata {
         private double[] nuHighland = new double[RAD2BT_TABLE_LENGTH];
         private double[] nuHighWater = new double[RAD2BT_TABLE_LENGTH];
 
-        public double getA(int index) {
+        double getA(int index) {
             return A[index - OFFSET];
         }
 
-        public void setA(int index, double a) {
+        void setA(int index, double a) {
             this.A[index] = a;
         }
 
-        public double getB(int index) {
+        double getB(int index) {
             return B[index - OFFSET];
         }
 
-        public void setB(int index, double b) {
+        void setB(int index, double b) {
             this.B[index] = b;
         }
 
-        public double getD(int index) {
+        double getD(int index) {
             return D[index - OFFSET];
         }
 
-        public void setD(int index, double d) {
+        void setD(int index, double d) {
             this.D[index] = d;
         }
 
-        public double getNuLow(int index) {
+        double getNuLow(int index) {
             return nuLow[index - OFFSET];
         }
 
-        public void setNuLow(int index, double nuLow) {
+        void setNuLow(int index, double nuLow) {
             this.nuLow[index] = nuLow;
         }
 
-        public double getNuMid(int index) {
+        double getNuMid(int index) {
             return nuMid[index - OFFSET];
         }
 
-        public void setNuMid(int index, double nuMid) {
+        void setNuMid(int index, double nuMid) {
             this.nuMid[index] = nuMid;
         }
 
-        public double getNuHighLand(int index) {
+        double getNuHighLand(int index) {
             return nuHighland[index - OFFSET];
         }
 
-        public void setNuHighland(int index, double nuHighland) {
+        void setNuHighland(int index, double nuHighland) {
             this.nuHighland[index] = nuHighland;
         }
 
-        public double getNuHighWater(int index) {
+        double getNuHighWater(int index) {
             return nuHighWater[index - OFFSET];
         }
 
-        public void setNuHighWater(int index, double nuHighWater) {
+        void setNuHighWater(int index, double nuHighWater) {
             this.nuHighWater[index] = nuHighWater;
         }
     }

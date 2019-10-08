@@ -14,28 +14,28 @@ import org.esa.snap.core.util.math.MathUtils;
  */
 public class VgtAlgorithm extends AbstractPixelProperties {
 
-    static final float LAND_THRESH = 0.9f;
-    static final float WATER_THRESH = 0.9f;
+    private static final float LAND_THRESH = 0.9f;
+    private static final float WATER_THRESH = 0.9f;
 
-    float[] refl;
+    private float[] refl;
 
     private static final float BRIGHTWHITE_THRESH = 0.65f;
     private static final float NDSI_THRESH = 0.50f;
-    private static final float PRESSURE_THRESH = 0.9f;
+//    private static final float PRESSURE_THRESH = 0.9f;
     private static final float CLOUD_THRESH = 1.65f;
     private static final float UNCERTAINTY_VALUE = 0.5f;
     private static final float BRIGHT_THRESH = 0.3f;
     private static final float WHITE_THRESH = 0.5f;
     private static final float BRIGHT_FOR_WHITE_THRESH = 0.2f;
-    private static final float NDVI_THRESH = 0.4f;
+//    private static final float NDVI_THRESH = 0.4f;
     private static final float REFL835_WATER_THRESH = 0.1f;
     private static final float REFL835_LAND_THRESH = 0.15f;
 
     private boolean smLand;
     private double[] nnOutput;
 
-    public boolean isWater;
-    public boolean usel1bLandWaterFlag;
+    private boolean isWater;
+    private boolean usel1bLandWaterFlag;
     private boolean isCoastline;
 
     public boolean isInvalid() {
@@ -81,9 +81,7 @@ public class VgtAlgorithm extends AbstractPixelProperties {
 
     public boolean isCloud() {
         if (!isInvalid()) {
-            if (((whiteValue() + brightValue() + pressureValue() + temperatureValue() > CLOUD_THRESH) && !isClearSnow())) {
-                return true;
-            }
+            return ((whiteValue() + brightValue() + pressureValue() + temperatureValue() > CLOUD_THRESH) && !isClearSnow());
         }
         return false;
     }
@@ -114,25 +112,25 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         return (!isInvalid() && whiteValue() > getWhiteThreshold());
     }
 
-    public boolean isVegRisk() {
-        return (!isInvalid() && ndviValue() > getNdviThreshold());
-    }
+//    public boolean isVegRisk() {
+//        return (!isInvalid() && ndviValue() > getNdviThreshold());
+//    }
 
-    public boolean isHigh() {
-        return (!isInvalid() && pressureValue() > getPressureThreshold());
-    }
+//    public boolean isHigh() {
+//        return (!isInvalid() && pressureValue() > getPressureThreshold());
+//    }
 
 
-    public boolean isSeaIce() {
-        // no algorithm available for VGT only
-        return false;
-    }
+//    public boolean isSeaIce() {
+//         // no algorithm available for VGT only
+//        return false;
+//    }
 
     public boolean isGlintRisk() {
         return false;
     }
 
-    public float brightValue() {
+    float brightValue() {
         double value;
 
         // do not make a difference any more
@@ -144,11 +142,11 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         return (float) value;
     }
 
-    public float temperatureValue() {
+    float temperatureValue() {
         return UNCERTAINTY_VALUE;
     }
 
-    public float spectralFlatnessValue() {
+    float spectralFlatnessValue() {
         final double slope0 = IdepixUtils.spectralSlope(refl[0], refl[1],
                                                         IdepixConstants.VGT_WAVELENGTHS[0],
                                                         IdepixConstants.VGT_WAVELENGTHS[1]);
@@ -159,7 +157,7 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         return (float) Math.max(0.0f, flatness);
     }
 
-    public float whiteValue() {
+    float whiteValue() {
         if (brightValue() > BRIGHT_FOR_WHITE_THRESH) {
             return spectralFlatnessValue();
         } else {
@@ -167,7 +165,7 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         }
     }
 
-    public float ndsiValue() {
+    float ndsiValue() {
         // NDSI (RED-SWIR)/(RED+ SWIR)
         double value = (refl[2] - refl[3]) / (refl[2] + refl[3]);
         value = Math.min(value, 1.0);
@@ -175,23 +173,23 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         return (float) value;
     }
 
-    public float ndviValue() {
+    float ndviValue() {
         double value = (refl[2] - refl[1]) / (refl[2] + refl[1]);
         value = Math.min(value, 1.0);
         value = Math.max(value, 0.0);
         return (float) value;
     }
 
-    public float pressureValue() {
+    private float pressureValue() {
         return UNCERTAINTY_VALUE;
     }
 
-    public float glintRiskValue() {
+    float glintRiskValue() {
         return IdepixUtils.spectralSlope(refl[0], refl[1], IdepixConstants.VGT_WAVELENGTHS[0],
                                          IdepixConstants.VGT_WAVELENGTHS[1]);
     }
 
-    public float aPrioriLandValue() {
+    private float aPrioriLandValue() {
         if (isInvalid()) {
             return UNCERTAINTY_VALUE;
         } else if (smLand) {
@@ -201,7 +199,7 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         }
     }
 
-    public float aPrioriWaterValue() {
+    private float aPrioriWaterValue() {
         if (isInvalid()) {
             return UNCERTAINTY_VALUE;
         } else if (!smLand) {
@@ -211,7 +209,7 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         }
     }
 
-    public float radiometricLandValue() {
+    float radiometricLandValue() {
         if (isInvalid() || isCloud()) {
             return UNCERTAINTY_VALUE;
         } else if (refl[2] > refl[1] && refl[2] > REFL835_LAND_THRESH) {
@@ -223,7 +221,7 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         }
     }
 
-    public float radiometricWaterValue() {
+    float radiometricWaterValue() {
         if (isInvalid() || isCloud()) {
             return UNCERTAINTY_VALUE;
         } else if (refl[0] > refl[1] && refl[1] > refl[2] && refl[2] < REFL835_WATER_THRESH) {
@@ -233,37 +231,37 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         }
     }
 
-    public float getBrightWhiteThreshold() {
+    private float getBrightWhiteThreshold() {
         return BRIGHTWHITE_THRESH;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public float getNdsiThreshold() {
+    private float getNdsiThreshold() {
         return NDSI_THRESH;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public float getNdviThreshold() {
-        return NDVI_THRESH;
-    }
+//    public float getNdviThreshold() {
+//        return NDVI_THRESH;
+//    }
 
-    public float getBrightThreshold() {
+    private float getBrightThreshold() {
         return BRIGHT_THRESH;
     }
 
-    public float getWhiteThreshold() {
+    private float getWhiteThreshold() {
         return WHITE_THRESH;
     }
 
-    public float getPressureThreshold() {
-        return PRESSURE_THRESH;
-    }
+//    public float getPressureThreshold() {
+//        return PRESSURE_THRESH;
+//    }
 
     // setters for VGT specific quantities
 
-    public void setSmLand(boolean smLand) {
+    void setSmLand(boolean smLand) {
         this.smLand = smLand;
     }
 
-    public void setIsCoastline(boolean isCoastline) {
+    void setIsCoastline(boolean isCoastline) {
         this.isCoastline = isCoastline;
     }
 
@@ -271,7 +269,7 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         this.isWater = !isInvalid() && isWater;
     }
 
-    public void setRefl(float[] refl) {
+    void setRefl(float[] refl) {
         if (refl.length != IdepixConstants.VGT_WAVELENGTHS.length) {
             throw new OperatorException("VGT pixel processing: Invalid number of wavelengths [" + refl.length +
                                                 "] - must be " + IdepixConstants.VGT_WAVELENGTHS.length);
@@ -279,15 +277,15 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         this.refl = refl;
     }
 
-    public void setNnOutput(double[] nnOutput) {
+    void setNnOutput(double[] nnOutput) {
         this.nnOutput = nnOutput;
     }
 
-    public double[] getNnOutput() {
+    double[] getNnOutput() {
         return nnOutput;
     }
 
-    public boolean isCoastline() {
+    boolean isCoastline() {
         return isCoastline;
     }
 }

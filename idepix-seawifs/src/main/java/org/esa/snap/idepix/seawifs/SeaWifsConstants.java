@@ -7,7 +7,7 @@ import org.esa.snap.idepix.core.IdepixConstants;
  *
  * @author olafd
  */
-public class SeaWifsConstants {
+class SeaWifsConstants {
 
     static final int SRC_SZA = 0;
     static final int SRC_SAA = 1;
@@ -37,7 +37,7 @@ public class SeaWifsConstants {
 
     static final int SEAWIFS_L1B_NUM_SPECTRAL_BANDS = SEAWIFS_L1B_SPECTRAL_BAND_NAMES.length;
 
-    public static final int IDEPIX_MIXED_PIXEL = IdepixConstants.NUM_DEFAULT_FLAGS + 1;
+    static final int IDEPIX_MIXED_PIXEL = IdepixConstants.NUM_DEFAULT_FLAGS + 1;
 
-    public static final String IDEPIX_MIXED_PIXEL_DESCR_TEXT = "Mixed pixel";
+    static final String IDEPIX_MIXED_PIXEL_DESCR_TEXT = "Mixed pixel";
 }

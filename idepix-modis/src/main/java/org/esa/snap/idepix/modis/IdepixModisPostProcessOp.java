@@ -11,9 +11,10 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
-
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.BasisOp;
+import org.esa.snap.idepix.core.operators.CloudBuffer;
+import org.esa.snap.idepix.core.util.IdepixUtils;
 
 import java.awt.*;
 
@@ -63,12 +64,12 @@ public class IdepixModisPostProcessOp extends BasisOp {
         createTargetProduct();
 
         rectCalculatorPlus = new RectangleExtender(new Rectangle(reflProduct.getSceneRasterWidth(),
-                reflProduct.getSceneRasterHeight()),
-                cloudBufferWidth, cloudBufferWidth);
+                                                                 reflProduct.getSceneRasterHeight()),
+                                                   cloudBufferWidth, cloudBufferWidth);
 
         rectCalculatorMinus = new RectangleExtender(new Rectangle(reflProduct.getSceneRasterWidth(),
-                reflProduct.getSceneRasterHeight()),
-                -cloudBufferWidth, -cloudBufferWidth);
+                                                                  reflProduct.getSceneRasterHeight()),
+                                                    -cloudBufferWidth, -cloudBufferWidth);
 
         landWaterBand = waterMaskProduct.getBand("land_water_fraction");
     }
@@ -108,15 +109,12 @@ public class IdepixModisPostProcessOp extends BasisOp {
             }
         }
 
-        for (int y = extendedRectangle.y; y < extendedRectangle.y + extendedRectangle.height; y++) {
+        // cloud buffer:
+        CloudBuffer.setCloudBuffer(targetTile, extendedRectangle, classifFlagSourceTile, cloudBufferWidth);
+        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
-            for (int x = extendedRectangle.x; x < extendedRectangle.x + extendedRectangle.width; x++) {
-                if (targetRectangle.contains(x, y)) {
-                    boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                    if (isCloud) {
-                        computeCloudBuffer(x, y, targetTile);
-                    }
-                }
+            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                IdepixUtils.consolidateCloudAndBuffer(targetTile, x, y);
             }
         }
     }
@@ -200,7 +198,7 @@ public class IdepixModisPostProcessOp extends BasisOp {
         final int TOP_BORDER = Math.max(y - windowWidth, rectangle.y);
         final int BOTTOM_BORDER = Math.min(y + windowWidth, rectangle.y + rectangle.height - 1);
         boolean removeCloudFlag = true;
-        if (isPixelSurrounded(x, y, sourceFlagTile, rectangle, IdepixConstants.IDEPIX_CLOUD)) {
+        if (isPixelSurrounded(x, y, sourceFlagTile, rectangle)) {
             removeCloudFlag = false;
         } else {
             Rectangle targetTileRectangle = targetTile.getRectangle();
@@ -233,13 +231,13 @@ public class IdepixModisPostProcessOp extends BasisOp {
         }
     }
 
-    private boolean isPixelSurrounded(int x, int y, Tile sourceFlagTile, Rectangle targetRectangle, int pixelFlag) {
+    private boolean isPixelSurrounded(int x, int y, Tile sourceFlagTile, Rectangle targetRectangle) {
         // check if pixel is surrounded by other pixels flagged as 'pixelFlag'
         int surroundingPixelCount = 0;
         for (int i = x - 1; i <= x + 1; i++) {
             for (int j = y - 1; j <= y + 1; j++) {
                 if (sourceFlagTile.getRectangle().contains(i, j)) {
-                    boolean is_flagged = sourceFlagTile.getSampleBit(i, j, pixelFlag);
+                    boolean is_flagged = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
                     if (is_flagged && targetRectangle.contains(i, j)) {
                         surroundingPixelCount++;
                     }
@@ -272,25 +270,6 @@ public class IdepixModisPostProcessOp extends BasisOp {
         int computedFlags = targetTile.getSampleInt(x, y);
         targetTile.setSample(x, y, sourceFlags | computedFlags);
     }
-
-    private void computeCloudBuffer(int x, int y, Tile targetTile) {
-        Rectangle rectangle = targetTile.getRectangle();
-        final int LEFT_BORDER = Math.max(x - cloudBufferWidth, rectangle.x);
-        final int RIGHT_BORDER = Math.min(x + cloudBufferWidth, rectangle.x + rectangle.width - 1);
-        final int TOP_BORDER = Math.max(y - cloudBufferWidth, rectangle.y);
-        final int BOTTOM_BORDER = Math.min(y + cloudBufferWidth, rectangle.y + rectangle.height - 1);
-        for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
-            for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                boolean is_already_cloud = targetTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
-                boolean centre_is_cloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                if (centre_is_cloud && !is_already_cloud && rectangle.contains(i, j)) {
-//                if (!is_already_cloud && rectangle.contains(i, j)) {
-                    targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_BUFFER, true);
-                }
-            }
-        }
-    }
-
 
     /**
      * The Service Provider Interface (SPI) for the operator.

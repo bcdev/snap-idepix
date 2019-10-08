@@ -4,6 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.idepix.core.operators.CloudBuffer;
 import org.esa.snap.idepix.core.CloudShadowFronts;
 import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.IdepixUtils;
 import org.esa.snap.idepix.core.util.OperatorUtils;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
@@ -99,7 +100,6 @@ public class AvhrrPostProcessOp extends Operator {
                                                    extendedWidth, extendedHeight
             );
 
-
             ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, avhrrCloudProduct, postProcessedCloudProduct, false);
             setTargetProduct(postProcessedCloudProduct);
         }
@@ -113,25 +113,13 @@ public class AvhrrPostProcessOp extends Operator {
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
         final Tile waterFractionTile = getSourceTile(landWaterBand, srcRectangle);
 
-        final Tile rt3Tile = getSourceTile(rt3Band, srcRectangle);
-        final Tile bt4Tile = getSourceTile(bt4Band, srcRectangle);
-        final Tile refl1Tile = getSourceTile(refl1Band, srcRectangle);
-        final Tile refl2Tile = getSourceTile(refl2Band, srcRectangle);
-
         for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
             checkForCancellation();
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
                 if (targetRectangle.contains(x, y)) {
                     boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                    boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
                     combineFlags(x, y, sourceFlagTile, targetTile);
-
-                    // snow/ice filter refinement for AVHRR (GK 20150922):
-                    // GK/JM don't want this any more after complete snow/ice revision, 20151028
-//                    if (isSnowIce) {
-//                        refineSnowIceCloudFlagging(x, y, rt3Tile, bt4Tile, refl1Tile, refl2Tile, targetTile);
-//                    }
 
                     if (refineClassificationNearCoastlines) {
                         if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
@@ -145,61 +133,25 @@ public class AvhrrPostProcessOp extends Operator {
                     boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     if (isCloudAfterRefinement) {
                         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
-                        if ((computeCloudBuffer)) {
-                            CloudBuffer.computeSimpleCloudBuffer(x, y,
-                                                                 targetTile, targetTile,
-                                                                 cloudBufferWidth,
-                                                                 IdepixConstants.IDEPIX_CLOUD,
-                                                                 IdepixConstants.IDEPIX_CLOUD_BUFFER);
-                        }
                     }
 
                 }
             }
         }
 
+        if (computeCloudBuffer) {
+            CloudBuffer.setCloudBuffer(targetTile, srcRectangle, sourceFlagTile, cloudBufferWidth);
+            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+                checkForCancellation();
+                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                    IdepixUtils.consolidateCloudAndBuffer(targetTile, x, y);
+                }
+            }
+        }
+
+
         if (computeCloudShadow) {
             // todo: we need something modified, as we have no CTP
-//            CloudShadowFronts cloudShadowFronts = new CloudShadowFronts(
-//                    geoCoding,
-//                    srcRectangle,
-//                    targetRectangle,
-//                    szaTile, saaTile, ctpTile, altTile) {
-//
-//
-//                @Override
-//                protected boolean isCloudForShadow(int x, int y) {
-//                    final boolean is_cloud_current;
-//                    if (!targetTile.getRectangle().contains(x, y)) {
-//                        is_cloud_current = sourceFlagTile.getSampleBit(x, y, Landsat8Constants.F_CLOUD);
-//                    } else {
-//                        is_cloud_current = targetTile.getSampleBit(x, y, Landsat8Constants.F_CLOUD);
-//                    }
-//                    if (is_cloud_current) {
-//                        final boolean isNearCoastline = isNearCoastline(x, y, waterFractionTile, srcRectangle);
-//                        if (!isNearCoastline) {
-//                            return true;
-//                        }
-//                    }
-//                    return false;
-//                }
-//
-//                @Override
-//                protected boolean isCloudFree(int x, int y) {
-//                    return !sourceFlagTile.getSampleBit(x, y, Landsat8Constants.F_CLOUD);
-//                }
-//
-//                @Override
-//                protected boolean isSurroundedByCloud(int x, int y) {
-//                    return isPixelSurrounded(x, y, sourceFlagTile, Landsat8Constants.F_CLOUD);
-//                }
-//
-//                @Override
-//                protected void setCloudShadow(int x, int y) {
-//                    targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SHADOW, true);
-//                }
-//            };
-//            cloudShadowFronts.computeCloudShadow();
         }
     }
 
@@ -212,7 +164,7 @@ public class AvhrrPostProcessOp extends Operator {
     private boolean isCoastlinePixel(int x, int y, Tile waterFractionTile) {
         boolean isCoastline = false;
         // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
-        if (getGeoPos(x, y).lat > -58f) {
+        if (IdepixUtils.getGeoPos(geoCoding, x, y).lat > -58f) {
             final int waterFraction = waterFractionTile.getSampleInt(x, y);
             // values bigger than 100 indicate no data
             if (waterFraction <= 100) {
@@ -222,13 +174,6 @@ public class AvhrrPostProcessOp extends Operator {
             }
         }
         return isCoastline;
-    }
-
-    private GeoPos getGeoPos(int x, int y) {
-        final GeoPos geoPos = new GeoPos();
-        final PixelPos pixelPos = new PixelPos(x, y);
-        geoCoding.getGeoPos(pixelPos, geoPos);
-        return geoPos;
     }
 
     private boolean isNearCoastline(int x, int y, Tile waterFractionTile, Rectangle rectangle) {
@@ -293,28 +238,6 @@ public class AvhrrPostProcessOp extends Operator {
         }
     }
 
-    private void refineSnowIceCloudFlagging(int x, int y,
-                                            Tile rt3Tile, Tile bt4Tile, Tile refl1Tile, Tile refl2Tile,
-                                            Tile targetTile) {
-
-        final double rt3 = rt3Tile.getSampleDouble(x, y);
-        final double bt4 = bt4Tile.getSampleDouble(x, y);
-        final double refl1 = refl1Tile.getSampleDouble(x, y);
-        final double refl2 = refl2Tile.getSampleDouble(x, y);
-        final double ratio21 = refl2/refl1;
-
-        final boolean firstCrit = rt3 > 0.08;
-        final boolean secondCrit = (-40.15 < bt4 && bt4 < 1.35) &&
-                refl1 > 0.25 && (0.85 < ratio21 && ratio21 < 1.15) && rt3 < 0.02;
-
-        if (firstCrit || !secondCrit) {
-            // reset snow_ice to cloud todo: check with a test product from GK if this makes sense at all
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
-        }
-    }
 
     public static class Spi extends OperatorSpi {
 

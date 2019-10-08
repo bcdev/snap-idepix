@@ -5,7 +5,7 @@ import com.bc.ceres.binding.ValueRange;
 /**
  * @author Marco Peters
  */
-public class OlciSlstrCloudNNInterpreter {
+class OlciSlstrCloudNNInterpreter {
 
 //    Schiller:
 //    target
@@ -22,18 +22,18 @@ public class OlciSlstrCloudNNInterpreter {
     private static final ValueRange OPAQUE_CLOUD_BOUNDS = new ValueRange(1.7, 2.5, true, false);
     private static final ValueRange SEMI_TRANS_CLOUD_BOUNDS = new ValueRange(2.5, 3.46, true, false);
     private static final ValueRange SPATIAL_MIXED_CLOUD_BOUNDS = new ValueRange(3.46, 4.54, true, false);
-    private static final ValueRange CLEAR_LAND_BOUNDS = new ValueRange(4.54, 5.46, true, false);
-    private static final ValueRange CLEAR_WATER_BOUNDS = new ValueRange(5.46, 6.00, true, false);
+//    private static final ValueRange CLEAR_LAND_BOUNDS = new ValueRange(4.54, 5.46, true, false);
+//    private static final ValueRange CLEAR_WATER_BOUNDS = new ValueRange(5.46, 6.00, true, false);
 
     private OlciSlstrCloudNNInterpreter() {
     }
 
     // Here we might add the nn as parameter to decide which valueRanges to load
-    public static OlciSlstrCloudNNInterpreter create() {
+    static OlciSlstrCloudNNInterpreter create() {
         return new OlciSlstrCloudNNInterpreter();
     }
 
-    boolean isCloudAmbiguous(double nnValue, boolean isLand, boolean considerGlint) {
+    boolean isCloudAmbiguous(double nnValue) {
         return SEMI_TRANS_CLOUD_BOUNDS.contains(nnValue) || SPATIAL_MIXED_CLOUD_BOUNDS.contains(nnValue);
     }
 

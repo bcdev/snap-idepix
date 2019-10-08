@@ -303,7 +303,6 @@ public class Landsat8Op extends Operator {
 
         classificationParameters.put("nnSelector", nnSelector);
         classificationParameters.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
-        classificationParameters.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
         classificationParameters.put("nnCloudSureSnowSeparationValue", nnCloudSureSnowSeparationValue);
 
         classificationParameters.put("darkGlintThreshTest1", darkGlintThreshTest1);
@@ -362,7 +361,7 @@ public class Landsat8Op extends Operator {
 
     private double computeClostHistogram3PercentOfMaximum(Band band) {
         final Stx stx = new StxFactory().create(band, ProgressMonitor.NULL);
-        return Landsat8Utils.getHistogramBinAtNPercentOfMaximum(stx, 3.0);
+        return Landsat8Utils.getHistogramBinAtNPercentOfMaximum(stx);
     }
 
 

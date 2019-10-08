@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.probav;
 
+import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
@@ -13,17 +14,15 @@ import java.util.Random;
  *
  * @author olafd
  */
-public class ProbaVUtils {
+class ProbaVUtils {
 
     /**
      * Provides MERIS pixel classification flag coding
      *
-     * @param flagId - the flag ID
-     *
      * @return - the flag coding
      */
-    public static FlagCoding createProbavFlagCoding(String flagId) {
-        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(flagId);
+    static FlagCoding createProbavFlagCoding() {
+        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
         flagCoding.addFlag("IDEPIX_WATER", BitSetter.setFlag(0, ProbaVConstants.IDEPIX_WATER),
                            ProbaVConstants.IDEPIX_WATER_DESCR_TEXT);
@@ -40,7 +39,7 @@ public class ProbaVUtils {
      *
      * @param classifProduct - the pixel classification product
      */
-    public static void setupProbavClassifBitmask(Product classifProduct) {
+    static void setupProbavClassifBitmask(Product classifProduct) {
         int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
 
         int w = classifProduct.getSceneRasterWidth();

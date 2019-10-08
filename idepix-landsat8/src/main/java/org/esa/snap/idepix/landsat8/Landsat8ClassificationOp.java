@@ -215,8 +215,8 @@ public class Landsat8ClassificationOp extends Operator {
     private Band clostBand;
     private Band otsuBand;
 
-    static final int L8_F_DESIGNATED_FILL = 0;
-    static final int L8_F_WATER_CONFIDENCE_HIGH = 5;  // todo: do we need this?
+    private static final int L8_F_DESIGNATED_FILL = 0;
+    private static final int L8_F_WATER_CONFIDENCE_HIGH = 5;  // todo: do we need this?
     private String cloudFlagBandName;
 
     private ThreadLocal<SchillerNeuralNetWrapper> landsat8CloudNet;
@@ -412,7 +412,6 @@ public class Landsat8ClassificationOp extends Operator {
         l8Algorithm.setShimezDiffThresh(shimezDiffThresh);
         l8Algorithm.setShimezMeanThresh(shimezMeanThresh);
         l8Algorithm.setHotThresh(hotThresh);
-        l8Algorithm.setApplyHotCloudTest(applyHotCloudTest);
         l8Algorithm.setClostThresh(clostThresh);
         l8Algorithm.setApplyClostCloudTest(applyClostCloudTest);
         l8Algorithm.setApplyOtsuCloudTest(applyOtsuCloudTest);
@@ -434,11 +433,6 @@ public class Landsat8ClassificationOp extends Operator {
         l8Algorithm.setWhitenessBand1Water(whitenessBand1Water);
         l8Algorithm.setWhitenessBand2Water(whitenessBand2Water);
         l8Algorithm.setWhitenessThreshWater(whitenessThreshWater);
-
-        l8Algorithm.setDarkGlintThresholdTest1(darkGlintThreshTest1);
-        l8Algorithm.setDarkGlintThresholdTest1Wvl(darkGlintThreshTest1Wavelength);
-        l8Algorithm.setDarkGlintThresholdTest2(darkGlintThreshTest2);
-        l8Algorithm.setDarkGlintThresholdTest2Wvl(darkGlintThreshTest2Wavelength);
 
         double[] netResult = calcNeuralNetResult(l8Reflectance);
         l8Algorithm.setNnResult(netResult);

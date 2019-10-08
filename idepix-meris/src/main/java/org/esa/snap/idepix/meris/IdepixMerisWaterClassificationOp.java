@@ -19,7 +19,6 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
-
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.seaice.SeaIceClassification;
 import org.esa.snap.idepix.core.seaice.SeaIceClassifier;
@@ -85,23 +84,21 @@ public class IdepixMerisWaterClassificationOp extends Operator {
     @Parameter(defaultValue = "2.0",
             label = " NN cloud ambiguous lower boundary ",
             description = " NN cloud ambiguous lower boundary ")
-    double schillerNNCloudAmbiguousLowerBoundaryValue;
+    private double schillerNNCloudAmbiguousLowerBoundaryValue;
 
     @Parameter(defaultValue = "3.7",
             label = " NN cloud ambiguous/sure separation value ",
             description = " NN cloud ambiguous cloud ambiguous/sure separation value ")
-    double schillerNNCloudAmbiguousSureSeparationValue;
+    private double schillerNNCloudAmbiguousSureSeparationValue;
 
     @Parameter(defaultValue = "4.05",
             label = " NN cloud sure/snow separation value ",
             description = " NN cloud ambiguous cloud sure/snow separation value ")
-    double schillerNNCloudSureSnowSeparationValue;
+    private double schillerNNCloudSureSnowSeparationValue;
 
-    public static final String MERIS_WATER_NET_NAME = "11x8x5x3_876.8_water.net";
-    public static final String MERIS_ALL_NET_NAME = "11x8x5x3_1409.7_all.net";
+    private static final String MERIS_ALL_NET_NAME = "11x8x5x3_1409.7_all.net";
 
-    ThreadLocal<SchillerNeuralNetWrapper> merisWaterNeuralNet;
-    ThreadLocal<SchillerNeuralNetWrapper> merisAllNeuralNet;
+    private ThreadLocal<SchillerNeuralNetWrapper> merisAllNeuralNet;
 
     private L2AuxData auxData;
 
@@ -129,9 +126,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
     }
 
     private void readSchillerNets() {
-        try (InputStream isWater = getClass().getResourceAsStream(MERIS_WATER_NET_NAME);
-             InputStream isAll = getClass().getResourceAsStream(MERIS_ALL_NET_NAME)) {
-            merisWaterNeuralNet = SchillerNeuralNetWrapper.create(isWater);
+        try (InputStream isAll = getClass().getResourceAsStream(MERIS_ALL_NET_NAME)) {
             merisAllNeuralNet = SchillerNeuralNetWrapper.create(isAll);
         } catch (IOException e) {
             throw new OperatorException("Cannot read Neural Nets: " + e.getMessage());
@@ -152,7 +147,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         targetProduct = IdepixIO.createCompatibleTargetProduct(l1bProduct, "MER", "MER_L2", true);
 
         cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
-        FlagCoding flagCoding = IdepixMerisUtils.createMerisFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = IdepixMerisUtils.createMerisFlagCoding();
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -252,7 +247,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         // values bigger than 100 indicate no data
         // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
         // is always 0 or 100!! (TS, OD, 20140502)
-        return getGeoPos(x, y).lat > -58f && waterFraction <= 100 && waterFraction < 100 && waterFraction > 0;
+        return getGeoPos(x, y).lat > -58f && waterFraction < 100 && waterFraction > 0;
     }
 
     private void classifyCloud(int x, int y, Tile[] rhoToaTiles, Tile winduTile, Tile windvTile,

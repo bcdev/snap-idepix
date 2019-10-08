@@ -108,13 +108,9 @@ public class IdepixModisClassificationOp extends PixelOperator {
     private Product modisWaterMaskProduct;
 
 
-    public static final String MODIS_WATER_NET_NAME = "9x7x5x3_130.3_water.net";
-    public static final String MODIS_LAND_NET_NAME = "8x6x4x2_290.4_land.net";
-    public static final String MODIS_ALL_NET_NAME = "9x7x5x3_319.7_all.net";
+    private static final String MODIS_ALL_NET_NAME = "9x7x5x3_319.7_all.net";
 
-    ThreadLocal<SchillerNeuralNetWrapper> modisWaterNeuralNet;
-    ThreadLocal<SchillerNeuralNetWrapper> modisLandNeuralNet;
-    ThreadLocal<SchillerNeuralNetWrapper> modisAllNeuralNet;
+    private ThreadLocal<SchillerNeuralNetWrapper> modisAllNeuralNet;
 
     @Override
     public Product getSourceProduct() {
@@ -180,7 +176,7 @@ public class IdepixModisClassificationOp extends PixelOperator {
 
         classifFlagBand.setDescription("Pixel classification flag");
         classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = IdepixModisUtils.createModisFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = IdepixModisUtils.createModisFlagCoding();
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 
@@ -194,12 +190,8 @@ public class IdepixModisClassificationOp extends PixelOperator {
 
     private void readSchillerNets() {
         try (
-                InputStream isMW = getClass().getResourceAsStream(MODIS_WATER_NET_NAME);
-                InputStream isML = getClass().getResourceAsStream(MODIS_LAND_NET_NAME);
                 InputStream isMA = getClass().getResourceAsStream(MODIS_ALL_NET_NAME)
         ) {
-            modisWaterNeuralNet = SchillerNeuralNetWrapper.create(isMW);
-            modisLandNeuralNet = SchillerNeuralNetWrapper.create(isML);
             modisAllNeuralNet = SchillerNeuralNetWrapper.create(isMA);
         } catch (IOException e) {
             throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());

@@ -22,7 +22,7 @@ import javax.media.jai.PlanarImage;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.BandSelectDescriptor;
 import javax.media.jai.operator.FormatDescriptor;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -62,20 +62,7 @@ public class OtsuBinarizeOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        final Band redBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_RED_BAND_NAME);
-        final Band greenBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_GREEN_BAND_NAME);
-        final Band blueBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_BLUE_BAND_NAME);
-        final Band cirrusBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_CIRRUS_BAND_NAME);
-        final Band aerosolBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_COASTAL_AEROSOL_BAND_NAME);
-        final Band panBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_PANCHROMATIC_BAND_NAME);
-
-        // MPa: try with clost band:
         Band clostBand = clostProduct.getBand(ClostOp.CLOST_BAND_NAME);
-        // MPa: now try with cirrus band...:     // todo: define what we want!!
-//        Band clostBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_CIRRUS_BAND_NAME);
-
-//        final RasterDataNode[] rgbChannelNodes = new RasterDataNode[]{redBand, greenBand, blueBand};
-//        final RasterDataNode[] rgbChannelNodes = new RasterDataNode[]{cirrusBand};
         final RasterDataNode[] rgbChannelNodes = new RasterDataNode[]{clostBand};
 
         try {
@@ -83,9 +70,6 @@ public class OtsuBinarizeOp extends Operator {
             BufferedImage clostImageRgb = ProductUtils.createRgbImage(rgbChannelNodes, clostImageInfo, ProgressMonitor.NULL);
             final BufferedImage clostImageGray = OtsuBinarize.toGray(clostImageRgb);
             final BufferedImage clostImageBinarized = OtsuBinarize.binarize(clostImageGray);
-//            System.out.println("clostImageRgbSize = " + clostImageRgb.getWidth() + "," + clostImageRgb.getHeight());
-//            System.out.println("clostImageBinarizedSize = " + clostImageBinarized.getWidth() + "," + clostImageBinarized.getHeight());
-//            System.out.println("clostImageGreySize = " + clostImageGray.getWidth() + "," + clostImageGray.getHeight());
             Product otsuProduct;
             if (otsuMode.equals("GREY")) {
                 otsuProduct = createGreyProduct(clostImageGray);
@@ -111,7 +95,7 @@ public class OtsuBinarizeOp extends Operator {
         product.setDescription("Product holding RGB Image transformed to binary");
 
         final PlanarImage planarImage = PlanarImage.wrapRenderedImage(sourceImage);
-        RenderedOp bandImage = getBandSourceImage(planarImage, 0);
+        RenderedOp bandImage = getBandSourceImage(planarImage);
         Band band = product.addBand(OTSU_BINARY_BAND_NAME, ImageManager.getProductDataType(bandImage.getSampleModel().getDataType()));
         band.setSourceImage(bandImage);
         band.setUnit("dl");
@@ -135,7 +119,7 @@ public class OtsuBinarizeOp extends Operator {
         product.setDescription("Product holding RGB Image transformed to greyscale");
 
         final PlanarImage planarImage = PlanarImage.wrapRenderedImage(sourceImage);
-        RenderedOp bandImage = getBandSourceImage(planarImage, 0);
+        RenderedOp bandImage = getBandSourceImage(planarImage);
         Band band = product.addBand(OTSU_GREY_BAND_NAME, ImageManager.getProductDataType(bandImage.getSampleModel().getDataType()));
         band.setSourceImage(bandImage);
         band.setUnit("dl");
@@ -148,8 +132,8 @@ public class OtsuBinarizeOp extends Operator {
         return product;
     }
 
-    private RenderedOp getBandSourceImage(PlanarImage planarImage, int i) {
-        RenderedOp bandImage = BandSelectDescriptor.create(planarImage, new int[]{i}, null);
+    private RenderedOp getBandSourceImage(PlanarImage planarImage) {
+        RenderedOp bandImage = BandSelectDescriptor.create(planarImage, new int[]{0}, null);
         int tileWidth = bandImage.getTileWidth();
         int tileHeight = bandImage.getTileHeight();
         ImageLayout imageLayout = new ImageLayout();

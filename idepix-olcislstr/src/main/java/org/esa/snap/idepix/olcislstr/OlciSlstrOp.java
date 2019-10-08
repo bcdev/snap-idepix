@@ -56,7 +56,7 @@ public class OlciSlstrOp extends BasisOp {
                     "Oa21_radiance"
             },
             defaultValue = "")
-    String[] olciRadianceBandsToCopy;
+    private String[] olciRadianceBandsToCopy;
 
     @Parameter(description = "The list of OLCI reflectance bands to write to target product.",
             label = "Select OLCI TOA reflectances to write to the target product",
@@ -68,7 +68,7 @@ public class OlciSlstrOp extends BasisOp {
                     "Oa21_reflectance"
             },
             defaultValue = "")
-    String[] olciReflBandsToCopy;
+    private String[] olciReflBandsToCopy;
 
     @Parameter(description = "The list of SLSTR radiance bands to write to target product.",
             label = "Select SLSTR TOA radiances to write to the target product",
@@ -79,7 +79,7 @@ public class OlciSlstrOp extends BasisOp {
                     "S4_radiance_cn", "S5_radiance_cn", "S6_radiance_cn"
             },
             defaultValue = "")
-    String[] slstrRadianceBandsToCopy;
+    private String[] slstrRadianceBandsToCopy;
 
     @Parameter(description = "The list of SLSTR reflectance bands to write to target product.",
             label = "Select SLSTR TOA reflectances to write to the target product",
@@ -90,7 +90,7 @@ public class OlciSlstrOp extends BasisOp {
                     "S4_reflectance_cn", "S5_reflectance_cn", "S6_reflectance_cn"
             },
             defaultValue = "")
-    String[] slstrReflBandsToCopy;
+    private String[] slstrReflBandsToCopy;
 
 
     @Parameter(defaultValue = "false",

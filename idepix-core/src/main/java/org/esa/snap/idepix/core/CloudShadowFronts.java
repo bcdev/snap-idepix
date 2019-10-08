@@ -42,10 +42,10 @@ public abstract class CloudShadowFronts {
     private final Tile ctpTile;
     private final Tile altTile;
 
-    public CloudShadowFronts(GeoCoding geoCoding,
-                             Rectangle sourceRectangle, Rectangle targetRectangle,
-                             Tile szaTile, Tile saaTile,
-                             Tile ctpTile, Tile altTile) {
+    protected CloudShadowFronts(GeoCoding geoCoding,
+                                Rectangle sourceRectangle, Rectangle targetRectangle,
+                                Tile szaTile, Tile saaTile,
+                                Tile ctpTile, Tile altTile) {
         this.geoCoding = geoCoding;
         this.sourceRectangle = sourceRectangle;
         this.targetRectangle = targetRectangle;

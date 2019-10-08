@@ -34,17 +34,17 @@ public class VgtOp extends BasisOp {
     @Parameter(defaultValue = "true",
             label = " Write TOA reflectances to the target product",
             description = " Write TOA reflectances to the target product")
-    boolean copyToaReflectances = true;
+    private boolean copyToaReflectances = true;
 
     @Parameter(defaultValue = "false",
             label = " Write input annotation bands to the target product",
             description = " Write input annotation bands to the target product")
-    boolean copyAnnotations;
+    private boolean copyAnnotations;
 
     @Parameter(defaultValue = "false",
             label = " Write feature values to the target product",
             description = " Write all feature values to the target product")
-    boolean copyFeatureValues = false;
+    private boolean copyFeatureValues = false;
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product.",

@@ -18,11 +18,11 @@ import java.util.TimeZone;
  *
  * @author olafd
  */
-public class AvhrrAcUtils {
+class AvhrrAcUtils {
 
-    public static FlagCoding createAvhrrAcFlagCoding(String flagId) {
+    static FlagCoding createAvhrrAcFlagCoding() {
 
-        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(flagId);
+        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
         // additional flags for AVHRR-AC (tests):
         flagCoding.addFlag("F_REFL1_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 1), null);
@@ -36,7 +36,7 @@ public class AvhrrAcUtils {
     }
 
 
-    public static int setupAvhrrAcClassifBitmask(Product classifProduct) {
+    static int setupAvhrrAcClassifBitmask(Product classifProduct) {
 
         int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
 
@@ -79,7 +79,7 @@ public class AvhrrAcUtils {
         return index;
     }
 
-    public static Calendar getProductDateAsCalendar(String ddmmyy) {
+    static Calendar getProductDateAsCalendar(String ddmmyy) {
         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         int year = Integer.parseInt(ddmmyy.substring(4, 6));
         if (year < 50) {
@@ -93,7 +93,7 @@ public class AvhrrAcUtils {
         return calendar;
     }
 
-    public static boolean anglesInvalid(double sza, double vza, double saa, double vaa) {
+    static boolean anglesInvalid(double sza, double vza, double saa, double vaa) {
         // todo: we have a discontinuity in angle retrieval at sza=90deg. Check!
 //        final double eps = 1.E-6;
 //        final boolean szaInvalid = sza < 90.0 + eps && sza > 90.0 - eps;
@@ -107,7 +107,8 @@ public class AvhrrAcUtils {
         return szaInvalid || saaInvalid || vzaInvalid || vaaInvalid;
     }
 
-    public static double convertRadianceToBt(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable, double radianceOrig, int ch, float waterFraction) {
+    static double convertRadianceToBt(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable, double radianceOrig, int ch,
+                                      float waterFraction) {
         final double c1 = 1.1910659E-5;
         final double c2 = 1.438833;
 

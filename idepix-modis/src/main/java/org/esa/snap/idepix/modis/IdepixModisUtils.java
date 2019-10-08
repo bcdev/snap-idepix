@@ -3,26 +3,25 @@ package org.esa.snap.idepix.modis;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.BitSetter;
+import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 
 import java.util.Random;
-import java.util.logging.Logger;
 
 /**
  * Utility class for IdePix MODIS
  *
  * @author olafd
  */
-public class IdepixModisUtils {
+class IdepixModisUtils {
 
     /**
      * Provides MODIS pixel classification flag coding
      *
-     * @param flagId - the flag ID
      * @return - the flag coding
      */
-    static FlagCoding createModisFlagCoding(String flagId) {
-        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(flagId);
+    static FlagCoding createModisFlagCoding() {
+        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
         flagCoding.addFlag("IDEPIX_MIXED_PIXEL", BitSetter.setFlag(0, IdepixModisConstants.IDEPIX_MIXED_PIXEL),
                            IdepixModisConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT);

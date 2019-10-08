@@ -17,7 +17,7 @@ import java.util.Random;
  *
  * @author olafd
  */
-public class Landsat8Utils {
+class Landsat8Utils {
 
     /**
      * Provides Landsat-8 pixel classification flag coding
@@ -26,7 +26,7 @@ public class Landsat8Utils {
      *
      * @return - the flag coding
      */
-    public static FlagCoding createLandsat8FlagCoding(String flagId) {
+    static FlagCoding createLandsat8FlagCoding(String flagId) {
         FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(flagId);
 
         // additional flags for Landsat-8
@@ -55,7 +55,7 @@ public class Landsat8Utils {
      *
      * @param classifProduct - the pixel classification product
      */
-    public static void setupLandsat8ClassifBitmask(Product classifProduct) {
+    static void setupLandsat8ClassifBitmask(Product classifProduct) {
 
         int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
 
@@ -120,7 +120,7 @@ public class Landsat8Utils {
      *
      * @return - the wavelength as int
      */
-    public static int getWavelengthFromString(String wvlString) {
+    static int getWavelengthFromString(String wvlString) {
         if (wvlString.toUpperCase().contains("PANCHROMATIC")) {
             return 590;
         } else {
@@ -132,11 +132,9 @@ public class Landsat8Utils {
      * Computes the histogram bin where histogram value is N percent of histogram maximum value
      *
      * @param stx - the statistics object
-     * @param percent - the N percent value
-     *
      * @return - the bin value
      */
-    public static double getHistogramBinAtNPercentOfMaximum(Stx stx, double percent) {
+    static double getHistogramBinAtNPercentOfMaximum(Stx stx) {
         final Histogram h = stx.getHistogram();
         final double highValue = h.getHighValue()[0];
         final double lowValue = h.getLowValue()[0];
@@ -146,7 +144,7 @@ public class Landsat8Utils {
 
         for (int i = numBins - 1; i >= 0; i--) {
             final double currValue = highValue - (numBins - i) * binWidth;
-            if (h.getBins()[0][i] >= percent * peakValue / 100.0) {
+            if (h.getBins()[0][i] >= 3.0 * peakValue / 100.0) {
                 return currValue;
             }
         }

@@ -33,7 +33,6 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
     private boolean applyShimezCloudTest;
     private float shimezDiffThresh;
     private float shimezMeanThresh;
-    private boolean applyHotCloudTest;
     private float hotThresh;
     private double clostThresh;
     private boolean applyClostCloudTest;
@@ -41,14 +40,10 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
     private float otsuValue;
     private boolean applyOtsuCloudTest;
     private double[] nnResult;
-    private double darkGlintThresholdTest1;
-    private double darkGlintThresholdTest2;
-    private int darkGlintThresholdTest1Wvl;
-    private int darkGlintThresholdTest2Wvl;
 
-    double nnCloudAmbiguousLowerBoundaryValue;
-    double nnCloudAmbiguousSureSeparationValue;
-    double nnCloudSureSnowSeparationValue;
+    private double nnCloudAmbiguousLowerBoundaryValue;
+    private double nnCloudAmbiguousSureSeparationValue;
+    private double nnCloudSureSnowSeparationValue;
 
     @Override
     public boolean isInvalid() {
@@ -147,7 +142,7 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
      *
      * @param nnResult - the neural net result
      */
-    public void setNnResult(double[] nnResult) {
+    void setNnResult(double[] nnResult) {
         this.nnResult = nnResult;
     }
 
@@ -156,7 +151,7 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
      *
      * @return - the neural net result
      */
-    public double[] getNnResult() {
+    double[] getNnResult() {
         return nnResult;
     }
 
@@ -165,7 +160,7 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
      *
      * @return - the classification result (int array of length of neural net result)
      */
-    public int[] getNnClassification() {
+    private int[] getNnClassification() {
         return classifyNNResult(nnResult);
         // todo: discuss logic, then apply separation values from new NNs, 20151119
     }
@@ -175,7 +170,7 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
      *
      * @return boolean
      */
-    public boolean isCloudShimez() {
+    boolean isCloudShimez() {
         // make sure we have reflectances here!!
 
         // this is the latest correction from MPa , 20150330:
@@ -200,7 +195,7 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
      *
      * @return boolean
      */
-    public boolean isCloudHot() {
+    boolean isCloudHot() {
         final double hot = l8SpectralBandData[1] - 0.5 * l8SpectralBandData[3];
         return hot > hotThresh;
     }
@@ -210,7 +205,7 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
      *
      * @return boolean
      */
-    public boolean isCloudClost() {
+    boolean isCloudClost() {
         if (applyOtsuCloudTest) {
             return clostValue > clostThresh;
         } else {
@@ -224,7 +219,7 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
      *
      * @return boolean
      */
-    public boolean isCloudOtsu() {
+    boolean isCloudOtsu() {
         // todo
         return otsuValue > 128;
     }
@@ -244,125 +239,105 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
 
     ///////////////// further setter methods ////////////////////////////////////////
 
-    public void setL8SpectralBandData(float[] l8SpectralBandData) {
+    void setL8SpectralBandData(float[] l8SpectralBandData) {
         this.l8SpectralBandData = l8SpectralBandData;
     }
 
-    public void setIsLand(boolean isLand) {
+    void setIsLand(boolean isLand) {
         this.isLand = isLand;
     }
 
-    public void setInvalid(boolean isInvalid) {
+    void setInvalid(boolean isInvalid) {
         this.isInvalid = isInvalid;
     }
 
-    public void setBrightnessBandLand(int brightnessBandLand) {
+    void setBrightnessBandLand(int brightnessBandLand) {
         this.brightnessBandLand = brightnessBandLand;
     }
 
-    public void setBrightnessThreshLand(float brightnessThreshLand) {
+    void setBrightnessThreshLand(float brightnessThreshLand) {
         this.brightnessThreshLand = brightnessThreshLand;
     }
 
-    public void setBrightnessBand1Water(int brightnessBand1Water) {
+    void setBrightnessBand1Water(int brightnessBand1Water) {
         this.brightnessBand1Water = brightnessBand1Water;
     }
 
-    public void setBrightnessWeightBand1Water(float brightnessWeightBand1Water) {
+    void setBrightnessWeightBand1Water(float brightnessWeightBand1Water) {
         this.brightnessWeightBand1Water = brightnessWeightBand1Water;
     }
 
-    public void setBrightnessBand2Water(int brightnessBand2Water) {
+    void setBrightnessBand2Water(int brightnessBand2Water) {
         this.brightnessBand2Water = brightnessBand2Water;
     }
 
-    public void setBrightnessWeightBand2Water(float brightnessWeightBand2Water) {
+    void setBrightnessWeightBand2Water(float brightnessWeightBand2Water) {
         this.brightnessWeightBand2Water = brightnessWeightBand2Water;
     }
 
-    public void setBrightnessThreshWater(float brightnessThreshWater) {
+    void setBrightnessThreshWater(float brightnessThreshWater) {
         this.brightnessThreshWater = brightnessThreshWater;
     }
 
-    public void setWhitenessBand1Land(int whitenessBand1Land) {
+    void setWhitenessBand1Land(int whitenessBand1Land) {
         this.whitenessBand1Land = whitenessBand1Land;
     }
 
-    public void setWhitenessBand2Land(int whitenessBand2Land) {
+    void setWhitenessBand2Land(int whitenessBand2Land) {
         this.whitenessBand2Land = whitenessBand2Land;
     }
 
-    public void setWhitenessThreshLand(float whitenessThreshLand) {
+    void setWhitenessThreshLand(float whitenessThreshLand) {
         this.whitenessThreshLand = whitenessThreshLand;
     }
 
-    public void setWhitenessThreshWater(float whitenessThreshWater) {
+    void setWhitenessThreshWater(float whitenessThreshWater) {
         this.whitenessThreshWater = whitenessThreshWater;
     }
 
-    public void setWhitenessBand1Water(int whitenessBand1Water) {
+    void setWhitenessBand1Water(int whitenessBand1Water) {
         this.whitenessBand1Water = whitenessBand1Water;
     }
 
-    public void setWhitenessBand2Water(int whitenessBand2Water) {
+    void setWhitenessBand2Water(int whitenessBand2Water) {
         this.whitenessBand2Water = whitenessBand2Water;
     }
 
 
-    public void setApplyShimezCloudTest(boolean applyShimezCloudTest) {
+    void setApplyShimezCloudTest(boolean applyShimezCloudTest) {
         this.applyShimezCloudTest = applyShimezCloudTest;
     }
 
-    public void setShimezDiffThresh(float shimezDiffThresh) {
+    void setShimezDiffThresh(float shimezDiffThresh) {
         this.shimezDiffThresh = shimezDiffThresh;
     }
 
-    public void setShimezMeanThresh(float shimezMeanThresh) {
+    void setShimezMeanThresh(float shimezMeanThresh) {
         this.shimezMeanThresh = shimezMeanThresh;
     }
 
-    public void setApplyHotCloudTest(boolean applyHotCloudTest) {
-        this.applyHotCloudTest = applyHotCloudTest;
-    }
-
-    public void setHotThresh(float hotThresh) {
+    void setHotThresh(float hotThresh) {
         this.hotThresh = hotThresh;
     }
 
-    public void setClostThresh(double clostThresh) {
+    void setClostThresh(double clostThresh) {
         this.clostThresh = clostThresh;
     }
 
-    public void setApplyClostCloudTest(boolean applyClostCloudTest) {
+    void setApplyClostCloudTest(boolean applyClostCloudTest) {
         this.applyClostCloudTest = applyClostCloudTest;
     }
 
-    public void setClostValue(float clostValue) {
+    void setClostValue(float clostValue) {
         this.clostValue = clostValue;
     }
 
-    public void setOtsuValue(float otsuValue) {
+    void setOtsuValue(float otsuValue) {
         this.otsuValue = otsuValue;
     }
 
-    public void setApplyOtsuCloudTest(boolean applyOtsuCloudTest) {
+    void setApplyOtsuCloudTest(boolean applyOtsuCloudTest) {
         this.applyOtsuCloudTest = applyOtsuCloudTest;
-    }
-
-    public void setDarkGlintThresholdTest1(double darkThreshold865) {
-        this.darkGlintThresholdTest1 = darkThreshold865;
-    }
-
-    public void setDarkGlintThresholdTest1Wvl(int darkGlintThresholdTest1Wvl) {
-        this.darkGlintThresholdTest1Wvl = darkGlintThresholdTest1Wvl;
-    }
-
-    public void setDarkGlintThresholdTest2(double darkThreshold1610) {
-        this.darkGlintThresholdTest2 = darkThreshold1610;
-    }
-
-    public void setDarkGlintThresholdTest2Wvl(int darkGlintThresholdTest2Wvl) {
-        this.darkGlintThresholdTest2Wvl = darkGlintThresholdTest2Wvl;
     }
 
     private int[] classifyNNResult(double[] netResult) {
@@ -382,15 +357,15 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
         return nnClassification;
     }
 
-    public void setNnCloudAmbiguousLowerBoundaryValue(double nnCloudAmbiguousLowerBoundaryValue) {
+    void setNnCloudAmbiguousLowerBoundaryValue(double nnCloudAmbiguousLowerBoundaryValue) {
         this.nnCloudAmbiguousLowerBoundaryValue = nnCloudAmbiguousLowerBoundaryValue;
     }
 
-    public void setNnCloudAmbiguousSureSeparationValue(double nnCloudAmbiguousSureSeparationValue) {
+    void setNnCloudAmbiguousSureSeparationValue(double nnCloudAmbiguousSureSeparationValue) {
         this.nnCloudAmbiguousSureSeparationValue = nnCloudAmbiguousSureSeparationValue;
     }
 
-    public void setNnCloudSureSnowSeparationValue(double nnCloudSureSnowSeparationValue) {
+    void setNnCloudSureSnowSeparationValue(double nnCloudSureSnowSeparationValue) {
         this.nnCloudSureSnowSeparationValue = nnCloudSureSnowSeparationValue;
     }
 }

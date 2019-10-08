@@ -1,17 +1,7 @@
 package org.esa.snap.idepix.landsat8;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.idepix.core.operators.CloudBuffer;
-import org.esa.snap.idepix.core.CloudShadowFronts;
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.util.OperatorUtils;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -21,8 +11,13 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
+import org.esa.snap.idepix.core.CloudShadowFronts;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.CloudBuffer;
+import org.esa.snap.idepix.core.util.IdepixUtils;
+import org.esa.snap.idepix.core.util.OperatorUtils;
 
-import java.awt.Rectangle;
+import java.awt.*;
 
 /**
  * Operator used to consolidate cloud flag for Landsat 8:
@@ -61,7 +56,7 @@ public class Landsat8PostProcessOp extends Operator {
 
     @SourceProduct(alias = "landsatCloud")
     private Product landsatCloudProduct;
-    @SourceProduct(alias = "waterMask", optional=true)
+    @SourceProduct(alias = "waterMask", optional = true)
     private Product waterMaskProduct;
 
     private Band waterFractionBand;
@@ -77,7 +72,7 @@ public class Landsat8PostProcessOp extends Operator {
             setTargetProduct(landsatCloudProduct);
         } else {
             Product postProcessedCloudProduct = OperatorUtils.createCompatibleProduct(landsatCloudProduct,
-                                                              "postProcessedCloud", "postProcessedCloud");
+                                                                                      "postProcessedCloud", "postProcessedCloud");
 
             if (waterMaskProduct != null) {
                 waterFractionBand = waterMaskProduct.getBand("land_water_fraction");
@@ -116,31 +111,93 @@ public class Landsat8PostProcessOp extends Operator {
             checkForCancellation();
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
-//                if ((x == 3461 || x == 3462) && y == 477) {
-//                    System.out.println("x,y = " + x + "," + y);
-//                }
-
                 if (targetRectangle.contains(x, y)) {
                     combineFlags(x, y, sourceFlagTile, targetTile);
 
                     postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
-                                Landsat8Constants.IDEPIX_CLOUD_SHIMEZ,
-                                Landsat8Constants.IDEPIX_CLOUD_SHIMEZ_BUFFER);
+                                Landsat8Constants.IDEPIX_CLOUD_SHIMEZ);
                     postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
-                                Landsat8Constants.IDEPIX_CLOUD_HOT,
-                                Landsat8Constants.IDEPIX_CLOUD_HOT_BUFFER);
+                                Landsat8Constants.IDEPIX_CLOUD_HOT);
                     postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
-                                Landsat8Constants.IDEPIX_CLOUD_OTSU,
-                                Landsat8Constants.IDEPIX_CLOUD_OTSU_BUFFER);
+                                Landsat8Constants.IDEPIX_CLOUD_OTSU);
                     postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
-                                Landsat8Constants.IDEPIX_CLOUD_CLOST,
-                                Landsat8Constants.IDEPIX_CLOUD_CLOST_BUFFER);
+                                Landsat8Constants.IDEPIX_CLOUD_CLOST);
 
                     postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
-                                IdepixConstants.IDEPIX_CLOUD_SURE,
-                                IdepixConstants.IDEPIX_CLOUD_BUFFER);
+                                IdepixConstants.IDEPIX_CLOUD_SURE);
                     targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD,
                                          targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_SURE));
+                }
+            }
+        }
+
+        if (computeCloudBuffer) {
+            for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
+                for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
+                    // SHIMEZ
+                    final boolean isCloudShimez = sourceFlagTile.getSampleBit(x, y, Landsat8Constants.IDEPIX_CLOUD_SHIMEZ);
+                    if (isCloudShimez) {
+                        CloudBuffer.computeSimpleCloudBuffer(x, y,
+                                                             targetTile,
+                                                             srcRectangle,
+                                                             cloudBufferWidth,
+                                                             Landsat8Constants.IDEPIX_CLOUD_SHIMEZ_BUFFER);
+                    }
+                    // HOT
+                    final boolean isCloudHot = sourceFlagTile.getSampleBit(x, y, Landsat8Constants.IDEPIX_CLOUD_HOT);
+                    if (isCloudHot) {
+                        CloudBuffer.computeSimpleCloudBuffer(x, y,
+                                                             targetTile,
+                                                             srcRectangle,
+                                                             cloudBufferWidth,
+                                                             Landsat8Constants.IDEPIX_CLOUD_HOT_BUFFER);
+                    }
+                    // OTSU
+                    final boolean isCloudOtsu = sourceFlagTile.getSampleBit(x, y, Landsat8Constants.IDEPIX_CLOUD_OTSU);
+                    if (isCloudOtsu) {
+                        CloudBuffer.computeSimpleCloudBuffer(x, y,
+                                                             targetTile,
+                                                             srcRectangle,
+                                                             cloudBufferWidth,
+                                                             Landsat8Constants.IDEPIX_CLOUD_OTSU_BUFFER);
+                    }
+                    // CLOST
+                    final boolean isCloudClost = sourceFlagTile.getSampleBit(x, y, Landsat8Constants.IDEPIX_CLOUD_CLOST);
+                    if (isCloudClost) {
+                        CloudBuffer.computeSimpleCloudBuffer(x, y,
+                                                             targetTile,
+                                                             srcRectangle,
+                                                             cloudBufferWidth,
+                                                             Landsat8Constants.IDEPIX_CLOUD_CLOST_BUFFER);
+                    }
+                    // overall
+                    final boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+                    if (isCloud) {
+                        CloudBuffer.computeSimpleCloudBuffer(x, y,
+                                                             targetTile,
+                                                             srcRectangle,
+                                                             cloudBufferWidth,
+                                                             IdepixConstants.IDEPIX_CLOUD_BUFFER);
+                    }
+                }
+            }
+
+            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+                checkForCancellation();
+                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                    consolidateLandsatCloudsAndBuffers(targetTile, x, y,
+                                                       Landsat8Constants.IDEPIX_CLOUD_SHIMEZ,
+                                                       Landsat8Constants.IDEPIX_CLOUD_SHIMEZ_BUFFER);
+                    consolidateLandsatCloudsAndBuffers(targetTile, x, y,
+                                                       Landsat8Constants.IDEPIX_CLOUD_HOT,
+                                                       Landsat8Constants.IDEPIX_CLOUD_HOT_BUFFER);
+                    consolidateLandsatCloudsAndBuffers(targetTile, x, y,
+                                                       Landsat8Constants.IDEPIX_CLOUD_OTSU,
+                                                       Landsat8Constants.IDEPIX_CLOUD_OTSU_BUFFER);
+                    consolidateLandsatCloudsAndBuffers(targetTile, x, y,
+                                                       Landsat8Constants.IDEPIX_CLOUD_CLOST,
+                                                       Landsat8Constants.IDEPIX_CLOUD_CLOST_BUFFER);
+                    IdepixUtils.consolidateCloudAndBuffer(targetTile, x, y);
                 }
             }
         }
@@ -150,8 +207,15 @@ public class Landsat8PostProcessOp extends Operator {
         }
     }
 
+    private static void consolidateLandsatCloudsAndBuffers(Tile targetTile, int x, int y,
+                                                           int cloudFlagBit, int cloudBufferFlagBit) {
+        if (targetTile.getSampleBit(x, y, cloudFlagBit)) {
+            targetTile.setSample(x, y, cloudBufferFlagBit, false);
+        }
+    }
+
     private void postProcess(int x, int y, Tile targetTile, Rectangle srcRectangle, Tile sourceFlagTile, Tile waterFractionTile,
-                             int cloudFlagBit, int cloudBufferFlagBit) {
+                             int cloudFlagBit) {
         boolean isCloud = sourceFlagTile.getSampleBit(x, y, cloudFlagBit);
         if (refineClassificationNearCoastlines && waterFractionTile != null) {
             if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
@@ -166,13 +230,6 @@ public class Landsat8PostProcessOp extends Operator {
         boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, cloudFlagBit);
         if (isCloudAfterRefinement) {
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
-            if ((computeCloudBuffer)) {
-                CloudBuffer.computeSimpleCloudBuffer(x, y,
-                                                     targetTile, targetTile,
-                                                     cloudBufferWidth,
-                                                     cloudFlagBit,
-                                                     cloudBufferFlagBit);
-            }
         }
     }
 
@@ -185,7 +242,7 @@ public class Landsat8PostProcessOp extends Operator {
     private boolean isCoastlinePixel(int x, int y, Tile waterFractionTile) {
         boolean isCoastline = false;
         // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
-        if (getGeoPos(x, y).lat > -58f) {
+        if (IdepixUtils.getGeoPos(geoCoding, x, y).lat > -58f) {
             final int waterFraction = waterFractionTile.getSampleInt(x, y);
             // values bigger than 100 indicate no data
             if (waterFraction <= 100) {
@@ -195,13 +252,6 @@ public class Landsat8PostProcessOp extends Operator {
             }
         }
         return isCoastline;
-    }
-
-    private GeoPos getGeoPos(int x, int y) {
-        final GeoPos geoPos = new GeoPos();
-        final PixelPos pixelPos = new PixelPos(x, y);
-        geoCoding.getGeoPos(pixelPos, geoPos);
-        return geoPos;
     }
 
     private boolean isNearCoastline(int x, int y, Tile waterFractionTile, Rectangle rectangle) {

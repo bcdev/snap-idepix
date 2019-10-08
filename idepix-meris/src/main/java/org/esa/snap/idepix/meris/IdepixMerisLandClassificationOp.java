@@ -71,8 +71,8 @@ public class IdepixMerisLandClassificationOp extends Operator {
     private Band[] merisReflBands;
     private Band landWaterBand;
 
-    public static final String MERIS_LAND_NET_NAME = "11x8x5x3_1062.5_land.net";
-    ThreadLocal<SchillerNeuralNetWrapper> merisLandNeuralNet;
+    private static final String MERIS_LAND_NET_NAME = "11x8x5x3_1062.5_land.net";
+    private ThreadLocal<SchillerNeuralNetWrapper> merisLandNeuralNet;
 
 //    static final int MERIS_L1B_F_LAND = 4;
 //    static final int MERIS_L1B_F_INVALID = 7;
@@ -92,7 +92,7 @@ public class IdepixMerisLandClassificationOp extends Operator {
         merisLandNeuralNet = SchillerNeuralNetWrapper.create(merisLandIS);
     }
 
-    public void setBands() {
+    private void setBands() {
         merisReflBands = new Band[Rad2ReflConstants.MERIS_REFL_BAND_NAMES.length];
         for (int i = 0; i < EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS; i++) {
             final int suffixStart = Rad2ReflConstants.MERIS_REFL_BAND_NAMES[i].indexOf("_");
@@ -101,7 +101,7 @@ public class IdepixMerisLandClassificationOp extends Operator {
         }
     }
 
-    void createTargetProduct() throws OperatorException {
+    private void createTargetProduct() throws OperatorException {
         int sceneWidth = sourceProduct.getSceneRasterWidth();
         int sceneHeight = sourceProduct.getSceneRasterHeight();
 
@@ -110,7 +110,7 @@ public class IdepixMerisLandClassificationOp extends Operator {
         // shall be the only target band!!
         cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
 //        cloudFlagBand = targetProduct.addBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT8);
-        FlagCoding flagCoding = IdepixMerisUtils.createMerisFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = IdepixMerisUtils.createMerisFlagCoding();
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -235,7 +235,7 @@ public class IdepixMerisLandClassificationOp extends Operator {
         return geoPos;
     }
 
-    void initCloudFlag(Tile merisL1bFlagTile, Tile targetTile, float[] merisReflectances, int y, int x) {
+    private void initCloudFlag(Tile merisL1bFlagTile, Tile targetTile, float[] merisReflectances, int y, int x) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
         final boolean l1Invalid = merisL1bFlagTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_INVALID);
         final boolean reflectancesValid = IdepixIO.areAllReflectancesValid(merisReflectances);

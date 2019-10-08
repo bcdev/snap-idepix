@@ -18,6 +18,7 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 
 import java.awt.geom.GeneralPath;
@@ -35,7 +36,7 @@ import java.util.Map;
  * @author olafd
  */
 
-public class IdepixOlciUtils {
+class IdepixOlciUtils {
 
     /**
      * Installs auxiliary data, here lookup tables.
@@ -55,11 +56,10 @@ public class IdepixOlciUtils {
     /**
      * Provides OLCI pixel classification flag coding
      *
-     * @param flagId - the flag ID
      * @return - the flag coding
      */
-    public static FlagCoding createOlciFlagCoding(String flagId) {
-        return IdepixFlagCoding.createDefaultFlagCoding(flagId);
+    static FlagCoding createOlciFlagCoding() {
+        return IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
     }
 
     /**
@@ -67,11 +67,11 @@ public class IdepixOlciUtils {
      *
      * @param classifProduct - the pixel classification product
      */
-    public static void setupOlciClassifBitmask(Product classifProduct) {
+    static void setupOlciClassifBitmask(Product classifProduct) {
         IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
     }
 
-    public static void addOlciRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
+    static void addOlciRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
         for (int i = 1; i <= Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
             for (String bandname : reflBandsToCopy) {
                 // e.g. Oa01_reflectance
@@ -83,14 +83,14 @@ public class IdepixOlciUtils {
         }
     }
 
-    public static Product computeRadiance2ReflectanceProduct(Product sourceProduct) {
+    static Product computeRadiance2ReflectanceProduct(Product sourceProduct) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("sensor", Sensor.OLCI);
         params.put("copyNonSpectralBands", false);
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
     }
 
-    public static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct, String alternativeNNDirPath, boolean outputCtp) {
+    static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct, String alternativeNNDirPath, boolean outputCtp) {
         Map<String, Product> ctpSourceProducts = new HashMap<>();
         ctpSourceProducts.put("sourceProduct", sourceProduct);
         ctpSourceProducts.put("o2CorrProduct", o2CorrProduct);
@@ -100,7 +100,7 @@ public class IdepixOlciUtils {
         return GPF.createProduct(OperatorSpi.getOperatorAlias(CtpOp.class), params, ctpSourceProducts);
     }
 
-    public static Polygon createPolygonFromCoordinateArray(double[][] coordArray) {
+    static Polygon createPolygonFromCoordinateArray(double[][] coordArray) {
         final Coordinate[] coordinates = new Coordinate[coordArray.length];
         for (int i = 0; i < coordinates.length; i++) {
             final double[] coord = coordArray[i];
@@ -110,7 +110,7 @@ public class IdepixOlciUtils {
         return factory.createPolygon(factory.createLinearRing(coordinates), null);
     }
 
-    public static boolean isCoordinateInsideGeometry(Coordinate coord, Geometry g, GeometryFactory gf) {
+    static boolean isCoordinateInsideGeometry(Coordinate coord, Geometry g, GeometryFactory gf) {
         return gf.createPoint(coord).within(g);
     }
 
@@ -190,7 +190,7 @@ public class IdepixOlciUtils {
     }
 
 
-    public static double getRefinedHeightFromCtp(double ctp, double slp, double[] temperatures) {
+    static double getRefinedHeightFromCtp(double ctp, double slp, double[] temperatures) {
         double height = 0.0;
         final double[] prsLevels = IdepixOlciConstants.referencePressureLevels;
 

@@ -10,13 +10,11 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
-
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.BasisOp;
 import org.esa.snap.idepix.core.util.IdepixIO;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -45,8 +43,7 @@ public class IdepixModisOp extends BasisOp {
                     "EV_250_Aggr1km_RefSB_1", "EV_250_Aggr1km_RefSB_2",
                     "EV_500_Aggr1km_RefSB_3", "EV_500_Aggr1km_RefSB_4", "EV_500_Aggr1km_RefSB_5",
                     "EV_500_Aggr1km_RefSB_6", "EV_500_Aggr1km_RefSB_7"
-            },
-            defaultValue = "")
+            })
     private String[] reflBandsToCopy;
 
     @Parameter(description = "The list of emissive bands to write to target product.",
@@ -56,8 +53,7 @@ public class IdepixModisOp extends BasisOp {
                     "EV_1KM_Emissive_24", "EV_1KM_Emissive_25", "EV_1KM_Emissive_27", "EV_1KM_Emissive_28",
                     "EV_1KM_Emissive_29", "EV_1KM_Emissive_30", "EV_1KM_Emissive_31", "EV_1KM_Emissive_32",
                     "EV_1KM_Emissive_33", "EV_1KM_Emissive_34", "EV_1KM_Emissive_35", "EV_1KM_Emissive_36"
-            },
-            defaultValue = "")
+            })
     private String[] emissiveBandsToCopy;
 
     @Parameter(defaultValue = "true",
@@ -86,17 +82,17 @@ public class IdepixModisOp extends BasisOp {
     @Parameter(defaultValue = "1.035",     // this does not work over land!
             label = " NN cloud ambiguous lower boundary",
             description = " NN cloud ambiguous lower boundary")
-    double nnCloudAmbiguousLowerBoundaryValue;
+    private double nnCloudAmbiguousLowerBoundaryValue;
 
     @Parameter(defaultValue = "3.35",
             label = " NN cloud ambiguous/sure separation value",
             description = " NN cloud ambiguous cloud ambiguous/sure separation value")
-    double nnCloudAmbiguousSureSeparationValue;
+    private double nnCloudAmbiguousSureSeparationValue;
 
     @Parameter(defaultValue = "4.2",
             label = " NN cloud sure/snow separation value",
             description = " NN cloud ambiguous cloud sure/snow separation value")
-    double nnCloudSureSnowSeparationValue;
+    private double nnCloudSureSnowSeparationValue;
 
 
     //    @Parameter(defaultValue = "0.08",

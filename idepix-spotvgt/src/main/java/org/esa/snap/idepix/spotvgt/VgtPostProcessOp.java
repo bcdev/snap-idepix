@@ -56,8 +56,8 @@ public class VgtPostProcessOp extends Operator {
 
         Product finalVgtCloudProduct = vgtCloudProduct;
 
-        Product postProcessedCloudProduct = createTargetProduct(vgtCloudProduct,
-                                                                "postProcessedCloud", "postProcessedCloud");
+        Product postProcessedCloudProduct = createTargetProduct(vgtCloudProduct
+        );
 
         origCloudFlagBand = finalVgtCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         origSmFlagBand = l1bProduct.getBand("SM");
@@ -73,11 +73,11 @@ public class VgtPostProcessOp extends Operator {
         setTargetProduct(postProcessedCloudProduct);
     }
 
-    private Product createTargetProduct(Product sourceProduct, String name, String type) {
+    private Product createTargetProduct(Product sourceProduct) {
         final int sceneWidth = sourceProduct.getSceneRasterWidth();
         final int sceneHeight = sourceProduct.getSceneRasterHeight();
 
-        Product targetProduct = new Product(name, type, sceneWidth, sceneHeight);
+        Product targetProduct = new Product("postProcessedCloud", "postProcessedCloud", sceneWidth, sceneHeight);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
@@ -89,9 +89,9 @@ public class VgtPostProcessOp extends Operator {
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Rectangle targetRectangle = targetTile.getRectangle();
 
-        Rectangle extendedRectangle = null;
+        Rectangle srcRectangle = null;
         if (computeCloudBuffer) {
-            extendedRectangle = rectCalculator.extend(targetRectangle);
+            srcRectangle = rectCalculator.extend(targetRectangle);
         }
 
         final Tile cloudFlagTile = getSourceTile(origCloudFlagBand, targetRectangle);
@@ -115,21 +115,7 @@ public class VgtPostProcessOp extends Operator {
 
         // cloud buffer:
         if (computeCloudBuffer) {
-            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
-                checkForCancellation();
-                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-
-                    final boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                    if (isCloud) {
-                        CloudBuffer.computeSimpleCloudBuffer(x, y,
-                                                             targetTile,
-                                                             extendedRectangle,
-                                                             cloudBufferWidth,
-                                                             IdepixConstants.IDEPIX_CLOUD_BUFFER);
-                    }
-                }
-            }
-
+            CloudBuffer.setCloudBuffer(targetTile, srcRectangle, cloudFlagTile, cloudBufferWidth);
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
                 checkForCancellation();
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {

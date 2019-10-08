@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.seawifs;
 
+import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
@@ -13,17 +14,15 @@ import java.util.Random;
  *
  * @author olafd
  */
-public class SeaWifsUtils {
+class SeaWifsUtils {
 
     /**
      * Provides SeaWiFS pixel classification flag coding
      *
-     * @param flagId - the flag ID
-     *
      * @return - the flag coding
      */
-    public static FlagCoding createSeawifsFlagCoding(String flagId) {
-        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(flagId);
+    static FlagCoding createSeawifsFlagCoding() {
+        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
         flagCoding.addFlag("IDEPIX_MIXED_PIXEL", BitSetter.setFlag(0, SeaWifsConstants.IDEPIX_MIXED_PIXEL),
                            SeaWifsConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT);
@@ -36,7 +35,7 @@ public class SeaWifsUtils {
      *
      * @param classifProduct - the pixel classification product
      */
-    public static void setupSeawifsClassifBitmask(Product classifProduct) {
+    static void setupSeawifsClassifBitmask(Product classifProduct) {
         int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
 
         int w = classifProduct.getSceneRasterWidth();

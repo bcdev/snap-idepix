@@ -81,10 +81,10 @@ public class ProbaVClassificationOp extends Operator {
     private boolean useL1bLandWaterFlag;
 
     @SourceProduct(alias = "l1b", description = "The source product.")
-    Product sourceProduct;
+    private Product sourceProduct;
 
     @TargetProduct(description = "The target product.")
-    Product targetProduct;
+    private Product targetProduct;
 
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
@@ -94,37 +94,37 @@ public class ProbaVClassificationOp extends Operator {
 
     private Band landWaterBand;
 
-    protected static final int SM_F_CLEAR = 0;
-//    protected static final int SM_F_UNDEFINED = 1;
-    protected static final int SM_F_CLOUD = 2;
-//    protected static final int SM_F_SNOWICE = 3;
-    protected static final int SM_F_CLOUDSHADOW = 4;
-    protected static final int SM_F_LAND = 5;
-    protected static final int SM_F_SWIR_GOOD = 6;
-    protected static final int SM_F_NIR_GOOD = 7;
-    protected static final int SM_F_RED_GOOD = 8;
-    protected static final int SM_F_BLUE_GOOD = 9;
+    static final int SM_F_CLEAR = 0;
+//    static final int SM_F_UNDEFINED = 1;
+    static final int SM_F_CLOUD = 2;
+//    static final int SM_F_SNOWICE = 3;
+    static final int SM_F_CLOUDSHADOW = 4;
 
-    static final byte WATERMASK_FRACTION_THRESH = 23;   // for 3x3 subsampling, this means 2 subpixels water
+    private static final int SM_F_LAND = 5;
+    private static final int SM_F_SWIR_GOOD = 6;
+    private static final int SM_F_NIR_GOOD = 7;
+    private static final int SM_F_RED_GOOD = 8;
+    private static final int SM_F_BLUE_GOOD = 9;
 
-    ElevationModel getasseElevationModel;
+    private static final byte WATERMASK_FRACTION_THRESH = 23;   // for 3x3 subsampling, this means 2 subpixels water
 
-    Band cloudFlagBand;
-    Band temperatureBand;
-    Band brightBand;
-    Band whiteBand;
-    Band brightWhiteBand;
-    Band spectralFlatnessBand;
-    Band ndviBand;
-    Band ndsiBand;
-    Band glintRiskBand;
-    Band radioLandBand;
+    private ElevationModel getasseElevationModel;
 
-    Band radioWaterBand;
+    private Band temperatureBand;
+    private Band brightBand;
+    private Band whiteBand;
+    private Band brightWhiteBand;
+    private Band spectralFlatnessBand;
+    private Band ndviBand;
+    private Band ndsiBand;
+    private Band glintRiskBand;
+    private Band radioLandBand;
+
+    private Band radioWaterBand;
 
 
-    public static final String VGT_NET_NAME = "3x2x2_341.8.net";
-    ThreadLocal<SchillerNeuralNetWrapper> vgtNeuralNet;
+    private static final String VGT_NET_NAME = "3x2x2_341.8.net";
+    private ThreadLocal<SchillerNeuralNetWrapper> vgtNeuralNet;
 
 
     @Override
@@ -312,14 +312,14 @@ public class ProbaVClassificationOp extends Operator {
         }
     }
 
-    void createTargetProduct() throws OperatorException {
+    private void createTargetProduct() throws OperatorException {
         int sceneWidth = sourceProduct.getSceneRasterWidth();
         int sceneHeight = sourceProduct.getSceneRasterHeight();
 
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
-        cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT32);
-        FlagCoding flagCoding = ProbaVUtils.createProbavFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        Band cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT32);
+        FlagCoding flagCoding = ProbaVUtils.createProbavFlagCoding();
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -362,7 +362,7 @@ public class ProbaVClassificationOp extends Operator {
 
     }
 
-    void setPixelSamples(Band band, Tile targetTile, int y, int x,
+    private void setPixelSamples(Band band, Tile targetTile, int y, int x,
                          ProbaVAlgorithm probaVAlgorithm) {
         // for given instrument, compute more pixel properties and write to distinct band
         if (band == brightBand) {
@@ -388,7 +388,7 @@ public class ProbaVClassificationOp extends Operator {
         }
     }
 
-    void setCloudFlag(Tile targetTile, int y, int x, ProbaVAlgorithm probaVAlgorithm) {
+    private void setCloudFlag(Tile targetTile, int y, int x, ProbaVAlgorithm probaVAlgorithm) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, probaVAlgorithm.isInvalid());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, probaVAlgorithm.isCloud());
@@ -403,7 +403,7 @@ public class ProbaVClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, probaVAlgorithm.isWhite());
     }
 
-    void setIsWaterByFraction(byte watermaskFraction, AbstractPixelProperties pixelProperties) {
+    private void setIsWaterByFraction(byte watermaskFraction, AbstractPixelProperties pixelProperties) {
         boolean isWater;
         if (watermaskFraction == WatermaskClassifier.INVALID_VALUE) {
             // fallback

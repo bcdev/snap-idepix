@@ -11,6 +11,7 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 
+import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 
 import java.util.HashMap;
@@ -22,17 +23,15 @@ import java.util.Random;
  *
  * @author olafd
  */
-public class IdepixMerisUtils {
+class IdepixMerisUtils {
 
     /**
      * Provides MERIS pixel classification flag coding
      *
-     * @param flagId - the flag ID
-     *
      * @return - the flag coding
      */
-    public static FlagCoding createMerisFlagCoding(String flagId) {
-        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(flagId);
+    static FlagCoding createMerisFlagCoding() {
+        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
         flagCoding.addFlag("IDEPIX_GLINT_RISK", BitSetter.setFlag(0, IdepixMerisConstants.IDEPIX_GLINT_RISK),
                            IdepixMerisConstants.IDEPIX_GLINT_RISK_DESCR_TEXT);
@@ -45,7 +44,7 @@ public class IdepixMerisUtils {
      *
      * @param classifProduct - the pixel classification product
      */
-    public static void setupMerisClassifBitmask(Product classifProduct) {
+    static void setupMerisClassifBitmask(Product classifProduct) {
         int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
 
         int w = classifProduct.getSceneRasterWidth();
@@ -60,13 +59,13 @@ public class IdepixMerisUtils {
 
     }
 
-    public static void addMerisRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
+    static void addMerisRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
         for (int i = 1; i <= Rad2ReflConstants.MERIS_REFL_BAND_NAMES.length; i++) {
             for (String bandname : reflBandsToCopy) {
                 // e.g. Oa01_reflectance
                 if (!targetProduct.containsBand(bandname) &&
                         bandname.startsWith(Rad2ReflConstants.MERIS_AUTOGROUPING_REFL_STRING) &&
-                        bandname.endsWith("_" + String.valueOf(i))) {
+                        bandname.endsWith("_" + i)) {
                     ProductUtils.copyBand(bandname, rad2reflProduct, targetProduct, true);
                     targetProduct.getBand(bandname).setUnit("dl");
                 }
@@ -74,14 +73,14 @@ public class IdepixMerisUtils {
         }
     }
 
-    public static Product computeRadiance2ReflectanceProduct(Product sourceProduct) {
+    static Product computeRadiance2ReflectanceProduct(Product sourceProduct) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("sensor", Sensor.MERIS);
         params.put("copyNonSpectralBands", false);
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
     }
 
-    public static Product computeCloudTopPressureProduct(Product sourceProduct) {
+    static Product computeCloudTopPressureProduct(Product sourceProduct) {
         return GPF.createProduct("Meris.CloudTopPressureOp", GPF.NO_PARAMS, sourceProduct);
     }
 

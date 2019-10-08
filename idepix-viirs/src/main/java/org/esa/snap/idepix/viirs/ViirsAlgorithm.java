@@ -8,30 +8,30 @@ package org.esa.snap.idepix.viirs;
  *
  * @author olafd
  */
-public class ViirsAlgorithm {
+class ViirsAlgorithm {
     private static final double THRESH_BRIGHT = 0.15;
 
-    float waterFraction;
-    double[] refl;
-    double[] nnOutput;
+    private float waterFraction;
+    private double[] refl;
+    private double[] nnOutput;
 
-    public boolean isInvalid() {
+    boolean isInvalid() {
         // todo: define if needed
         return false;
     }
 
-    public boolean isCoastline() {
-        // NOTE that this does not work if we have a PixelGeocoding. In that case, waterFraction
-        // is always 0 or 100!! (TS, OD, 20140502). If so, get a coastline in post processing approach.
-        return waterFraction < 100 && waterFraction > 0;
-    }
+//    public boolean isCoastline() {
+//        // NOTE that this does not work if we have a PixelGeocoding. In that case, waterFraction
+//        // is always 0 or 100!! (TS, OD, 20140502). If so, get a coastline in post processing approach.
+//        return waterFraction < 100 && waterFraction > 0;
+//    }
 
-    public boolean isLand() {
+    boolean isLand() {
         return waterFraction == 0;
     }
 
 
-    public boolean isSnowIce() {
+    boolean isSnowIce() {
         // for VIIRS NN, nnOutput has one element:
         // nnOutput[0] =
         // 1 < x < 2.15 : clear
@@ -42,11 +42,11 @@ public class ViirsAlgorithm {
         return nnOutput[0] > 4.15 && nnOutput[0] <= 5.0;
     }
 
-    public boolean isCloud() {
+    boolean isCloud() {
         return isCloudAmbiguous() || isCloudSure();
     }
 
-    public boolean isCloudAmbiguous() {
+    boolean isCloudAmbiguous() {
         if (isCloudSure() || isSnowIce()) {   // this check has priority
             return false;
         }
@@ -61,7 +61,7 @@ public class ViirsAlgorithm {
         return nnOutput[0] > 2.15 && nnOutput[0] <= 3.7;
     }
 
-    public boolean isCloudSure() {
+    boolean isCloudSure() {
         if (isSnowIce()) {   // this has priority
             return false;
         }
@@ -76,51 +76,51 @@ public class ViirsAlgorithm {
         return nnOutput[0] > 3.7 && nnOutput[0] <= 4.2;
     }
 
-    public boolean isCloudBuffer() {
+    boolean isCloudBuffer() {
         // is applied in post processing!
         return false;
     }
 
-    public boolean isCloudShadow() {
+    boolean isCloudShadow() {
         // will be applied in post processing once we have an appropriate algorithm
         return false;
     }
 
-    public boolean isMixedPixel() {
+    boolean isMixedPixel() {
         // todo
         return false;
     }
 
-    public boolean isGlintRisk() {
-        // todo
-        return false;
-    }
+//    public boolean isGlintRisk() {
+//         todo
+//        return false;
+//    }
 
-    public boolean isBright() {
+    boolean isBright() {
         return brightValue() > THRESH_BRIGHT;
     }
 
     ///////////////////////////////////////////////////////////////////////
 
-    public float brightValue() {
+    float brightValue() {
         return (float) refl[4];   //  rhot_671 (671nm)
     }
 
-    public float ndsiValue() {
+    float ndsiValue() {
         return 0.5f; // not yet needed
     }
 
     ///////////////////////////////////////////////////////////////////////
     // setters
-    public void setWaterFraction(float waterFraction) {
+    void setWaterFraction(float waterFraction) {
         this.waterFraction = waterFraction;
     }
 
-    public void setRefl(double[] reflectance) {
+    void setRefl(double[] reflectance) {
         refl = reflectance;
     }
 
-    public void setNnOutput(double[] nnOutput) {
+    void setNnOutput(double[] nnOutput) {
         this.nnOutput = nnOutput;
     }
 

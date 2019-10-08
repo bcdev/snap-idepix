@@ -39,7 +39,7 @@ import java.awt.*;
  *
  * @author olafd
  */
-public class IdepixOlciCloudShadowFronts {
+class IdepixOlciCloudShadowFronts {
 
     private static final int MEAN_EARTH_RADIUS = 6372000;
 
@@ -71,7 +71,7 @@ public class IdepixOlciCloudShadowFronts {
         this.altTile = altTile;
     }
 
-    public void computeCloudShadow(Tile sourceFlagTile, Tile targetTile) {
+    void computeCloudShadow(Tile sourceFlagTile, Tile targetTile) {
         final Rectangle targetRectangle = targetTile.getRectangle();
         final int h = targetRectangle.height;
         final int w = targetRectangle.width;
@@ -114,13 +114,13 @@ public class IdepixOlciCloudShadowFronts {
 
     ///////////////////// end of public ///////////////////////////////////////////////////////
 
-    private static boolean isPixelSurrounded(int x, int y, Tile sourceFlagTile, int pixelFlag) {
+    private static boolean isPixelSurrounded(int x, int y, Tile sourceFlagTile) {
         // check if pixel is surrounded by other pixels flagged as 'pixelFlag'
         int surroundingPixelCount = 0;
         Rectangle rectangle = sourceFlagTile.getRectangle();
         for (int i = x - 1; i <= x + 1; i++) {
             for (int j = y - 1; j <= y + 1; j++) {
-                if (rectangle.contains(i, j) && sourceFlagTile.getSampleBit(i, j, pixelFlag)) {
+                if (rectangle.contains(i, j) && sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD)) {
                     surroundingPixelCount++;
                 }
             }
@@ -141,7 +141,7 @@ public class IdepixOlciCloudShadowFronts {
     }
 
     private boolean isSurroundedByCloud(Tile sourceFlagTile, int x, int y) {
-        return isPixelSurrounded(x, y, sourceFlagTile, IdepixConstants.IDEPIX_CLOUD);
+        return isPixelSurrounded(x, y, sourceFlagTile);
     }
 
     private void setCloudShadow(Tile targetTile, int x, int y) {

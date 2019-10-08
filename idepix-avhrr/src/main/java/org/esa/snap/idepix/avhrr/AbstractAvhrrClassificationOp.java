@@ -104,7 +104,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 
 
     static final int ALBEDO_TO_RADIANCE = 0;
-    static final int RADIANCE_TO_ALBEDO = 1;
+    private static final int RADIANCE_TO_ALBEDO = 1;
 
     static final String AVHRRAC_NET_NAME = "6x3_114.1.net";
 
@@ -144,7 +144,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         sunPosition = SunPositionCalculator.calculate(calendar);
     }
 
-    int getDoy() {
+    private int getDoy() {
         return IdepixUtils.getDoyFromYYMMDD(getProductDatestring());
     }
 
@@ -260,7 +260,8 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         } else if (mode == RADIANCE_TO_ALBEDO) {
             result = input / (conversionFactor * Math.cos(sza * MathUtils.DTOR) * getDistanceCorr());
         } else {
-            throw new IllegalArgumentException("wrong mode " + mode + " for albedo/radiance conversion");
+            throw new IllegalArgumentException("wrong mode " + AbstractAvhrrClassificationOp.ALBEDO_TO_RADIANCE +
+                                                       " for albedo/radiance conversion");
         }
         return result;
 

@@ -40,17 +40,17 @@ public class VgtClassificationOp extends Operator {
     @Parameter(defaultValue = "true",
             label = " Write TOA reflectances to the target product",
             description = " Write TOA reflectances to the target product")
-    boolean copyToaReflectances = true;
+    private boolean copyToaReflectances = true;
 
     @Parameter(defaultValue = "false",
             label = " Write input annotation bands to the target product",
             description = " Write input annotation bands to the target product")
-    boolean copyAnnotations;
+    private boolean copyAnnotations;
 
     @Parameter(defaultValue = "false",
             label = " Write feature values to the target product",
             description = " Write all feature values to the target product")
-    boolean copyFeatureValues = false;
+    private boolean copyFeatureValues = false;
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product.",
@@ -81,44 +81,43 @@ public class VgtClassificationOp extends Operator {
     // VGT bands:
     private Band[] vgtReflectanceBands;
 
-    Band cloudFlagBand;
-    Band temperatureBand;
-    Band brightBand;
-    Band whiteBand;
-    Band brightWhiteBand;
-    Band spectralFlatnessBand;
-    Band ndviBand;
-    Band ndsiBand;
-    Band glintRiskBand;
-    Band radioLandBand;
+    private Band temperatureBand;
+    private Band brightBand;
+    private Band whiteBand;
+    private Band brightWhiteBand;
+    private Band spectralFlatnessBand;
+    private Band ndviBand;
+    private Band ndsiBand;
+    private Band glintRiskBand;
+    private Band radioLandBand;
 
-    Band radioWaterBand;
+    private Band radioWaterBand;
 
-    public static final int SM_F_CLOUD_1 = 0;
-    public static final int SM_F_CLOUD_2 = 1;
+    static final int SM_F_CLOUD_1 = 0;
+    static final int SM_F_CLOUD_2 = 1;
 //    public static final int SM_F_ICE_SNOW = 2;
-    public static final int SM_F_LAND = 3;
-    public static final int SM_F_MIR_GOOD = 4;
-    public static final int SM_F_B3_GOOD = 5;
-    public static final int SM_F_B2_GOOD = 6;
-    public static final int SM_F_B0_GOOD = 7;
+    private static final int SM_F_LAND = 3;
+    private static final int SM_F_MIR_GOOD = 4;
+    private static final int SM_F_B3_GOOD = 5;
+    private static final int SM_F_B2_GOOD = 6;
+    private static final int SM_F_B0_GOOD = 7;
 
     @SourceProduct(alias = "l1b", description = "The source product.")
-    Product sourceProduct;
+    private Product sourceProduct;
 
     @TargetProduct(description = "The target product.")
-    Product targetProduct;
+    private Product targetProduct;
 
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
 
-    public static final String VGT_NET_NAME = "3x2x2_341.8.net";
-    ThreadLocal<SchillerNeuralNetWrapper> vgtNeuralNet;
+    private static final String VGT_NET_NAME = "3x2x2_341.8.net";
+    private ThreadLocal<SchillerNeuralNetWrapper> vgtNeuralNet;
 
     private Band landWaterBand;
 
-    static final byte WATERMASK_FRACTION_THRESH = 23;   // for 3x3 subsampling, this means 2 subpixels water
+    private static final byte WATERMASK_FRACTION_THRESH = 23;   // for 3x3 subsampling, this means 2 subpixels water
 
     @Override
     public void initialize() throws OperatorException {
@@ -210,14 +209,14 @@ public class VgtClassificationOp extends Operator {
         }
     }
 
-    void createTargetProduct() throws OperatorException {
+    private void createTargetProduct() throws OperatorException {
         int sceneWidth = sourceProduct.getSceneRasterWidth();
         int sceneHeight = sourceProduct.getSceneRasterHeight();
 
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
-        cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT32);
-        FlagCoding flagCoding = VgtUtils.createVgtFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        Band cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT32);
+        FlagCoding flagCoding = VgtUtils.createVgtFlagCoding();
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -266,14 +265,14 @@ public class VgtClassificationOp extends Operator {
     }
 
 
-    public void setBands() {
+    private void setBands() {
         vgtReflectanceBands = new Band[IdepixConstants.VGT_REFLECTANCE_BAND_NAMES.length];
         for (int i = 0; i < IdepixConstants.VGT_REFLECTANCE_BAND_NAMES.length; i++) {
             vgtReflectanceBands[i] = sourceProduct.getBand(IdepixConstants.VGT_REFLECTANCE_BAND_NAMES[i]);
         }
     }
 
-    void setCloudFlag(Tile targetTile, int y, int x, VgtAlgorithm vgtAlgorithm) {
+    private void setCloudFlag(Tile targetTile, int y, int x, VgtAlgorithm vgtAlgorithm) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, vgtAlgorithm.isInvalid());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, vgtAlgorithm.isCloud());
@@ -289,7 +288,7 @@ public class VgtClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, vgtAlgorithm.isWhite());
     }
 
-    void setPixelSamples(Band band, Tile targetTile, int y, int x,
+    private void setPixelSamples(Band band, Tile targetTile, int y, int x,
                          VgtAlgorithm vgtAlgorithm) {
         // for given instrument, compute more pixel properties and write to distinct band
         if (band == brightBand) {
@@ -316,7 +315,7 @@ public class VgtClassificationOp extends Operator {
     }
 
 
-    public void extendTargetProduct() throws OperatorException {
+    private void extendTargetProduct() throws OperatorException {
         if (copyToaReflectances) {
             copyVgtReflectances();
             ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
@@ -384,7 +383,7 @@ public class VgtClassificationOp extends Operator {
         return vgtAlgorithm;
     }
 
-    void setIsWaterByFraction(byte watermaskFraction, AbstractPixelProperties pixelProperties) {
+    private void setIsWaterByFraction(byte watermaskFraction, AbstractPixelProperties pixelProperties) {
         boolean isWater;
         if (watermaskFraction == WatermaskClassifier.INVALID_VALUE) {
             // fallback
@@ -400,7 +399,7 @@ public class VgtClassificationOp extends Operator {
         // values bigger than 100 indicate no data
         // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
         // is always 0 or 100!! (TS, OD, 20140502)
-        return getGeoPos(x, y).lat > -58f && waterFraction <= 100 && waterFraction < 100 && waterFraction > 0;
+        return getGeoPos(x, y).lat > -58f && waterFraction < 100 && waterFraction > 0;
     }
 
     private GeoPos getGeoPos(int x, int y) {

@@ -9,28 +9,24 @@ import org.esa.snap.idepix.core.util.IdepixIO;
  */
 public class AvhrrAlgorithm implements AvhrrPixelProperties {
 
-    float waterFraction;
-    double[] radiance;
-    double[] nnOutput;
+    private float waterFraction;
+    private double[] radiance;
+    private double[] nnOutput;
 
-    double avhrracSchillerNNCloudAmbiguousLowerBoundaryValue;
-    double avhrracSchillerNNCloudAmbiguousSureSeparationValue;
-    double avhrracSchillerNNCloudSureSnowSeparationValue;
+    private double avhrracSchillerNNCloudAmbiguousLowerBoundaryValue;
+    private double avhrracSchillerNNCloudAmbiguousSureSeparationValue;
+    private double avhrracSchillerNNCloudSureSnowSeparationValue;
 
-    double reflCh1;
-    double reflCh2;
-    double reflCh3;
-    double btCh3;
-    double btCh4;
-    double btCh5;
+    private double reflCh1;
+    private double reflCh2;
+    private double reflCh3;
+    private double btCh3;
+    private double btCh4;
+    private double btCh5;
 
-    double rho3b;
-    double emissivity3b;
-    double ndsi;
-
-    String noaaId;
-    double distanceCorr;
-    double sza;
+    private double rho3b;
+    private double emissivity3b;
+    private double ndsi;
 
     private double latitude;
     private double longitude;
@@ -179,12 +175,8 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
             return true;
         }
 
-        final boolean isResidualCloud = isResidualCloud();
-        if (isResidualCloud) {
-            return true;
-        }
-        return false;
-//        return isCloudSureSchiller || isCloudAdditional;
+        return isResidualCloud();
+        //        return isCloudSureSchiller || isCloudAdditional;
 //        return isCloudSureSchiller || isCloudAdditional || isCloudFromOldSnowIce || isResidualCloud;
     }
 
@@ -371,80 +363,63 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
     }
 
 
-    public void setReflCh1(double reflCh1) {
+    void setReflCh1(double reflCh1) {
         this.reflCh1 = reflCh1;
     }
 
-    public void setReflCh2(double reflCh2) {
+    void setReflCh2(double reflCh2) {
         this.reflCh2 = reflCh2;
     }
 
-    public void setReflCh3(double reflCh3) {
+    void setReflCh3(double reflCh3) {
         this.reflCh3 = reflCh3;
     }
 
-    public void setBtCh3(double btCh3) {
+    void setBtCh3(double btCh3) {
         this.btCh3 = btCh3;
     }
 
-    public void setBtCh4(double btCh4) {
+    void setBtCh4(double btCh4) {
         this.btCh4 = btCh4;
     }
 
-    public void setBtCh5(double btCh5) {
+    void setBtCh5(double btCh5) {
         this.btCh5 = btCh5;
     }
 
-    public void setRadiance(double[] rad) {
+    void setRadiance(double[] rad) {
         this.radiance = rad;
     }
 
-    public void setWaterFraction(float waterFraction) {
+    void setWaterFraction(float waterFraction) {
         this.waterFraction = waterFraction;
     }
 
-    public void setNnOutput(double[] nnOutput) {
+    void setNnOutput(double[] nnOutput) {
         this.nnOutput = nnOutput;
     }
 
-    public void setAmbiguousLowerBoundaryValue(double avhrracSchillerNNCloudAmbiguousLowerBoundaryValue) {
+    void setAmbiguousLowerBoundaryValue(double avhrracSchillerNNCloudAmbiguousLowerBoundaryValue) {
         this.avhrracSchillerNNCloudAmbiguousLowerBoundaryValue = avhrracSchillerNNCloudAmbiguousLowerBoundaryValue;
     }
 
-    public void setAmbiguousSureSeparationValue(double avhrracSchillerNNCloudAmbiguousSureSeparationValue) {
+    void setAmbiguousSureSeparationValue(double avhrracSchillerNNCloudAmbiguousSureSeparationValue) {
         this.avhrracSchillerNNCloudAmbiguousSureSeparationValue = avhrracSchillerNNCloudAmbiguousSureSeparationValue;
     }
 
-    public void setSureSnowSeparationValue(double avhrracSchillerNNCloudSureSnowSeparationValue) {
+    void setSureSnowSeparationValue(double avhrracSchillerNNCloudSureSnowSeparationValue) {
         this.avhrracSchillerNNCloudSureSnowSeparationValue = avhrracSchillerNNCloudSureSnowSeparationValue;
     }
 
-    public void setLatitude(double latitude) {
+    void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public void setLongitude(double longitude) {
+    void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
-    public void setElevation(double elevation) {
+    void setElevation(double elevation) {
         this.elevation = elevation;
     }
-
-    public void setSza(double sza) {
-        this.sza = sza;
-    }
-
-    public void setDistanceCorr(double distanceCorr) {
-        this.distanceCorr = distanceCorr;
-    }
-
-    public void setNoaaId(String noaaId) {
-        this.noaaId = noaaId;
-    }
-
-    public float getWaterFraction() {
-        return waterFraction;
-    }
-
 }
