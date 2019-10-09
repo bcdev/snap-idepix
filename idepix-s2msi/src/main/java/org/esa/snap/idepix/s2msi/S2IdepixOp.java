@@ -205,6 +205,7 @@ public class S2IdepixOp extends Operator {
             params.put("computeMountainShadow", computeMountainShadow);
             params.put("computeCloudShadow", computeCloudShadow);
             params.put("mode", "LandWater");
+            params.put("demName", demName);
             postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixPostProcessOp.class),
                                                       params, inputShadow);
         }
