@@ -30,6 +30,8 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
     private boolean l1bLand;
     private boolean processingLand;  // land + buffer
 
+    private boolean isProcessingForC3SLot5;
+
     private boolean isBlueGood;
     private boolean isRedGood;
     private boolean isNirGood;
@@ -41,8 +43,13 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
     private float[] refl;
 
     public boolean isInvalid() {
-        // GK 20151126;
-        return !(isBlueGood && isRedGood && isNirGood && isSwirGood && processingLand);
+        if (isProcessingForC3SLot5) {
+            // GK 20191013;
+            return !processingLand;
+        } else {
+            // GK 20151126;
+            return !(isBlueGood && isRedGood && isNirGood && isSwirGood && processingLand);
+        }
     }
 
     public boolean isClearSnow() {
@@ -333,6 +340,10 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
 
     void setProcessingLand(boolean processingLand) {
         this.processingLand = processingLand;
+    }
+
+    public void setProcessingForC3SLot5(boolean isProcessingForC3SLot5) {
+        isProcessingForC3SLot5 = isProcessingForC3SLot5;
     }
 
     void setIsBlueGood(boolean isBlueGood) {

@@ -84,6 +84,11 @@ public class VgtOp extends BasisOp {
             description = "Use land-water flag from L1b product instead of SRTM mask")
     private boolean useL1bLandWaterFlag;
 
+    @Parameter(defaultValue = "false",
+            label = " Apply processing mode for C3S-Lot5 project",
+            description = "If set, processing mode for C3S-Lot5 project is applied (uses specific tests)")
+    private boolean isProcessingForC3SLot5;
+
 
     @SourceProduct(alias = "sourceProduct",
             label = "L1b product",
@@ -149,6 +154,7 @@ public class VgtOp extends BasisOp {
         cloudClassificationParameters.put("copyFeatureValues", copyFeatureValues);
         cloudClassificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
         cloudClassificationParameters.put("useL1bLandWaterFlag", useL1bLandWaterFlag);
+        cloudClassificationParameters.put("isProcessingForC3SLot5", isProcessingForC3SLot5);
         cloudClassificationParameters.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
         cloudClassificationParameters.put("nnCloudAmbiguousSureSeparationValue", nnCloudAmbiguousSureSeparationValue);
         cloudClassificationParameters.put("nnCloudSureSnowSeparationValue", nnCloudSureSnowSeparationValue);

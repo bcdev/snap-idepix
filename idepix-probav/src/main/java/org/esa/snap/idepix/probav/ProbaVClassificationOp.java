@@ -80,6 +80,12 @@ public class ProbaVClassificationOp extends Operator {
             description = "Use land-water flag from L1b product instead of SRTM mask")
     private boolean useL1bLandWaterFlag;
 
+    @Parameter(defaultValue = "false",
+            label = " Apply processing mode for C3S-Lot5 project",
+            description = "If set, processing mode for C3S-Lot5 project is applied (uses specific tests)")
+    private boolean isProcessingForC3SLot5;
+
+
     @SourceProduct(alias = "l1b", description = "The source product.")
     private Product sourceProduct;
 
@@ -272,6 +278,8 @@ public class ProbaVClassificationOp extends Operator {
                                                       int y, int x) {
 
         ProbaVAlgorithm probaVAlgorithm = new ProbaVAlgorithm();
+
+        probaVAlgorithm.setProcessingForC3SLot5(isProcessingForC3SLot5);
 
         for (int i = 0; i < IdepixConstants.PROBAV_REFLECTANCE_BAND_NAMES.length; i++) {
             probavReflectance[i] = probavReflectanceTiles[i].getSampleFloat(x, y);

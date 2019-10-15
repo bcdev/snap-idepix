@@ -77,6 +77,12 @@ public class VgtClassificationOp extends Operator {
             description = " NN cloud ambiguous cloud sure/snow separation value")
     private double nnCloudSureSnowSeparationValue;
 
+    @Parameter(defaultValue = "false",
+            label = " Apply processing mode for C3S-Lot5 project",
+            description = "If set, processing mode for C3S-Lot5 project is applied (uses specific tests)")
+    private boolean isProcessingForC3SLot5;
+
+
 
     // VGT bands:
     private Band[] vgtReflectanceBands;
@@ -355,7 +361,9 @@ public class VgtClassificationOp extends Operator {
             vgtReflectance[i] = vgtReflectanceTiles[i].getSampleFloat(x, y);
         }
 
-        checkVgtReflectanceQuality(vgtReflectance, smFlagTile, x, y);
+        if (!isProcessingForC3SLot5) {
+            checkVgtReflectanceQuality(vgtReflectance, smFlagTile, x, y);
+        }
         float[] vgtReflectanceSaturationCorrected = IdepixUtils.correctSaturatedReflectances(vgtReflectance);
         vgtAlgorithm.setRefl(vgtReflectanceSaturationCorrected);
 
