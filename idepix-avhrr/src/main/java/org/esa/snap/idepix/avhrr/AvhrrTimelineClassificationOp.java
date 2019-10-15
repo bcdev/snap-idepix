@@ -82,6 +82,13 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
     void runAvhrrAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         AvhrrAlgorithm avhrrAlgorithm = new AvhrrAlgorithm();
 
+        final String sensor =
+                sourceProduct.getMetadataRoot().getElement("Global_Attributes").getAttributeString("sensor");
+        if (!sensor.equals("AVHRR/2") && !sensor.equals("AVHRR/3")) {
+            throw new OperatorException("Sensor '" + sensor + "' is not supported in Timeline product. " +
+                                                "Must be 'AVHRR/2' or 'AVHRR/3'.");
+        }
+
         double sza = sourceSamples[AvhrrConstants.SRC_TIMELINE_SZA].getDouble();
         double vza = sourceSamples[AvhrrConstants.SRC_TIMELINE_VZA].getDouble();
         double saa = sourceSamples[AvhrrConstants.SRC_TIMELINE_SAA].getDouble();
