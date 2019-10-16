@@ -66,10 +66,11 @@ public class AvhrrConstants {
     static final int SRC_TIMELINE_VAA = 3;
     static final int SRC_TIMELINE_ALBEDO_1 = 4;
     static final int SRC_TIMELINE_ALBEDO_2 = 5;
-    static final int SRC_TIMELINE_RAD_3b = 6;
-    static final int SRC_TIMELINE_RAD_4 = 7;
-    static final int SRC_TIMELINE_RAD_5 = 8;
-    static final int SRC_TIMELINE_WATERFRACTION = 9;
+    static final int SRC_TIMELINE_ALBEDO_3a = 6;
+    static final int SRC_TIMELINE_RAD_3b = 7;
+    static final int SRC_TIMELINE_RAD_4 = 8;
+    static final int SRC_TIMELINE_RAD_5 = 9;
+    static final int SRC_TIMELINE_WATERFRACTION = 10;
 
     public static final double SOLAR_3b = 4.448;
     // first value of the following constants is for NOAA11, second value for NOAA14  third value for NOAA7

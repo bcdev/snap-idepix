@@ -2,6 +2,7 @@ package org.esa.snap.idepix.avhrr;
 
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.CloudBufferOp;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.operators.BasisOp;
 import org.esa.snap.core.datamodel.Band;
@@ -45,7 +46,7 @@ public class AvhrrOp extends BasisOp {
     private Product targetProduct;
 
     private Product classificationProduct;
-    private Product postProcessingProduct;
+    private Product finalProduct;
 
     private Product waterMaskProduct;
 
@@ -79,6 +80,7 @@ public class AvhrrOp extends BasisOp {
     private double avhrrNNCloudSureSnowSeparationValue;
 
     private Map<String, Object> cloudClassificationParameters;
+    private boolean isTimelineProduct;
 
     @Override
     public void initialize() throws OperatorException {
@@ -88,8 +90,9 @@ public class AvhrrOp extends BasisOp {
         }
 
         cloudClassificationParameters = createCloudClassificationParameters();
-        if (sourceProduct.getDescription() != null &&
-                sourceProduct.getDescription().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_TIMELINE_DESCRIPTION)){
+        isTimelineProduct = sourceProduct.getDescription() != null &&
+                sourceProduct.getDescription().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_TIMELINE_DESCRIPTION);
+        if (isTimelineProduct){
             processAvhrrTimeLine();
         } else {
             processAvhrr();
@@ -131,7 +134,7 @@ public class AvhrrOp extends BasisOp {
 
         Band cloudFlagBand;
         cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
+        cloudFlagBand.setSourceImage(finalProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
 
     }
     private void processAvhrr() {
@@ -153,7 +156,7 @@ public class AvhrrOp extends BasisOp {
 
         Band cloudFlagBand;
         cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
+        cloudFlagBand.setSourceImage(finalProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
 
     }
     private void postProcess() {
@@ -165,7 +168,19 @@ public class AvhrrOp extends BasisOp {
         params.put("cloudBufferWidth", cloudBufferWidth);
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("computeCloudShadow", false);     // todo: we need algo
-        postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(AvhrrPostProcessOp.class), params, input);
+        params.put("applyUniformityTests", isTimelineProduct);
+        Product postProcessingProduct =
+                GPF.createProduct(OperatorSpi.getOperatorAlias(AvhrrPostProcessOp.class), params, input);
+
+        if (computeCloudBuffer) {
+            input = new HashMap<>();
+            input.put("classifiedProduct", postProcessingProduct);
+            params = new HashMap<>();
+            params.put("cloudBufferWidth", cloudBufferWidth);
+            finalProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(CloudBufferOp.class), params, input);
+        } else {
+            finalProduct = postProcessingProduct;
+        }
     }
 
     private void createWaterMaskProduct() {

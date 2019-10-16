@@ -18,6 +18,7 @@ package org.esa.snap.idepix.core.operators;
 
 
 import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.idepix.core.IdepixConstants;
 
 import java.awt.*;
 
@@ -26,21 +27,16 @@ import java.awt.*;
  */
 public class CloudBuffer {
 
-    public static void computeSimpleCloudBuffer(int x, int y,
-                                                Tile sourceFlagTile, Tile targetTile,
-                                                int cloudBufferWidth,
-                                                int cloudFlagBit, int cloudBufferFlagBit) {
-        Rectangle rectangle = targetTile.getRectangle();
-        int LEFT_BORDER = Math.max(x - cloudBufferWidth, rectangle.x);
-        int RIGHT_BORDER = Math.min(x + cloudBufferWidth, rectangle.x + rectangle.width - 1);
-        int TOP_BORDER = Math.max(y - cloudBufferWidth, rectangle.y);
-        int BOTTOM_BORDER = Math.min(y + cloudBufferWidth, rectangle.y + rectangle.height - 1);
-
-        for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
-            for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                boolean is_already_cloud = sourceFlagTile.getSampleBit(i, j, cloudFlagBit);
-                if (!is_already_cloud && rectangle.contains(i, j)) {
-                    targetTile.setSample(i, j, cloudBufferFlagBit, true);
+    public static void setCloudBuffer(Tile targetTile, Rectangle srcRectangle, Tile sourceFlagTile, int cloudBufferWidth) {
+        for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
+            for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
+                final boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+                if (isCloud) {
+                    computeSimpleCloudBuffer(x, y,
+                                             targetTile,
+                                             srcRectangle,
+                                             cloudBufferWidth,
+                                             IdepixConstants.IDEPIX_CLOUD_BUFFER);
                 }
             }
         }
@@ -66,8 +62,7 @@ public class CloudBuffer {
         }
     }
 
-
-    public static void computeCloudBufferLC(Tile targetTile, int cloudFlagBit, int cloudBufferFlagBit) {
+    static void computeCloudBufferLC(Tile targetTile) {
         //  set alternative cloud buffer flag as used in LC-CCI project:
         // 1. use 2x2 square with reference pixel in upper left
         // 2. move this square row-by-row over the tile
@@ -80,7 +75,7 @@ public class CloudBuffer {
         Rectangle rectangle = targetTile.getRectangle();
         for (int y = rectangle.y; y < rectangle.y + rectangle.height - 1; y++) {
             for (int x = rectangle.x; x < rectangle.x + rectangle.width - 1; x++) {
-                if (targetTile.getSampleBit(x, y, cloudFlagBit)) {
+                if (targetTile.getSampleBit(x, y, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD)) {
                     // reference pixel is upper left (x, y)
                     // first set buffer of 1 in each direction
                     int bufferWidth = 1;
@@ -89,9 +84,9 @@ public class CloudBuffer {
                     int TOP_BORDER = Math.max(y - bufferWidth, rectangle.y);
                     int BOTTOM_BORDER = Math.min(y + bufferWidth, rectangle.y + rectangle.height - 1);
                     // now check if whole 2x2 square (x+1,y), (x, y+1), (x+1, y+1) is cloudy
-                    if (targetTile.getSampleBit(x + 1, y, cloudFlagBit) &&
-                            targetTile.getSampleBit(x, y + 1, cloudFlagBit) &&
-                            targetTile.getSampleBit(x + 1, y + 1, cloudFlagBit)) {
+                    if (targetTile.getSampleBit(x + 1, y, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD) &&
+                            targetTile.getSampleBit(x, y + 1, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD) &&
+                            targetTile.getSampleBit(x + 1, y + 1, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD)) {
                         // set buffer of 2 in each direction
                         bufferWidth = 2;
                         LEFT_BORDER = Math.max(x - bufferWidth, rectangle.x);
@@ -101,7 +96,7 @@ public class CloudBuffer {
                     }
                     for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
                         for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                            targetTile.setSample(i, j, cloudBufferFlagBit, true);
+                            targetTile.setSample(i, j, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD_BUFFER, true);
                         }
                     }
                 }
@@ -115,10 +110,10 @@ public class CloudBuffer {
             int LEFT_BORDER = Math.max(x - bufferWidth, rectangle.x);
             int RIGHT_BORDER = Math.min(x + bufferWidth, rectangle.x + rectangle.width - 1);
             int TOP_BORDER = Math.max(rectangle.y, ySouth - bufferWidth);
-            if (targetTile.getSampleBit(x, ySouth, cloudFlagBit)) {
+            if (targetTile.getSampleBit(x, ySouth, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD)) {
                 for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
                     for (int j = TOP_BORDER; j <= ySouth; j++) {
-                        targetTile.setSample(i, j, cloudBufferFlagBit, true);
+                        targetTile.setSample(i, j, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD_BUFFER, true);
                     }
                 }
             }
@@ -130,19 +125,19 @@ public class CloudBuffer {
             int LEFT_BORDER = Math.max(rectangle.x, xEast - bufferWidth);
             int TOP_BORDER = Math.max(y - bufferWidth, rectangle.y);
             int BOTTOM_BORDER = Math.min(y + bufferWidth, rectangle.y + rectangle.height - 1);
-            if (targetTile.getSampleBit(xEast, y, cloudFlagBit)) {
+            if (targetTile.getSampleBit(xEast, y, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD)) {
                 for (int i = LEFT_BORDER; i <= xEast; i++) {
                     for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                        targetTile.setSample(i, j, cloudBufferFlagBit, true);
+                        targetTile.setSample(i, j, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD_BUFFER, true);
                     }
                 }
             }
         }
         // pixel in lower right corner...
-        if (targetTile.getSampleBit(xEast, ySouth, cloudFlagBit)) {
+        if (targetTile.getSampleBit(xEast, ySouth, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD)) {
             for (int i = Math.max(rectangle.x, xEast - 1); i <= xEast; i++) {
                 for (int j = Math.max(rectangle.y, ySouth - 1); j <= ySouth; j++) {
-                    targetTile.setSample(i, j, cloudBufferFlagBit, true);
+                    targetTile.setSample(i, j, org.esa.snap.idepix.core.IdepixConstants.IDEPIX_CLOUD_BUFFER, true);
                 }
             }
         }

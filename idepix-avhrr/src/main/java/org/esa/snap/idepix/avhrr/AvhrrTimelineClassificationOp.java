@@ -47,6 +47,8 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
     Product targetProduct;
 
     private ElevationModel getasseElevationModel;
+    private String sensor;
+    private boolean isAvhrrB3aInactive;
 
     @Override
     public void prepareInputs() throws OperatorException {
@@ -55,7 +57,9 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         createTargetProduct();
 
         try {
-            rad2BTTable = AvhrrAuxdata.getInstance().createRad2BTTable(noaaId);
+//            rad2BTTable = AvhrrAuxdata.getInstance().createRad2BTTable(noaaId);
+            System.out.println("noaaId = " + noaaId);
+            rad2BTTable = AvhrrAuxdata.getInstance().createRad2BTTable("14");  // test, as long we do not have NOAA >= 15
         } catch (IOException e) {
             throw new OperatorException("Failed to get VZA from auxdata - cannot proceed: ", e);
         }
@@ -67,6 +71,19 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
             throw new OperatorException("DEM cannot be downloaded: " + demName + ".");
         }
         getasseElevationModel = demDescriptor.createDem(Resampling.BILINEAR_INTERPOLATION);
+
+        sensor = sourceProduct.getMetadataRoot().getElement("Global_Attributes").getAttributeString("sensor");
+        if (!sensor.equals("AVHRR/2") && !sensor.equals("AVHRR/3")) {
+            throw new OperatorException("Sensor '" + sensor + "' is not supported in Timeline product. " +
+                                                "Must be 'AVHRR/2' or 'AVHRR/3'.");
+        }
+
+        // for AVHRR/3, check if avhrr_b3a is active
+        // this depends on NOAA_XX and period, see table 2 in
+        // https://www.atmos-chem-phys.net/13/5351/2013/acp-13-5351-2013.pdf:
+        isAvhrrB3aInactive = sensor.equals("AVHRR/2") ||
+                sourceProduct.getBand("avhrr_b3a").getStx().getSampleCount() == 0;
+
     }
 
     void readSchillerNets() {
@@ -82,13 +99,6 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
     void runAvhrrAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         AvhrrAlgorithm avhrrAlgorithm = new AvhrrAlgorithm();
 
-        final String sensor =
-                sourceProduct.getMetadataRoot().getElement("Global_Attributes").getAttributeString("sensor");
-        if (!sensor.equals("AVHRR/2") && !sensor.equals("AVHRR/3")) {
-            throw new OperatorException("Sensor '" + sensor + "' is not supported in Timeline product. " +
-                                                "Must be 'AVHRR/2' or 'AVHRR/3'.");
-        }
-
         double sza = sourceSamples[AvhrrConstants.SRC_TIMELINE_SZA].getDouble();
         double vza = sourceSamples[AvhrrConstants.SRC_TIMELINE_VZA].getDouble();
         double saa = sourceSamples[AvhrrConstants.SRC_TIMELINE_SAA].getDouble();
@@ -102,7 +112,8 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
 
         final double albedo1 = sourceSamples[AvhrrConstants.SRC_TIMELINE_ALBEDO_1].getDouble();
         final double albedo2 = sourceSamples[AvhrrConstants.SRC_TIMELINE_ALBEDO_2].getDouble();
-        final double bt3 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_3b].getDouble();    // brightness temp !!
+
+//        final double bt3 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_3b].getDouble();    // brightness temp !!
         final double bt4 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_4].getDouble();
         final double bt5 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_5].getDouble();
 
@@ -129,11 +140,28 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
 
             avhrrAlgorithm.setLatitude(getGeoPos(x, y).lat);
             avhrrAlgorithm.setLongitude(getGeoPos(x, y).lon);
-            avhrrAlgorithm.setSza(sza);
 
             avhrrRadiance[0] = convertBetweenAlbedoAndRadiance(albedo1, sza, ALBEDO_TO_RADIANCE, 0);
             avhrrRadiance[1] = convertBetweenAlbedoAndRadiance(albedo2, sza, ALBEDO_TO_RADIANCE, 1);
-            avhrrRadiance[2] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt3, 3, waterFraction);
+
+            double ndsi;
+            if (sensor.equals("AVHRR/2") || isAvhrrB3aInactive) {
+                final double bt3 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_3b].getDouble();    // brightness temp !!
+                avhrrRadiance[2] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt3, 3, waterFraction);
+                final double albedo3b = calculateReflectancePartChannel3b(avhrrRadiance[2], bt4, bt5, sza);
+                avhrrAlgorithm.setReflCh3(albedo3b); // on [0,1]
+                avhrrAlgorithm.setElevation(altitude);
+                ndsi = (albedo3b - albedo1Norm) / (albedo3b + albedo1Norm);
+            } else {
+                final double albedo3a = sourceSamples[AvhrrConstants.SRC_TIMELINE_ALBEDO_3a].getDouble();
+                avhrrRadiance[2] = convertBetweenAlbedoAndRadiance(albedo3a, sza, ALBEDO_TO_RADIANCE, 3);
+                final double albedo3Norm = albedo3a / d;
+                final double albedo3Norm100 = albedo3Norm / 100.0;
+                avhrrAlgorithm.setReflCh3(albedo3Norm100); // on [0,1]
+                ndsi = (albedo3Norm100 - albedo1Norm) / (albedo3Norm100 + albedo1Norm);
+            }
+            avhrrAlgorithm.setNdsi(ndsi);
+
             avhrrRadiance[3] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt4, 4, waterFraction);
             avhrrRadiance[4] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt5, 5, waterFraction);
 
@@ -152,14 +180,13 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
             double[] nnOutput = nnWrapper.getNeuralNet().calc(inputVector);
 
             avhrrAlgorithm.setNnOutput(nnOutput);
-            avhrrAlgorithm.setAmbiguousLowerBoundaryValue(avhrrNNCloudAmbiguousLowerBoundaryValue);
             avhrrAlgorithm.setAmbiguousSureSeparationValue(avhrrNNCloudAmbiguousSureSeparationValue);
             avhrrAlgorithm.setSureSnowSeparationValue(avhrrNNCloudSureSnowSeparationValue);
 
             avhrrAlgorithm.setReflCh1(albedo1Norm / 100.0); // on [0,1]        --> put here albedo_norm now!!
             avhrrAlgorithm.setReflCh2(albedo2Norm / 100.0); // on [0,1]
 
-            avhrrAlgorithm.setBtCh3(bt3);
+//            avhrrAlgorithm.setBtCh3(bt3);
             avhrrAlgorithm.setBtCh4(bt4);
             avhrrAlgorithm.setBtCh5(bt5);
             avhrrAlgorithm.setElevation(altitude);

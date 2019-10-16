@@ -1,10 +1,7 @@
 package org.esa.snap.idepix.avhrr;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.idepix.core.operators.CloudBuffer;
-import org.esa.snap.idepix.core.CloudShadowFronts;
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.util.OperatorUtils;
+import com.google.common.primitives.Doubles;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -15,6 +12,11 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
+import org.esa.snap.idepix.core.CloudShadowFronts;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.CloudBuffer;
+import org.esa.snap.idepix.core.util.IdepixUtils;
+import org.esa.snap.idepix.core.util.OperatorUtils;
 
 import java.awt.*;
 
@@ -28,38 +30,36 @@ import java.awt.*;
  * @since IdePix 2.1
  */
 @OperatorMetadata(alias = "Idepix.Avhrr.Postprocess",
-                  version = "3.0",
-                  internal = true,
-                  authors = "Marco Peters, Marco Zuehlke, Olaf Danne",
-                  copyright = "(c) 2016 by Brockmann Consult",
-                  description = "Refines the AVHRR pixel classification.")
+        version = "3.0",
+        internal = true,
+        authors = "Marco Peters, Marco Zuehlke, Olaf Danne",
+        copyright = "(c) 2016 by Brockmann Consult",
+        description = "Refines the AVHRR pixel classification.")
 public class AvhrrPostProcessOp extends Operator {
-    @Parameter(defaultValue = "2", label = "Width of cloud buffer (# of pixels)")
-    private int cloudBufferWidth;
 
-    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
-    private boolean computeCloudBuffer;
+    private static final double RUTCLR_THRESH = 9.0;   // %
+    private static final double TUTCLR_THRESH = 3.0;  // Kelvin
 
-    //    @Parameter(defaultValue = "true",
-//            label = " Compute cloud shadow",
-//            description = " Compute cloud shadow with latest 'fronts' algorithm")
-    private boolean computeCloudShadow = false;   // todo: we have no info at all for this (pressure, height, temperature)
+    private boolean computeCloudShadow = false;   // todo: we have no info for this (pressure, height, temperature)
 
-//    @Parameter(defaultValue = "true",
-//               label = " Refine pixel classification near coastlines",
-//               description = "Refine pixel classification near coastlines. ")
-//    private boolean refineClassificationNearCoastlines;
-    private boolean refineClassificationNearCoastlines = false;
+    @Parameter(defaultValue = "false",
+            label = " Apply spatial uniformity tests",
+            description = "Apply spatial uniformity tests (actually works for AVHRR TIMELINE products only) . ")
+    private boolean applyUniformityTests;
+
 
     @SourceProduct(alias = "l1b")
     private Product l1bProduct;
     @SourceProduct(alias = "avhrrCloud")
     private Product avhrrCloudProduct;
-    @SourceProduct(alias = "waterMask", optional=true)
+    @SourceProduct(alias = "waterMask", optional = true)
     private Product waterMaskProduct;
 
     private Band landWaterBand;
     private Band origCloudFlagBand;
+    private Band reflCh1Band;
+    private Band btCh4Band;
+
     private GeoCoding geoCoding;
 
     private RectangleExtender rectCalculator;
@@ -67,26 +67,22 @@ public class AvhrrPostProcessOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        if (!computeCloudBuffer && !computeCloudShadow && !refineClassificationNearCoastlines) {
+        if (!computeCloudShadow) {
             setTargetProduct(avhrrCloudProduct);
         } else {
             Product postProcessedCloudProduct = OperatorUtils.createCompatibleProduct(avhrrCloudProduct,
-                                                                    "postProcessedCloud", "postProcessedCloud");
-
-//            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
+                                                                                      "postProcessedCloud", "postProcessedCloud");
 
             geoCoding = l1bProduct.getSceneGeoCoding();
 
             origCloudFlagBand = avhrrCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
 
-            int extendedWidth = 64;
-            int extendedHeight = 64; // todo: what do we need?
+            reflCh1Band = l1bProduct.getBand("avhrr_b1");
+            btCh4Band = l1bProduct.getBand("avhrr_b4");
 
             rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
                                                                  l1bProduct.getSceneRasterHeight()),
-                                                   extendedWidth, extendedHeight
-            );
-
+                                                   1, 1);
 
             ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, avhrrCloudProduct, postProcessedCloudProduct, false);
             setTargetProduct(postProcessedCloudProduct);
@@ -99,84 +95,91 @@ public class AvhrrPostProcessOp extends Operator {
         final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
 
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
-//        final Tile waterFractionTile = getSourceTile(landWaterBand, srcRectangle);
 
-        for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
+        final Tile reflCh1Tile = applyUniformityTests ? getSourceTile(reflCh1Band, srcRectangle) : null;
+        final Tile btCh4Tile = applyUniformityTests ? getSourceTile(btCh4Band, srcRectangle) : null;
+
+        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
-            for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
-
-                if (targetRectangle.contains(x, y)) {
-//                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-//                    boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
-                    combineFlags(x, y, sourceFlagTile, targetTile);
-
-//                    if (refineClassificationNearCoastlines) {
-//                        if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
-//                            targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, true);
-//                            refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
-//                            if (isCloud) {
-//                                refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, waterFractionTile, targetTile, srcRectangle);
-//                            }
-//                        }
-//                    }
-                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                    if (isCloudAfterRefinement) {
-                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
-                        if ((computeCloudBuffer)) {
-                            CloudBuffer.computeSimpleCloudBuffer(x, y,
-                                                                 targetTile, targetTile,
-                                                                 cloudBufferWidth,
-                                                                 IdepixConstants.IDEPIX_CLOUD,
-                                                                 IdepixConstants.IDEPIX_CLOUD_BUFFER);
-                        }
-                    }
-
-                }
+            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                combineFlags(x, y, sourceFlagTile, targetTile);
             }
         }
 
-        if (computeCloudShadow) {
-            // todo: we need something modified, as we have no CTP
-//            CloudShadowFronts cloudShadowFronts = new CloudShadowFronts(
-//                    geoCoding,
-//                    srcRectangle,
-//                    targetRectangle,
-//                    szaTile, saaTile, ctpTile, altTile) {
-//
-//
-//                @Override
-//                protected boolean isCloudForShadow(int x, int y) {
-//                    final boolean is_cloud_current;
-//                    if (!targetTile.getRectangle().contains(x, y)) {
-//                        is_cloud_current = sourceFlagTile.getSampleBit(x, y, Landsat8Constants.F_CLOUD);
-//                    } else {
-//                        is_cloud_current = targetTile.getSampleBit(x, y, Landsat8Constants.F_CLOUD);
-//                    }
-//                    if (is_cloud_current) {
-//                        final boolean isNearCoastline = isNearCoastline(x, y, waterFractionTile, srcRectangle);
-//                        if (!isNearCoastline) {
-//                            return true;
-//                        }
-//                    }
-//                    return false;
-//                }
-//
-//                @Override
-//                protected boolean isCloudFree(int x, int y) {
-//                    return !sourceFlagTile.getSampleBit(x, y, Landsat8Constants.F_CLOUD);
-//                }
-//
-//                @Override
-//                protected boolean isSurroundedByCloud(int x, int y) {
-//                    return isPixelSurrounded(x, y, sourceFlagTile, Landsat8Constants.F_CLOUD);
-//                }
-//
-//                @Override
-//                protected void setCloudShadow(int x, int y) {
-//                    targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SHADOW, true);
-//                }
-//            };
-//            cloudShadowFronts.computeCloudShadow();
+        if (applyUniformityTests) {
+            applyUniformityTest(targetTile, srcRectangle, sourceFlagTile, btCh4Tile, TUTCLR_THRESH);
+            applyUniformityTest(targetTile, srcRectangle, sourceFlagTile, reflCh1Tile, RUTCLR_THRESH);
+        }
+
+        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+            checkForCancellation();
+            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+                if (isCloud) {
+                    targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+                }
+            }
+        }
+    }
+
+    private void applyUniformityTest(Tile targetTile, Rectangle srcRectangle,
+                                     Tile sourceFlagTile, Tile spectralTile, double spectralThresh) {
+
+        // walk over tile in steps of 2 pixels:
+        for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y += 2) {
+            for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x += 2) {
+                final int RIGHT_BORDER = Math.min(x + 1, srcRectangle.x + srcRectangle.width - 1);
+                int BOTTOM_BORDER = Math.min(y + 1, srcRectangle.y + srcRectangle.height - 1);
+
+                // determine the land pixels in a 2x2 window
+                boolean[] isLand2x2 = new boolean[4];
+                int index = 0;
+                for (int i = x; i <= RIGHT_BORDER; i++) {
+                    for (int j = y; j <= BOTTOM_BORDER; j++) {
+                        isLand2x2[index++] = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_LAND);
+                    }
+                }
+
+                // if ALL pixels are land in the 2x2 window, apply uniformity test:
+                if (isLand2x2[0] || isLand2x2[1] || isLand2x2[2] || isLand2x2[3]) {
+                    // determine 2x2 min and max of incoming refl1 (RUT test) or bt4 (TUT test):
+                    double[] spectralValues = new double[4];
+                    index = 0;
+                    for (int i = x; i <= RIGHT_BORDER; i++) {
+                        for (int j = y; j <= BOTTOM_BORDER; j++) {
+                            spectralValues[index++] = spectralTile.getSampleDouble(i, j);
+                        }
+                    }
+                    final double utClrMin = Doubles.min(spectralValues);
+                    final double utClrMax = Doubles.max(spectralValues);
+                    final boolean isUtClr = utClrMax - utClrMin < spectralThresh;
+
+                    if (isUtClr) {
+                        // if uniformity is given, set all 2x2 pixels as clear:
+                        for (int i = x; i <= RIGHT_BORDER; i++) {
+                            for (int j = y; j <= BOTTOM_BORDER; j++) {
+                                targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD, false);
+                                targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                                targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                            }
+                        }
+                    } else {
+                        // if one of the 4 pixels is cloudy, set all 2x2 pixels as cloud (sure)
+                        boolean[] isCloud2x2 = new boolean[4];
+                        index = 0;
+                        for (int i = x; i <= RIGHT_BORDER; i++) {
+                            for (int j = y; j <= BOTTOM_BORDER; j++) {
+                                isCloud2x2[index++] = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
+                            }
+                        }
+                        if (isCloud2x2[0] || isCloud2x2[1] || isCloud2x2[2] || isCloud2x2[3]) {
+                            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
+                            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
+                            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                        }
+                    }
+                }
+            }
         }
     }
 

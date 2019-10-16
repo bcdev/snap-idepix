@@ -168,15 +168,12 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
     @Override
     void runAvhrrAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         AvhrrAlgorithm avhrrAlgorithm = new AvhrrAlgorithm();
-        avhrrAlgorithm.setNoaaId(noaaId);
-        avhrrAlgorithm.setDistanceCorr(getDistanceCorr());
 
         final double sza = sourceSamples[AvhrrConstants.SRC_USGS_SZA].getDouble();
         final double latitude = sourceSamples[AvhrrConstants.SRC_USGS_LAT].getDouble();
         final double longitude = sourceSamples[AvhrrConstants.SRC_USGS_LON].getDouble();
         avhrrAlgorithm.setLatitude(latitude);
         avhrrAlgorithm.setLongitude(longitude);
-        avhrrAlgorithm.setSza(sza);
         double vza = Math.abs(vzaTable.getVza(x));  // !!!
 
         final GeoPos satPosition = computeSatPosition(y);
@@ -229,7 +226,6 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
             double[] nnOutput = nnWrapper.getNeuralNet().calc(inputVector);
 
             avhrrAlgorithm.setNnOutput(nnOutput);
-            avhrrAlgorithm.setAmbiguousLowerBoundaryValue(avhrrNNCloudAmbiguousLowerBoundaryValue);
             avhrrAlgorithm.setAmbiguousSureSeparationValue(avhrrNNCloudAmbiguousSureSeparationValue);
             avhrrAlgorithm.setSureSnowSeparationValue(avhrrNNCloudSureSnowSeparationValue);
 
@@ -237,7 +233,6 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
             avhrrAlgorithm.setReflCh2(albedo2Norm / 100.0); // on [0,1]
 
             final double btCh3 = AvhrrAcUtils.convertRadianceToBt(noaaId, rad2BTTable, avhrrRadiance[2], 3, waterFraction);     // GK,MB 20151102: use K everywhere!!
-            avhrrAlgorithm.setBtCh3(btCh3);
             final double btCh4 = AvhrrAcUtils.convertRadianceToBt(noaaId, rad2BTTable, avhrrRadiance[3], 4, waterFraction);
             avhrrAlgorithm.setBtCh4(btCh4);
             final double btCh5 = AvhrrAcUtils.convertRadianceToBt(noaaId, rad2BTTable, avhrrRadiance[4], 5, waterFraction);
