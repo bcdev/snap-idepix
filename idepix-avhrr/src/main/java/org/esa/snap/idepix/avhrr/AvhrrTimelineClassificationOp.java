@@ -60,7 +60,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         try {
             rad2BTTable = AvhrrAuxdata.getInstance().createRad2BTTable(noaaId);
         } catch (IOException e) {
-            throw new OperatorException("Failed to get VZA from auxdata - cannot proceed: ", e);
+            throw new OperatorException("Failed to get Rad2BTTable from auxdata - cannot proceed: ", e);
         }
 
         final String demName = "GETASSE30";

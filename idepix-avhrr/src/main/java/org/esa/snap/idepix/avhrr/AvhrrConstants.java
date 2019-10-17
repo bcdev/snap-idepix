@@ -95,7 +95,16 @@ public class AvhrrConstants {
     // NOAA 14_5:  190-230	834.4496, 230-270	834.8066, 270-310	835.1647, 290-330	 835.374
 
 
-    public static final double TGCT_THRESH = 260.0;
+
+
+
+//    3	1.00359	0.0000000	-0.0031	2638.652	2642.807	2645.899	2647.169
+//    4	0.92370	0.0003833	3.72000	928.2603	928.8284	929.3323	929.5878
+//    5	0.96190	0.0001742	2.00000	834.4496	834.8066	835.1647	835.374
+
+
+
+    public static final double TGCT_THRESH = 244.0; // 244K over land - 270K over water
 
     public static final double EMISSIVITY_THRESH = 0.022;
     public static final double LAT_MAX_THRESH = 60.0;
