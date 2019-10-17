@@ -53,13 +53,12 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
     @Override
     public void prepareInputs() throws OperatorException {
         setNoaaId();
+        noaaId = "14";  // test, as long we do not have NOAA >= 15
         readSchillerNets();
         createTargetProduct();
 
         try {
-//            rad2BTTable = AvhrrAuxdata.getInstance().createRad2BTTable(noaaId);
-            System.out.println("noaaId = " + noaaId);
-            rad2BTTable = AvhrrAuxdata.getInstance().createRad2BTTable("14");  // test, as long we do not have NOAA >= 15
+            rad2BTTable = AvhrrAuxdata.getInstance().createRad2BTTable(noaaId);
         } catch (IOException e) {
             throw new OperatorException("Failed to get VZA from auxdata - cannot proceed: ", e);
         }
@@ -134,9 +133,14 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
                 waterFraction = sourceSamples[AvhrrConstants.SRC_TIMELINE_WATERFRACTION].getFloat();
             }
 
-//            if (x == 260 && y == 575) {
-//                System.out.println("x = " + x);
-//            }
+            if (x == 6110 && y == 1650) {
+                // clear
+                System.out.println("x = " + x);
+            }
+            if (x == 6110 && y == 1651) {
+                // cloud
+                System.out.println("x = " + x);
+            }
 
             avhrrAlgorithm.setLatitude(getGeoPos(x, y).lat);
             avhrrAlgorithm.setLongitude(getGeoPos(x, y).lon);
@@ -154,7 +158,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
                 ndsi = (albedo3b - albedo1Norm) / (albedo3b + albedo1Norm);
             } else {
                 final double albedo3a = sourceSamples[AvhrrConstants.SRC_TIMELINE_ALBEDO_3a].getDouble();
-                avhrrRadiance[2] = convertBetweenAlbedoAndRadiance(albedo3a, sza, ALBEDO_TO_RADIANCE, 3);
+                avhrrRadiance[2] = convertBetweenAlbedoAndRadiance(albedo3a, sza, ALBEDO_TO_RADIANCE, 2);
                 final double albedo3Norm = albedo3a / d;
                 final double albedo3Norm100 = albedo3Norm / 100.0;
                 avhrrAlgorithm.setReflCh3(albedo3Norm100); // on [0,1]
@@ -254,12 +258,9 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         sampleConfigurer.defineSample(index++, AvhrrConstants.SRC_TIMELINE_SAA_BAND_NAME);
         sampleConfigurer.defineSample(index++, AvhrrConstants.SRC_TIMELINE_VZA_BAND_NAME);
         sampleConfigurer.defineSample(index++, AvhrrConstants.SRC_TIMELINE_VAA_BAND_NAME);
-        sampleConfigurer.defineSample(index++, AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES[0]);
-        sampleConfigurer.defineSample(index++, AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES[1]);
-        sampleConfigurer.defineSample(index++, AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES[2]);
-        sampleConfigurer.defineSample(index++, AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES[3]);
-        sampleConfigurer.defineSample(index++, AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES[4]);
-
+        for (int i = 0; i < AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES.length; i++) {
+            sampleConfigurer.defineSample(index++, AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES[i]);
+        }
         sampleConfigurer.defineSample(index, IdepixConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
     }
 

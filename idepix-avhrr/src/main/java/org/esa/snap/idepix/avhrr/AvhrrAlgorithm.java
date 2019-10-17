@@ -58,7 +58,8 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
         if (latitude > 62.0) {
 
             final boolean condBtCh4 = -15.0 < btCh4Celsius && btCh4Celsius < 1.35;
-            final boolean condElevation = elevation > 300.0;
+//            final boolean condElevation = elevation > 300.0;
+            final boolean condElevation = true;        // todo: discuss
             final boolean cond1 = condBtCh4 && reflCh1 > 0.4 && 0.95 <= ratio21 &&
                     ratio21 < 1.15 && reflCh3 < 0.054 && condElevation;
             final boolean cond2 = condBtCh4 && reflCh1 > 0.4 && 0.8 <= ratio21 && ratio21 < 1.15 &&
@@ -199,11 +200,12 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
     }
 
     private boolean isDesertArea() {
-        return (latitude >= 10.0 && latitude < 35.0 && longitude >= -20.0 && longitude < 30.0) ||
+        return isLand() &&
+                ((latitude >= 10.0 && latitude < 35.0 && longitude >= -20.0 && longitude < 30.0) ||
                 (latitude >= 5.0 && latitude < 50.0 && longitude >= 30.0 && longitude < 60.0) ||
                 (latitude >= 25.0 && latitude < 50.0 && longitude >= 60.0 && longitude < 110.0) ||
                 (latitude >= -31.0 && latitude < 19.0 && longitude >= 121.0 && longitude < 141.0) ||
-                (latitude >= 35.0 && latitude < 50.0 && longitude >= 110.0 && longitude < 127.0);
+                (latitude >= 35.0 && latitude < 50.0 && longitude >= 110.0 && longitude < 127.0));
     }
 
     private double getRgctThreshold(double ndvi) {

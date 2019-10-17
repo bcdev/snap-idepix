@@ -98,7 +98,8 @@ public class AvhrrAcUtils {
 //        final double eps = 1.E-6;
 //        final boolean szaInvalid = sza < 90.0 + eps && sza > 90.0 - eps;
 //        final boolean szaInvalid = sza  > 85.0; // GK, 20150326
-        final boolean szaInvalid = sza > 70.0; // GK, 20150922
+//        final boolean szaInvalid = sza > 70.0; // GK, 20150922
+        final boolean szaInvalid = sza > 80.0; // GK, 20191017
 
         final boolean vzaInvalid = Double.isNaN(vza);
         final boolean saaInvalid = Double.isNaN(saa);

@@ -51,7 +51,7 @@ public class AvhrrConstants {
     static final int SRC_USGS_WATERFRACTION = 8;
 
     static final String[] SRC_TIMELINE_SPECTRAL_BAND_NAMES = {
-            "avhrr_b1", "avhrr_b2", "avhrr_b3b", "avhrr_b4", "avhrr_b5"
+            "avhrr_b1", "avhrr_b2", "avhrr_b3a", "avhrr_b3b", "avhrr_b4", "avhrr_b5"
     };
 
     static final String SRC_TIMELINE_SZA_BAND_NAME = "sun_zenith";

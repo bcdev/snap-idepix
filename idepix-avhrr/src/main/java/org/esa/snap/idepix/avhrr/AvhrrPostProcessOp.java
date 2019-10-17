@@ -141,7 +141,7 @@ public class AvhrrPostProcessOp extends Operator {
                 }
 
                 // if ALL pixels are land in the 2x2 window, apply uniformity test:
-                if (isLand2x2[0] || isLand2x2[1] || isLand2x2[2] || isLand2x2[3]) {
+                if (isLand2x2[0] && isLand2x2[1] && isLand2x2[2] && isLand2x2[3]) {
                     // determine 2x2 min and max of incoming refl1 (RUT test) or bt4 (TUT test):
                     double[] spectralValues = new double[4];
                     index = 0;
@@ -173,9 +173,14 @@ public class AvhrrPostProcessOp extends Operator {
                             }
                         }
                         if (isCloud2x2[0] || isCloud2x2[1] || isCloud2x2[2] || isCloud2x2[3]) {
-                            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
-                            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
-                            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                            for (int i = x; i <= RIGHT_BORDER; i++) {
+                                for (int j = y; j <= BOTTOM_BORDER; j++) {
+                                    targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD, true);
+                                    targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_SURE, true);
+                                    targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                                }
+                            }
+
                         }
                     }
                 }
