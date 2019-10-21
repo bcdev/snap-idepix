@@ -46,9 +46,9 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
     @TargetProduct(description = "The target product.")
     Product targetProduct;
 
-    private ElevationModel getasseElevationModel;
     private String sensor;
     private boolean isAvhrrB3aInactive;
+
 
     @Override
     public void prepareInputs() throws OperatorException {
@@ -85,15 +85,6 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
 
     }
 
-    void readSchillerNets() {
-        try (InputStream is = getClass().getResourceAsStream(AVHRRAC_NET_NAME)) {
-            avhrrNeuralNet = SchillerNeuralNetWrapper.create(is);
-        } catch (IOException e) {
-            throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
-        }
-    }
-
-
     @Override
     void runAvhrrAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         AvhrrAlgorithm avhrrAlgorithm = new AvhrrAlgorithm();
@@ -125,21 +116,12 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         double[] avhrrRadiance = new double[AvhrrConstants.AVHRR_AC_RADIANCE_BAND_NAMES.length];
 
         int targetSamplesIndex;
-        if (albedo1 >= 0.0 && albedo2 >= 0.0 && !AvhrrAcUtils.anglesInvalid(sza, vza, saa, vaa)) {
+        if (albedo1 >= 0.0 && albedo2 >= 0.0 && AvhrrAcUtils.anglesValid(sza, vza, saa, vaa)) {
 
             float waterFraction = Float.NaN;
             // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
             if (getGeoPos(x, y).lat > -58f) {
                 waterFraction = sourceSamples[AvhrrConstants.SRC_TIMELINE_WATERFRACTION].getFloat();
-            }
-
-            if (x == 6110 && y == 1650) {
-                // clear
-                System.out.println("x = " + x);
-            }
-            if (x == 6110 && y == 1651) {
-                // cloud
-                System.out.println("x = " + x);
             }
 
             avhrrAlgorithm.setLatitude(getGeoPos(x, y).lat);
@@ -206,20 +188,6 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         }
     }
 
-    private double computeGetasseAltitude(float x, float y)  {
-        final PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
-        GeoPos geoPos = sourceProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
-        double altitude;
-        try {
-            altitude = getasseElevationModel.getElevation(geoPos);
-        } catch (Exception e) {
-            // todo
-            e.printStackTrace();
-            altitude = 0.0;
-        }
-        return altitude;
-    }
-
     @Override
     void setClassifFlag(WritableSample[] targetSamples, AvhrrAlgorithm algorithm) {
         targetSamples[0].set(IdepixConstants.IDEPIX_INVALID, algorithm.isInvalid());
@@ -279,7 +247,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
 
         classifFlagBand.setDescription("Pixel classification flag");
         classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = AvhrrAcUtils.createAvhrrAcFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = AvhrrAcUtils.createAvhrrAcFlagCoding();
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 
@@ -303,14 +271,12 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         }
     }
 
-    /**
-     * The Service Provider Interface (SPI) for the operator.
-     * It provides operator meta-data and is a factory for new operator instances.
-     */
-    public static class Spi extends OperatorSpi {
-
-        public Spi() {
-            super(AvhrrTimelineClassificationOp.class);
+    void readSchillerNets() {
+        try (InputStream is = getClass().getResourceAsStream(AVHRRAC_NET_NAME)) {
+            avhrrNeuralNet = SchillerNeuralNetWrapper.create(is);
+        } catch (IOException e) {
+            throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
         }
     }
+
 }

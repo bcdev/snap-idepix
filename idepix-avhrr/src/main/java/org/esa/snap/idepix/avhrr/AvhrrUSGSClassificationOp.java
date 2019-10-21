@@ -73,11 +73,11 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         getasseElevationModel = demDescriptor.createDem(Resampling.BILINEAR_INTERPOLATION);
     }
 
-    static double computeRelativeAzimuth(double vaaRad, double saaRad) {
+    private static double computeRelativeAzimuth(double vaaRad, double saaRad) {
         return correctRelAzimuthRange(vaaRad, saaRad);
     }
 
-    static double[] computeAzimuthAngles(double sza, double vza,
+    private static double[] computeAzimuthAngles(double sza, double vza,
                                          GeoPos satPosition,
                                          GeoPos pointPosition,
                                          SunPosition sunPosition) {
@@ -129,42 +129,6 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         return greatCirclePointToSat / (0.001 * RsMathUtils.MEAN_EARTH_RADIUS);
     }
 
-    private static double computeSaa(double sza, double latPointRad, double lonPointRad, double latSunRad, double lonSunRad) {
-        double arg = (Math.sin(latSunRad) - Math.sin(latPointRad) * Math.cos(sza * MathUtils.DTOR)) /
-                (Math.cos(latPointRad) * Math.sin(sza * MathUtils.DTOR));
-        arg = Math.min(Math.max(arg, -1.0), 1.0);    // keep in range [-1.0, 1.0]
-        double saaRad = Math.acos(arg);
-        if (Math.sin(lonSunRad - lonPointRad) < 0.0) {
-            saaRad = 2.0 * Math.PI - saaRad;
-        }
-        return saaRad;
-    }
-
-    private static double computeVaa(double latPointRad, double lonPointRad, double latSatRad, double lonSatRad,
-                             double greatCirclePointToSatRad) {
-        double arg = (Math.sin(latSatRad) - Math.sin(latPointRad) * Math.cos(greatCirclePointToSatRad)) /
-                (Math.cos(latPointRad) * Math.sin(greatCirclePointToSatRad));
-        arg = Math.min(Math.max(arg, -1.0), 1.0);    // keep in range [-1.0, 1.0]
-        double vaaRad = Math.acos(arg);
-        if (Math.sin(lonSatRad - lonPointRad) < 0.0) {
-            vaaRad = 2.0 * Math.PI - vaaRad;
-        }
-
-        return vaaRad;
-    }
-
-    void readSchillerNets() {
-        try (InputStream is = getClass().getResourceAsStream(AVHRRAC_NET_NAME)) {
-            avhrrNeuralNet = SchillerNeuralNetWrapper.create(is);
-        } catch (IOException e) {
-            throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
-        }
-    }
-
-    GeoPos computeSatPosition(int y) {
-        return getGeoPos(sourceProduct.getSceneRasterWidth() / 2, y);    // LAC_NADIR = 1024.5
-    }
-
     @Override
     void runAvhrrAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         AvhrrAlgorithm avhrrAlgorithm = new AvhrrAlgorithm();
@@ -196,7 +160,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         final double albedo2Norm = albedo2 / d;
 
         int targetSamplesIndex;
-        if (albedo1 >= 0.0 && albedo2 >= 0.0 && !AvhrrAcUtils.anglesInvalid(sza, vza, azimuthAngles[0], azimuthAngles[1])) {
+        if (albedo1 >= 0.0 && albedo2 >= 0.0 && AvhrrAcUtils.anglesValid(sza, vza, azimuthAngles[0], azimuthAngles[1])) {
 
             avhrrRadiance[0] = convertBetweenAlbedoAndRadiance(albedo1, sza, ALBEDO_TO_RADIANCE, 0);
             avhrrRadiance[1] = convertBetweenAlbedoAndRadiance(albedo2, sza, ALBEDO_TO_RADIANCE, 1);
@@ -284,20 +248,6 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         }
     }
 
-    private double computeGetasseAltitude(float x, float y)  {
-        final PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
-        GeoPos geoPos = sourceProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
-        double altitude;
-        try {
-            altitude = getasseElevationModel.getElevation(geoPos);
-        } catch (Exception e) {
-            // todo
-            e.printStackTrace();
-            altitude = 0.0;
-        }
-        return altitude;
-    }
-
     @Override
     void setClassifFlag(WritableSample[] targetSamples, AvhrrAlgorithm algorithm) {
         targetSamples[0].set(IdepixConstants.IDEPIX_INVALID, algorithm.isInvalid());
@@ -375,7 +325,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
 
         classifFlagBand.setDescription("Pixel classification flag");
         classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = AvhrrAcUtils.createAvhrrAcFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = AvhrrAcUtils.createAvhrrAcFlagCoding();
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 
@@ -465,6 +415,43 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
             }
         }
     }
+
+    void readSchillerNets() {
+        try (InputStream is = getClass().getResourceAsStream(AVHRRAC_NET_NAME)) {
+            avhrrNeuralNet = SchillerNeuralNetWrapper.create(is);
+        } catch (IOException e) {
+            throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
+        }
+    }
+
+    GeoPos computeSatPosition(int y) {
+        return getGeoPos(sourceProduct.getSceneRasterWidth() / 2, y);    // LAC_NADIR = 1024.5
+    }
+
+    private static double computeSaa(double sza, double latPointRad, double lonPointRad, double latSunRad, double lonSunRad) {
+        double arg = (Math.sin(latSunRad) - Math.sin(latPointRad) * Math.cos(sza * MathUtils.DTOR)) /
+                (Math.cos(latPointRad) * Math.sin(sza * MathUtils.DTOR));
+        arg = Math.min(Math.max(arg, -1.0), 1.0);    // keep in range [-1.0, 1.0]
+        double saaRad = Math.acos(arg);
+        if (Math.sin(lonSunRad - lonPointRad) < 0.0) {
+            saaRad = 2.0 * Math.PI - saaRad;
+        }
+        return saaRad;
+    }
+
+    private static double computeVaa(double latPointRad, double lonPointRad, double latSatRad, double lonSatRad,
+                                     double greatCirclePointToSatRad) {
+        double arg = (Math.sin(latSatRad) - Math.sin(latPointRad) * Math.cos(greatCirclePointToSatRad)) /
+                (Math.cos(latPointRad) * Math.sin(greatCirclePointToSatRad));
+        arg = Math.min(Math.max(arg, -1.0), 1.0);    // keep in range [-1.0, 1.0]
+        double vaaRad = Math.acos(arg);
+        if (Math.sin(lonSatRad - lonPointRad) < 0.0) {
+            vaaRad = 2.0 * Math.PI - vaaRad;
+        }
+
+        return vaaRad;
+    }
+
 
     /**
      * The Service Provider Interface (SPI) for the operator.

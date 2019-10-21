@@ -72,17 +72,19 @@ public class AvhrrConstants {
     static final int SRC_TIMELINE_RAD_5 = 9;
     static final int SRC_TIMELINE_WATERFRACTION = 10;
 
-    public static final double SOLAR_3b = 4.448;
-    // first value of the following constants is for NOAA11, second value for NOAA14  third value for NOAA7
-    public static final double[] FREQUENZ_3B = {3.743,3.779, 3.743};
-    public static final double[] EW_3b = {278.85792,284.69366, 278.85792};
-    public static final double[] A0 = {6.34384,4.00162, 6.34384};
-    public static final double[] B0 = {2.68468,0.98107, 2.68468};
-    public static final double[] C0 = {-1.70931,1.9789, -1.70931};
-    public static final double[] a1_3b = {-1.738973,-1.88533, -1.738973};
-    public static final double[] a2_3b = {1.003354,1.003839, 1.003354};
-    public static final double c1 = 1.1910659*1.E-5; // mW/(m^2 sr cm^-4)
-    public static final double c2 = 1.438833;
+    static final double SOLAR_3b = 4.448;
+
+    // values of the following constants are for NOAA7, 11, 14, 15, 16, 17, 18, METOP-A, 19, METOP-B
+    // todo: GK to provide correct values for NOAA > 15. For the moment we take the same as for NOAA-14
+    static final double[] FREQUENZ_3B = {3.743, 3.743, 3.779, 3.779, 3.779, 3.779, 3.779, 3.779, 3.779, 3.779};
+    static final double[] EW_3b = {278.85792, 278.85792, 284.69366, 284.69366, 284.69366, 284.69366, 284.69366, 284.69366, 284.69366};
+    static final double[] A0 = {6.34384, 6.34384, 4.00162, 4.00162, 4.00162, 4.00162, 4.00162, 4.00162, 4.00162, 4.00162};
+    static final double[] B0 = {2.68468, 2.68468, 0.98107, 0.98107, 0.98107, 0.98107, 0.98107, 0.98107, 0.98107, 0.98107};
+    static final double[] C0 = {-1.70931, -1.70931, 1.9789, 1.9789, 1.9789, 1.9789, 1.9789, 1.9789, 1.9789, 1.9789};
+    static final double[] a1_3b = {-1.738973, -1.738973, -1.88533, -1.88533, -1.88533, -1.88533, -1.88533, -1.88533, -1.88533, -1.88533};
+    static final double[] a2_3b = {1.003354, 1.003354, 1.003839, 1.003839, 1.003839, 1.003839, 1.003839, 1.003839, 1.003839, 1.003839};
+    static final double c1 = 1.1910659 * 1.E-5; // mW/(m^2 sr cm^-4)
+    static final double c2 = 1.438833;
 
     // different central wave numbers for AVHRR Channel3b, 4, 5 correspond to the temperature ranges & to NOAA11 and NOAA14
     // NOAA 11_3b: 180-225	2663.500, 225-275	2668.150, 275-320	2671.400, 270-310	2670.960
@@ -98,23 +100,23 @@ public class AvhrrConstants {
     public static final double EMISSIVITY_THRESH = 0.022;
     public static final double LAT_MAX_THRESH = 60.0;
 
-    public static double[] fmftTestThresholds = new double[] {
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 0.01, 0.03, 0.05, 0.08, 0.11, 0.14, 0.18, 0.23, 0.28,
-        0.34, 0.41, 0.48, 0.57, 0.66, 0.76, 0.87, 1.0, 1.13, 1.27,
-        1.42, 1.59, 1.76, 1.94, 2.14, 2.34, 2.55, 2.77, 3.0, 3.24,
-        3.48, 3.73, 3.99, 4.26, 4.52, 4.80, 5.0, 5.35, 5.64, 5.92,
-        6.20, 6.48, 6.76, 7.03, 7.30, 7.8, 7.8, 7.8, 7.8, 7.8,
-        7.8, 7.8, 7.8, 7.8, 7.8, 7.8, 7.8, 7.8, 7.8, 7.8,
-        7.8
+    public static double[] fmftTestThresholds = new double[]{
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.01, 0.03, 0.05, 0.08, 0.11, 0.14, 0.18, 0.23, 0.28,
+            0.34, 0.41, 0.48, 0.57, 0.66, 0.76, 0.87, 1.0, 1.13, 1.27,
+            1.42, 1.59, 1.76, 1.94, 2.14, 2.34, 2.55, 2.77, 3.0, 3.24,
+            3.48, 3.73, 3.99, 4.26, 4.52, 4.80, 5.0, 5.35, 5.64, 5.92,
+            6.20, 6.48, 6.76, 7.03, 7.30, 7.8, 7.8, 7.8, 7.8, 7.8,
+            7.8, 7.8, 7.8, 7.8, 7.8, 7.8, 7.8, 7.8, 7.8, 7.8,
+            7.8
     };
 
-    public static double[] tmftTestMaxThresholds = new double[] {
+    public static double[] tmftTestMaxThresholds = new double[]{
             2.635, 2.505, 3.395, 3.5,
             2.635, 2.505, 3.395, 3.5,
             2.635, 2.505, 3.395, 3.5,
@@ -131,7 +133,7 @@ public class AvhrrConstants {
             18.115, 15.935, 20.395, 16.025
     };
 
-    public static double[] tmftTestMinThresholds = new double[] {
+    public static double[] tmftTestMinThresholds = new double[]{
             0.145, -0.165, -0.075, -0.075,
             0.145, -0.165, -0.075, -0.075,
             0.145, -0.165, -0.075, -0.075,

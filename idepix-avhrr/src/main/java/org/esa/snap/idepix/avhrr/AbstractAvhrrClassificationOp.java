@@ -1,10 +1,11 @@
 package org.esa.snap.idepix.avhrr;
 
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.dem.ElevationModel;
-import org.esa.snap.idepix.core.util.*;
-import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
@@ -13,10 +14,16 @@ import org.esa.snap.core.gpf.pointop.PixelOperator;
 import org.esa.snap.core.gpf.pointop.Sample;
 import org.esa.snap.core.gpf.pointop.WritableSample;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.core.util.IdepixUtils;
+import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
+import org.esa.snap.idepix.core.util.SunPosition;
+import org.esa.snap.idepix.core.util.SunPositionCalculator;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Basic operator for GlobAlbedo pixel classification
@@ -106,16 +113,13 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
             description = " Channel 5 brightness temperature threshold (C)")
     double btCh5Thresh;
 
-    ElevationModel getasseElevationModel;
 
     static final int ALBEDO_TO_RADIANCE = 0;
-    static final int RADIANCE_TO_ALBEDO = 1;
-
-    static final int BT_TO_RADIANCE = 0;
-    static final int RADIANCE_TO_BT = 1;
-
+    private static final int RADIANCE_TO_ALBEDO = 1;
 
     static final String AVHRRAC_NET_NAME = "6x3_114.1.net";
+
+    ElevationModel getasseElevationModel;
 
     ThreadLocal<SchillerNeuralNetWrapper> avhrrNeuralNet;
 
@@ -126,9 +130,30 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 
     String noaaId;
 
+    private static final Map<String, Integer> noaaIdIndexMap = new HashMap<>();
+
+    static {
+        noaaIdIndexMap.put("7", 0);
+        noaaIdIndexMap.put("11", 1);
+        noaaIdIndexMap.put("14", 2);
+        noaaIdIndexMap.put("15", 3);
+        noaaIdIndexMap.put("16", 4);
+        noaaIdIndexMap.put("17", 5);
+        noaaIdIndexMap.put("18", 6);
+        noaaIdIndexMap.put("METOP-A", 7);
+        noaaIdIndexMap.put("19", 8);
+        noaaIdIndexMap.put("METOP-B", 9);
+    }
+
+
 
     public Product getSourceProduct() {
         return sourceProduct;
+    }
+
+    @Override
+    protected void prepareInputs() throws OperatorException {
+        super.prepareInputs();
     }
 
     @Override
@@ -169,9 +194,8 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         return geoPos;
     }
 
-    double calculateReflectancePartChannel3b(double radianceCh3b,double btCh4, double btch5, double sza) {
+    double calculateReflectancePartChannel3b(double radianceCh3b, double btCh4, double btch5, double sza) {
         // follows GK formula
-        int sensorId;
         double frequenz;
         double t_3b_B0;
         double r_3b_em;
@@ -182,55 +206,37 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         // NOAA 11: 180-225	2663.500, 225-275	2668.150, 275-320	2671.400, 270-310	2670.96
         // NOAA 14: 190-230	2638.652, 230-270	2642.807, 270-310	2645.899, 290-330	2647.169
 
-
-
-        switch (noaaId) {
-            case "7":
-                // NOAA 7
-                sensorId = 2;
-                frequenz=AvhrrConstants.FREQUENZ_3B[sensorId];
-                break;
-            case "11":
-                // NOAA 11
-                sensorId = 0;
-                frequenz=AvhrrConstants.FREQUENZ_3B[sensorId];
-                break;
-            case "14":
-                // NOAA 14
-                sensorId = 1;
-                frequenz=AvhrrConstants.FREQUENZ_3B[sensorId];
-                break;
-            default:
-                throw new OperatorException("Cannot parse source product name " + sourceProduct.getName() + " properly.");
-        }
+        final Integer noaaIdMapIndex = noaaIdIndexMap.get(noaaId);
+        frequenz = AvhrrConstants.FREQUENZ_3B[noaaIdMapIndex];
 
         if ((btCh4 - btch5) > 1.) {
-            t_3b_B0 = AvhrrConstants.A0[sensorId]
-                    + AvhrrConstants.B0[sensorId] * btCh4
-                    + AvhrrConstants.C0[sensorId] * (btCh4 - btch5);
+            t_3b_B0 = AvhrrConstants.A0[noaaIdMapIndex]
+                    + AvhrrConstants.B0[noaaIdMapIndex] * btCh4
+                    + AvhrrConstants.C0[noaaIdMapIndex] * (btCh4 - btch5);
         } else {
             t_3b_B0 = btCh4;
         }
 
-        if (btCh4  > 0.) {
+        if (btCh4 > 0.) {
             r_3b_em = (AvhrrConstants.c1 * Math.pow(frequenz, 3))
-                    /(Math.exp((AvhrrConstants.c2 * frequenz)/
-                    ((t_3b_B0- AvhrrConstants.a1_3b[sensorId])/(AvhrrConstants.a2_3b[sensorId])))-1.);
+                    / (Math.exp((AvhrrConstants.c2 * frequenz) /
+                                        ((t_3b_B0 - AvhrrConstants.a1_3b[noaaIdMapIndex]) /
+                                                (AvhrrConstants.a2_3b[noaaIdMapIndex]))) - 1.);
         } else {
             r_3b_em = 0;
         }
 
-        if (btCh4  > 0.) {
-            emissivity_3b = radianceCh3b/r_3b_em;
+        if (btCh4 > 0.) {
+            emissivity_3b = radianceCh3b / r_3b_em;
         } else {
             emissivity_3b = 0;
         }
 
-        if (sza  < 90. && r_3b_em > 0. && radianceCh3b > 0.) {
-            b_0_3b = 1000.0 * AvhrrConstants.SOLAR_3b/ AvhrrConstants.EW_3b[sensorId];
-            result = Math.PI * (radianceCh3b - r_3b_em)/
-                    (b_0_3b * Math.cos(sza * MathUtils.DTOR) * getDistanceCorr() - Math.PI * r_3b_em );
-        } else  if (sza  > 90. && emissivity_3b > 0.) {
+        if (sza < 90. && r_3b_em > 0. && radianceCh3b > 0.) {
+            b_0_3b = 1000.0 * AvhrrConstants.SOLAR_3b / AvhrrConstants.EW_3b[noaaIdMapIndex];
+            result = Math.PI * (radianceCh3b - r_3b_em) /
+                    (b_0_3b * Math.cos(sza * MathUtils.DTOR) * getDistanceCorr() - Math.PI * r_3b_em);
+        } else if (sza > 90. && emissivity_3b > 0.) {
             result = 1. - emissivity_3b;
         } else {
             result = Double.NaN;
@@ -239,14 +245,6 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
     }
 
     double convertBetweenAlbedoAndRadiance(double input, double sza, int mode, int bandIndex) {
-
-//        if (bandIndex < 0 || bandIndex > 2) {
-//            throw new IllegalArgumentException("convertBetweenAlbedoAndRadiance: band index " + bandIndex +
-//                    "invalid - must be 0, 1, or 2.");
-//        } else if (bandIndex == 2 && Integer.parseInt(noaaId) < 15) {
-//            throw new IllegalArgumentException("convertBetweenAlbedoAndRadiance: " +
-//                                                       "band index 2 is only allowed for NOAA >= 15.");
-//        }
 
         // follows GK formula
         float[] integrSolarSpectralIrrad = new float[3];     // F
@@ -350,7 +348,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         //input technical albedo output radiance
         if (mode == ALBEDO_TO_RADIANCE) {
             result = input * conversionFactor;
-        // input radiance output corrected albedo => albedo_corr= technical_albedo/(cos(sun_zenith) * abstandkorrektur)
+            // input radiance output corrected albedo => albedo_corr= technical_albedo/(cos(sun_zenith) * abstandkorrektur)
         } else if (mode == RADIANCE_TO_ALBEDO) {
             result = input / (conversionFactor * Math.cos(sza * MathUtils.DTOR) * getDistanceCorr());
         } else {
@@ -358,6 +356,20 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         }
         return result;
 
+    }
+
+    double computeGetasseAltitude(float x, float y)  {
+        final PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
+        GeoPos geoPos = sourceProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
+        double altitude;
+        try {
+            altitude = getasseElevationModel.getElevation(geoPos);
+        } catch (Exception e) {
+            // todo
+            e.printStackTrace();
+            altitude = 0.0;
+        }
+        return altitude;
     }
 
 
@@ -369,14 +381,4 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 
     abstract String getProductDatestring();
 
-    /**
-     * The Service Provider Interface (SPI) for the operator.
-     * It provides operator meta-data and is a factory for new operator instances.
-     */
-    public static class Spi extends OperatorSpi {
-
-        public Spi() {
-            super(AbstractAvhrrClassificationOp.class);
-        }
-    }
 }

@@ -20,9 +20,9 @@ import java.util.TimeZone;
  */
 public class AvhrrAcUtils {
 
-    public static FlagCoding createAvhrrAcFlagCoding(String flagId) {
+    static FlagCoding createAvhrrAcFlagCoding() {
 
-        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(flagId);
+        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
         // additional flags for AVHRR-AC (tests):
         flagCoding.addFlag("F_REFL1_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 1), null);
@@ -36,7 +36,7 @@ public class AvhrrAcUtils {
     }
 
 
-    public static int setupAvhrrAcClassifBitmask(Product classifProduct) {
+    static void setupAvhrrAcClassifBitmask(Product classifProduct) {
 
         int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
 
@@ -74,12 +74,11 @@ public class AvhrrAcUtils {
         mask = Mask.BandMathsType.create("F_BT5_ABOVE_THRESH", "Brightness temperature Channel 5 above threshold", w, h,
                                          "pixel_classif_flags.F_BT5_ABOVE_THRESH",
                                          IdepixFlagCoding.getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
+        classifProduct.getMaskGroup().add(index, mask);
 
-        return index;
     }
 
-    public static Calendar getProductDateAsCalendar(String ddmmyy) {
+    static Calendar getProductDateAsCalendar(String ddmmyy) {
         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         int year = Integer.parseInt(ddmmyy.substring(4, 6));
         if (year < 50) {
@@ -93,7 +92,7 @@ public class AvhrrAcUtils {
         return calendar;
     }
 
-    public static boolean anglesInvalid(double sza, double vza, double saa, double vaa) {
+    static boolean anglesValid(double sza, double vza, double saa, double vaa) {
         // todo: we have a discontinuity in angle retrieval at sza=90deg. Check!
 //        final double eps = 1.E-6;
 //        final boolean szaInvalid = sza < 90.0 + eps && sza > 90.0 - eps;
@@ -105,10 +104,10 @@ public class AvhrrAcUtils {
         final boolean saaInvalid = Double.isNaN(saa);
         final boolean vaaInvalid = Double.isNaN(vaa);
 
-        return szaInvalid || saaInvalid || vzaInvalid || vaaInvalid;
+        return !szaInvalid && !saaInvalid && !vzaInvalid && !vaaInvalid;
     }
 
-    public static double convertRadianceToBt(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable, double radianceOrig, int ch, float waterFraction) {
+    static double convertRadianceToBt(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable, double radianceOrig, int ch, float waterFraction) {
         final double c1 = 1.1910659E-5;
         final double c2 = 1.438833;
 
@@ -117,160 +116,40 @@ public class AvhrrAcUtils {
         double nuStart = rad2BTTable.getNuMid(ch);
         double tRef = c2 * nuStart / (Math.log(1.0 + c1 * nuStart * nuStart * nuStart / rad));
 
-        double nuFinal = nuStart;
-        switch (noaaId) {
-            case "7":
-                if (tRef < 225.0) {
-                    nuFinal = rad2BTTable.getNuLow(ch);
-                } else if (tRef >= 225.0 && tRef < 275.0) {
-                    if (waterFraction == 100.0f && tRef > 270.0) {
-                        // water
-                        nuFinal = rad2BTTable.getNuHighWater(ch);
-                    } else {
-                        nuFinal = rad2BTTable.getNuMid(ch);
-                    }
-                } else if (tRef >= 275.0 && tRef < 320.0) {
-                    if (waterFraction == 100.0f && tRef < 310.0) {
-                        // water
-                        nuFinal = rad2BTTable.getNuHighWater(ch);
-                    } else {
-                        nuFinal = rad2BTTable.getNuHighLand(ch);
-                    }
-                }
-                break;
-            case "11":
-                if (tRef < 225.0) {
-                    nuFinal = rad2BTTable.getNuLow(ch);
-                } else if (tRef >= 225.0 && tRef < 275.0) {
-                    if (waterFraction == 100.0f && tRef > 270.0) {
-                        // water
-                        nuFinal = rad2BTTable.getNuHighWater(ch);
-                    } else {
-                        nuFinal = rad2BTTable.getNuMid(ch);
-                    }
-                } else if (tRef >= 275.0 && tRef < 320.0) {
-                    if (waterFraction == 100.0f && tRef < 310.0) {
-                        // water
-                        nuFinal = rad2BTTable.getNuHighWater(ch);
-                    } else {
-                        nuFinal = rad2BTTable.getNuHighLand(ch);
-                    }
-                }
-                break;
-            case "14":
-                if (tRef < 230.0) {
-                    nuFinal = rad2BTTable.getNuLow(ch);
-                } else if (tRef >= 230.0 && tRef < 270.0) {
-                    nuFinal = rad2BTTable.getNuMid(ch);
-                } else if (tRef >= 270.0 && tRef < 330.0) {
-                    if (waterFraction == 100.0f && tRef < 310.0) {
-                        // water
-                        nuFinal = rad2BTTable.getNuHighWater(ch);
-                    } else {
-                        nuFinal = rad2BTTable.getNuHighLand(ch);
-                    }
-                }
-                break;
-            default:
-                throw new OperatorException("AVHRR version " + noaaId + " not supported.");
-        }
+        double nuFinal = getNuFinalFromAuxdata(noaaId, rad2BTTable, ch, waterFraction, tRef);
 
         return c2 * nuFinal / (Math.log(1.0 + c1 * nuFinal * nuFinal * nuFinal / rad));
     }
 
 
-    public static double convertBtToRadiance(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable, double bt, int ch, float waterFraction) {
+    static double convertBtToRadiance(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable, double bt, int ch, float waterFraction) {
         final double c1 = 1.1910659E-5;
         final double c2 = 1.438833;
 
-        double tRef = bt;
-        double nuStart = rad2BTTable.getNuMid(ch);
-        double nuFinal = nuStart;
-
-        switch (noaaId) {
-            case "7":
-                if (tRef < 225.0) {
-                    nuFinal = rad2BTTable.getNuLow(ch);
-                } else if (tRef >= 225.0 && tRef < 275.0) {
-                    if (waterFraction == 100.0f && tRef > 270.0) {
-                        // water
-                        nuFinal = rad2BTTable.getNuHighWater(ch);
-                    } else {
-                        nuFinal = rad2BTTable.getNuMid(ch);
-                    }
-                } else if (tRef >= 275.0 && tRef < 320.0) {
-                    if (waterFraction == 100.0f && tRef < 310.0) {
-                        // water
-                        nuFinal = rad2BTTable.getNuHighWater(ch);
-                    } else {
-                        nuFinal = rad2BTTable.getNuHighLand(ch);
-                    }
-                }
-                break;
-            case "11":
-                if (tRef < 225.0) {
-                    nuFinal = rad2BTTable.getNuLow(ch);
-                } else if (tRef >= 225.0 && tRef < 275.0) {
-                    if (waterFraction == 100.0f && tRef > 270.0) {
-                        // water
-                        nuFinal = rad2BTTable.getNuHighWater(ch);
-                    } else {
-                        nuFinal = rad2BTTable.getNuMid(ch);
-                    }
-                } else if (tRef >= 275.0 && tRef < 320.0) {
-                    if (waterFraction == 100.0f && tRef < 310.0) {
-                        // water
-                        nuFinal = rad2BTTable.getNuHighWater(ch);
-                    } else {
-                        nuFinal = rad2BTTable.getNuHighLand(ch);
-                    }
-                }
-                break;
-            case "14":
-                if (tRef < 230.0) {
-                    nuFinal = rad2BTTable.getNuLow(ch);
-                } else if (tRef >= 230.0 && tRef < 270.0) {
-                    nuFinal = rad2BTTable.getNuMid(ch);
-                } else if (tRef >= 270.0 && tRef < 330.0) {
-                    if (waterFraction == 100.0f && tRef < 310.0) {
-                        // water
-                        nuFinal = rad2BTTable.getNuHighWater(ch);
-                    } else {
-                        nuFinal = rad2BTTable.getNuHighLand(ch);
-                    }
-                }
-                break;
-            default:
-                throw new OperatorException("AVHRR version " + noaaId + " not supported.");
-        }
-
+        double nuFinal = getNuFinalFromAuxdata(noaaId, rad2BTTable, ch, waterFraction, bt);
         double rad = (c1 * nuFinal * nuFinal * nuFinal) / (Math.exp(c2 * nuFinal / bt) - 1.0);
 
-        // todo: test the part which should work as in other direction
-
-        //                  A	    B	        D	    rad 	rad_ori
-        //        7	    3	1	    0	        0	    121 	121
-        //              4	0.8978	0.0004819	5.25	121 	121.0598375
-        //              5	0.9368	0.0002425	3.93	121 	121.167507
-        //        11	3	1	    0	        0	    121 	121
-        //              4	0.8412	0.0008739	7.21	121	    120.2490977
-        //              5	0.946	0.0002504	2.92	121 	120.9482344
-        //        14	3	1.00359	0	        -0.0031	121 	120.5702528
-        //              4	0.9237	0.0003833	3.72	121	    120.9020137
-        //              5	0.9619	0.0001742	2	    121	    121.0593963
-
-
-        double radOri1 = Double.NaN;
-        double radOri2 = Double.NaN;
+        double radOri1;
+        double radOri2;
 
         switch (noaaId) {
-            case "11":
             case "7":
+            case "11":
                 radOri1 = rad;
                 radOri2 = radOri1;
                 break;
             case "14":
-                radOri1 = (rad - rad2BTTable.getD(ch)) / rad2BTTable.getA(ch);
+                radOri1 = (rad - rad2BTTable.getD(ch)) / rad2BTTable.getA(ch);  // todo: getB instead of getD ???
+                radOri2 = radOri1;
+                break;
+            case "15":
+            case "16":
+            case "17":
+            case "18":
+            case "METOP-A":
+            case "19":
+            case "METOP-B":
+                radOri1 = (rad - rad2BTTable.getB(ch)) / rad2BTTable.getA(ch);
                 radOri2 = radOri1;
                 break;
             default:
@@ -288,6 +167,59 @@ public class AvhrrAcUtils {
         } else {
             return rad;
         }
+    }
+
+    private static double getNuFinalFromAuxdata(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable,
+                                                int ch, float waterFraction, double tRef) {
+        double nuFinal = rad2BTTable.getNuMid(ch);
+        switch (noaaId) {
+            case "7":
+            case "11":
+                if (tRef < 225.0) {
+                    nuFinal = rad2BTTable.getNuLow(ch);
+                } else if (tRef >= 225.0 && tRef < 275.0) {
+                    if (waterFraction == 100.0f && tRef > 270.0) {
+                        // water
+                        nuFinal = rad2BTTable.getNuHighWater(ch);
+                    } else {
+                        nuFinal = rad2BTTable.getNuMid(ch);
+                    }
+                } else if (tRef >= 275.0 && tRef < 320.0) {
+                    if (waterFraction == 100.0f && tRef < 310.0) {
+                        // water
+                        nuFinal = rad2BTTable.getNuHighWater(ch);
+                    } else {
+                        nuFinal = rad2BTTable.getNuHighLand(ch);
+                    }
+                }
+                break;
+            case "14":
+                if (tRef < 230.0) {
+                    nuFinal = rad2BTTable.getNuLow(ch);
+                } else if (tRef >= 230.0 && tRef < 270.0) {
+                    nuFinal = rad2BTTable.getNuMid(ch);
+                } else if (tRef >= 270.0 && tRef < 330.0) {
+                    if (waterFraction == 100.0f && tRef < 310.0) {
+                        // water
+                        nuFinal = rad2BTTable.getNuHighWater(ch);
+                    } else {
+                        nuFinal = rad2BTTable.getNuHighLand(ch);
+                    }
+                }
+                break;
+            case "15":
+            case "16":
+            case "17":
+            case "18":
+            case "METOP-A":
+            case "19":
+            case "METOP-B":
+                nuFinal = rad2BTTable.getNuMid(ch);
+                break;
+            default:
+                throw new OperatorException("AVHRR version " + noaaId + " not supported.");
+        }
+        return nuFinal;
     }
 
 }

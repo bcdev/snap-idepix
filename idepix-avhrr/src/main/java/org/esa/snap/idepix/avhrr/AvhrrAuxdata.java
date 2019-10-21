@@ -71,7 +71,7 @@ public class AvhrrAuxdata {
 
     public Rad2BTTable createRad2BTTable(String noaaId) throws IOException {
 
-        final String filename = RAD2BT_FILE_NAME_PREFIX + noaaId + ".txt";
+        final String filename = RAD2BT_FILE_NAME_PREFIX + "_" + noaaId + ".txt";
         LOG.info("createRad2BTTable filename: " + filename);
         System.out.println("createRad2BTTable filename = " + filename);
         final InputStream inputStream = getClass().getResourceAsStream(filename);
