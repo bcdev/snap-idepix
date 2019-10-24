@@ -1,1 +1,4 @@
 org.esa.snap.idepix.avhrr.AvhrrOp$Spi
+org.esa.snap.idepix.avhrr.AvhrrPostProcessOp$Spi
+org.esa.snap.idepix.avhrr.AvhrrTimelineClassificationOp$Spi
+org.esa.snap.idepix.avhrr.AvhrrUSGSClassificationOp$Spi
