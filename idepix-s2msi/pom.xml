@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>7.0.0</version>
+        <version>7.0.1</version>
     </parent>
 
     <artifactId>idepix-s2msi</artifactId>
@@ -34,10 +34,15 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from S2-MSI.
     </description>
 
+    <properties>
+        <idepix.version>7.0.1-SNAPSHOT</idepix.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
+            <version>${idepix.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
