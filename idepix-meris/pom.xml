@@ -21,11 +21,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>7.0.0</version>
+        <version>7.0.1</version>
     </parent>
 
     <artifactId>idepix-meris</artifactId>
-    <version>7.0.0</version>
+    <version>7.0.1-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
     
@@ -34,6 +34,7 @@
 
     <properties>
         <netcdf.version>4.3.22</netcdf.version>
+        <idepix.version>7.0.1-SNAPSHOT</idepix.version>
     </properties>
 
     <dependencies>
@@ -84,6 +85,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
+            <version>${idepix.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
