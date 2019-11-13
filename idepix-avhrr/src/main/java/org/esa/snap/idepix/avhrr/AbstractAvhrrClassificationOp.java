@@ -196,7 +196,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 
     double calculateReflectancePartChannel3b(double radianceCh3b, double btCh4, double btch5, double sza) {
         // follows GK formula
-        double frequenz;
+        double wavenumber;
         double t_3b_B0;
         double r_3b_em;
         double b_0_3b;
@@ -207,40 +207,52 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         // NOAA 14: 190-230	2638.652, 230-270	2642.807, 270-310	2645.899, 290-330	2647.169
 
         final Integer noaaIdMapIndex = noaaIdIndexMap.get(noaaId);
-        frequenz = AvhrrConstants.FREQUENZ_3B[noaaIdMapIndex];
+        wavenumber = AvhrrConstants.WAVENUMBER_3b[noaaIdMapIndex];
 
-        if ((btCh4 - btch5) > 1.) {
-            t_3b_B0 = AvhrrConstants.A0[noaaIdMapIndex]
-                    + AvhrrConstants.B0[noaaIdMapIndex] * btCh4
-                    + AvhrrConstants.C0[noaaIdMapIndex] * (btCh4 - btch5);
-        } else {
-            t_3b_B0 = btCh4;
+        switch (noaaId) {
+            case "7":
+            case "11":
+            case "14":
+                if ((btCh4 - btch5) > 1.) {
+                    t_3b_B0 = AvhrrConstants.A0[noaaIdMapIndex]
+                            + AvhrrConstants.B0[noaaIdMapIndex] * btCh4
+                            + AvhrrConstants.C0[noaaIdMapIndex] * (btCh4 - btch5);
+                } else {
+                    t_3b_B0 = btCh4;
+                }
+
+                if (btCh4 > 0.) {
+                    r_3b_em = (AvhrrConstants.c1 * Math.pow(wavenumber, 3))
+                            / (Math.exp((AvhrrConstants.c2 * wavenumber) /
+                                                ((t_3b_B0 - AvhrrConstants.a1_3b[noaaIdMapIndex]) /
+                                                        (AvhrrConstants.a2_3b[noaaIdMapIndex]))) - 1.);
+                } else {
+                    r_3b_em = 0;
+                }
+
+                if (btCh4 > 0.) {
+                    emissivity_3b = radianceCh3b / r_3b_em;
+                } else {
+                    emissivity_3b = 0;
+                }
+
+                if (sza < 90. && r_3b_em > 0. && radianceCh3b > 0.) {
+                    b_0_3b = 1000.0 * AvhrrConstants.SOLAR_3b / AvhrrConstants.EW_3b[noaaIdMapIndex];
+                    result = Math.PI * (radianceCh3b - r_3b_em) /
+                            (b_0_3b * Math.cos(sza * MathUtils.DTOR) * getDistanceCorr() - Math.PI * r_3b_em);
+                } else if (sza > 90. && emissivity_3b > 0.) {
+                    result = 1. - emissivity_3b;
+                } else {
+                    result = Double.NaN;
+                }
+            default:
+                double radCh3_btCh4 = (AvhrrConstants.c1 * Math.pow(wavenumber, 3))
+                        / (Math.exp((AvhrrConstants.c2 * wavenumber) /
+                        (btCh4 * AvhrrConstants.a1_3b[noaaIdMapIndex] - AvhrrConstants.a2_3b[noaaIdMapIndex])) - 1.);
+                b_0_3b = 1000.0 * AvhrrConstants.SOLAR_3b / AvhrrConstants.EW_3b[noaaIdMapIndex];
+                result = (radianceCh3b - radCh3_btCh4)/(b_0_3b * Math.cos(sza * MathUtils.DTOR) - radCh3_btCh4);
         }
 
-        if (btCh4 > 0.) {
-            r_3b_em = (AvhrrConstants.c1 * Math.pow(frequenz, 3))
-                    / (Math.exp((AvhrrConstants.c2 * frequenz) /
-                                        ((t_3b_B0 - AvhrrConstants.a1_3b[noaaIdMapIndex]) /
-                                                (AvhrrConstants.a2_3b[noaaIdMapIndex]))) - 1.);
-        } else {
-            r_3b_em = 0;
-        }
-
-        if (btCh4 > 0.) {
-            emissivity_3b = radianceCh3b / r_3b_em;
-        } else {
-            emissivity_3b = 0;
-        }
-
-        if (sza < 90. && r_3b_em > 0. && radianceCh3b > 0.) {
-            b_0_3b = 1000.0 * AvhrrConstants.SOLAR_3b / AvhrrConstants.EW_3b[noaaIdMapIndex];
-            result = Math.PI * (radianceCh3b - r_3b_em) /
-                    (b_0_3b * Math.cos(sza * MathUtils.DTOR) * getDistanceCorr() - Math.PI * r_3b_em);
-        } else if (sza > 90. && emissivity_3b > 0.) {
-            result = 1. - emissivity_3b;
-        } else {
-            result = Double.NaN;
-        }
         return result;
     }
 
