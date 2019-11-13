@@ -46,8 +46,9 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
     @TargetProduct(description = "The target product.")
     Product targetProduct;
 
-    private String sensor;
+    private  String sensor;
     private boolean isAvhrrB3aInactive;
+    private Avhrr3Algorithm algorithm;
 
 
     @Override
@@ -88,6 +89,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
     @Override
     void runAvhrrAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         AvhrrAlgorithm avhrrAlgorithm = new AvhrrAlgorithm();
+        Avhrr3Algorithm avhrr3Algorithm = new Avhrr3Algorithm();
 
         double sza = sourceSamples[AvhrrConstants.SRC_TIMELINE_SZA].getDouble();
         double vza = sourceSamples[AvhrrConstants.SRC_TIMELINE_VZA].getDouble();
@@ -124,9 +126,6 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
                 waterFraction = sourceSamples[AvhrrConstants.SRC_TIMELINE_WATERFRACTION].getFloat();
             }
 
-            avhrrAlgorithm.setLatitude(getGeoPos(x, y).lat);
-            avhrrAlgorithm.setLongitude(getGeoPos(x, y).lon);
-
             avhrrRadiance[0] = convertBetweenAlbedoAndRadiance(albedo1, sza, ALBEDO_TO_RADIANCE, 0);
             avhrrRadiance[1] = convertBetweenAlbedoAndRadiance(albedo2, sza, ALBEDO_TO_RADIANCE, 1);
 
@@ -137,17 +136,23 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
                 final double albedo3b = calculateReflectancePartChannel3b(avhrrRadiance[2], bt4, bt5, sza);
                 avhrrAlgorithm.setReflCh3(albedo3b); // on [0,1]
                 avhrrAlgorithm.setElevation(altitude);
+                avhrrAlgorithm.setLatitude(getGeoPos(x, y).lat);
+                avhrrAlgorithm.setLongitude(getGeoPos(x, y).lon);
                 ndsi = (albedo3b - albedo1Norm) / (albedo3b + albedo1Norm);
+                avhrrAlgorithm.setBtCh3(bt3);
             } else {
                 final double albedo3a = sourceSamples[AvhrrConstants.SRC_TIMELINE_ALBEDO_3a].getDouble();
                 avhrrRadiance[2] = convertBetweenAlbedoAndRadiance(albedo3a, sza, ALBEDO_TO_RADIANCE, 2);
                 final double albedo3Norm = albedo3a / d;
                 final double albedo3Norm100 = albedo3Norm / 100.0;
-                avhrrAlgorithm.setReflCh3(albedo3Norm100); // on [0,1]
+                avhrr3Algorithm.setReflCh3(albedo3Norm100); // on [0,1]
+                avhrr3Algorithm.setLatitude(getGeoPos(x, y).lat);
+                avhrr3Algorithm.setLongitude(getGeoPos(x, y).lon);
                 ndsi = (albedo3Norm100 - albedo1Norm) / (albedo3Norm100 + albedo1Norm);
             }
-            avhrrAlgorithm.setNdsi(ndsi);
 
+            avhrrAlgorithm.setNdsi(ndsi);
+            avhrr3Algorithm.setNdsi(ndsi);
             avhrrRadiance[3] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt4, 4, waterFraction);
             avhrrRadiance[4] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt5, 5, waterFraction);
 
@@ -160,28 +165,37 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
             inputVector[4] = Math.sqrt(avhrrRadiance[1]);
             inputVector[5] = Math.sqrt(avhrrRadiance[3]);
             inputVector[6] = Math.sqrt(avhrrRadiance[4]);
-            avhrrAlgorithm.setRadiance(avhrrRadiance);
-            avhrrAlgorithm.setWaterFraction(waterFraction);
 
             double[] nnOutput = nnWrapper.getNeuralNet().calc(inputVector);
 
-            avhrrAlgorithm.setNnOutput(nnOutput);
-            avhrrAlgorithm.setAmbiguousSureSeparationValue(avhrrNNCloudAmbiguousSureSeparationValue);
-            avhrrAlgorithm.setSureSnowSeparationValue(avhrrNNCloudSureSnowSeparationValue);
+            if (sensor.equals("AVHRR/2") || isAvhrrB3aInactive) {
+                avhrrAlgorithm.setRadiance(avhrrRadiance);
+                avhrrAlgorithm.setWaterFraction(waterFraction);
+                avhrrAlgorithm.setNnOutput(nnOutput);
+                avhrrAlgorithm.setAmbiguousSureSeparationValue(avhrrNNCloudAmbiguousSureSeparationValue);
+                avhrrAlgorithm.setSureSnowSeparationValue(avhrrNNCloudSureSnowSeparationValue);
 
-            avhrrAlgorithm.setReflCh1(albedo1Norm / 100.0); // on [0,1]        --> put here albedo_norm now!!
-            avhrrAlgorithm.setReflCh2(albedo2Norm / 100.0); // on [0,1]
+                avhrrAlgorithm.setReflCh1(albedo1Norm / 100.0); // on [0,1]        --> put here albedo_norm now!!
+                avhrrAlgorithm.setReflCh2(albedo2Norm / 100.0); // on [0,1]
+                avhrrAlgorithm.setBtCh4(bt4);
+                avhrrAlgorithm.setBtCh5(bt5);
+                avhrrAlgorithm.setElevation(altitude);
+                setClassifFlag(targetSamples, avhrrAlgorithm);
+            } else {
+                avhrr3Algorithm.setRadiance(avhrrRadiance);
+                avhrr3Algorithm.setWaterFraction(waterFraction);
+                avhrr3Algorithm.setNnOutput(nnOutput);
+                avhrr3Algorithm.setAmbiguousSureSeparationValue(avhrrNNCloudAmbiguousSureSeparationValue);
+                avhrr3Algorithm.setSureSnowSeparationValue(avhrrNNCloudSureSnowSeparationValue);
 
-//            avhrrAlgorithm.setBtCh3(bt3);
-            avhrrAlgorithm.setBtCh4(bt4);
-            avhrrAlgorithm.setBtCh5(bt5);
-            avhrrAlgorithm.setElevation(altitude);
+                avhrr3Algorithm.setReflCh1(albedo1Norm / 100.0); // on [0,1]        --> put here albedo_norm now!!
+                avhrr3Algorithm.setReflCh2(albedo2Norm / 100.0); // on [0,1]
 
-
-            final double albedo3 = calculateReflectancePartChannel3b(avhrrRadiance[2], bt4, bt5, sza);
-            avhrrAlgorithm.setReflCh3(albedo3); // on [0,1]
-
-            setClassifFlag(targetSamples, avhrrAlgorithm);
+                avhrr3Algorithm.setBtCh4(bt4);
+                avhrr3Algorithm.setBtCh5(bt5);
+                avhrr3Algorithm.setElevation(altitude);
+                setClassifFlag(targetSamples, avhrr3Algorithm);
+            }
         } else {
             targetSamplesIndex = 0;
             targetSamples[targetSamplesIndex].set(IdepixConstants.IDEPIX_INVALID, true);
@@ -190,6 +204,20 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
 
     @Override
     void setClassifFlag(WritableSample[] targetSamples, AvhrrAlgorithm algorithm) {
+        targetSamples[0].set(IdepixConstants.IDEPIX_INVALID, algorithm.isInvalid());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD, algorithm.isCloud());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_SURE, algorithm.isCloudSure());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_BUFFER, algorithm.isCloudBuffer());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_SHADOW, algorithm.isCloudShadow());
+        targetSamples[0].set(IdepixConstants.IDEPIX_SNOW_ICE, algorithm.isSnowIce());
+        targetSamples[0].set(IdepixConstants.IDEPIX_COASTLINE, algorithm.isCoastline());
+        targetSamples[0].set(IdepixConstants.IDEPIX_LAND, algorithm.isLand());
+    }
+    //TODO
+    //@Override
+    void setClassifFlag(WritableSample[] targetSamples, Avhrr3Algorithm algorithm) {
+        this.algorithm = algorithm;
         targetSamples[0].set(IdepixConstants.IDEPIX_INVALID, algorithm.isInvalid());
         targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD, algorithm.isCloud());
         targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());

@@ -76,8 +76,8 @@ public class AvhrrConstants {
 
     // values of the following constants are for NOAA7, 11, 14, 15, 16, 17, 18, METOP-A, 19, METOP-B
     // todo: GK to provide correct values for NOAA > 15. For the moment we take the same as for NOAA-14
-    static final double[] FREQUENZ_3B = {3.743, 3.743, 3.779, 3.779, 3.779, 3.779, 3.779, 3.779, 3.779, 3.779};
-    static final double[] EW_3b = {278.85792, 278.85792, 284.69366, 284.69366, 284.69366, 284.69366, 284.69366, 284.69366, 284.69366};
+    static final double[] FREQUENZ_3B = {3.743, 3.743, 3.779, 3.709, 3.704, 3.746, 3.760, 3.722, 3.745, 3.725};
+    static final double[] EW_3b = {278.85792, 278.85792, 284.69366, 284.69366, 284.69366, 284.69366, 284.69366, 284.69366, 284.69366, 284.69366};
     static final double[] A0 = {6.34384, 6.34384, 4.00162, 4.00162, 4.00162, 4.00162, 4.00162, 4.00162, 4.00162, 4.00162};
     static final double[] B0 = {2.68468, 2.68468, 0.98107, 0.98107, 0.98107, 0.98107, 0.98107, 0.98107, 0.98107, 0.98107};
     static final double[] C0 = {-1.70931, -1.70931, 1.9789, 1.9789, 1.9789, 1.9789, 1.9789, 1.9789, 1.9789, 1.9789};
