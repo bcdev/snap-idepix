@@ -139,9 +139,6 @@ public class AvhrrAcUtils {
         if (ch == 3) {
             switch (noaaId) {
                 case "7":
-                    radOri1 = rad;
-                    radOri2 = radOri1;
-                    break;
                 case "11":
                     radOri1 = rad;
                     radOri2 = radOri1;
