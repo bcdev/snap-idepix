@@ -153,6 +153,12 @@ public class AvhrrAuxdata {
 
     /**
      *  Class providing a radiance-to-BT coefficients table
+     *
+     *  Walton, C. C., Sullivan, J. T., Rao, C. R. N., & Weinreb, M. P. (1998). Corrections for detector nonlinearities
+     *  and calibration inconsistencies of the infrared channels of the advanced very high resolution radiometer.
+     *  Journal of Geophysical Research: Oceans, 103(C2), 3323–3337. https://doi.org/10.1029/97JC02018
+     *
+     *  KLM + PODD user Guide
      */
     public class Rad2BTTable {
         private final int OFFSET = 3;

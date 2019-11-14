@@ -1,7 +1,9 @@
 package org.esa.snap.idepix.avhrr;
 
-import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.dataop.dem.ElevationModel;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.dem.ElevationModelRegistry;
 import org.esa.snap.core.dataop.resamp.Resampling;
@@ -48,7 +50,6 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
 
     private  String sensor;
     private boolean isAvhrrB3aInactive;
-    private Avhrr3Algorithm algorithm;
 
 
     @Override
@@ -214,10 +215,9 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         targetSamples[0].set(IdepixConstants.IDEPIX_COASTLINE, algorithm.isCoastline());
         targetSamples[0].set(IdepixConstants.IDEPIX_LAND, algorithm.isLand());
     }
+
     //TODO
-    //@Override
     void setClassifFlag(WritableSample[] targetSamples, Avhrr3Algorithm algorithm) {
-        this.algorithm = algorithm;
         targetSamples[0].set(IdepixConstants.IDEPIX_INVALID, algorithm.isInvalid());
         targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD, algorithm.isCloud());
         targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());

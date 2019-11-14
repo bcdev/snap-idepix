@@ -47,33 +47,33 @@ public class AvhrrAcUtils {
 
         // tests:
         mask = Mask.BandMathsType.create("F_REFL1_ABOVE_THRESH", "TOA reflectance Channel 1 above threshold", w, h,
-                                         "pixel_classif_flags.F_REFL1_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+                "pixel_classif_flags.F_REFL1_ABOVE_THRESH",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_REFL2_ABOVE_THRESH", "TOA reflectance Channel 2 above threshold", w, h,
-                                         "pixel_classif_flags.F_REFL2_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+                "pixel_classif_flags.F_REFL2_ABOVE_THRESH",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_RATIO_REFL21_ABOVE_THRESH", "Ratio of TOA reflectance Channel 2/1 above threshold", w, h,
-                                         "pixel_classif_flags.F_RATIO_REFL21_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+                "pixel_classif_flags.F_RATIO_REFL21_ABOVE_THRESH",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_RATIO_REFL31_ABOVE_THRESH", "Ratio of TOA reflectance Channel 3/1 above threshold", w, h,
-                                         "pixel_classif_flags.F_RATIO_REFL31_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+                "pixel_classif_flags.F_RATIO_REFL31_ABOVE_THRESH",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_BT4_ABOVE_THRESH", "Brightness temperature Channel 4 above threshold", w, h,
-                                         "pixel_classif_flags.F_BT4_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+                "pixel_classif_flags.F_BT4_ABOVE_THRESH",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_BT5_ABOVE_THRESH", "Brightness temperature Channel 5 above threshold", w, h,
-                                         "pixel_classif_flags.F_BT5_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+                "pixel_classif_flags.F_BT5_ABOVE_THRESH",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index, mask);
 
     }
@@ -126,42 +126,52 @@ public class AvhrrAcUtils {
         final double c1 = 1.1910659E-5;
         final double c2 = 1.438833;
 
+        if (ch < 3 || ch > 5) {
+            throw new IllegalArgumentException(String.format("Channel '%d' not supported. Only channels 3,4 and 5 are supported, .", ch));
+        }
+
         double nuFinal = getNuFinalFromAuxdata(noaaId, rad2BTTable, ch, waterFraction, bt);
         double rad = (c1 * nuFinal * nuFinal * nuFinal) / (Math.exp(c2 * nuFinal / bt) - 1.0);
 
         double radOri1;
         double radOri2;
 
-        switch (noaaId) {
-            case "7":
-            case "11":
-                radOri1 = rad;
-                radOri2 = radOri1;
-                break;
-            case "14":
-                radOri1 = (rad - rad2BTTable.getD(ch)) / rad2BTTable.getA(ch);  // todo: getB instead of getD ???
-                radOri2 = radOri1;
-                break;
-            case "15":
-            case "16":
-            case "17":
-            case "18":
-            case "METOP-A":
-            case "19":
-            case "METOP-B":
-                radOri1 = (rad - rad2BTTable.getB(ch)) / rad2BTTable.getA(ch);
-                radOri2 = radOri1;
-                break;
-            default:
-                throw new OperatorException("AVHRR version " + noaaId + " not supported.");
+        if (ch == 3) {
+            switch (noaaId) {
+                case "7":
+                    radOri1 = rad;
+                    radOri2 = radOri1;
+                    break;
+                case "11":
+                    radOri1 = rad;
+                    radOri2 = radOri1;
+                    break;
+                case "14":
+                    radOri1 = (rad - rad2BTTable.getD(ch)) / rad2BTTable.getA(ch);
+                    radOri2 = radOri1;
+                    break;
+                case "15":
+                case "16":
+                case "17":
+                case "18":
+                case "METOP-A":
+                case "19":
+                case "METOP-B":
+                    double pHalf = rad2BTTable.getA(ch) / rad2BTTable.getB(ch) / 2.0;
+                    double q = (-rad) / rad2BTTable.getB(ch);
+                    radOri1 = -pHalf - Math.sqrt((pHalf * pHalf) - q);
+                    radOri2 = -pHalf + Math.sqrt((pHalf * pHalf) - q);
+                    break;
+                default:
+                    throw new OperatorException("AVHRR version " + noaaId + " not supported.");
+            }
+        } else {
+                    double pHalf = rad2BTTable.getA(ch) / rad2BTTable.getB(ch) / 2.0;
+                    double q = (rad2BTTable.getD(ch) - rad) / rad2BTTable.getB(ch);
+                    radOri1 = -pHalf - Math.sqrt((pHalf * pHalf) - q);
+                    radOri2 = -pHalf + Math.sqrt((pHalf * pHalf) - q);
         }
 
-        if (ch > 3) {
-            double pHalf = rad2BTTable.getA(ch) / rad2BTTable.getB(ch) / 2.0;
-            double q = (rad2BTTable.getD(ch) - rad) / rad2BTTable.getB(ch);
-            radOri1 = -pHalf - Math.sqrt((pHalf * pHalf) - q);
-            radOri2 = -pHalf + Math.sqrt((pHalf * pHalf) - q);
-        }
         if (Math.max(radOri1, radOri2) >= 0) {
             return Math.max(radOri1, radOri2);
         } else {
