@@ -43,8 +43,9 @@ public class Avhrr3Algorithm implements AvhrrPixelProperties {
     public boolean isSnowIce() {
 
 
-//        final double ndsi = (reflCh3 - reflCh1) / (reflCh3 + reflCh1);
-        boolean isSnowIceOne = (notIsCloudTgct() && ndsi > 0.7) || (reflCh1 > 1.1 && ndsi > 0.4);
+//        final double ndsi = (reflCh1 - reflCh3) / (reflCh3 + reflCh1);
+        boolean isSnowIceOne = (notIsCloudTgct() && ndsi > 0.5) && (reflCh1 > 0.45 && ndsi > 0.4);
+
 
         if (!isSnowIceOne && nnOutput != null) {
             isSnowIceOne = nnOutput[0] > avhrracSchillerNNCloudSureSnowSeparationValue && nnOutput[0] <= 5.0;
@@ -80,7 +81,7 @@ public class Avhrr3Algorithm implements AvhrrPixelProperties {
             isSnowIceTwo = isLand() && -15.0 < btCh4Celsius && btCh4Celsius < 1.35 && reflCh1 > 0.4 &&
                     ratio21 > 0.8 && ratio21 < 1.15 && reflCh3 < 0.054 && elevation > 1000.0;
         }
-        return (isSnowIceOne && isSnowIceTwo);
+        return (isSnowIceOne || isSnowIceTwo);
     }
 
     @Override
@@ -106,7 +107,7 @@ public class Avhrr3Algorithm implements AvhrrPixelProperties {
         }
 
         // Test (GK/JM 20151029): use 'old' snow/ice test as additional cloud criterion:
-        boolean isCloudFromOldSnowIce = notIsCloudTgct() && ndsi > 0.8;
+        boolean isCloudFromOldSnowIce = notIsCloudTgct() && ndsi > 0.8 && isLand();
         // for AVHRR, nnOutput has one element:
         // nnOutput[0] =
         // 0 < x < 2.15 : clear

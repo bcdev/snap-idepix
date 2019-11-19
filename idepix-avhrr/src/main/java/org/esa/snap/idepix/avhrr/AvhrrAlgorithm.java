@@ -45,23 +45,14 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
     @Override
     public boolean isSnowIce() {
 
-//        boolean isSnowIce = isCloudSureSchiller() && emissivity3b < AvhrrAcConstants.EMISSIVITY_THRESH;
-        // todo: also consider NDSI?!
-        boolean isSnowIce = !isCloudTgct() && ndsi > 0.8;
-
-        // for AVHRR, nnOutput has one element:
-        // nnOutput[0] =
-        // 0 < x < 2.15 : clear
-        // 2.15 < x < 3.45 : noncl / semitransparent cloud --> cloud ambiguous
-        // 3.45 < x < 4.45 : cloudy --> cloud sure
-        // 4.45 < x : clear snow/ice
-        if (!isSnowIce && nnOutput != null) {
-            // separation numbers from HS, 20140923
-            isSnowIce = nnOutput[0] > avhrracSchillerNNCloudSureSnowSeparationValue && nnOutput[0] <= 5.0;
-        }
+        // isSnowIce
+        boolean isSnowIceOne;
+        isSnowIceOne = false;
+        isSnowIceOne = notIsCloudTgct() && ndsi > -0.2 && btCh3 - btCh4 < 25;
 
         // forget all the old stuff, completely new test now (GK/JM, 20151028):
-        isSnowIce = false;
+        boolean isSnowIceTwo;
+        isSnowIceTwo = false;
         final double btCh3Celsius = btCh3 - 273.15;
         final double btCh4Celsius = btCh4 - 273.15;
         final double btCh5Celsius = btCh5 - 273.15;
@@ -86,21 +77,21 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
 
             final boolean snowIceCondition = (cond1 || cond2 ||cond3 || cond4);
 
-            isSnowIce = isLand() && snowIceCondition;
+            isSnowIceTwo = isLand() && snowIceCondition;
 
         } else if (latitude < -62.0) {
 
-            isSnowIce = -27.0 < btCh4Celsius && btCh4Celsius < 1.35 && reflCh1 > 0.75 &&
+            isSnowIceTwo = -27.0 < btCh4Celsius && btCh4Celsius < 1.35 && reflCh1 > 0.75 &&
                     ratio21 > 0.85 && ratio21 < 1.15 && reflCh3 < 0.03 &&
                     diffbt53 > -13.0 || (reflCh1-reflCh3)/(reflCh2+reflCh3) > 1.05 && reflCh1 > 0.55;
 
         } else {
 
-            isSnowIce = isLand() && -15.0 < btCh4Celsius && btCh4Celsius < 1.35 && reflCh1 > 0.4 &&
+            isSnowIceTwo = isLand() && -15.0 < btCh4Celsius && btCh4Celsius < 1.35 && reflCh1 > 0.4 &&
                     ratio21 > 0.8 && ratio21 < 1.15 && reflCh3 < 0.054 && diffbt53 > -14.0 && elevation > 1000.0;
         }
 
-        return isSnowIce;
+        return isSnowIceOne || isSnowIceTwo;
     }
 
     @Override
@@ -125,7 +116,8 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
         }
 
         // Test (GK/JM 20151029): use 'old' snow/ice test as additional cloud criterion:
-        boolean isCloudFromOldSnowIce = !isCloudTgct() && ndsi > 0.8;
+        boolean isCloudFromOldSnowIce;
+        isCloudFromOldSnowIce = (isCloudTgct() && ndsi < 0.2);
         // for AVHRR, nnOutput has one element:
         // nnOutput[0] =
         // 0 < x < 2.15 : clear
@@ -141,7 +133,8 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
         }
 
         return isResidualCloud();
-        //        return isCloudSureSchiller || isCloudAdditional;
+
+//        return isCloudSureSchiller || isCloudAdditional;
 //        return isCloudSureSchiller || isCloudAdditional || isCloudFromOldSnowIce || isResidualCloud;
     }
 
@@ -237,6 +230,9 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
         return btCh4 < AvhrrConstants.TGCT_THRESH;
     }
 
+    private boolean notIsCloudTgct() {
+        return btCh4 >= AvhrrConstants.TGCT_THRESH;
+    }
     private double getTmftMinThreshold(double bt34) {
         int tmftMinThresholdIndexRow = (int) ((btCh4 - 190.0) / 10.0);
         tmftMinThresholdIndexRow = Math.max(0, tmftMinThresholdIndexRow);
