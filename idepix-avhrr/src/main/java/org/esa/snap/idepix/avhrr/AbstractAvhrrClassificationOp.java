@@ -201,7 +201,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
         double r_3b_em;
         double b_0_3b;
         double emissivity_3b;
-        double result;
+        double result = Double.NaN;;
         // different central wave numbers for AVHRR Channel3b correspond to the temperature ranges & to NOAA11 and NOAA14
         // NOAA 11: 180-225	2663.500, 225-275	2668.150, 275-320	2671.400, 270-310	2670.96
         // NOAA 14: 190-230	2638.652, 230-270	2642.807, 270-310	2645.899, 290-330	2647.169
@@ -242,18 +242,16 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
                             (b_0_3b * Math.cos(sza * MathUtils.DTOR) * getDistanceCorr() - Math.PI * r_3b_em);
                 } else if (sza > 90. && emissivity_3b > 0.) {
                     result = 1. - emissivity_3b;
-                } else {
-                    result = Double.NaN;
                 }
+                return result;
             default:
                 double radCh3_btCh4 = (AvhrrConstants.c1 * Math.pow(wavenumber, 3))
                         / (Math.exp((AvhrrConstants.c2 * wavenumber) /
                         (btCh4 * AvhrrConstants.a1_3b[noaaIdMapIndex] - AvhrrConstants.a2_3b[noaaIdMapIndex])) - 1.);
                 b_0_3b = 1000.0 * AvhrrConstants.SOLAR_3b / AvhrrConstants.EW_3b[noaaIdMapIndex];
                 result = (radianceCh3b - radCh3_btCh4)/(b_0_3b * Math.cos(sza * MathUtils.DTOR) - radCh3_btCh4);
+                return result;
         }
-
-        return result;
     }
 
     double convertBetweenAlbedoAndRadiance(double input, double sza, int mode, int bandIndex) {
