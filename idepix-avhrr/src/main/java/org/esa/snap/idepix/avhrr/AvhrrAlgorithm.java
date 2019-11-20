@@ -48,7 +48,7 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
         // isSnowIce
         boolean isSnowIceOne;
         isSnowIceOne = false;
-        isSnowIceOne = notIsCloudTgct() && ndsi > -0.2 && btCh3 - btCh4 < 25;
+        isSnowIceOne = notIsCloudTgct() && ndsi > -0.2;
 
         // forget all the old stuff, completely new test now (GK/JM, 20151028):
         boolean isSnowIceTwo;
@@ -91,7 +91,7 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
                     ratio21 > 0.8 && ratio21 < 1.15 && reflCh3 < 0.054 && diffbt53 > -14.0 && elevation > 1000.0;
         }
 
-        return isSnowIceOne || isSnowIceTwo;
+        return isSnowIceOne && isSnowIceTwo;
     }
 
     @Override
