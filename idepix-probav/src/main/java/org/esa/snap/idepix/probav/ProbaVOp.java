@@ -121,6 +121,7 @@ public class ProbaVOp extends BasisOp {
         computePostProcessProduct();
 
         Product targetProduct = IdepixIO.cloneProduct(cloudProduct, true);
+//        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 16); // test!
 
         Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
