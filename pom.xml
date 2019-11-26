@@ -22,16 +22,15 @@
     <name>snap-idepix</name>
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-idepix</artifactId>
-    <version>7.0.0-SNAPSHOT</version>
+    <version>7.0.1</version>
     <packaging>pom</packaging>
 
     <description>SNAP IdePix Parent project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>7.0.0-SNAPSHOT</snap.version>
-        <s3tbx.version>7.0.0-SNAPSHOT</s3tbx.version>
-        <idepix.version>7.0.0-SNAPSHOT</idepix.version>
+        <snap.version>7.0.0</snap.version>
+        <s3tbx.version>7.0.0</s3tbx.version>
         <netbeans.version>RELEASE82</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
     </properties>
@@ -39,6 +38,8 @@
     <modules>
         <module>idepix-core</module>
         <module>idepix-avhrr</module>
+        <module>idepix-probav</module>
+        <module>idepix-spotvgt</module>
     </modules>
 
     <dependencyManagement>
@@ -109,11 +110,6 @@
                 <version>${s3tbx.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.esa.snap</groupId>
-                <artifactId>idepix-core</artifactId>
-                <version>${idepix.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.netbeans.api</groupId>
                 <artifactId>org-netbeans-api-progress-nb</artifactId>
                 <version>${netbeans.version}</version>
@@ -150,8 +146,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-
         </plugins>
+        
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -228,15 +224,15 @@
         </pluginManagement>
     </build>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>LATEST</version>
-            </plugin>
-        </plugins>
-    </reporting>
+    <!--<reporting>-->
+        <!--<plugins>-->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-surefire-report-plugin</artifactId>-->
+                <!--<version>LATEST</version>-->
+            <!--</plugin>-->
+        <!--</plugins>-->
+    <!--</reporting>-->
 
     <distributionManagement>
         <repository>
@@ -258,6 +254,19 @@
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
             <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>bc-nexus-repo</id>
+            <name>Public Nexus Repository for BC</name>
+            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
             <releases>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>

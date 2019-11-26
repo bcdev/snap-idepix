@@ -1,11 +1,11 @@
 package org.esa.snap.idepix.core.util;
 
-import org.esa.snap.idepix.core.AlgorithmSelector;
-import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
+import org.esa.snap.idepix.core.AlgorithmSelector;
+import org.esa.snap.idepix.core.IdepixConstants;
 
 /**
  * @author Olaf Danne
@@ -30,24 +30,6 @@ public class IdepixIO {
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
         return targetProduct;
-    }
-
-    /**
-     * Copies the tie point data.
-     */
-    private static void copyTiePoints(Product sourceProduct,
-                                     Product targetProduct, boolean copyAllTiePoints) {
-        if (copyAllTiePoints) {
-            // copy all tie point grids to output product
-            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        } else {
-            for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
-                TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
-                if (srcTPG.getName().equals("latitude") || srcTPG.getName().equals("longitude")) {
-                    targetProduct.addTiePointGrid(srcTPG.cloneTiePointGrid());
-                }
-            }
-        }
     }
 
     /**
@@ -105,20 +87,94 @@ public class IdepixIO {
         return clonedProduct;
     }
 
+    public static boolean validateInputProduct(Product inputProduct, AlgorithmSelector algorithm) {
+        return isInputValid(inputProduct) && isInputConsistentWithAlgorithm(inputProduct, algorithm);
+    }
+
+    public static boolean areAllReflectancesValid(float[] reflectance) {
+        for (float aReflectance : reflectance) {
+            if (Float.isNaN(aReflectance) || aReflectance <= 0.0f) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean areAllReflectancesValid(double[] reflectance) {
+        for (double aReflectance : reflectance) {
+            if (Double.isNaN(aReflectance) || aReflectance <= 0.0f) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void setNewBandProperties(Band band, String description, String unit, double noDataValue,
+                                            boolean useNoDataValue) {
+        band.setDescription(description);
+        band.setUnit(unit);
+        band.setNoDataValue(noDataValue);
+        band.setNoDataValueUsed(useNoDataValue);
+    }
+
+    public static void copySourceBands(Product sourceProduct, Product targetProduct, String bandNameSubstring) {
+        for (String bandname : sourceProduct.getBandNames()) {
+            if (bandname.contains(bandNameSubstring) && !targetProduct.containsBand(bandname)) {
+                ProductUtils.copyBand(bandname, sourceProduct, targetProduct, true);
+            }
+        }
+    }
+
+    public static void addRadianceBands(Product l1bProduct, Product targetProduct, String[] bandsToCopy) {
+        for (String bandname : bandsToCopy) {
+            if (!targetProduct.containsBand(bandname) && bandname.contains("radiance")) {
+                ProductUtils.copyBand(bandname, l1bProduct, targetProduct, true);
+            }
+        }
+    }
+
+    /// END of public ///
+
+    static boolean isValidLandsat8Product(Product product) {
+        return product.containsBand("coastal_aerosol") &&
+                product.containsBand("blue") &&
+                product.containsBand("green") &&
+                product.containsBand("red") &&
+                product.containsBand("near_infrared") &&
+                product.containsBand("swir_1") &&
+                product.containsBand("swir_2") &&
+                product.containsBand("panchromatic") &&
+                product.containsBand("cirrus") &&
+                product.containsBand("thermal_infrared_(tirs)_1") &&
+                product.containsBand("thermal_infrared_(tirs)_2");
+
+    }
+
+    private static void copyTiePoints(Product sourceProduct,
+                                      Product targetProduct, boolean copyAllTiePoints) {
+        if (copyAllTiePoints) {
+            // copy all tie point grids to output product
+            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+        } else {
+            for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
+                TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
+                if (srcTPG.getName().equals("latitude") || srcTPG.getName().equals("longitude")) {
+                    targetProduct.addTiePointGrid(srcTPG.cloneTiePointGrid());
+                }
+            }
+        }
+    }
+
     private static boolean isIdepixSpectralBand(Band b) {
         return b.getName().startsWith("radiance") || b.getName().startsWith("refl") ||
                 b.getName().startsWith("brr") || b.getName().startsWith("rho_toa");
-    }
-
-
-    public static boolean validateInputProduct(Product inputProduct, AlgorithmSelector algorithm) {
-        return isInputValid(inputProduct) && isInputConsistentWithAlgorithm(inputProduct, algorithm);
     }
 
     private static boolean isInputValid(Product inputProduct) {
         if (!isValidAvhrrProduct(inputProduct) &&
                 !isValidLandsat8Product(inputProduct) &&
                 !isValidProbavProduct(inputProduct) &&
+                !isValidAvhrrProduct(inputProduct) &&
                 !isValidModisProduct(inputProduct) &&
                 !isValidSeawifsProduct(inputProduct) &&
                 !isValidViirsProduct(inputProduct) &&
@@ -127,8 +183,8 @@ public class IdepixIO {
                 !isValidOlciSlstrSynergyProduct(inputProduct) &&
                 !isValidVgtProduct(inputProduct)) {
             IdepixUtils.logErrorMessage("Input sensor must be either Landsat-8, MERIS, AATSR, AVHRR, " +
-                    "OLCI, colocated OLCI/SLSTR, " +
-                    "MODIS/SeaWiFS, PROBA-V or VGT!");
+                                                "OLCI, colocated OLCI/SLSTR, " +
+                                                "MODIS/SeaWiFS, PROBA-V or VGT!");
         }
         return true;
     }
@@ -166,26 +222,9 @@ public class IdepixIO {
     }
 
     private static boolean isValidAvhrrProduct(Product product) {
-//        return product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_PRODUCT_TYPE) ||
-//                product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_USGS_PRODUCT_TYPE);
-        return (product.getDescription() != null &&
-                product.getDescription().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_TIMELINE_DESCRIPTION)) ||
+        return product.getName().contains("C3S-L2A-FCDR-AVHRR_NOAA") ||
+                product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_PRODUCT_TYPE) ||
                 product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_USGS_PRODUCT_TYPE);
-    }
-
-    static boolean isValidLandsat8Product(Product product) {
-        return product.containsBand("coastal_aerosol") &&
-                product.containsBand("blue") &&
-                product.containsBand("green") &&
-                product.containsBand("red") &&
-                product.containsBand("near_infrared") &&
-                product.containsBand("swir_1") &&
-                product.containsBand("swir_2") &&
-                product.containsBand("panchromatic") &&
-                product.containsBand("cirrus") &&
-                product.containsBand("thermal_infrared_(tirs)_1") &&
-                product.containsBand("thermal_infrared_(tirs)_2");
-
     }
 
     private static boolean isValidModisProduct(Product product) {
@@ -255,49 +294,5 @@ public class IdepixIO {
                 throw new OperatorException("Algorithm " + algorithm.toString() + " not supported.");
         }
     }
-
-
-    public static boolean areAllReflectancesValid(float[] reflectance) {
-        for (float aReflectance : reflectance) {
-            if (Float.isNaN(aReflectance) || aReflectance <= 0.0f) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static boolean areAllReflectancesValid(double[] reflectance) {
-        for (double aReflectance : reflectance) {
-            if (Double.isNaN(aReflectance) || aReflectance <= 0.0f) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static void setNewBandProperties(Band band, String description, String unit, double noDataValue,
-                                            boolean useNoDataValue) {
-        band.setDescription(description);
-        band.setUnit(unit);
-        band.setNoDataValue(noDataValue);
-        band.setNoDataValueUsed(useNoDataValue);
-    }
-
-    public static void copySourceBands(Product sourceProduct, Product targetProduct, String bandNameSubstring) {
-        for (String bandname : sourceProduct.getBandNames()) {
-            if (bandname.contains(bandNameSubstring) && !targetProduct.containsBand(bandname)) {
-                ProductUtils.copyBand(bandname, sourceProduct, targetProduct, true);
-            }
-        }
-    }
-
-    public static void addRadianceBands(Product l1bProduct, Product targetProduct, String[] bandsToCopy) {
-        for (String bandname : bandsToCopy) {
-            if (!targetProduct.containsBand(bandname) && bandname.contains("radiance")) {
-                ProductUtils.copyBand(bandname, l1bProduct, targetProduct, true);
-            }
-        }
-    }
-
 
 }

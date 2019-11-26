@@ -26,19 +26,7 @@ public class IdepixConstants {
 
     public static final int NUM_DEFAULT_FLAGS = 11;
 
-    public static final String IDEPIX_INVALID_DESCR_TEXT = "Invalid pixels";
     public static final String IDEPIX_CLOUD_DESCR_TEXT = "Pixels which are either cloud_sure or cloud_ambiguous";
-    public static final String IDEPIX_CLOUD_AMBIGUOUS_DESCR_TEXT =
-            "Semi transparent clouds, or clouds where the detection level is uncertain";
-    public static final String IDEPIX_CLOUD_SURE_DESCR_TEXT = "Fully opaque clouds with full confidence of their detection";
-    public static final String IDEPIX_CLOUD_BUFFER_DESCR_TEXT =
-            "A buffer of n pixels around a cloud. n is a user supplied parameter. Applied to pixels masked as 'cloud'";
-    public static final String IDEPIX_CLOUD_SHADOW_DESCR_TEXT = "Pixels is affect by a cloud shadow";
-    public static final String IDEPIX_SNOW_ICE_DESCR_TEXT = "Clear snow/ice pixels";
-    public static final String IDEPIX_BRIGHT_DESCR_TEXT = "Bright pixels";
-    public static final String IDEPIX_WHITE_DESCR_TEXT = "White pixels";
-    public static final String IDEPIX_COASTLINE_DESCR_TEXT = "Pixels at a coastline";
-    public static final String IDEPIX_LAND_DESCR_TEXT = "Land pixels";
 
     public static final int LAND_WATER_MASK_RESOLUTION = 50;
     public static final int OVERSAMPLING_FACTOR_X = 3;
@@ -52,21 +40,15 @@ public class IdepixConstants {
 
     public static final String AVHRR_L1b_TIMELINE_DESCRIPTION = "AVHRR FCDR";
 
-    public static final String VGT_RADIANCE_0_BAND_NAME = "B0";
-    public static final String VGT_RADIANCE_2_BAND_NAME = "B2";
-    public static final String VGT_RADIANCE_3_BAND_NAME = "B3";
-    public static final String VGT_RADIANCE_MIR_BAND_NAME = "MIR";
-
-    public static final String PROBAV_BLUE_BAND_NAME = "TOA_REFL_BLUE";
-    public static final String PROBAV_RED_BAND_NAME = "TOA_REFL_RED";
-    public static final String PROBAV_NIR_BAND_NAME = "TOA_REFL_NIR";
-    public static final String PROBAV_SWIR_BAND_NAME = "TOA_REFL_SWIR";
-
     public static final int NO_DATA_VALUE = -1;
 
     public static final String NN_OUTPUT_BAND_NAME = "nn_value";
     public static final String CTP_OUTPUT_BAND_NAME = "ctp";
 
+    private static final String VGT_RADIANCE_0_BAND_NAME = "B0";
+    private static final String VGT_RADIANCE_2_BAND_NAME = "B2";
+    private static final String VGT_RADIANCE_3_BAND_NAME = "B3";
+    private static final String VGT_RADIANCE_MIR_BAND_NAME = "MIR";
     /**
      * The names of the VGT spectral band names.
      */
@@ -89,6 +71,10 @@ public class IdepixConstants {
 
     public static final float[] VGT_WAVELENGTHS = {450.0f, 645.0f, 835.0f, 1670.0f};
 
+    private static final String PROBAV_BLUE_BAND_NAME = "TOA_REFL_BLUE";
+    private static final String PROBAV_RED_BAND_NAME = "TOA_REFL_RED";
+    private static final String PROBAV_NIR_BAND_NAME = "TOA_REFL_NIR";
+    private static final String PROBAV_SWIR_BAND_NAME = "TOA_REFL_SWIR";
     public static final String[] PROBAV_REFLECTANCE_BAND_NAMES = {
             PROBAV_BLUE_BAND_NAME,
             PROBAV_RED_BAND_NAME,
@@ -119,6 +105,20 @@ public class IdepixConstants {
      * @see java.util.regex.Matcher
      */
     public static final Pattern MERIS_CCL1P_TYPE_PATTERN = Pattern.compile("MER_..._CCL1P");
+
+    static final String IDEPIX_INVALID_DESCR_TEXT = "Invalid pixels";
+    static final String IDEPIX_CLOUD_AMBIGUOUS_DESCR_TEXT =
+            "Semi transparent clouds, or clouds where the detection level is uncertain";
+    static final String IDEPIX_CLOUD_SURE_DESCR_TEXT = "Fully opaque clouds with full confidence of their detection";
+    static final String IDEPIX_CLOUD_BUFFER_DESCR_TEXT =
+            "A buffer of n pixels around a cloud. n is a user supplied parameter. Applied to pixels masked as 'cloud'";
+    static final String IDEPIX_CLOUD_SHADOW_DESCR_TEXT = "Pixels is affect by a cloud shadow";
+    static final String IDEPIX_SNOW_ICE_DESCR_TEXT = "Clear snow/ice pixels";
+    static final String IDEPIX_BRIGHT_DESCR_TEXT = "Bright pixels";
+    static final String IDEPIX_WHITE_DESCR_TEXT = "White pixels";
+    static final String IDEPIX_COASTLINE_DESCR_TEXT = "Pixels at a coastline";
+    static final String IDEPIX_LAND_DESCR_TEXT = "Land pixels";
+
 
     private IdepixConstants() {
     }

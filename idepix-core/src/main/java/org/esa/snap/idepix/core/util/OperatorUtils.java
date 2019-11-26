@@ -12,21 +12,15 @@ public class OperatorUtils {
     private OperatorUtils() {
     }
 
-    public static Product createCompatibleProduct(Product sourceProduct, String name, String type) {
-        return createCompatibleProduct(sourceProduct, name, type, false);
-    }
     /**
      * Creates a new product with the same size.
      * Copies geocoding and the start and stop time.
      */
-    public static Product createCompatibleProduct(Product sourceProduct, String name, String type, boolean includeTiepoints) {
+    public static Product createCompatibleProduct(Product sourceProduct, String name, String type) {
         final int sceneWidth = sourceProduct.getSceneRasterWidth();
         final int sceneHeight = sourceProduct.getSceneRasterHeight();
 
         Product targetProduct = new Product(name, type, sceneWidth, sceneHeight);
-        if (includeTiepoints) {
-            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        }
         copyProductBase(sourceProduct, targetProduct);
         return targetProduct;
     }
@@ -34,7 +28,7 @@ public class OperatorUtils {
     /**
      * Copies geocoding and the start and stop time.
      */
-    public static void copyProductBase(Product sourceProduct, Product targetProduct) {
+    private static void copyProductBase(Product sourceProduct, Product targetProduct) {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
