@@ -288,7 +288,19 @@ public class ProbaVClassificationOp extends Operator {
         final double altitude = computeGetasseAltitude(x, y);
         probaVAlgorithm.setElevation(altitude);
 
-        checkProbavReflectanceQuality(probaVAlgorithm, probavReflectance, smFlagTile, x, y);
+        boolean isLand;
+        if (useL1bLandWaterFlag) {
+            isLand = smFlagTile.getSampleBit(x, y, SM_F_LAND);
+            probaVAlgorithm.setL1bLand(isLand);
+            probaVAlgorithm.setIsWater(!isLand);
+        } else {
+            isLand = smFlagTile.getSampleBit(x, y, SM_F_LAND) &&
+                    watermaskFraction < WATERMASK_FRACTION_THRESH;
+            probaVAlgorithm.setL1bLand(isLand);
+            setIsWaterByFraction(watermaskFraction, probaVAlgorithm);
+        }
+
+        checkProbavReflectanceQuality(probaVAlgorithm, probavReflectance, smFlagTile, isLand, x, y);
         probaVAlgorithm.setRefl(probavReflectance);
 
         SchillerNeuralNetWrapper nnWrapper = vgtNeuralNet.get();
@@ -297,17 +309,6 @@ public class ProbaVClassificationOp extends Operator {
             inputVector[i] = Math.sqrt(probavReflectance[i]);
         }
         probaVAlgorithm.setNnOutput(nnWrapper.getNeuralNet().calc(inputVector));
-
-        if (useL1bLandWaterFlag) {
-            final boolean isLand = smFlagTile.getSampleBit(x, y, SM_F_LAND);
-            probaVAlgorithm.setL1bLand(isLand);
-            probaVAlgorithm.setIsWater(!isLand);
-        } else {
-            final boolean isLand = smFlagTile.getSampleBit(x, y, SM_F_LAND) &&
-                    watermaskFraction < WATERMASK_FRACTION_THRESH;
-            probaVAlgorithm.setL1bLand(isLand);
-            setIsWaterByFraction(watermaskFraction, probaVAlgorithm);
-        }
 
         return probaVAlgorithm;
     }
@@ -439,12 +440,13 @@ public class ProbaVClassificationOp extends Operator {
     private void checkProbavReflectanceQuality(ProbaVAlgorithm probaVAlgorithm,
                                                float[] probavReflectance,
                                                Tile smFlagTile,
+                                               boolean isProcessingLand,
                                                int x, int y) {
         final boolean isBlueGood = smFlagTile.getSampleBit(x, y, SM_F_BLUE_GOOD);
         final boolean isRedGood = smFlagTile.getSampleBit(x, y, SM_F_RED_GOOD);
         final boolean isNirGood = smFlagTile.getSampleBit(x, y, SM_F_NIR_GOOD);
         final boolean isSwirGood = smFlagTile.getSampleBit(x, y, SM_F_SWIR_GOOD);
-        final boolean isProcessingLand = smFlagTile.getSampleBit(x, y, SM_F_LAND);
+//        final boolean isProcessingLand = smFlagTile.getSampleBit(x, y, SM_F_LAND);
         probaVAlgorithm.setIsBlueGood(isBlueGood);
         probaVAlgorithm.setIsRedGood(isRedGood);
         probaVAlgorithm.setIsNirGood(isNirGood);
