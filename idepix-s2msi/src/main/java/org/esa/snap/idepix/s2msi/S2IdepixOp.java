@@ -185,12 +185,7 @@ public class S2IdepixOp extends Operator {
             input.put("classifiedProduct", s2ClassifProduct);
             Map<String, Object> paramsBuffer = new HashMap<>();
             paramsBuffer.put("cloudBufferWidth", cloudBufferWidth);
-            paramsBuffer.put("computeCloudBuffer", computeCloudBuffer);
             paramsBuffer.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
-            paramsBuffer.put("cwThresh", cwThresh);
-            paramsBuffer.put("gclThresh", gclThresh);
-            paramsBuffer.put("clThresh", clThresh);
-            paramsBuffer.put("demName", demName);
             cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudBufferOp.class),
                                                    paramsBuffer, input);
             postProcessingProduct = cloudBufferProduct;

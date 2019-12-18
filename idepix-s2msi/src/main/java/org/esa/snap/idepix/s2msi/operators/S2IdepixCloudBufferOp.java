@@ -1,8 +1,6 @@
 package org.esa.snap.idepix.s2msi.operators;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
-import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
@@ -14,6 +12,8 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
+import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
 import java.awt.*;
 
@@ -32,6 +32,9 @@ public class S2IdepixCloudBufferOp extends Operator {
 
     @Parameter(defaultValue = "2", label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
+
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer also for cloud ambiguous pixels")
+    private boolean computeCloudBufferForCloudAmbiguous;
 
     @SourceProduct(alias = "classifiedProduct")
     private Product classifiedProduct;
@@ -84,8 +87,14 @@ public class S2IdepixCloudBufferOp extends Operator {
                 if (targetRectangle.contains(x, y)) {
                     S2IdepixUtils.combineFlags(x, y, sourceFlagTile, targetTile);
                 }
-                boolean isCloud = sourceFlagTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_CLOUD_SURE) ||
-                        sourceFlagTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS);
+
+                boolean isCloud;
+                if (computeCloudBufferForCloudAmbiguous) {
+                    isCloud = sourceFlagTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_CLOUD_SURE) ||
+                            sourceFlagTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS);
+                } else {
+                    isCloud = sourceFlagTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_CLOUD_SURE);
+                }
                 if (isCloud) {
                     S2IdepixCloudBuffer.computeSimpleCloudBuffer(x, y,
                                                                  targetTile,
