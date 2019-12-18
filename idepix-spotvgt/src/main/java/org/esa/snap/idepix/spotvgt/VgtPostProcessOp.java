@@ -94,8 +94,8 @@ public class VgtPostProcessOp extends Operator {
             srcRectangle = rectCalculator.extend(targetRectangle);
         }
 
-        final Tile cloudFlagTile = getSourceTile(origCloudFlagBand, targetRectangle);
-        final Tile smFlagTile = getSourceTile(origSmFlagBand, targetRectangle);
+        final Tile cloudFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
+        final Tile smFlagTile = getSourceTile(origSmFlagBand, srcRectangle);
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();

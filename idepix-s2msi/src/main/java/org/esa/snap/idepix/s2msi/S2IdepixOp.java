@@ -159,7 +159,7 @@ public class S2IdepixOp extends Operator {
             computePostProcessProduct();
 
             targetProduct = S2IdepixUtils.cloneProduct(s2ClassifProduct, true);
-            if (!copyToaReflectances) {
+            if (!copyToaReflectances && computeCloudShadow) {
                 S2IdepixUtils.removeReflectancesForCloudShadow(targetProduct);
             }
 
