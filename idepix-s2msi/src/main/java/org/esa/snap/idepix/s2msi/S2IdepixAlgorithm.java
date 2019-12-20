@@ -304,6 +304,10 @@ public class S2IdepixAlgorithm {
         this.clThresh = clThresh;
     }
 
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
     // GETTERS
     public float getNdsiThreshold() {
         return NDSI_THRESH;
@@ -368,4 +372,5 @@ public class S2IdepixAlgorithm {
     public double getElevationSnowThreshold() {
         return ELEVATION_SNOW_THRESH;
     }
+
 }

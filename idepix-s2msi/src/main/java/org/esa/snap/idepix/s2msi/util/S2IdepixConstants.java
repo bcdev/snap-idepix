@@ -32,6 +32,7 @@ public class S2IdepixConstants {
     public static final int NO_DATA_VALUE = -1;
 
     public static final String ELEVATION_BAND_NAME = "elevation";
+    public static final String LATITUDE_BAND_NAME = "lat";
 
     public static final String[] S2_MSI_REFLECTANCE_BAND_NAMES = {
             "B1",
