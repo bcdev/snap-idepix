@@ -2,7 +2,304 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d13b59b2-bee3-414a-9903-e8208704ca31" name="Default Changelist" comment="Default Changelist">
+      <change afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/dataio/nc4/IdepixModisGeocodingPart.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/dataio/nc4/IdepixModisMetadataPart.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/dataio/nc4/IdepixModisNc4WriterPlugIn.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/idepix-modis/src/main/resources/META-INF/services/org.esa.snap.core.dataio.ProductWriterPlugIn" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-assembly/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/java/org/esa/snap/idepix/avhrr/AbstractAvhrrClassificationOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/java/org/esa/snap/idepix/avhrr/AvhrrAcUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/java/org/esa/snap/idepix/avhrr/AvhrrAlgorithm.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/java/org/esa/snap/idepix/avhrr/AvhrrAuxdata.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/java/org/esa/snap/idepix/avhrr/AvhrrConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/java/org/esa/snap/idepix/avhrr/AvhrrOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/java/org/esa/snap/idepix/avhrr/AvhrrPixelProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/java/org/esa/snap/idepix/avhrr/AvhrrPostProcessOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/java/org/esa/snap/idepix/avhrr/AvhrrUSGSClassificationOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/nbm/manifest.mf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/resources/layer.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/resources/org/esa/snap/idepix/avhrr/6x3_114.1.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/resources/org/esa/snap/idepix/avhrr/rad2bt_noaa11.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/resources/org/esa/snap/idepix/avhrr/rad2bt_noaa14.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/main/resources/org/esa/snap/idepix/avhrr/view_zenith.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/test/java/org/esa/snap/idepix/avhrr/AvhrrUSGSClassificationOpTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-avhrr/src/test/resources/org/esa/snap/idepix/avhrr/view_zenith.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/ClostOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/Landsat8Algorithm.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/Landsat8ClassificationOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/Landsat8Constants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/Landsat8Op.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/Landsat8PixelProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/Landsat8PostProcessOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/Landsat8Utils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/NNSelector.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/OtsuBinarize.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/OtsuBinarizeOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/help.hs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/images/snap_header.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/Landsat8OliAlgorithmSpecification.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/Landsat8OliCommandLine.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/Landsat8OliProcessorDescription.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/Landsat8OliTool.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/Landsat8FlagCoding.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/Landsat8MaskManager.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/Landsat8Parameters.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/Landsat8Paths.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/formulaBrightLand.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/formulaBrightWater.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/formulaClost.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/formulaHot.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/formulaMean.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/formulaOtsu.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/formulaRatioBlueGreen.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/formulaRatioRedGreen.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/formulaShimez.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/landsat8/images/formulaWhite.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/map.jhm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/javahelp/org/esa/snap/idepix/landsat8/docs/toc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/nbm/manifest.mf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/helpset.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/layer.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/org/esa/snap/idepix/landsat8/11x4x2_434.7.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/org/esa/snap/idepix/landsat8/12x4_444.6.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/org/esa/snap/idepix/landsat8/12x4x2_305.0.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/org/esa/snap/idepix/landsat8/12x4x2_307.5.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/org/esa/snap/idepix/landsat8/16x6x2_735.5.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/org/esa/snap/idepix/landsat8/18x6_509.5.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/org/esa/snap/idepix/landsat8/20x4x2_1012.9.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/main/resources/org/esa/snap/idepix/landsat8/8x5x3_342.3.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/test/java/org/esa/snap/idepix/landsat8/Landsat8ClassificationOpTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/test/java/org/esa/snap/idepix/landsat8/OtsuBinarizeMain.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-landsat8/src/test/resources/org/esa/snap/idepix/landsat8/olaf02.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-modis/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/idepix-modis/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/javahelp/org/esa/snap/idepix/modis/docs/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/idepix-modis/src/main/javahelp/org/esa/snap/idepix/modis/docs/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" beforeDir="false" afterPath="$PROJECT_DIR$/idepix-modis/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/resources/org/esa/snap/idepix/modis/8x6x4x2_290.4_land.net" beforeDir="false" afterPath="$PROJECT_DIR$/idepix-modis/src/main/resources/org/esa/snap/idepix/modis/8x6x4x2_290.4_land.net" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/resources/org/esa/snap/idepix/modis/9x7x5x3_130.3_water.net" beforeDir="false" afterPath="$PROJECT_DIR$/idepix-modis/src/main/resources/org/esa/snap/idepix/modis/9x7x5x3_130.3_water.net" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-modis/src/main/resources/org/esa/snap/idepix/modis/9x7x5x3_319.7_all.net" beforeDir="false" afterPath="$PROJECT_DIR$/idepix-modis/src/main/resources/org/esa/snap/idepix/modis/9x7x5x3_319.7_all.net" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-modis/src/test/java/org/esa/snap/idepix/modis/IdepixModisOpTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/idepix-modis/src/test/java/org/esa/snap/idepix/modis/IdepixModisOpTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrClassificationOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrCloudNNInterpreter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrPostProcessOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/src/main/nbm/manifest.mf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/src/main/resources/layer.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-olcislstr/src/main/resources/org/esa/snap/idepix/olcislstr/11x9x6x4x3x2_57.8.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVAlgorithm.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVClassificationOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVPostProcessOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/help.hs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/images/snap_header.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/map.jhm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/probav/ProbaVCommandLine.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/probav/ProbaVTool.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/probav/ProbavVegetationAlgorithmSpecification.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/probav/ProbavVegetationProcessorDescription.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/probav/images/ProbavFlagCoding.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/probav/images/ProbavMaskManager.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/probav/images/ProbavParameters.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/probav/images/ProbavPaths.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/probav/images/VgtParameters.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/javahelp/org/esa/snap/idepix/probav/docs/toc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/nbm/manifest.mf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/resources/helpset.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/resources/layer.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-probav/src/main/resources/org/esa/snap/idepix/probav/3x2x2_341.8.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixAlgorithm.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixClassificationOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixPostProcessOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/StartModule.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/S2IdepixCloudBuffer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/S2IdepixCloudBufferOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/AdaptedIsoClustering.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/CloudBulkShifter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/CloudShadowFlaggerCombination.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/CloudShadowFlaggerShiftInCloudGaps.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/CloudShadowUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/ClusteringKMeans.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/FindContinuousAreas.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/FlagDetector.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/Mode.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/MountainShadowFlagger.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/PotentialCloudShadowAreaIdentifier.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/PotentialPathShapeRasterizer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/PreparationMaskBand.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/RecommendedCloudShadowFlagger.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/S2IdepixCloudShadowOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/S2IdepixPostCloudShadowOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/S2IdepixPreCloudShadowOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/ShiftingCloudIndividualAlongCloudPath.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/fft/LinearAlgebraUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/fft/PhaseFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/fft/SarUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/fft/SpectralUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/fft/Window.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/mountainshadow/S2IdepixMountainShadowOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/mountainshadow/SlopeAspectOrientationOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/util/AlgorithmSelector.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/util/S2IdepixConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/util/S2IdepixUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/util/SchillerNeuralNetWrapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/help.hs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/S2MsiIdepixAlgorithmSpecification.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/S2MsiIdepixCommandLine.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/S2MsiIdepixProcessorDescription.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/S2MsiIdepixTool.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/AcquisitionModelEquation.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/CommandLine.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/IdepixFlagCoding.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/IdepixMaskManager.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/IdepixParameterSen2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/IdepixPathsSen2Msi.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/Sen2MsiFlagCoding.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/Sen2MsiMaskManager.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/formulaBrightLand.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/formulaBrightWater.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/formulaClost.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/formulaHot.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/formulaMean.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/formulaOtsu.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/formulaRatioBlueGreen.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/formulaRatioRedGreen.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/formulaShimez.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/idepix/images/formulaWhite.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/images/snap_header.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/map.jhm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/javahelp/org/esa/snap/idepix/s2msi/docs/toc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/nbm/manifest.mf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/resources/helpset.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/resources/layer.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/resources/org/esa/snap/idepix/s2msi/20x4x2_1012.9.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/main/resources/org/esa/snap/idepix/s2msi/graphs/optical/Sentinel2-Resample-Idepix-Subset.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/CloudShadowUtilsTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/ClusteringKMeansTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/MountainShadowFlaggerTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/PotentialCloudShadowAreaIdentifierTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/PreparationMaskBandTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/S2IdepixCloudShadowOp_IntegrationTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/S2IdepixPreCloudShadowOpTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/mountainshadow/S2IdepixMountainShadowOpTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/mountainshadow/S2IdepixMountainShadowOp_IntegrationTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/mountainshadow/SlopeAspectOrientationOpTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/operators/mountainshadow/SlopeAspectOrientation_IntegrationTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/sentinel2/Sentinel2ClassificationOpTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/java/org/esa/snap/idepix/s2msi/util/S2IdepixUtilsTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/B3.hdr" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/B3.img" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/B8A.hdr" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/B8A.img" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/elevation.hdr" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/elevation.img" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/pixel_classif_flags.hdr" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/pixel_classif_flags.img" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/sun_azimuth.hdr" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/sun_azimuth.img" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/sun_zenith.hdr" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/sun_zenith.img" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/vector_data/ground_control_points.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/vector_data/pins.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/view_azimuth_mean.hdr" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/view_azimuth_mean.img" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/view_zenith_mean.hdr" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.data/view_zenith_mean.img" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-s2msi/src/test/resources/org/esa/snap/idepix/s2msi/operators/cloudshadow/s2_classif.dim" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsAlgorithm.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsClassificationOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsPostProcessOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/help.hs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/images/snap_header.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/map.jhm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/seawifs/OrbView2SeawifsAlgorithmSpecification.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/seawifs/OrbView2SeawifsCommandLine.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/seawifs/OrbView2SeawifsProcessorDescription.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/seawifs/OrbView2SeawifsTool.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/seawifs/images/SeawifsFlagCoding.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/seawifs/images/SeawifsMaskManager.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/seawifs/images/SeawifsParameters.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/seawifs/images/SeawifsPaths.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/javahelp/org/esa/snap/idepix/seawifs/docs/toc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/nbm/manifest.mf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/resources/helpset.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/resources/layer.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-seawifs/src/main/resources/org/esa/snap/idepix/seawifs/6x3_166.0.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtAlgorithm.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtClassificationOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtPostProcessOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/help.hs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/images/snap_header.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/map.jhm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/spotvgt/SpotVegetationAlgorithmSpecification.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/spotvgt/SpotVegetationCommandLine.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/spotvgt/SpotVegetationProcessorDescription.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/spotvgt/SpotVegetationTool.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/spotvgt/images/VgtFlagCoding.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/spotvgt/images/VgtMaskManager.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/spotvgt/images/VgtParameters.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/spotvgt/images/VgtPaths.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/javahelp/org/esa/snap/idepix/spotvgt/docs/toc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/nbm/manifest.mf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/resources/helpset.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/resources/layer.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-spotvgt/src/main/resources/org/esa/snap/idepix/spotvgt/3x2x2_341.8.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsAlgorithm.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsClassificationOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsPostProcessOp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/help.hs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/images/snap_header.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/map.jhm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/toc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/viirs/SuomiNppViirsAlgorithmSpecification.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/viirs/SuomiNppViirsCommandLine.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/viirs/SuomiNppViirsProcessorDescription.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/viirs/SuomiNppViirsTool.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/viirs/images/ViirsFlagCoding.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/viirs/images/ViirsMaskManager.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/viirs/images/ViirsParameters.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/javahelp/org/esa/snap/idepix/viirs/docs/viirs/images/ViirsPaths.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/nbm/manifest.mf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/resources/META-INF/services/org.esa.snap.core.gpf.OperatorSpi" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/resources/helpset.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/resources/layer.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idepix-viirs/src/main/resources/org/esa/snap/idepix/viirs/6x5x4x3x2_204.8.net" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/s2tbx-cache/target/" />
     <ignored path="$PROJECT_DIR$/s2tbx-jp2-writer/target/" />
@@ -68,7 +365,6 @@
     <ignored path="$PROJECT_DIR$/idepix-landsat8/target/" />
     <ignored path="$PROJECT_DIR$/idepix-core/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
-    <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -81,92 +377,29 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-olci/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="391">
-              <caret line="35" selection-start-line="35" selection-end-line="37" selection-end-column="17" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-olcislstr/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="69" column="28" selection-start-line="69" selection-start-column="28" selection-end-line="69" selection-end-column="28" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-probav/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="37" column="17" selection-start-line="37" selection-start-column="17" selection-end-line="37" selection-end-column="17" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-s2msi/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1280">
-              <caret line="24" column="22" selection-start-line="24" selection-start-column="22" selection-end-line="24" selection-end-column="22" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-seawifs/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="29" column="30" selection-start-line="29" selection-start-column="30" selection-end-line="29" selection-end-column="30" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-spotvgt/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="80">
-              <caret line="23" column="22" selection-start-line="23" selection-start-column="22" selection-end-line="23" selection-end-column="22" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-viirs/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="22" column="44" selection-start-line="22" selection-start-column="44" selection-end-line="22" selection-end-column="44" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idepix-assembly/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="16" column="30" lean-forward="true" selection-start-line="16" selection-start-column="30" selection-end-line="16" selection-end-column="30" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="1" column="6" lean-forward="true" selection-start-line="1" selection-start-column="6" selection-end-line="1" selection-end-column="6" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/idepix-modis/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="391">
-              <caret line="38" selection-start-line="38" selection-end-line="38" />
+            <state relative-caret-position="340">
+              <caret line="27" column="24" selection-start-line="27" selection-start-column="24" selection-end-line="27" selection-end-column="24" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/pom.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="204">
+              <caret line="37" column="58" lean-forward="true" selection-start-line="37" selection-start-column="58" selection-end-line="37" selection-end-column="58" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisAlgorithm.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="162">
+              <caret line="168" column="32" selection-start-line="168" selection-start-column="32" selection-end-line="168" selection-end-column="32" />
             </state>
           </provider>
         </entry>
@@ -225,19 +458,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/idepix-landsat8/src/main/java/org/esa/snap/idepix/landsat8/OtsuBinarizeOp.java" />
-        <option value="$PROJECT_DIR$/idepix-landsat8/src/test/java/org/esa/snap/idepix/landsat8/Landsat8ClassificationOpTest.java" />
-        <option value="$PROJECT_DIR$/idepix-landsat8/src/test/java/org/esa/snap/idepix/landsat8/OtsuBinarizeMain.java" />
-        <option value="$PROJECT_DIR$/idepix-olci/src/main/java/org/esa/snap/idepix/olci/IdepixOlciConstants.java" />
-        <option value="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrClassificationOp.java" />
-        <option value="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrCloudNNInterpreter.java" />
-        <option value="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrConstants.java" />
-        <option value="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrOp.java" />
-        <option value="$PROJECT_DIR$/idepix-olcislstr/src/main/java/org/esa/snap/idepix/olcislstr/OlciSlstrUtils.java" />
-        <option value="$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVAlgorithm.java" />
-        <option value="$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVClassificationOp.java" />
-        <option value="$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVConstants.java" />
-        <option value="$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVUtils.java" />
         <option value="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/S2IdepixCloudBuffer.java" />
         <option value="$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixAlgorithm.java" />
         <option value="$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsAlgorithm.java" />
@@ -256,7 +476,6 @@
         <option value="$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsConstants.java" />
         <option value="$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisConstants.java" />
         <option value="$PROJECT_DIR$/idepix-core/src/main/java/org/esa/snap/idepix/core/operators/CloudBuffer.java" />
-        <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/idepix-core/pom.xml" />
         <option value="$PROJECT_DIR$/idepix-landsat8/pom.xml" />
         <option value="$PROJECT_DIR$/idepix-avhrr/pom.xml" />
@@ -269,14 +488,9 @@
         <option value="$PROJECT_DIR$/idepix-seawifs/pom.xml" />
         <option value="$PROJECT_DIR$/idepix-spotvgt/pom.xml" />
         <option value="$PROJECT_DIR$/idepix-viirs/pom.xml" />
+        <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
-  </component>
-  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
-  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
-  <component name="JsGulpfileManager">
-    <detection-done>true</detection-done>
-    <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="MavenImportPreferences">
     <option name="importingSettings">
@@ -291,15 +505,6 @@
       <expand>
         <path>
           <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
-          <item name="IdePix Spot VGT" type="9519ce18:MavenProjectsStructure$ProjectNode" />
-        </path>
-        <path>
-          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
-          <item name="IdePix Spot VGT" type="9519ce18:MavenProjectsStructure$ProjectNode" />
-          <item name="Dependencies" type="f4be9f2a:MavenProjectsStructure$DependenciesNode" />
-        </path>
-        <path>
-          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
           <item name="snap-idepix" type="9519ce18:MavenProjectsStructure$ProjectNode" />
         </path>
         <path>
@@ -312,10 +517,10 @@
     </treeState>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
-    <option name="width" value="1936" />
-    <option name="height" value="1056" />
+    <option name="x" value="25" />
+    <option name="y" value="4" />
+    <option name="width" value="1838" />
+    <option name="height" value="1005" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -324,7 +529,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -335,30 +540,25 @@
             <path>
               <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-avhrr" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-avhrr" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-avhrr" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-avhrr" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
@@ -366,84 +566,61 @@
             <path>
               <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-core" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-core" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-landsat8" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-meris" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="modis" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
               <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="modis" type="462c0819:PsiDirectoryNode" />
+              <item name="nc4" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-olci" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="resources" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
               <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-olcislstr" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-probav" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-s2msi" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-seawifs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-spotvgt" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="snap-idepix" type="b2602c69:ProjectViewProjectNode" />
-              <item name="snap-idepix" type="462c0819:PsiDirectoryNode" />
-              <item name="idepix-viirs" type="462c0819:PsiDirectoryNode" />
+              <item name="idepix-modis" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="resources" type="462c0819:PsiDirectoryNode" />
+              <item name="services" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="add_unversioned_files" value="true" />
     <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1570143293453" />
     <property name="extract.method.default.visibility" value="private" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../calvalus-instances" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/pom.xml" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -470,7 +647,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JAR Application.Idepix OLCI (SNAP GUI)">
+  <component name="RunManager" selected="JAR Application.gpt_modis">
     <configuration name="IdepixMerisNc4WriterTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.esa.snap.idepix.meris.dataio.nc4.IdepixMerisNc4WriterTest" />
       <module name="idepix-meris" />
@@ -481,10 +658,13 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <method>
+      <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
@@ -496,37 +676,20 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="org.esa.snap.idepix.olci" />
       <option name="MAIN_CLASS_NAME" value="org.esa.snap.idepix.olci.TensorflowNNCalculatorTest" />
-      <option name="METHOD_NAME" />
       <option name="TEST_OBJECT" value="class" />
       <option name="VM_PARAMETERS" />
-      <option name="PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <patterns />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration default="true" type="JUnit" factoryName="JUnit">
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="METHOD_NAME" />
       <option name="TEST_OBJECT" value="class" />
       <option name="VM_PARAMETERS" />
-      <option name="PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <patterns />
-      <method>
+      <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
@@ -537,6 +700,16 @@
       <option name="WORKING_DIRECTORY" value="F:\olafd\snap-snapshots\release_7.0.0\\snap" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
+      <method v="2" />
+    </configuration>
+    <configuration name="gpt_modis" type="JarApplication" factoryName="JAR Application">
+      <option name="JAR_PATH" value="F:/olafd/snap-snapshots/release_7.0.0/snap/snap/modules/ext/org.esa.snap.snap-core/org-esa-snap/snap-runtime.jar" />
+      <option name="VM_PARAMETERS" value="-Dsnap.mainClass=org.esa.snap.core.gpf.main.GPT -Dsnap.home=F:\olafd\snap-snapshots\release_7.0.0\snap -Dsnap.extraClusters=&quot;C:\Users\olafd\workspaces\git\snap-idepix\idepix-core\target\nbm\netbeans\idepix;C:\Users\olafd\workspaces\git\snap-idepix\idepix-modis\target\nbm\netbeans\idepix&quot; -Dsnap.log.level=ALL -Dsnap.debug=true -Dsnap.consoleLog=true -Djpy.debug=true" />
+      <option name="PROGRAM_PARAMETERS" value="Idepix.Modis -SsourceProduct=&quot;F:\olafd\cci_wv\MODIS\MOD021KM.A2011336.1325.061.2017328034027.hdf&quot; -PreflBandsToCopy=EV_250_Aggr1km_RefSB_2,EV_500_Aggr1km_RefSB_5,EV_1KM_RefSB_17,EV_1KM_RefSB_18,EV_1KM_RefSB_19 -f NetCDF4-IDEPIX-MODIS -t &quot;F:\olafd\cci_wv\MODIS\MOD021KM.A2011336.1325.061.2017328034027_idepix_ncidepixmodis.nc&quot;" />
+      <option name="WORKING_DIRECTORY" value="F:\olafd\snap-snapshots\release_7.0.0\snap" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
+      <method v="2" />
     </configuration>
     <configuration default="true" type="TestNG">
       <option name="TEST_OBJECT" value="CLASS" />
@@ -547,9 +720,72 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="tests" factoryName="Nosetests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_regexPattern" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Twisted Trial">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Unittests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="py.test">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
     <list>
-      <item itemvalue="JAR Application.Idepix OLCI (SNAP GUI)" />
       <item itemvalue="Application.IdepixMerisNc4WriterTest" />
+      <item itemvalue="JAR Application.Idepix OLCI (SNAP GUI)" />
+      <item itemvalue="JAR Application.gpt_modis" />
       <item itemvalue="JUnit.TensorflowNNCalculatorTest" />
     </list>
     <recent_temporary>
@@ -600,6 +836,7 @@
       <workItem from="1570459508412" duration="1650000" />
       <workItem from="1570526805013" duration="23843000" />
       <workItem from="1573215787045" duration="6221000" />
+      <workItem from="1577985847609" duration="550000" />
     </task>
     <task id="LOCAL-00001" summary="merging cloud and mountain shadow branch to master&#10;&#10;# Conflicts:&#10;#&#9;s2tbx-muscate-reader/pom.xml&#10;#&#9;s2tbx-muscate-reader/src/main/java/org/esa/s2tbx/dataio/muscate/MuscateProductReader.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixClassificationOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixConstants.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixUtils.java">
       <created>1538658059462</created>
@@ -826,69 +1063,70 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="161027000" />
+    <option name="totallyTimeSpent" value="161577000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info anchor="right" id="Palette" order="0" />
-      <window_info anchor="bottom" id="TODO" order="1" />
-      <window_info anchor="bottom" id="Messages" order="8" weight="0.32900432" />
-      <window_info anchor="right" id="Palette&#9;" order="5" />
-      <window_info anchor="bottom" id="Event Log" order="5" sideWeight="0.50240093" side_tool="true" weight="0.24854143" />
-      <window_info anchor="right" id="Maven Projects" order="7" visible="true" weight="0.17803837" />
-      <window_info active="true" anchor="bottom" id="Version Control" order="0" sideWeight="0.49879953" visible="true" weight="0.4069264" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4956822" weight="0.3474026" />
-      <window_info anchor="bottom" id="Terminal" order="4" />
       <window_info id="Designer" order="0" />
-      <window_info content_ui="combo" id="Project" order="1" visible="true" weight="0.1924307" />
+      <window_info content_ui="combo" id="Project" order="1" visible="true" weight="0.21002132" />
       <window_info id="Structure" order="2" side_tool="true" />
-      <window_info anchor="right" id="Ant Build" order="2" />
+      <window_info id="Image Layers" order="3" />
+      <window_info id="Capture Tool" order="4" />
       <window_info id="UI Designer" order="5" />
       <window_info id="Favorites" order="6" side_tool="true" />
-      <window_info anchor="bottom" id="Debug" order="6" sideWeight="0.49759904" weight="0.3033839" />
-      <window_info anchor="right" id="Maven" order="9" visible="true" weight="0.17527011" />
-      <window_info anchor="bottom" id="Duplicate detector" order="7" weight="0.32905483" />
-      <window_info id="Image Layers" order="3" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info id="Capture Tool" order="4" />
-      <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
-      <window_info anchor="right" id="Capture Analysis" order="1" />
-      <window_info anchor="right" x="0" y="0" width="381" height="813" id="Documentation" order="8" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="JProfiler" order="3" />
-      <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info anchor="bottom" id="Find" order="7" sideWeight="0.49939975" weight="0.23337223" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="right" id="SciView" order="6" />
-      <window_info anchor="right" id="Database" order="4" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="right" id="Theme Preview" order="3" />
+      <window_info anchor="bottom" id="Version Control" order="0" sideWeight="0.49879953" weight="0.24555555" />
+      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info anchor="bottom" id="TODO" order="2" />
+      <window_info active="true" anchor="bottom" id="Run" order="3" sideWeight="0.4956822" visible="true" weight="0.4077778" />
+      <window_info anchor="bottom" id="JProfiler" order="4" />
+      <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
+      <window_info anchor="bottom" id="Terminal" order="6" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50240093" side_tool="true" weight="0.24854143" />
+      <window_info anchor="bottom" id="Inspection" order="8" weight="0.4" />
+      <window_info anchor="bottom" id="Debug" order="9" sideWeight="0.49759904" weight="0.3033839" />
+      <window_info anchor="bottom" id="Duplicate detector" order="10" weight="0.32905483" />
+      <window_info anchor="bottom" id="Find" order="11" sideWeight="0.49939975" weight="0.23337223" />
+      <window_info anchor="bottom" id="Messages" order="12" weight="0.32900432" />
+      <window_info anchor="bottom" id="Docker" order="13" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Database Changes" order="14" />
+      <window_info anchor="right" id="Palette" order="0" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="1" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Capture Analysis" order="2" />
+      <window_info anchor="right" id="Ant Build" order="3" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
+      <window_info anchor="right" id="Theme Preview" order="5" />
+      <window_info anchor="right" id="Database" order="6" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="right" id="SciView" order="8" />
+      <window_info anchor="right" id="Maven Projects" order="9" visible="true" weight="0.17803837" />
+      <window_info anchor="right" x="0" y="0" width="381" height="813" id="Documentation" order="10" />
+      <window_info anchor="right" id="Maven" order="11" visible="true" weight="0.1748401" />
     </layout>
     <layout-to-restore>
-      <window_info anchor="right" id="Palette" order="0" />
-      <window_info anchor="right" id="Capture Analysis" order="2" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.38228437" />
-      <window_info anchor="right" id="Ant Build" order="6" />
+      <window_info id="Image Layers" order="0" />
+      <window_info id="Capture Tool" order="1" />
+      <window_info id="Designer" order="2" />
       <window_info id="Project" order="3" visible="true" weight="0.2364706" />
       <window_info id="Structure" order="4" side_tool="true" />
-      <window_info anchor="right" id="Theme Preview" order="7" />
-      <window_info anchor="bottom" id="TODO" order="0" />
-      <window_info id="Image Layers" order="0" />
-      <window_info id="Designer" order="2" />
       <window_info id="UI Designer" order="5" />
-      <window_info anchor="bottom" id="Debug" order="6" />
-      <window_info anchor="bottom" id="JProfiler" order="5" />
-      <window_info anchor="right" id="Database" order="4" />
-      <window_info anchor="right" id="Palette&#9;" order="1" />
-      <window_info anchor="bottom" id="Terminal" order="4" />
-      <window_info anchor="bottom" id="Event Log" order="1" side_tool="true" />
-      <window_info anchor="bottom" id="Version Control" order="3" show_stripe_button="false" />
-      <window_info anchor="right" id="SciView" order="5" />
-      <window_info id="Capture Tool" order="1" />
-      <window_info anchor="right" id="Maven Projects" order="3" visible="true" />
       <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="bottom" id="TODO" order="0" />
+      <window_info anchor="bottom" id="Event Log" order="1" side_tool="true" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.38228437" />
+      <window_info anchor="bottom" id="Version Control" order="3" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Terminal" order="4" />
+      <window_info anchor="bottom" id="JProfiler" order="5" />
+      <window_info anchor="bottom" id="Debug" order="6" />
+      <window_info anchor="right" id="Palette" order="0" />
+      <window_info anchor="right" id="Palette&#9;" order="1" />
+      <window_info anchor="right" id="Capture Analysis" order="2" />
+      <window_info anchor="right" id="Maven Projects" order="3" visible="true" />
+      <window_info anchor="right" id="Database" order="4" />
+      <window_info anchor="right" id="SciView" order="5" />
+      <window_info anchor="right" id="Ant Build" order="6" />
+      <window_info anchor="right" id="Theme Preview" order="7" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -929,9 +1167,20 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="merging cloud and mountain shadow branch to master&#10;&#10;# Conflicts:&#10;#&#9;s2tbx-muscate-reader/pom.xml&#10;#&#9;s2tbx-muscate-reader/src/main/java/org/esa/s2tbx/dataio/muscate/MuscateProductReader.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixClassificationOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/algorithms/sentinel2/S2IdepixPostProcessOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/operators/cloudshadow/S2IdepixCloudShadowOp.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixConstants.java&#10;#&#9;s2tbx-s2msi-idepix/src/main/java/org/esa/s2tbx/s2msi/idepix/util/S2IdepixUtils.java" />
@@ -1044,264 +1293,13 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/idepix-core/src/main/java/org/esa/snap/idepix/core/pixel/AbstractPixelProperties.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="24" column="22" selection-start-line="24" selection-start-column="22" selection-end-line="24" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-core/src/main/java/org/esa/snap/idepix/core/operators/CloudBuffer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="31" column="52" selection-start-line="31" selection-start-column="52" selection-end-line="31" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVPostProcessOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="23">
-          <caret line="113" column="57" lean-forward="true" selection-start-line="113" selection-start-column="57" selection-end-line="113" selection-end-column="57" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-probav/src/main/java/org/esa/snap/idepix/probav/ProbaVUtils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="301">
-          <caret line="51" column="99" lean-forward="true" selection-start-line="51" selection-start-column="99" selection-end-line="51" selection-end-column="99" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/StartModule.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="8" column="13" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/cloudshadow/S2IdepixCloudShadowOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="371">
-          <caret line="198" column="51" selection-start-line="198" selection-start-column="44" selection-end-line="198" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="193" column="90" selection-start-line="193" selection-start-column="90" selection-end-line="193" selection-end-column="90" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixPostProcessOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="183">
-          <caret line="114" column="89" lean-forward="true" selection-start-line="114" selection-start-column="89" selection-end-line="114" selection-end-column="89" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixAlgorithm.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="44" column="26" lean-forward="true" selection-start-line="44" selection-start-column="26" selection-end-line="44" selection-end-column="26" />
-          <folding>
-            <element signature="e#6803#6804#0" expanded="true" />
-            <element signature="e#6831#6832#0" expanded="true" />
-            <element signature="e#7174#7175#0" expanded="true" />
-            <element signature="e#7233#7234#0" expanded="true" />
-            <element signature="e#7265#7266#0" expanded="true" />
-            <element signature="e#7322#7323#0" expanded="true" />
-            <element signature="e#7356#7357#0" expanded="true" />
-            <element signature="e#7411#7412#0" expanded="true" />
-            <element signature="e#7442#7443#0" expanded="true" />
-            <element signature="e#7470#7471#0" expanded="true" />
-            <element signature="e#7507#7508#0" expanded="true" />
-            <element signature="e#7557#7558#0" expanded="true" />
-            <element signature="e#7591#7592#0" expanded="true" />
-            <element signature="e#7623#7624#0" expanded="true" />
-            <element signature="e#7678#7679#0" expanded="true" />
-            <element signature="e#7721#7722#0" expanded="true" />
-            <element signature="e#7788#7789#0" expanded="true" />
-            <element signature="e#7844#7845#0" expanded="true" />
-            <element signature="e#8417#8418#0" expanded="true" />
-            <element signature="e#8485#8486#0" expanded="true" />
-            <element signature="e#10101#10102#0" expanded="true" />
-            <element signature="e#10167#10168#0" expanded="true" />
-            <element signature="e#10451#10452#0" expanded="true" />
-            <element signature="e#10496#10497#0" expanded="true" />
-            <element signature="e#10536#10537#0" expanded="true" />
-            <element signature="e#10582#10583#0" expanded="true" />
-            <element signature="e#10657#10658#0" expanded="true" />
-            <element signature="e#10705#10706#0" expanded="true" />
-            <element signature="e#10746#10747#0" expanded="true" />
-            <element signature="e#10778#10779#0" expanded="true" />
-            <element signature="e#10823#10824#0" expanded="true" />
-            <element signature="e#10859#10860#0" expanded="true" />
-            <element signature="e#10909#10910#0" expanded="true" />
-            <element signature="e#10951#10952#0" expanded="true" />
-            <element signature="e#10999#11000#0" expanded="true" />
-            <element signature="e#11039#11040#0" expanded="true" />
-            <element signature="e#11089#11090#0" expanded="true" />
-            <element signature="e#11131#11132#0" expanded="true" />
-            <element signature="e#11179#11180#0" expanded="true" />
-            <element signature="e#11219#11220#0" expanded="true" />
-            <element signature="e#11273#11274#0" expanded="true" />
-            <element signature="e#11307#11308#0" expanded="true" />
-            <element signature="e#11346#11347#0" expanded="true" />
-            <element signature="e#11380#11381#0" expanded="true" />
-            <element signature="e#11418#11419#0" expanded="true" />
-            <element signature="e#11451#11452#0" expanded="true" />
-            <element signature="e#11492#11493#0" expanded="true" />
-            <element signature="e#11528#11529#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
-            <element signature="e#11603#11604#0" expanded="true" />
-            <element signature="e#11640#11641#0" expanded="true" />
-            <element signature="e#11671#11672#0" expanded="true" />
-            <element signature="e#11710#11711#0" expanded="true" />
-            <element signature="e#11750#11751#0" expanded="true" />
-            <element signature="e#12457#12458#0" expanded="true" />
-            <element signature="e#12498#12499#0" expanded="true" />
-            <element signature="e#12535#12536#0" expanded="true" />
-            <element signature="e#12575#12576#0" expanded="true" />
-            <element signature="e#12624#12625#0" expanded="true" />
-            <element signature="e#12666#12667#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/S2IdepixCloudBuffer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="131">
-          <caret line="31" column="61" selection-start-line="31" selection-start-column="61" selection-end-line="31" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/operators/S2IdepixCloudBufferOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-172">
-          <caret line="33" column="16" selection-start-line="33" selection-start-column="16" selection-end-line="33" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsAlgorithm.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="437">
-          <caret line="112" column="5" selection-start-line="112" selection-start-column="5" selection-end-line="112" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsClassificationOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="151">
-          <caret line="168" selection-start-line="168" selection-end-line="168" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsConstants.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" selection-start-line="9" selection-end-line="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="40">
-          <caret line="30" column="13" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsPostProcessOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="74">
-          <caret line="189" column="37" selection-start-line="189" selection-start-column="37" selection-end-line="189" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-seawifs/src/main/java/org/esa/snap/idepix/seawifs/SeaWifsUtils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="193">
-          <caret line="24" column="73" selection-start-line="24" selection-start-column="73" selection-end-line="24" selection-end-column="73" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-core/src/main/java/org/esa/snap/idepix/core/pixel/AbstractPixelProperties.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="24" column="22" selection-start-line="24" selection-start-column="22" selection-end-line="24" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtAlgorithm.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="30" column="47" selection-start-line="30" selection-start-column="47" selection-end-line="30" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtConstants.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="16" column="4" selection-start-line="16" selection-start-column="4" selection-end-line="16" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1269">
-          <caret line="46" column="12" selection-start-line="46" selection-start-column="12" selection-end-line="46" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtClassificationOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="96" column="4" selection-start-line="96" selection-start-column="4" selection-end-line="96" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtPostProcessOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-342">
-          <caret line="117" selection-start-line="117" selection-end-line="117" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtUtils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="19" column="73" selection-start-line="19" selection-start-column="73" selection-end-line="19" selection-end-column="73" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsAlgorithm.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" selection-start-line="10" selection-end-line="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsClassificationOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="612">
-          <caret line="47" column="12" selection-start-line="47" selection-start-column="12" selection-end-line="47" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsConstants.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="714">
-          <caret line="42" column="4" selection-start-line="42" selection-start-column="4" selection-end-line="42" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="30" column="13" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtClassificationOp.java" />
+    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtPostProcessOp.java" />
+    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/src/main/java/org/esa/snap/idepix/spotvgt/VgtUtils.java" />
+    <entry file="file://$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsAlgorithm.java" />
+    <entry file="file://$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsClassificationOp.java" />
+    <entry file="file://$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsConstants.java" />
+    <entry file="file://$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsOp.java" />
     <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisClassificationOp.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4488">
@@ -1316,13 +1314,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixClassificationOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="17" column="55" selection-start-line="17" selection-start-column="55" selection-end-line="17" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-s2msi/src/main/java/org/esa/snap/idepix/s2msi/S2IdepixClassificationOp.java" />
     <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisPostProcessOp.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="207">
@@ -1337,16 +1329,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsPostProcessOp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="183">
-          <caret line="108" column="13" selection-start-line="108" selection-start-column="13" selection-end-line="108" selection-end-column="13" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-viirs/src/main/java/org/esa/snap/idepix/viirs/ViirsPostProcessOp.java" />
     <entry file="file://$PROJECT_DIR$/idepix-core/src/main/java/org/esa/snap/idepix/core/operators/CloudBuffer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
@@ -1357,20 +1340,7 @@
     <entry file="file://$MAVEN_REPOSITORY$/org/esa/snap/idepix-core/7.0.0/idepix-core-7.0.0.pom">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="26" selection-start-line="26" selection-end-line="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-avhrr/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="23" column="21" selection-start-line="23" selection-start-column="21" selection-end-line="23" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-avhrr/pom.xml" />
     <entry file="file://$PROJECT_DIR$/idepix-core/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="272">
@@ -1378,13 +1348,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-landsat8/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="38" selection-start-line="35" selection-end-line="38" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/idepix-landsat8/pom.xml" />
     <entry file="file://$PROJECT_DIR$/idepix-meris/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
@@ -1392,10 +1356,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-modis/pom.xml">
+    <entry file="file://$PROJECT_DIR$/idepix-olcislstr/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/idepix-probav/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/idepix-s2msi/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/idepix-seawifs/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/idepix-viirs/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/idepix-assembly/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="38" selection-start-line="38" selection-end-line="38" />
+        <state relative-caret-position="17">
+          <caret line="1" column="6" selection-start-line="1" selection-start-column="6" selection-end-line="1" selection-end-column="6" />
         </state>
       </provider>
     </entry>
@@ -1406,59 +1377,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-olcislstr/pom.xml">
+    <entry file="file://$PROJECT_DIR$/idepix-modis/src/main/java/org/esa/snap/idepix/modis/IdepixModisAlgorithm.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="69" column="28" selection-start-line="69" selection-start-column="28" selection-end-line="69" selection-end-column="28" />
+        <state relative-caret-position="162">
+          <caret line="168" column="32" selection-start-line="168" selection-start-column="32" selection-end-line="168" selection-end-column="32" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-probav/pom.xml">
+    <entry file="file://$PROJECT_DIR$/idepix-modis/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="37" column="17" selection-start-line="37" selection-start-column="17" selection-end-line="37" selection-end-column="17" />
+        <state relative-caret-position="340">
+          <caret line="27" column="24" selection-start-line="27" selection-start-column="24" selection-end-line="27" selection-end-column="24" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-s2msi/pom.xml">
+    <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1280">
-          <caret line="24" column="22" selection-start-line="24" selection-start-column="22" selection-end-line="24" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-seawifs/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="29" column="30" selection-start-line="29" selection-start-column="30" selection-end-line="29" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-spotvgt/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="80">
-          <caret line="23" column="22" selection-start-line="23" selection-start-column="22" selection-end-line="23" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-viirs/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="22" column="44" selection-start-line="22" selection-start-column="44" selection-end-line="22" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idepix-assembly/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="16" column="30" lean-forward="true" selection-start-line="16" selection-start-column="30" selection-end-line="16" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="6" lean-forward="true" selection-start-line="1" selection-start-column="6" selection-end-line="1" selection-end-column="6" />
+        <state relative-caret-position="204">
+          <caret line="37" column="58" lean-forward="true" selection-start-line="37" selection-start-column="58" selection-end-line="37" selection-end-column="58" />
         </state>
       </provider>
     </entry>
@@ -1520,7 +1456,6 @@
             <option name="proportions">
               <list>
                 <option value="0.2" />
-                <option value="0.6" />
               </list>
             </option>
           </splitter-proportions>
