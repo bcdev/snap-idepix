@@ -131,13 +131,13 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
 
     @Override
     void runAvhrrAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        AvhrrAlgorithm avhrrAlgorithm = new AvhrrAlgorithm();
+        Avhrr2Algorithm avhrr2Algorithm = new Avhrr2Algorithm();
 
         final double sza = sourceSamples[AvhrrConstants.SRC_USGS_SZA].getDouble();
         final double latitude = sourceSamples[AvhrrConstants.SRC_USGS_LAT].getDouble();
         final double longitude = sourceSamples[AvhrrConstants.SRC_USGS_LON].getDouble();
-        avhrrAlgorithm.setLatitude(latitude);
-        avhrrAlgorithm.setLongitude(longitude);
+        avhrr2Algorithm.setLatitude(latitude);
+        avhrr2Algorithm.setLongitude(longitude);
         double vza = Math.abs(vzaTable.getVza(x));  // !!!
 
         final GeoPos satPosition = computeSatPosition(y);
@@ -167,7 +167,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
             avhrrRadiance[2] = sourceSamples[AvhrrConstants.SRC_USGS_RADIANCE_3].getDouble();           // mW*cm/(m^2*sr)
             avhrrRadiance[3] = sourceSamples[AvhrrConstants.SRC_USGS_RADIANCE_4].getDouble();           // mW*cm/(m^2*sr)
             avhrrRadiance[4] = sourceSamples[AvhrrConstants.SRC_USGS_RADIANCE_5].getDouble();           // mW*cm/(m^2*sr)
-            avhrrAlgorithm.setRadiance(avhrrRadiance);
+            avhrr2Algorithm.setRadiance(avhrrRadiance);
 
             float waterFraction = Float.NaN;
             // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
@@ -184,29 +184,29 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
             inputVector[4] = Math.sqrt(avhrrRadiance[1]);
             inputVector[5] = Math.sqrt(avhrrRadiance[3]);
             inputVector[6] = Math.sqrt(avhrrRadiance[4]);
-            avhrrAlgorithm.setRadiance(avhrrRadiance);
-            avhrrAlgorithm.setWaterFraction(waterFraction);
+            avhrr2Algorithm.setRadiance(avhrrRadiance);
+            avhrr2Algorithm.setWaterFraction(waterFraction);
 
             double[] nnOutput = nnWrapper.getNeuralNet().calc(inputVector);
 
-            avhrrAlgorithm.setNnOutput(nnOutput);
-            avhrrAlgorithm.setAmbiguousSureSeparationValue(avhrrNNCloudAmbiguousSureSeparationValue);
-            avhrrAlgorithm.setSureSnowSeparationValue(avhrrNNCloudSureSnowSeparationValue);
+            avhrr2Algorithm.setNnOutput(nnOutput);
+            avhrr2Algorithm.setAmbiguousSureSeparationValue(avhrrNNCloudAmbiguousSureSeparationValue);
+            avhrr2Algorithm.setSureSnowSeparationValue(avhrrNNCloudSureSnowSeparationValue);
 
-            avhrrAlgorithm.setReflCh1(albedo1Norm / 100.0); // on [0,1]        --> put here albedo_norm now!!
-            avhrrAlgorithm.setReflCh2(albedo2Norm / 100.0); // on [0,1]
+            avhrr2Algorithm.setReflCh1(albedo1Norm / 100.0); // on [0,1]        --> put here albedo_norm now!!
+            avhrr2Algorithm.setReflCh2(albedo2Norm / 100.0); // on [0,1]
 
             final double btCh3 = AvhrrAcUtils.convertRadianceToBt(noaaId, rad2BTTable, avhrrRadiance[2], 3, waterFraction);     // GK,MB 20151102: use K everywhere!!
             final double btCh4 = AvhrrAcUtils.convertRadianceToBt(noaaId, rad2BTTable, avhrrRadiance[3], 4, waterFraction);
-            avhrrAlgorithm.setBtCh4(btCh4);
+            avhrr2Algorithm.setBtCh4(btCh4);
             final double btCh5 = AvhrrAcUtils.convertRadianceToBt(noaaId, rad2BTTable, avhrrRadiance[4], 5, waterFraction);
-            avhrrAlgorithm.setBtCh5(btCh5);
-            avhrrAlgorithm.setElevation(altitude);
+            avhrr2Algorithm.setBtCh5(btCh5);
+            avhrr2Algorithm.setElevation(altitude);
 
             final double albedo3 = calculateReflectancePartChannel3b(avhrrRadiance[2], btCh4, btCh5, sza);
-            avhrrAlgorithm.setReflCh3(albedo3); // on [0,1]
+            avhrr2Algorithm.setReflCh3(albedo3); // on [0,1]
 
-            setClassifFlag(targetSamples, avhrrAlgorithm);
+            setClassifFlag(targetSamples, avhrr2Algorithm);
             targetSamplesIndex = 1;
             targetSamples[targetSamplesIndex++].set(vza);
             targetSamples[targetSamplesIndex++].set(sza);

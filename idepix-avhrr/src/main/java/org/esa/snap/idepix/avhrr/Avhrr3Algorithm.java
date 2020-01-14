@@ -1,50 +1,18 @@
 package org.esa.snap.idepix.avhrr;
 
-import org.esa.snap.idepix.core.util.IdepixIO;
-
 /**
- * IDEPIX instrument-specific pixel identification algorithm for GlobAlbedo: abstract superclass
+ * IDEPIX instrument-specific pixel identification algorithm
  *
  * @author olafd
  */
-public class Avhrr3Algorithm implements AvhrrPixelProperties {
-
-    private float waterFraction;
-    private double[] radiance;
-    private double[] nnOutput;
-
-    private double avhrracSchillerNNCloudAmbiguousSureSeparationValue;
-    private double avhrracSchillerNNCloudSureSnowSeparationValue;
-
-    private double reflCh1;
-    private double reflCh2;
-    private double reflCh3;
-    //    double btCh3;
-    private double btCh4;
-    private double btCh5;
-
-    private double ndsi;
-
-    private double latitude;
-    private double longitude;
-    private double elevation;
-
-    @Override
-    public boolean isInvalid() {
-        return !IdepixIO.areAllReflectancesValid(radiance);
-    }
-
-    @Override
-    public boolean isCloud() {
-        return isCloudAmbiguous() || isCloudSure();
-    }
+public class Avhrr3Algorithm extends AvhrrAlgorithm {
 
     @Override
     public boolean isSnowIce() {
 
 
 //        final double ndsi = (reflCh1 - reflCh3) / (reflCh3 + reflCh1);
-        boolean isSnowIceOne = (notIsCloudTgct() && ndsi > 0.5) && (reflCh1 > 0.45 && ndsi > 0.4);
+        boolean isSnowIceOne = (!isCloudTgct() && ndsi > 0.5) && (reflCh1 > 0.45 && ndsi > 0.4);
 
 
         if (!isSnowIceOne && nnOutput != null) {
@@ -85,13 +53,6 @@ public class Avhrr3Algorithm implements AvhrrPixelProperties {
     }
 
     @Override
-    public boolean isCloudAmbiguous() {
-        return isCloudSure();
-        // todo: discuss if we need specific ambiguous flag
-        // CB: cloud sure gives enough clouds, no ambiguous needed, 20141111
-    }
-
-    @Override
     public boolean isCloudSure() {
         if (isSnowIce()) {   // this check has priority
             return false;
@@ -107,7 +68,7 @@ public class Avhrr3Algorithm implements AvhrrPixelProperties {
         }
 
         // Test (GK/JM 20151029): use 'old' snow/ice test as additional cloud criterion:
-        boolean isCloudFromOldSnowIce = notIsCloudTgct() && ndsi > 0.8 && isLand();
+        boolean isCloudFromOldSnowIce = !isCloudTgct() && ndsi > 0.8 && isLand();
         // for AVHRR, nnOutput has one element:
         // nnOutput[0] =
         // 0 < x < 2.15 : clear
@@ -133,23 +94,6 @@ public class Avhrr3Algorithm implements AvhrrPixelProperties {
             return reflCh3 < 0.18 && reflCh1 > 0.15 && (reflCh1 + reflCh2 + reflCh3) / 3 > 0.2 &&
                     btCh4 < 302 && reflCh3 < 0.4;
         }
-    }
-
-    private boolean isCloudSureSchiller() {
-        boolean isCloudSureSchiller;
-        // for AVHRR, nnOutput has one element:
-        // nnOutput[0] =
-        // 0 < x < 2.15 : clear
-        // 2.15 < x < 3.45 : noncl / semitransparent cloud --> cloud ambiguous
-        // 3.45 < x < 4.45 : cloudy --> cloud sure
-        // 4.45 < x : clear snow/ice
-        if (nnOutput != null) {
-            isCloudSureSchiller = nnOutput[0] >= avhrracSchillerNNCloudAmbiguousSureSeparationValue &&
-                    nnOutput[0] < avhrracSchillerNNCloudSureSnowSeparationValue;   // separation numbers from report HS, 0141112 for NN Nr.2
-        } else {
-            isCloudSureSchiller = false;
-        }
-        return isCloudSureSchiller;
     }
 
     private boolean isCloudSnowIceFromDecisionTree() {
@@ -190,129 +134,4 @@ public class Avhrr3Algorithm implements AvhrrPixelProperties {
         return isCloudAdditional;
     }
 
-    private boolean notIsCloudTgct() {
-        return btCh4 >= AvhrrConstants.TGCT_THRESH;
-    }
-
-    private double getFmftThreshold() {
-        int fmftThresholdIndex = (int) (btCh4 - 200.0);
-        fmftThresholdIndex = Math.max(0, fmftThresholdIndex);
-        fmftThresholdIndex = Math.min(120, fmftThresholdIndex);
-        return AvhrrConstants.fmftTestThresholds[fmftThresholdIndex];
-    }
-
-    private boolean isDesertArea() {
-        return isLand() &&
-                ((latitude >= 10.0 && latitude < 35.0 && longitude >= -20.0 && longitude < 30.0) ||
-                        (latitude >= 5.0 && latitude < 50.0 && longitude >= 30.0 && longitude < 60.0) ||
-                        (latitude >= 25.0 && latitude < 50.0 && longitude >= 60.0 && longitude < 110.0) ||
-                        (latitude >= -31.0 && latitude < 19.0 && longitude >= 121.0 && longitude < 141.0) ||
-                        (latitude >= 35.0 && latitude < 50.0 && longitude >= 110.0 && longitude < 127.0));
-    }
-
-    private double getRgctThreshold(double ndvi) {
-        double rgctThresh = Double.MAX_VALUE;
-        if (ndvi < -0.05) {
-            rgctThresh = 0.8;
-        } else if (ndvi >= -0.05 && ndvi < 0.0) {
-            rgctThresh = 0.6;
-        } else if (ndvi >= 0.0 && ndvi < 0.05) {
-            rgctThresh = 0.5;
-        } else if (ndvi >= 0.05 && ndvi < 0.1) {
-            rgctThresh = 0.4;
-        } else if (ndvi >= 0.1 && ndvi < 0.15) {
-            rgctThresh = 0.35;
-        } else if (ndvi >= 0.15 && ndvi < 0.25) {
-            rgctThresh = 0.3;
-        } else if (ndvi >= 0.25) {
-            rgctThresh = 0.25;
-        }
-        return rgctThresh;
-    }
-
-    @Override
-    public boolean isCloudBuffer() {
-        // is applied in post processing!
-        return false;
-    }
-
-    @Override
-    public boolean isCloudShadow() {
-        // is applied in post processing!
-        return false;
-    }
-
-    @Override
-    public boolean isCoastline() {
-        // NOTE that this does not work if we have a PixelGeocoding. In that case, waterFraction
-        // is always 0 or 100!! (TS, OD, 20140502). If so, get a coastline in post processing approach.
-        return waterFraction < 100 && waterFraction > 0;
-    }
-
-    @Override
-    public boolean isLand() {
-        return waterFraction == 0;
-    }
-
-    @Override
-    public boolean isGlintRisk() {
-        return false;
-    }
-
-
-    void setReflCh1(double reflCh1) {
-        this.reflCh1 = reflCh1;
-    }
-
-    void setReflCh2(double reflCh2) {
-        this.reflCh2 = reflCh2;
-    }
-
-    void setReflCh3(double reflCh3) {
-        this.reflCh3 = reflCh3;
-    }
-
-    void setBtCh4(double btCh4) {
-        this.btCh4 = btCh4;
-    }
-
-    void setBtCh5(double btCh5) {
-        this.btCh5 = btCh5;
-    }
-
-    void setRadiance(double[] rad) {
-        this.radiance = rad;
-    }
-
-    void setNdsi(double ndsi) {
-        this.ndsi = ndsi;
-    }
-
-    void setWaterFraction(float waterFraction) {
-        this.waterFraction = waterFraction;
-    }
-
-    void setNnOutput(double[] nnOutput) {
-        this.nnOutput = nnOutput;
-    }
-
-    void setAmbiguousSureSeparationValue(double avhrracSchillerNNCloudAmbiguousSureSeparationValue) {
-        this.avhrracSchillerNNCloudAmbiguousSureSeparationValue = avhrracSchillerNNCloudAmbiguousSureSeparationValue;
-    }
-
-    void setSureSnowSeparationValue(double avhrracSchillerNNCloudSureSnowSeparationValue) {
-        this.avhrracSchillerNNCloudSureSnowSeparationValue = avhrracSchillerNNCloudSureSnowSeparationValue;
-    }
-
-    void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
-    void setElevation(double elevation) {
-        this.elevation = elevation;
-    }
 }

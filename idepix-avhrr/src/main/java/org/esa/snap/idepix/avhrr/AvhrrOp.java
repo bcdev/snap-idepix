@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.avhrr;
 
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.CloudBufferOp;
@@ -33,7 +34,8 @@ import java.util.Map;
         description = "Pixel identification and classification for AVHRR.")
 public class AvhrrOp extends BasisOp {
 
-    private static final int LAND_WATER_MASK_RESOLUTION = 1000;
+//    private static final int LAND_WATER_MASK_RESOLUTION = 1000;
+    private static final int LAND_WATER_MASK_RESOLUTION = 50;
     private static final int SUBSAMPLING_FACTOR_X = 1;
     private static final int SUBSAMPLING_FACTOR_Y = 1;
 
@@ -135,6 +137,19 @@ public class AvhrrOp extends BasisOp {
         Band cloudFlagBand;
         cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         cloudFlagBand.setSourceImage(finalProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
+
+        if (copyRadiances) {
+            for (int i = 0; i < AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES.length; i++) {
+                ProductUtils.copyBand(AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES[i],
+                                      sourceProduct, finalProduct, true);
+            }
+        }
+        if (copyGeometries) {
+            ProductUtils.copyBand(AvhrrConstants.SRC_TIMELINE_SZA_BAND_NAME, sourceProduct, finalProduct, true);
+            ProductUtils.copyBand(AvhrrConstants.SRC_TIMELINE_VZA_BAND_NAME, sourceProduct, finalProduct, true);
+            ProductUtils.copyBand(AvhrrConstants.SRC_TIMELINE_SAA_BAND_NAME, sourceProduct, finalProduct, true);
+            ProductUtils.copyBand(AvhrrConstants.SRC_TIMELINE_VAA_BAND_NAME, sourceProduct, finalProduct, true);
+        }
 
     }
     private void processAvhrr() {

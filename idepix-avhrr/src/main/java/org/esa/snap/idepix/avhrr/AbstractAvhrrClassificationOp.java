@@ -49,10 +49,10 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
     Product targetProduct;
 
     @Parameter(defaultValue = "false", label = " Copy input radiance bands (with albedo1/2 converted)")
-    boolean copyRadiances = false;
+    boolean copyRadiances;
 
     @Parameter(defaultValue = "false", label = " Copy geometry bands")
-    boolean copyGeometries = false;
+    boolean copyGeometries;
 
     @Parameter(defaultValue = "2", label = " Width of cloud buffer (# of pixels)")
     int cloudBufferWidth;
