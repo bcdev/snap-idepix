@@ -166,7 +166,6 @@ public class S2IdepixClassificationOp extends Operator {
     Band vzaBand;
     Band saaBand;
     Band vaaBand;
-    Band latBand;
 
     Mask validPixelMask;
 
@@ -250,7 +249,6 @@ public class S2IdepixClassificationOp extends Operator {
         final Tile vzaTile = getSourceTile(vzaBand, rectangle);
         final Tile saaTile = getSourceTile(saaBand, rectangle);
         final Tile vaaTile = getSourceTile(vaaBand, rectangle);
-        final Tile latTile = getSourceTile(latBand, rectangle);
 
         final Band nnTargetBand = targetProduct.getBand("nn_value");
         Tile nnTargetTile = null;
@@ -282,7 +280,6 @@ public class S2IdepixClassificationOp extends Operator {
                     S2IdepixAlgorithm s2MsiAlgorithm = createS2MsiAlgorithm(s2ReflectanceTiles,
                                                                             szaTile, vzaTile, saaTile, vaaTile,
                                                                             elevationTile,
-                                                                            latTile,
                                                                             validPixelTile,
                                                                             watermaskClassifier,
                                                                             s2MsiReflectance,
@@ -367,7 +364,6 @@ public class S2IdepixClassificationOp extends Operator {
         vzaBand = sourceProduct.getBand(S2IdepixConstants.S2_MSI_ANNOTATION_BAND_NAMES[1]);
         saaBand = sourceProduct.getBand(S2IdepixConstants.S2_MSI_ANNOTATION_BAND_NAMES[2]);
         vaaBand = sourceProduct.getBand(S2IdepixConstants.S2_MSI_ANNOTATION_BAND_NAMES[3]);
-        latBand = sourceProduct.getBand(S2IdepixConstants.LATITUDE_BAND_NAME);
     }
 
     public void extendTargetProduct() throws OperatorException {
@@ -391,8 +387,8 @@ public class S2IdepixClassificationOp extends Operator {
         }
 
         if (sourceProduct.containsBand("lon") && !targetProduct.containsBand("lon")) {
-            Band latBand = ProductUtils.copyBand("lon", sourceProduct, targetProduct, true);
-            latBand.setUnit("deg");
+            Band lonBand = ProductUtils.copyBand("lon", sourceProduct, targetProduct, true);
+            lonBand.setUnit("deg");
         }
 
         if (copyNNValue) {
@@ -425,7 +421,6 @@ public class S2IdepixClassificationOp extends Operator {
     private S2IdepixAlgorithm createS2MsiAlgorithm(Tile[] s2MsiReflectanceTiles,
                                                    Tile szaTile, Tile vzaTile, Tile saaTile, Tile vaaTile,
                                                    Tile elevationTile,
-                                                   Tile latTile,
                                                    Tile validPixelTile,
                                                    WatermaskClassifier classifier, float[] s2MsiReflectances,
                                                    int y,
@@ -446,8 +441,7 @@ public class S2IdepixClassificationOp extends Operator {
         final double vza = vzaTile.getSampleDouble(x, y);
         final double saa = saaTile.getSampleDouble(x, y);
         final double vaa = vaaTile.getSampleDouble(x, y);
-        final double lat = latTile.getSampleDouble(x, y);
-        s2MsiAlgorithm.setLat(lat);
+        s2MsiAlgorithm.setLat(getGeoPos(x, y).lat);
         final double elevation = elevationTile.getSampleDouble(x, y);
         s2MsiAlgorithm.setElevation(elevation);
         final double rhoToa442Thresh = calcRhoToa442ThresholdTerm(sza, vza, saa, vaa);
@@ -651,9 +645,6 @@ public class S2IdepixClassificationOp extends Operator {
     }
 
     void setCloudFlag(Tile targetTile, int y, int x, S2IdepixAlgorithm s2Algorithm) {
-        if (x == 900 && y == 450) {
-            System.out.println("x = " + x);
-        }
         // for given instrument, compute boolean pixel properties and write to cloud flag band
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_INVALID, s2Algorithm.isInvalid());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD, s2Algorithm.isCloud());
