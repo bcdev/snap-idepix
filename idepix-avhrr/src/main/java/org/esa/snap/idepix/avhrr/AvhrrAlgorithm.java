@@ -112,13 +112,27 @@ public abstract class AvhrrAlgorithm implements AvhrrPixelProperties {
         return AvhrrConstants.fmftTestThresholds[fmftThresholdIndex];
     }
 
-    boolean isDesertArea() {
+    //Mathews (1985) -
+    // Mathews, E., 1985: Atlas of archived vegetation, land-use and sea-sonal  albedo  data  sets.
+    // NASA  Tech.  Memo.  86199,  GoddardInstitute  for  Space  Studies,  New  York,  NY,  54  pp.
+    // [Availablefrom Goddard Institute for Space Studies, 2880 Broadway, NewYork, NY 10025.]:
+
+    // Africa                         (land between 10°–35°N,  20°W–30°E);
+    // Saudi  Arabia – western  Asia  (landbetween  5°–50°N,  30°–60°E);
+    // central  Asia                  (25°–50°N,60°–110°E);
+    // Australia                      (19°–31°S, 121°–141°E).
+
+
+
+    private boolean isDesertArea() {
         return isLand() &&
                 (latitude >= 10.0 && latitude < 35.0 && longitude >= -20.0 && longitude < 30.0) ||
                 (latitude >= 5.0 && latitude < 50.0 && longitude >= 30.0 && longitude < 60.0) ||
                 (latitude >= 25.0 && latitude < 50.0 && longitude >= 60.0 && longitude < 110.0) ||
-                (latitude >= -31.0 && latitude < 19.0 && longitude >= 121.0 && longitude < 141.0) ||
-                (latitude >= 35.0 && latitude < 50.0 && longitude >= 110.0 && longitude < 127.0);
+                (latitude >= 35.0 && latitude < 50.0 && longitude >= 110.0 && longitude < 127.0)||
+                (latitude >= -35.0 && latitude < -11.0 && longitude >= -80 && longitude < -60.0)||
+                (latitude >= -30.0 && latitude < -13.0 && longitude >= 8 && longitude < 19.0)||
+                (latitude >= -34.0 && latitude < -22.0 && longitude >= 129.0 && longitude < 144.0);
     }
 
     double getRgctThreshold(double ndvi) {
