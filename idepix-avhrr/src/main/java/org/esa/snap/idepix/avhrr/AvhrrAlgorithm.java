@@ -124,7 +124,7 @@ public abstract class AvhrrAlgorithm implements AvhrrPixelProperties {
 
 
 
-    private boolean isDesertArea() {
+    boolean isDesertArea() {
         return isLand() &&
                 (latitude >= 10.0 && latitude < 35.0 && longitude >= -20.0 && longitude < 30.0) ||
                 (latitude >= 5.0 && latitude < 50.0 && longitude >= 30.0 && longitude < 60.0) ||

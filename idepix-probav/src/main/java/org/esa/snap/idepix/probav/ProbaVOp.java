@@ -54,6 +54,11 @@ public class ProbaVOp extends BasisOp {
             description = " NN cloud ambiguous lower boundary")
     private double schillerNNCloudAmbiguousLowerBoundaryValue;
 
+    @Parameter(defaultValue = "1.2",
+            label = " NN cloud ambiguous upper boundary",
+            description = " NN cloud ambiguous upper boundary")
+    private double schillerNNCloudAmbiguousUpperBoundaryValue;
+
     @Parameter(defaultValue = "2.7",
             label = " NN cloud ambiguous/sure separation value",
             description = " NN cloud ambiguous cloud ambiguous/sure separation value")
@@ -152,6 +157,8 @@ public class ProbaVOp extends BasisOp {
         cloudClassificationParameters.put("isProcessingForC3SLot5", isProcessingForC3SLot5);
         cloudClassificationParameters.put("schillerNNCloudAmbiguousLowerBoundaryValue",
                                             schillerNNCloudAmbiguousLowerBoundaryValue);
+        cloudClassificationParameters.put("schillerNNCloudAmbiguousUpperBoundaryValue",
+                                            schillerNNCloudAmbiguousUpperBoundaryValue);
         cloudClassificationParameters.put("schillerNNCloudAmbiguousSureSeparationValue",
                                             schillerNNCloudAmbiguousSureSeparationValue);
         cloudClassificationParameters.put("schillerNNCloudSureSnowSeparationValue",

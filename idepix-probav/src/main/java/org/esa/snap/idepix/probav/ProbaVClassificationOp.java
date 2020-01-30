@@ -65,6 +65,12 @@ public class ProbaVClassificationOp extends Operator {
             description = " NN cloud ambiguous lower boundary")
     private double schillerNNCloudAmbiguousLowerBoundaryValue;
 
+    @Parameter(defaultValue = "1.2",
+            label = " NN cloud ambiguous lower boundary",
+            description = " NN cloud ambiguous lower boundary")
+    private double schillerNNCloudAmbiguousUpperBoundaryValue;
+
+
     @Parameter(defaultValue = "2.7",
             label = " NN cloud ambiguous/sure separation value",
             description = " NN cloud ambiguous cloud ambiguous/sure separation value")
@@ -193,7 +199,7 @@ public class ProbaVClassificationOp extends Operator {
                                                                                     y, x);
 
                     setCloudFlag(cloudFlagTargetTile, y, x, probaVAlgorithm);
-
+                    //TODO
                     // apply improvement from NN approach...
                     final double[] nnOutput = probaVAlgorithm.getNnOutput();
                     if (applySchillerNN) {
@@ -203,7 +209,7 @@ public class ProbaVClassificationOp extends Operator {
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                             if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
-                                    nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue) {
+                                    nnOutput[0] <= schillerNNCloudAmbiguousUpperBoundaryValue) {
                                 // this would be as 'CLOUD_AMBIGUOUS'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
