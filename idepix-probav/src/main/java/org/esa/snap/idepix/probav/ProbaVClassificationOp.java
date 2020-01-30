@@ -202,27 +202,39 @@ public class ProbaVClassificationOp extends Operator {
                     //TODO
                     // apply improvement from NN approach...
                     final double[] nnOutput = probaVAlgorithm.getNnOutput();
+                    final boolean smCloud = smFlagTile.getSampleBit(x, y, ProbaVClassificationOp.SM_F_CLOUD);
                     if (applySchillerNN) {
                         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                             if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
-                                    nnOutput[0] <= schillerNNCloudAmbiguousUpperBoundaryValue) {
+                                    nnOutput[0] <= schillerNNCloudAmbiguousUpperBoundaryValue && smCloud) {
                                 // this would be as 'CLOUD_AMBIGUOUS'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, false);
                             }
                             if (nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue &&
-                                    nnOutput[0] <= schillerNNCloudSureSnowSeparationValue) {
+                                    nnOutput[0] <= schillerNNCloudSureSnowSeparationValue && smCloud) {
                                 // this would be as 'CLOUD_SURE'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, false);
                             }
-                            if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue) {
+                            if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue && cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE)) {
                                 // this would be as 'SNOW/ICE'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, false);
+                            } else {
+                                    cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                             }
                         }
                         nnTargetTile.setSample(x, y, nnOutput[0]);
