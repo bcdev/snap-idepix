@@ -31,6 +31,13 @@ public abstract class AvhrrAlgorithm implements AvhrrPixelProperties {
     private float waterFraction;
     private double[] radiance;
     private double avhrracSchillerNNCloudAmbiguousSureSeparationValue;
+    private boolean isDesertSet;
+    private boolean isDesert;
+
+    public AvhrrAlgorithm() {
+        isDesertSet = false;
+        isDesert = false;
+    }
 
     @Override
     public boolean isInvalid() {
@@ -125,6 +132,9 @@ public abstract class AvhrrAlgorithm implements AvhrrPixelProperties {
 
 
     boolean isDesertArea() {
+        if (isDesertSet) {
+            return isDesert;
+        }
         return isLand() &&
                 (latitude >= 10.0 && latitude < 35.0 && longitude >= -20.0 && longitude < 30.0) ||
                 (latitude >= 5.0 && latitude < 50.0 && longitude >= 30.0 && longitude < 60.0) ||
@@ -209,6 +219,11 @@ public abstract class AvhrrAlgorithm implements AvhrrPixelProperties {
 
     void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    void setDesert(boolean isDesert) {
+        this.isDesertSet = true;
+        this.isDesert = isDesert;
     }
 
     void setElevation(double elevation) {

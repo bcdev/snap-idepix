@@ -12,12 +12,12 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.gpf.common.BandMathsOp;
 import org.esa.snap.core.gpf.pointop.*;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -41,12 +41,19 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
 
     private static final int CLASSIF_SAMPLE_INDEX = 0;
     private static final int NDSI_SAMPLE_INDEX = 1;
+    private static final int SOURCE_DESERT_SAMPLE_INDEX = 11;
 
     private String sensor;
     private boolean isAvhrrB3aInactive;
 
     @SourceProduct(alias = "l1b", description = "The source product.")
     Product sourceProduct;
+
+    @SourceProduct(alias = "desertMask", optional = true)
+    private Product desertProduct;
+
+    @SourceProduct(alias = "desertMaskColocated", optional = true)
+    private Product desertMaskProduct;
 
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
@@ -135,6 +142,9 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
             double ndsi;
             algorithmToUse.setLatitude(getGeoPos(x, y).lat);
             algorithmToUse.setLongitude(getGeoPos(x, y).lon);
+            if (sourceSamples.length == 12) {
+                algorithmToUse.setDesert(sourceSamples[SOURCE_DESERT_SAMPLE_INDEX].getBoolean());
+            }
             if (sensor.equals("AVHRR/2") || isAvhrrB3aInactive) {
                 final double bt3 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_3b].getDouble();    // brightness temp !!
                 avhrrRadiance[2] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt3, 3, waterFraction);
@@ -224,6 +234,9 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
             sampleConfigurer.defineSample(index++, AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES[i]);
         }
         sampleConfigurer.defineSample(index, IdepixConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
+        if (desertMaskProduct != null) {
+            sampleConfigurer.defineSample(SOURCE_DESERT_SAMPLE_INDEX, "DesertMaskArea", desertMaskProduct);
+        }
     }
 
     @Override
@@ -280,6 +293,8 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
             throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
         }
     }
+
+
 
     /**
      * The Service Provider Interface (SPI) for the operator.

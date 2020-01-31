@@ -15,6 +15,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.collocation.CollocateOp;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,13 +45,23 @@ public class AvhrrOp extends BasisOp {
             description = "The AVHRR source product.")
     private Product sourceProduct;
 
+    @SourceProduct(alias = "desertMaskProduct",
+            label = "desert mask produkt",
+            description = "The AVHRR desert mask product.",
+            optional = true
+    )
+    private Product desertProduct;
+
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
 
     private Product classificationProduct;
+
     private Product finalProduct;
 
     private Product waterMaskProduct;
+
+    private Product desertMaskProduct;
 
 
     @Parameter(defaultValue = "false", label = " Copy input radiance/reflectance bands")
@@ -86,6 +97,8 @@ public class AvhrrOp extends BasisOp {
 
     @Override
     public void initialize() throws OperatorException {
+        sourceProduct = getSourceProduct("sourceProduct");
+        desertProduct = getSourceProduct("desertMaskProduct");
         final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.AVHRR);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
@@ -128,6 +141,13 @@ public class AvhrrOp extends BasisOp {
         createWaterMaskProduct();
         timelineClassificationOp.setSourceProduct("waterMask", waterMaskProduct);
 
+        if (desertProduct != null) {
+            desertMaskProduct = collocateDesertProduct(sourceProduct, desertProduct);
+        }
+        if (desertMaskProduct != null) {
+            timelineClassificationOp.setSourceProduct("desertMaskCollocated", desertMaskProduct);
+        }
+
         classificationProduct = timelineClassificationOp.getTargetProduct();
         postProcess();
 
@@ -160,8 +180,16 @@ public class AvhrrOp extends BasisOp {
             usgsClassificationOp.setParameter(key, cloudClassificationParameters.get(key));
         }
         usgsClassificationOp.setSourceProduct("l1b", sourceProduct);
+
         createWaterMaskProduct();
         usgsClassificationOp.setSourceProduct("waterMask", waterMaskProduct);
+
+        if (desertProduct != null) {
+            desertMaskProduct = collocateDesertProduct(sourceProduct, desertProduct);
+        }
+        if (desertMaskProduct != null) {
+            usgsClassificationOp.setSourceProduct("desertMaskCollocated", desertMaskProduct);
+        }
 
         classificationProduct = usgsClassificationOp.getTargetProduct();
         postProcess();
@@ -204,6 +232,16 @@ public class AvhrrOp extends BasisOp {
         waterParameters.put("subSamplingFactorX", SUBSAMPLING_FACTOR_X);
         waterParameters.put("subSamplingFactorY", SUBSAMPLING_FACTOR_Y);
         waterMaskProduct = GPF.createProduct("LandWaterMask", waterParameters, sourceProduct);
+    }
+
+    private Product collocateDesertProduct(Product sourceProduct, Product desertProduct) {
+        CollocateOp collocateOp = new CollocateOp();
+        collocateOp.setMasterProduct(sourceProduct);
+        collocateOp.setSlaveProduct(desertProduct);
+        collocateOp.setParameter("resamplingType", "NEAREST_NEIGHBOUR");
+        collocateOp.setRenameMasterComponents(false);
+        collocateOp.setRenameSlaveComponents(false);
+        return collocateOp.getTargetProduct();
     }
 
     /**

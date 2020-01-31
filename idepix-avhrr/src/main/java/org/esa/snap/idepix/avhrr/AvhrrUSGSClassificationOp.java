@@ -36,12 +36,19 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
     @SourceProduct(alias = "l1b", description = "The source product.")
     Product sourceProduct;
 
+    @SourceProduct(alias = "desertMask", optional = true)
+    private Product desertProduct;
+
+    @SourceProduct(alias = "desertMaskCollocated", optional = true)
+    private Product desertMaskProduct;
+
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
     @TargetProduct(description = "The target product.")
     Product targetProduct;
 
+    private static final int SOURCE_DESERT_SAMPLE_INDEX = 11;
 
     @Override
     public void prepareInputs() throws OperatorException {
@@ -138,6 +145,9 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         final double longitude = sourceSamples[AvhrrConstants.SRC_USGS_LON].getDouble();
         avhrr2Algorithm.setLatitude(latitude);
         avhrr2Algorithm.setLongitude(longitude);
+        if (sourceSamples.length == 10) {
+            avhrr2Algorithm.setDesert(sourceSamples[AvhrrConstants.SRC_USGS_DESERTMASK].getBoolean());
+        }
         double vza = Math.abs(vzaTable.getVza(x));  // !!!
 
         final GeoPos satPosition = computeSatPosition(y);

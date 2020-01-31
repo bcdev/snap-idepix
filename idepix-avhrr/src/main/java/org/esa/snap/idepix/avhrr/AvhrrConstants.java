@@ -49,6 +49,7 @@ public class AvhrrConstants {
     static final int SRC_USGS_RADIANCE_4 = 6;
     static final int SRC_USGS_RADIANCE_5 = 7;
     static final int SRC_USGS_WATERFRACTION = 8;
+    static final int SRC_USGS_DESERTMASK = 9;
 
     static final String[] SRC_TIMELINE_SPECTRAL_BAND_NAMES = {
             "avhrr_b1", "avhrr_b2", "avhrr_b3a", "avhrr_b3b", "avhrr_b4", "avhrr_b5"
