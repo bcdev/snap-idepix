@@ -35,7 +35,7 @@
     </description>
 
     <properties>
-        <idepix.version>7.0.1-SNAPSHOT</idepix.version>
+        <idepix.version>7.0.1</idepix.version>
     </properties>
 
     <dependencies>
