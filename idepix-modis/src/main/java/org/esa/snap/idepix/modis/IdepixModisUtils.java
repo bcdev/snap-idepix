@@ -60,7 +60,7 @@ class IdepixModisUtils {
         final MetadataAttribute dayNightAttr = product.getMetadataRoot().getElement("Global_Attributes").
                 getAttribute("DayNightFlag");
 
-        if (dayNightAttr != null && !dayNightAttr.getData().getElemString().equals("Day")) {
+        if (dayNightAttr != null && !dayNightAttr.getData().getElemString().equals("Day") && !dayNightAttr.getData().getElemString().equals("Both")) {
             throw new OperatorException("Product '" + product.getName() +
                                                 "' does not seem to be a MODIS L1b Day product - will exit IdePix.");
         }
