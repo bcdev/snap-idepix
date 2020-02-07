@@ -46,10 +46,12 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
         //TODO
         if (isProcessingForC3SLot5) {
             // GK 20191013;
-            return !(processingLand && isSwirGood);
+            //return !(processingLand && isSwirGood);
+            return !isSwirGood;
         } else {
             // GK 20151126;
-            return !(isBlueGood && isRedGood && isNirGood && isSwirGood && processingLand);
+            //return !(isBlueGood && isRedGood && isNirGood && isSwirGood && processingLand);
+            return !(isBlueGood && isRedGood && isNirGood && isSwirGood);
         }
     }
 
@@ -344,7 +346,7 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
     }
 
     public void setProcessingForC3SLot5(boolean isProcessingForC3SLot5) {
-        isProcessingForC3SLot5 = isProcessingForC3SLot5;
+        this.isProcessingForC3SLot5 = isProcessingForC3SLot5;
     }
 
     void setIsBlueGood(boolean isBlueGood) {
