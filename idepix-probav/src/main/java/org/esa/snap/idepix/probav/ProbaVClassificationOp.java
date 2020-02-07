@@ -318,7 +318,7 @@ public class ProbaVClassificationOp extends Operator {
             setIsWaterByFraction(watermaskFraction, probaVAlgorithm);
         }
 
-        checkProbavReflectanceQuality(probaVAlgorithm, probavReflectance, smFlagTile, isLand, x, y);
+        checkProbavReflectanceQuality(probaVAlgorithm, probavReflectance, smFlagTile, isLand, isProcessingForC3SLot5, x, y);
         probaVAlgorithm.setRefl(probavReflectance);
 
         SchillerNeuralNetWrapper nnWrapper = vgtNeuralNet.get();
@@ -459,6 +459,7 @@ public class ProbaVClassificationOp extends Operator {
                                                float[] probavReflectance,
                                                Tile smFlagTile,
                                                boolean isProcessingLand,
+                                               boolean isProcessingForC3SLot5,
                                                int x, int y) {
         final boolean isBlueGood = smFlagTile.getSampleBit(x, y, SM_F_BLUE_GOOD);
         final boolean isRedGood = smFlagTile.getSampleBit(x, y, SM_F_RED_GOOD);
@@ -470,10 +471,18 @@ public class ProbaVClassificationOp extends Operator {
         probaVAlgorithm.setIsNirGood(isNirGood);
         probaVAlgorithm.setIsSwirGood(isSwirGood);
         probaVAlgorithm.setProcessingLand(isProcessingLand);
-
-        if (!isBlueGood || !isRedGood || !isNirGood || !isSwirGood || !isProcessingLand) {
-            for (int i = 0; i < probavReflectance.length; i++) {
-                probavReflectance[i] = Float.NaN;
+// TODO
+        if (isProcessingForC3SLot5){
+            if (!isSwirGood || !isProcessingLand) {
+                for (int i = 0; i < probavReflectance.length; i++) {
+                    probavReflectance[i] = Float.NaN;
+                }
+            }
+        } else {
+            if (!isBlueGood || !isRedGood || !isNirGood || !isSwirGood || !isProcessingLand) {
+                for (int i = 0; i < probavReflectance.length; i++) {
+                    probavReflectance[i] = Float.NaN;
+                }
             }
         }
     }

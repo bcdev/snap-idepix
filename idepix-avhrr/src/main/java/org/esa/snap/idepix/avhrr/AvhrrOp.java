@@ -146,6 +146,7 @@ public class AvhrrOp extends BasisOp {
         }
         if (desertMaskProduct != null) {
             timelineClassificationOp.setSourceProduct("desertMaskCollocated", desertMaskProduct);
+            getLogger().info("desert mask " + desertMaskProduct.getName() + " applied");
         }
 
         classificationProduct = timelineClassificationOp.getTargetProduct();

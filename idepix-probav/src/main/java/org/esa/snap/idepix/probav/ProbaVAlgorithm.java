@@ -43,9 +43,10 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
     private float[] refl;
 
     public boolean isInvalid() {
+        //TODO
         if (isProcessingForC3SLot5) {
             // GK 20191013;
-            return !processingLand;
+            return !(processingLand && isSwirGood);
         } else {
             // GK 20151126;
             return !(isBlueGood && isRedGood && isNirGood && isSwirGood && processingLand);

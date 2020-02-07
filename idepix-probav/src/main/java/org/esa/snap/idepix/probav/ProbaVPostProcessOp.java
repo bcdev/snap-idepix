@@ -162,6 +162,10 @@ public class ProbaVPostProcessOp extends Operator {
         targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
         targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, safeClearWaterFinal);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, safeCloudFinal);
+        if (safeCloudFinal) {
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+        }
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, safeSnowIce);
     }
 
