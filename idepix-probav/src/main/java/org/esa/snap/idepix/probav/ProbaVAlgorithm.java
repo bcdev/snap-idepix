@@ -384,4 +384,20 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
     double[] getNnOutput() {
         return nnOutput;
     }
+
+    public boolean isBlueGood() {
+        return isBlueGood;
+    }
+
+    public boolean isRedGood() {
+        return isRedGood;
+    }
+
+    public boolean isNirGood() {
+        return isNirGood;
+    }
+
+    public boolean isSwirGood() {
+        return isSwirGood;
+    }
 }

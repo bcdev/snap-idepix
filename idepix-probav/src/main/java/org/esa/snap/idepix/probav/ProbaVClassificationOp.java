@@ -187,6 +187,9 @@ public class ProbaVClassificationOp extends Operator {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
 
+//                    if (x == 15 && y == 80) {
+//                        System.out.println("x = " + x);
+//                    }
                     byte waterMaskFraction = WatermaskClassifier.INVALID_VALUE;
                     if (!useL1bLandWaterFlag) {
                         waterMaskFraction = (byte) waterFractionTile.getSampleInt(x, y);
@@ -303,6 +306,15 @@ public class ProbaVClassificationOp extends Operator {
             probavReflectance[i] = probavReflectanceTiles[i].getSampleFloat(x, y);
         }
 
+        final boolean isBlueGood = smFlagTile.getSampleBit(x, y, SM_F_BLUE_GOOD);
+        final boolean isRedGood = smFlagTile.getSampleBit(x, y, SM_F_RED_GOOD);
+        final boolean isNirGood = smFlagTile.getSampleBit(x, y, SM_F_NIR_GOOD);
+        final boolean isSwirGood = smFlagTile.getSampleBit(x, y, SM_F_SWIR_GOOD);
+        probaVAlgorithm.setIsBlueGood(isBlueGood);
+        probaVAlgorithm.setIsRedGood(isRedGood);
+        probaVAlgorithm.setIsNirGood(isNirGood);
+        probaVAlgorithm.setIsSwirGood(isSwirGood);
+
         final double altitude = computeGetasseAltitude(x, y);
         probaVAlgorithm.setElevation(altitude);
 
@@ -318,7 +330,7 @@ public class ProbaVClassificationOp extends Operator {
             setIsWaterByFraction(watermaskFraction, probaVAlgorithm);
         }
 
-        checkProbavReflectanceQuality(probaVAlgorithm, probavReflectance, smFlagTile, isLand, isProcessingForC3SLot5, x, y);
+        checkProbavReflectanceQuality(probaVAlgorithm, probavReflectance, isLand, isProcessingForC3SLot5, x, y);
         probaVAlgorithm.setRefl(probavReflectance);
 
         SchillerNeuralNetWrapper nnWrapper = vgtNeuralNet.get();
@@ -430,15 +442,15 @@ public class ProbaVClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, probaVAlgorithm.isWhite());
     }
 
-    private void setIsWaterByFraction(byte watermaskFraction, AbstractPixelProperties pixelProperties) {
+    private void setIsWaterByFraction(byte watermaskFraction, ProbaVAlgorithm probaVAlgorithm) {
         boolean isWater;
         if (watermaskFraction == WatermaskClassifier.INVALID_VALUE) {
             // fallback
-            isWater = pixelProperties.isL1Water();
+            isWater = probaVAlgorithm.isL1Water();
         } else {
             isWater = watermaskFraction >= WATERMASK_FRACTION_THRESH;
         }
-        pixelProperties.setIsWater(isWater);
+        probaVAlgorithm.setIsWater(isWater);
     }
 
     private double computeGetasseAltitude(float x, float y) {
@@ -457,19 +469,13 @@ public class ProbaVClassificationOp extends Operator {
 
     private void checkProbavReflectanceQuality(ProbaVAlgorithm probaVAlgorithm,
                                                float[] probavReflectance,
-                                               Tile smFlagTile,
                                                boolean isProcessingLand,
                                                boolean isProcessingForC3SLot5,
                                                int x, int y) {
-        final boolean isBlueGood = smFlagTile.getSampleBit(x, y, SM_F_BLUE_GOOD);
-        final boolean isRedGood = smFlagTile.getSampleBit(x, y, SM_F_RED_GOOD);
-        final boolean isNirGood = smFlagTile.getSampleBit(x, y, SM_F_NIR_GOOD);
-        final boolean isSwirGood = smFlagTile.getSampleBit(x, y, SM_F_SWIR_GOOD);
-//        final boolean isProcessingLand = smFlagTile.getSampleBit(x, y, SM_F_LAND);
-        probaVAlgorithm.setIsBlueGood(isBlueGood);
-        probaVAlgorithm.setIsRedGood(isRedGood);
-        probaVAlgorithm.setIsNirGood(isNirGood);
-        probaVAlgorithm.setIsSwirGood(isSwirGood);
+        final boolean isBlueGood = probaVAlgorithm.isBlueGood();
+        final boolean isRedGood = probaVAlgorithm.isRedGood();
+        final boolean isNirGood = probaVAlgorithm.isNirGood();
+        final boolean isSwirGood = probaVAlgorithm.isSwirGood();
         probaVAlgorithm.setProcessingLand(isProcessingLand);
 // TODO
         if (isProcessingForC3SLot5){
