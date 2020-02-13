@@ -47,11 +47,11 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
         if (isProcessingForC3SLot5) {
             // GK 20191013;
             //return !(processingLand && isSwirGood);
-            return !isSwirGood;
+            return !(isBlueGood && isRedGood && isNirGood && isSwirGood);
         } else {
             // GK 20151126;
             //return !(isBlueGood && isRedGood && isNirGood && isSwirGood && processingLand);
-            return !(isBlueGood && isRedGood && isNirGood && isSwirGood);
+            return !(isBlueGood && isRedGood && isNirGood && isSwirGood && processingLand);
         }
     }
 
