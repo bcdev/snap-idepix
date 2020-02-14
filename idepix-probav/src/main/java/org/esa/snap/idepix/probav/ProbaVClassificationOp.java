@@ -107,7 +107,7 @@ public class ProbaVClassificationOp extends Operator {
     private Band landWaterBand;
 
     static final int SM_F_CLEAR = 0;
-//    static final int SM_F_UNDEFINED = 1;
+    static final int SM_F_UNDEFINED = 1;
     static final int SM_F_CLOUD = 2;
 //    static final int SM_F_SNOWICE = 3;
     static final int SM_F_CLOUDSHADOW = 4;
@@ -310,10 +310,12 @@ public class ProbaVClassificationOp extends Operator {
         final boolean isRedGood = smFlagTile.getSampleBit(x, y, SM_F_RED_GOOD);
         final boolean isNirGood = smFlagTile.getSampleBit(x, y, SM_F_NIR_GOOD);
         final boolean isSwirGood = smFlagTile.getSampleBit(x, y, SM_F_SWIR_GOOD);
+        final boolean isUndefined = smFlagTile.getSampleBit(x, y, SM_F_UNDEFINED);
         probaVAlgorithm.setIsBlueGood(isBlueGood);
         probaVAlgorithm.setIsRedGood(isRedGood);
         probaVAlgorithm.setIsNirGood(isNirGood);
         probaVAlgorithm.setIsSwirGood(isSwirGood);
+        probaVAlgorithm.setIsUndefined(isUndefined);
 
         final double altitude = computeGetasseAltitude(x, y);
         probaVAlgorithm.setElevation(altitude);

@@ -145,6 +145,7 @@ public class ProbaVPostProcessOp extends Operator {
         final boolean idepixClearWater = targetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER);
         final boolean idepixClearSnow = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
         final boolean idepixCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+        final boolean idepixInvalid = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
 
         final boolean safeClearLand = smClear && idepixLand && idepixClearLand && !idepixClearSnow;
         final boolean safeClearWater = smClear && idepixWater && idepixClearWater && !idepixClearSnow;
@@ -153,12 +154,13 @@ public class ProbaVPostProcessOp extends Operator {
         // GK 20151201;
         final boolean smCloud = smFlagTile.getSampleBit(x, y, ProbaVClassificationOp.SM_F_CLOUD);
         final boolean safeCloud = idepixCloud || (potentialCloudSnow && (!safeSnowIce && !safeClearWater));
-        final boolean safeClearWaterFinal = ((!safeClearLand && !safeSnowIce && !safeCloud && !smCloud) && idepixWater) || safeClearWater;
-        final boolean safeClearLandFinal = ((!safeSnowIce && !idepixCloud && !smCloud && !safeClearWaterFinal) && idepixLand) || safeClearLand;
-        final boolean safeCloudFinal = safeCloud && (!safeClearLandFinal && !safeClearWaterFinal);
+        final boolean safeClearWaterFinal = (((!safeClearLand && !safeSnowIce && !safeCloud && !smCloud) && idepixWater) || safeClearWater) && !idepixInvalid;
+        final boolean safeClearLandFinal = (((!safeSnowIce && !idepixCloud && !smCloud && !safeClearWaterFinal) && idepixLand) || safeClearLand) && !idepixInvalid;
+        final boolean safeCloudFinal = safeCloud && (!safeClearLandFinal && !safeClearWaterFinal) && !idepixInvalid;;
 
 
         // GK 20151201;
+
         targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
         targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, safeClearWaterFinal);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, safeCloudFinal);

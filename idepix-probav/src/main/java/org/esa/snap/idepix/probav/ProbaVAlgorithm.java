@@ -36,6 +36,7 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
     private boolean isRedGood;
     private boolean isNirGood;
     private boolean isSwirGood;
+    private boolean isUndefined;
 
     private double elevation;
 
@@ -127,7 +128,32 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
 
     public boolean isLand() {
         final boolean isLand1 = !usel1bLandWaterFlag && !isWater;
-        return !isInvalid() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        if (isProcessingForC3SLot5) {
+            return !isUndefined() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        } else {
+            return !isInvalid() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        }
+    }
+
+    @Override
+    public boolean isWater() {
+        if (isProcessingForC3SLot5) {
+            return !isUndefined() && isWater;
+        } else {
+            return !isInvalid() && isWater;
+        }
+    }
+
+    public void setIsWater(boolean isWater) {
+        if (isProcessingForC3SLot5) {
+            this.isWater = !isUndefined() && isWater;
+        } else {
+            this.isWater = !isInvalid() && isWater;
+        }
+    }
+
+    private boolean isUndefined() {
+        return isUndefined;
     }
 
     public boolean isL1Water() {
@@ -363,6 +389,10 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
 
     void setIsSwirGood(boolean isSwirGood) {
         this.isSwirGood = isSwirGood;
+    }
+
+    void setIsUndefined(boolean isUndefined) {
+        this.isUndefined = isUndefined;
     }
 
     void setRefl(float[] refl) {
