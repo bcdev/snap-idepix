@@ -228,12 +228,13 @@ public class IdepixOlciUtilsTest {
         double saa = 147.73538;
         double oza = 2.3104007;
         double oaa = -76.864624;
-        assertEquals(146.03139, IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa), 1.E-4);
+        double lat = 25.;
+        assertEquals(146.03139, IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, lat), 1.E-4);
 
         sza = 45.74776;
         saa = 140.51381;
         oza = 40.13199;
         oaa = 100.81727;
-        assertEquals(195.46022, IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa), 1.E-4);
+        assertEquals(195.46022, IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, lat), 1.E-4);
     }
 }
