@@ -138,9 +138,10 @@ class IdepixOlciUtils {
      * @param saa - sun azimuth (deg)
      * @param oza - view zenith (deg)
      * @param oaa - view azimuth (deg)
+     * @param lat - latitude (deg)
      * @return the apparent saa (deg)
      */
-    static double computeApparentSaa(double sza, double saa, double oza, double oaa) {
+    static double computeApparentSaa(double sza, double saa, double oza, double oaa, double lat) {
         final double szaRad = sza * MathUtils.DTOR;
         final double ozaRad = oza * MathUtils.DTOR;
 
@@ -153,9 +154,12 @@ class IdepixOlciUtils {
         final double deltaPhiRad = deltaPhi * MathUtils.DTOR;
         final double numerator = Math.tan(szaRad) - Math.tan(ozaRad) * Math.cos(deltaPhiRad);
         final double denominator = Math.sqrt(Math.tan(ozaRad) * Math.tan(ozaRad) + Math.tan(szaRad) * Math.tan(szaRad) -
-                                                     2.0 * Math.tan(szaRad) * Math.tan(ozaRad) * Math.cos(deltaPhiRad));
+                2.0 * Math.tan(szaRad) * Math.tan(ozaRad) * Math.cos(deltaPhiRad));
 
-        final double delta = Math.acos(numerator / denominator);
+        double delta = Math.acos(numerator / denominator);
+        if (lat < 0.0){
+            delta =-1.*delta;
+        }
         if (oaa < 0.0) {
             return saa - delta * MathUtils.RTOD;
         } else {
