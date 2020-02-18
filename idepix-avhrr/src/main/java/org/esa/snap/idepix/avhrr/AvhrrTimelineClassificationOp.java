@@ -52,7 +52,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
     @SourceProduct(alias = "desertMask", optional = true)
     private Product desertProduct;
 
-    @SourceProduct(alias = "desertMaskColocated", optional = true)
+    @SourceProduct(alias = "desertMaskCollocated", optional = true)
     private Product desertMaskProduct;
 
     @SourceProduct(alias = "waterMask")
