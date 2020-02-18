@@ -36,6 +36,7 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
     private boolean isRedGood;
     private boolean isNirGood;
     private boolean isSwirGood;
+    private boolean isUndefined;
 
     private double elevation;
 
@@ -47,11 +48,11 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
         if (isProcessingForC3SLot5) {
             // GK 20191013;
             //return !(processingLand && isSwirGood);
-            return !isSwirGood;
+            return !(isBlueGood && isRedGood && isNirGood && isSwirGood);
         } else {
             // GK 20151126;
             //return !(isBlueGood && isRedGood && isNirGood && isSwirGood && processingLand);
-            return !(isBlueGood && isRedGood && isNirGood && isSwirGood);
+            return !(isBlueGood && isRedGood && isNirGood && isSwirGood && processingLand);
         }
     }
 
@@ -127,7 +128,32 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
 
     public boolean isLand() {
         final boolean isLand1 = !usel1bLandWaterFlag && !isWater;
-        return !isInvalid() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        if (isProcessingForC3SLot5) {
+            return !isUndefined() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        } else {
+            return !isInvalid() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        }
+    }
+
+    @Override
+    public boolean isWater() {
+        if (isProcessingForC3SLot5) {
+            return !isUndefined() && isWater;
+        } else {
+            return !isInvalid() && isWater;
+        }
+    }
+
+    public void setIsWater(boolean isWater) {
+        if (isProcessingForC3SLot5) {
+            this.isWater = !isUndefined() && isWater;
+        } else {
+            this.isWater = !isInvalid() && isWater;
+        }
+    }
+
+    private boolean isUndefined() {
+        return isUndefined;
     }
 
     public boolean isL1Water() {
@@ -365,6 +391,10 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
         this.isSwirGood = isSwirGood;
     }
 
+    void setIsUndefined(boolean isUndefined) {
+        this.isUndefined = isUndefined;
+    }
+
     void setRefl(float[] refl) {
         if (refl.length != IdepixConstants.PROBAV_WAVELENGTHS.length) {
             throw new OperatorException("PROBA-V pixel processing: Invalid number of wavelengths [" + refl.length +
@@ -383,5 +413,21 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
 
     double[] getNnOutput() {
         return nnOutput;
+    }
+
+    public boolean isBlueGood() {
+        return isBlueGood;
+    }
+
+    public boolean isRedGood() {
+        return isRedGood;
+    }
+
+    public boolean isNirGood() {
+        return isNirGood;
+    }
+
+    public boolean isSwirGood() {
+        return isSwirGood;
     }
 }
