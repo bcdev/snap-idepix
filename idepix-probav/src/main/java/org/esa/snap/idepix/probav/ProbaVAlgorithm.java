@@ -371,7 +371,7 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
         this.processingLand = processingLand;
     }
 
-    public void setProcessingForC3SLot5(boolean isProcessingForC3SLot5) {
+    void setProcessingForC3SLot5(boolean isProcessingForC3SLot5) {
         this.isProcessingForC3SLot5 = isProcessingForC3SLot5;
     }
 
@@ -415,19 +415,19 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
         return nnOutput;
     }
 
-    public boolean isBlueGood() {
+    boolean isBlueGood() {
         return isBlueGood;
     }
 
-    public boolean isRedGood() {
+    boolean isRedGood() {
         return isRedGood;
     }
 
-    public boolean isNirGood() {
+    boolean isNirGood() {
         return isNirGood;
     }
 
-    public boolean isSwirGood() {
+    boolean isSwirGood() {
         return isSwirGood;
     }
 }

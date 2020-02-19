@@ -479,7 +479,7 @@ public class ProbaVClassificationOp extends Operator {
         final boolean isNirGood = probaVAlgorithm.isNirGood();
         final boolean isSwirGood = probaVAlgorithm.isSwirGood();
         probaVAlgorithm.setProcessingLand(isProcessingLand);
-// TODO
+
         if (isProcessingForC3SLot5){
             if (!isSwirGood || !isProcessingLand) {
                 for (int i = 0; i < probavReflectance.length; i++) {

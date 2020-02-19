@@ -1,11 +1,6 @@
 package org.esa.snap.idepix.spotvgt;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.pixel.AbstractPixelProperties;
-import org.esa.snap.idepix.core.util.IdepixIO;
-import org.esa.snap.idepix.core.util.IdepixUtils;
-import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -16,6 +11,11 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.pixel.AbstractPixelProperties;
+import org.esa.snap.idepix.core.util.IdepixIO;
+import org.esa.snap.idepix.core.util.IdepixUtils;
+import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.watermask.operator.WatermaskClassifier;
 
 import java.awt.*;
@@ -356,6 +356,11 @@ public class VgtClassificationOp extends Operator {
                                             int y, int x) {
 
         VgtAlgorithm vgtAlgorithm = new VgtAlgorithm();
+
+        vgtAlgorithm.setProcessingForC3SLot5(isProcessingForC3SLot5);
+
+        final boolean isUndefined = smFlagTile.getSampleInt(x, y) == 0;    // GK, 20200219
+        vgtAlgorithm.setIsUndefined(isUndefined);
 
         for (int i = 0; i < IdepixConstants.VGT_REFLECTANCE_BAND_NAMES.length; i++) {
             vgtReflectance[i] = vgtReflectanceTiles[i].getSampleFloat(x, y);

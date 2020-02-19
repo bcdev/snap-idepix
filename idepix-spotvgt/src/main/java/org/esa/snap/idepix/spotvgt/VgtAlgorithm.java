@@ -1,11 +1,11 @@
 package org.esa.snap.idepix.spotvgt;
 
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.pixel.AbstractPixelProperties;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
-import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.core.util.math.MathUtils;
 
 /**
  * IDEPIX pixel identification algorithm for VGT
@@ -37,6 +37,11 @@ public class VgtAlgorithm extends AbstractPixelProperties {
     private boolean isWater;
     private boolean usel1bLandWaterFlag;
     private boolean isCoastline;
+
+    private boolean isUndefined;
+
+    private boolean isProcessingForC3SLot5;
+
 
     public boolean isInvalid() {
         return !IdepixIO.areAllReflectancesValid(refl);
@@ -88,12 +93,25 @@ public class VgtAlgorithm extends AbstractPixelProperties {
 
     public boolean isLand() {
         final boolean isLand1 = !usel1bLandWaterFlag && !isWater;
-        return !isInvalid() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        if (isProcessingForC3SLot5) {
+            return !isUndefined() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        } else {
+            return !isInvalid() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        }
     }
 
     public boolean isWater() {
-        return !isInvalid() && isWater;
+        if (isProcessingForC3SLot5) {
+            return !isUndefined() && isWater;
+        } else {
+            return !isInvalid() && isWater;
+        }
     }
+
+    private boolean isUndefined() {
+        return isUndefined;
+    }
+
 
     @Override
     public boolean isL1Water() {
@@ -265,8 +283,16 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         this.isCoastline = isCoastline;
     }
 
+    void setProcessingForC3SLot5(boolean isProcessingForC3SLot5) {
+        this.isProcessingForC3SLot5 = isProcessingForC3SLot5;
+    }
+
     public void setIsWater(boolean isWater) {
         this.isWater = !isInvalid() && isWater;
+    }
+
+    void setIsUndefined(boolean isUndefined) {
+        this.isUndefined = isUndefined;
     }
 
     void setRefl(float[] refl) {
