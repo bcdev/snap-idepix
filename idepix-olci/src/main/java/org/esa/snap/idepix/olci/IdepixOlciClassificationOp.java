@@ -233,7 +233,8 @@ public class IdepixOlciClassificationOp extends Operator {
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, isBright);
                     final boolean isCoastline = classifyCoastline(olciQualityFlagTile, y, x, waterFraction);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, isCoastline);
-                    if (isOlciLandPixel(x, y, olciQualityFlagTile, waterFraction)) {
+                    if (isOlciLandPixel(x, y, olciQualityFlagTile, waterFraction)&&
+                            !isOlciInlandWaterPixel(x, y, olciQualityFlagTile)) {
                         classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
                                          surface13Tile, trans13Tile, y, x);
                     } else {
@@ -358,6 +359,10 @@ public class IdepixOlciClassificationOp extends Operator {
                 return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
             }
         }
+    }
+
+    private boolean isOlciInlandWaterPixel(int x, int y, Tile olciL1bFlagTile) {
+        return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_FRESH_INLAND_WATER);
     }
 
     private void classifyCloud(int x, int y, Tile l1FlagsTile, Tile[] rhoToaTiles, Tile targetTile, boolean isCoastline) {
