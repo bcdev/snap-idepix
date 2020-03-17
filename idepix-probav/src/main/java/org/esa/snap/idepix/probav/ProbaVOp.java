@@ -93,6 +93,12 @@ public class ProbaVOp extends BasisOp {
             description = "The Proba-V L1b source product.")
     private Product sourceProduct;
 
+    @SourceProduct(alias = "vitoCloudProduct",
+            label = "Proba-V VITO cloud product",
+            optional = true,
+            description = "Proba-V VITO cloud product (optional)")
+    private Product vitoCloudProduct;
+
     private Product cloudProduct;
     private Product postProcessingProduct;
 
@@ -116,6 +122,7 @@ public class ProbaVOp extends BasisOp {
         // Cloud Classification
         Map<String, Product> cloudInput = new HashMap<>(4);
         cloudInput.put("l1b", sourceProduct);
+        cloudInput.put("vitoCm", vitoCloudProduct);
         cloudInput.put("waterMask", waterMaskProduct);
 
         Map<String, Object> cloudClassificationParameters = createCloudClassificationParameters();

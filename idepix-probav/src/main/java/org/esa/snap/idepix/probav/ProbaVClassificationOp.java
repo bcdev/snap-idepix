@@ -95,6 +95,9 @@ public class ProbaVClassificationOp extends Operator {
     @SourceProduct(alias = "l1b", description = "The source product.")
     private Product sourceProduct;
 
+    @SourceProduct(alias = "vitoCm", description = "Proba-V VITO cloud product.", optional = true)
+    private Product vitoCloudProduct;
+
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
 
@@ -137,6 +140,7 @@ public class ProbaVClassificationOp extends Operator {
 
     private static final String VGT_NET_NAME = "3x2x2_341.8.net";
     private ThreadLocal<SchillerNeuralNetWrapper> vgtNeuralNet;
+    private Band vitoCmBand;
 
 
     @Override
@@ -170,6 +174,11 @@ public class ProbaVClassificationOp extends Operator {
 
         Tile waterFractionTile = getSourceTile(landWaterBand, rectangle);
 
+        Tile vitoCmTile = null;
+        if (isProcessingForC3SLot5 && vitoCloudProduct != null) {
+            vitoCmTile = getSourceTile(vitoCmBand, rectangle);
+        }
+
         Tile[] probavReflectanceTiles = new Tile[IdepixConstants.PROBAV_REFLECTANCE_BAND_NAMES.length];
         float[] probavReflectance = new float[IdepixConstants.PROBAV_REFLECTANCE_BAND_NAMES.length];
         for (int i = 0; i < IdepixConstants.PROBAV_REFLECTANCE_BAND_NAMES.length; i++) {
@@ -187,9 +196,6 @@ public class ProbaVClassificationOp extends Operator {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
 
-//                    if (x == 15 && y == 80) {
-//                        System.out.println("x = " + x);
-//                    }
                     byte waterMaskFraction = WatermaskClassifier.INVALID_VALUE;
                     if (!useL1bLandWaterFlag) {
                         waterMaskFraction = (byte) waterFractionTile.getSampleInt(x, y);
@@ -241,6 +247,24 @@ public class ProbaVClassificationOp extends Operator {
                             }
                         }
                         nnTargetTile.setSample(x, y, nnOutput[0]);
+                    }
+
+                    // final check for c3sLot5 processing and VITO CM product present (GK 20200317):
+                    if (isProcessingForC3SLot5 && vitoCmTile != null) {
+                        final boolean isInvalid = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
+                        final int vitoCmValue = vitoCmTile.getSampleInt(x, y);
+                        if (!isInvalid && vitoCmValue == 2) {
+//                            if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD))  {
+//                                System.out.println("x,y = " + x + ", " + y);
+//                            }
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, false);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+                            cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, false);
+                            cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, false);
+                        }
                     }
 
                     for (Band band : targetProduct.getBands()) {
@@ -400,6 +424,14 @@ public class ProbaVClassificationOp extends Operator {
 
         // new bit masks:
         ProbaVUtils.setupProbavClassifBitmask(targetProduct);
+
+        if (isProcessingForC3SLot5 && vitoCloudProduct != null) {
+            vitoCloudProduct.setSceneGeoCoding(sourceProduct.getSceneGeoCoding());  // todo: check if products are compatible
+            vitoCmBand = vitoCloudProduct.getBand("cloud_mask");
+            if (vitoCmBand != null) {
+                ProductUtils.copyBand("cloud_mask", vitoCloudProduct, "vito_cloud_mask", targetProduct, true);
+            }
+        }
 
     }
 
