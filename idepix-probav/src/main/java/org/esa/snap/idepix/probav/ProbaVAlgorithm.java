@@ -144,6 +144,7 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
         }
     }
 
+    @Override
     public void setIsWater(boolean isWater) {
         if (isProcessingForC3SLot5) {
             this.isWater = !isUndefined() && isWater;

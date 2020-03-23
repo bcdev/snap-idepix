@@ -42,7 +42,7 @@ public class AvhrrPostProcessOp extends Operator {
 
     private boolean computeCloudShadow = false;   // todo: we have no info for this (pressure, height, temperature)
 
-    @Parameter(defaultValue = "false",
+    @Parameter(defaultValue = "true",
             label = " Apply spatial uniformity tests",
             description = "Apply spatial uniformity tests (actually works for AVHRR TIMELINE products only) . ")
     private boolean applyUniformityTests;
