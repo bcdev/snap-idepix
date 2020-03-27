@@ -129,7 +129,9 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
     public boolean isLand() {
         final boolean isLand1 = !usel1bLandWaterFlag && !isWater;
         if (isProcessingForC3SLot5) {
-            return !isUndefined() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+            //   TODO MASK
+            return isLand1 || (aPrioriLandValue() > LAND_THRESH);
+//            return !isUndefined() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
         } else {
             return !isInvalid() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
         }
@@ -138,7 +140,9 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
     @Override
     public boolean isWater() {
         if (isProcessingForC3SLot5) {
-            return !isUndefined() && isWater;
+            //   TODO MASK
+            return isWater;
+//            return !isUndefined() && isWater;
         } else {
             return !isInvalid() && isWater;
         }
@@ -147,7 +151,9 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
     @Override
     public void setIsWater(boolean isWater) {
         if (isProcessingForC3SLot5) {
-            this.isWater = !isUndefined() && isWater;
+            //   TODO MASK
+            this.isWater =  isWater;;
+//            this.isWater = !isUndefined() && isWater;
         } else {
             this.isWater = !isInvalid() && isWater;
         }
