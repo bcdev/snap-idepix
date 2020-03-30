@@ -24,6 +24,8 @@ class ProbaVUtils {
     static FlagCoding createProbavFlagCoding() {
         FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
+        flagCoding.addFlag("IDEPIX_INLAND_WATER", BitSetter.setFlag(0, ProbaVConstants.IDEPIX_INLAND_WATER),
+                ProbaVConstants.IDEPIX_INLAND_WATER_DESCR_TEXT);
         flagCoding.addFlag("IDEPIX_WATER", BitSetter.setFlag(0, ProbaVConstants.IDEPIX_WATER),
                            ProbaVConstants.IDEPIX_WATER_DESCR_TEXT);
         flagCoding.addFlag("IDEPIX_CLEAR_LAND", BitSetter.setFlag(0, ProbaVConstants.IDEPIX_CLEAR_LAND),
@@ -46,6 +48,11 @@ class ProbaVUtils {
         int h = classifProduct.getSceneRasterHeight();
         Mask mask;
         Random r = new Random(124567);
+
+        mask = Mask.BandMathsType.create("IDEPIX_INLAND_WATER", ProbaVConstants.IDEPIX_INLAND_WATER_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_INLAND_WATER",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
+        classifProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("IDEPIX_WATER", ProbaVConstants.IDEPIX_WATER_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.IDEPIX_WATER",

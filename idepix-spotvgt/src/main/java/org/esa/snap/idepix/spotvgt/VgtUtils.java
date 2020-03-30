@@ -19,6 +19,8 @@ class VgtUtils {
     static FlagCoding createVgtFlagCoding() {
         FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
+        flagCoding.addFlag("IDEPIX_INLAND_WATER", BitSetter.setFlag(0, VgtConstants.IDEPIX_INLAND_WATER),
+                VgtConstants.IDEPIX_INLAND_WATER_DESCR_TEXT);
         flagCoding.addFlag("IDEPIX_WATER", BitSetter.setFlag(0, VgtConstants.IDEPIX_WATER),
                            VgtConstants.IDEPIX_WATER_DESCR_TEXT);
         flagCoding.addFlag("IDEPIX_CLEAR_LAND", BitSetter.setFlag(0, VgtConstants.IDEPIX_CLEAR_LAND),
@@ -38,6 +40,10 @@ class VgtUtils {
         Mask mask;
         Random r = new Random(124567);
 
+        mask = Mask.BandMathsType.create("IDEPIX_INLAND_WATER", VgtConstants.IDEPIX_INLAND_WATER_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_INLAND_WATER",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
+        classifProduct.getMaskGroup().add(index++, mask);
         mask = Mask.BandMathsType.create("IDEPIX_WATER", VgtConstants.IDEPIX_WATER_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.IDEPIX_WATER",
                                          IdepixFlagCoding.getRandomColour(r), 0.5f);

@@ -45,9 +45,13 @@ public class VgtPostProcessOp extends Operator {
     private Product l1bProduct;
     @SourceProduct(alias = "vgtCloud")
     private Product vgtCloudProduct;
+    @SourceProduct(alias = "inlandWaterMaskCollocated", optional = true)
+    private Product inlandWaterCollProduct;
+
 
     private Band origCloudFlagBand;
     private Band origSmFlagBand;
+    private Band origInlandWaterFlagBand;
 
     private RectangleExtender rectCalculator;
 
@@ -61,7 +65,9 @@ public class VgtPostProcessOp extends Operator {
 
         origCloudFlagBand = finalVgtCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         origSmFlagBand = l1bProduct.getBand("SM");
-
+        if(inlandWaterCollProduct != null) {
+            origInlandWaterFlagBand = inlandWaterCollProduct.getBand("band_1");
+        }
         if (computeCloudBuffer) {
             rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
                                                                  l1bProduct.getSceneRasterHeight()),
@@ -96,11 +102,25 @@ public class VgtPostProcessOp extends Operator {
 
         final Tile cloudFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
         final Tile smFlagTile = getSourceTile(origSmFlagBand, srcRectangle);
+        Tile inlandWaterFlagTile = null;
+        if(inlandWaterCollProduct != null) {
+            inlandWaterFlagTile = getSourceTile(origInlandWaterFlagBand, srcRectangle);
+        }
+
+
+        boolean idepixLand;
+        int inlandWater;
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-
+                if (inlandWaterCollProduct != null) {
+                    idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
+                    inlandWater = inlandWaterFlagTile.getSampleInt(x, y);
+                    if(!idepixLand && inlandWater > 0.5) {
+                        inlandWaterFlagTile.setSample(x, y, VgtConstants.IDEPIX_INLAND_WATER, true);
+                    }
+                }
                 if (targetRectangle.contains(x, y)) {
                     boolean isInvalid = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
                     if (!isInvalid) {

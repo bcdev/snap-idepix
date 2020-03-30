@@ -1,5 +1,7 @@
 package org.esa.snap.idepix.avhrr;
 
+import org.esa.snap.idepix.core.IdepixConstants;
+
 /**
  * todo: add comment
  * To change this template use File | Settings | File Templates.
@@ -39,6 +41,17 @@ public class AvhrrConstants {
             AVHRR_AC_TL_ALBEDO_1_BAND_NAME,
             AVHRR_AC_TL_ALBEDO_2_BAND_NAME,
     };
+
+    static final int IDEPIX_INLAND_WATER = IdepixConstants.NUM_DEFAULT_FLAGS + 0;
+    static final int IDEPIX_WATER = IdepixConstants.NUM_DEFAULT_FLAGS + 1;
+    static final int IDEPIX_CLEAR_LAND = IdepixConstants.NUM_DEFAULT_FLAGS + 2;
+    static final int IDEPIX_CLEAR_WATER = IdepixConstants.NUM_DEFAULT_FLAGS + 3;
+
+    static final String IDEPIX_CLEAR_LAND_DESCR_TEXT = "Clear land pixels";
+    static final String IDEPIX_CLEAR_WATER_DESCR_TEXT = "Clear water pixels";
+    static final String IDEPIX_WATER_DESCR_TEXT = "Water pixels";
+    static final String IDEPIX_INLAND_WATER_DESCR_TEXT = "inland water pixels";
+
 
     static final int SRC_USGS_SZA = 0;
     static final int SRC_USGS_LAT = 1;

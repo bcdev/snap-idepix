@@ -1,9 +1,6 @@
 package org.esa.snap.idepix.spotvgt;
 
-import org.esa.snap.idepix.core.AlgorithmSelector;
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.util.IdepixIO;
-import org.esa.snap.idepix.core.operators.BasisOp;
+import org.esa.snap.collocation.CollocateOp;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -14,6 +11,10 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.idepix.core.AlgorithmSelector;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.BasisOp;
+import org.esa.snap.idepix.core.util.IdepixIO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -95,6 +96,12 @@ public class VgtOp extends BasisOp {
             description = "The SPOT-VGT L1b product.")
     private Product sourceProduct;
 
+    @SourceProduct(alias = "inlandWaterProduct",
+            label = "External inland water product",
+            optional = true,
+            description = "External inland water product(optiona)")
+    private Product inlandWaterProduct;
+
     // skip for the moment, clarify if needed
 //    @SourceProduct(alias = "urbanProduct", optional = true,
 //            label = "ProbaV or VGT urban product",
@@ -105,6 +112,7 @@ public class VgtOp extends BasisOp {
     private Product targetProduct;
 
     private Product cloudProduct;
+    private Product inlandWaterMaskProduct;
     private Product postProcessingProduct;
 
     @Override
@@ -114,6 +122,7 @@ public class VgtOp extends BasisOp {
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
+        inlandWaterProduct = getSourceProduct("inlandWaterProduct");
         processGlobAlbedoVgt();
 
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);   // we need the L1b flag!
@@ -138,6 +147,14 @@ public class VgtOp extends BasisOp {
 
         cloudProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(VgtClassificationOp.class),
                                          cloudClassificationParameters, classificationInputProducts);
+
+        if (inlandWaterProduct != null) {
+            inlandWaterMaskProduct = collocateInlandWaterProduct(sourceProduct, inlandWaterProduct);
+        }
+        if (inlandWaterMaskProduct != null) {
+            setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+            getLogger().info("inland water mask " + inlandWaterMaskProduct.getName() + " applied");
+        }
 
         computeVgtPostProcessProduct();
 
@@ -166,12 +183,23 @@ public class VgtOp extends BasisOp {
         HashMap<String, Product> input = new HashMap<>();
         input.put("l1b", sourceProduct);
         input.put("vgtCloud", cloudProduct);
+        input.put("inlandWaterMaskCollocated", inlandWaterMaskProduct);
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(VgtPostProcessOp.class),
                                                             params, input);
+    }
+
+    private Product collocateInlandWaterProduct(Product sourceProduct, Product inlandWaterProduct) {
+        CollocateOp collocateOp = new CollocateOp();
+        collocateOp.setMasterProduct(sourceProduct);
+        collocateOp.setSlaveProduct(inlandWaterProduct);
+        collocateOp.setParameter("resamplingType", "NEAREST_NEIGHBOUR");
+        collocateOp.setRenameMasterComponents(false);
+        collocateOp.setRenameSlaveComponents(false);
+        return collocateOp.getTargetProduct();
     }
 
     /**

@@ -1,9 +1,6 @@
 package org.esa.snap.idepix.probav;
 
-import org.esa.snap.idepix.core.AlgorithmSelector;
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.util.IdepixIO;
-import org.esa.snap.idepix.core.operators.BasisOp;
+import org.esa.snap.collocation.CollocateOp;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -12,6 +9,10 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.idepix.core.AlgorithmSelector;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.BasisOp;
+import org.esa.snap.idepix.core.util.IdepixIO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -99,8 +100,19 @@ public class ProbaVOp extends BasisOp {
             description = "Proba-V VITO cloud product (optional)")
     private Product vitoCloudProduct;
 
+
+    @SourceProduct(alias = "inlandWaterProduct",
+            label = "External inland water product",
+            optional = true,
+            description = "External inland water product(optiona)")
+    private Product inlandWaterProduct;
+
+
+
     private Product cloudProduct;
+    private Product inlandWaterMaskProduct;
     private Product postProcessingProduct;
+
 
     @Override
     public void initialize() throws OperatorException {
@@ -108,7 +120,7 @@ public class ProbaVOp extends BasisOp {
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
-
+        inlandWaterProduct = getSourceProduct("inlandWaterProduct");
         processProbav();
     }
 
@@ -130,6 +142,14 @@ public class ProbaVOp extends BasisOp {
         cloudProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ProbaVClassificationOp.class),
                                          cloudClassificationParameters, cloudInput);
 
+        if (inlandWaterProduct != null) {
+            inlandWaterMaskProduct = collocateInlandWaterProduct(sourceProduct, inlandWaterProduct);
+        }
+        if (inlandWaterMaskProduct != null) {
+            setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+            getLogger().info("inland water mask " + inlandWaterMaskProduct.getName() + " applied");
+        }
+
         computePostProcessProduct();
 
         Product targetProduct = IdepixIO.cloneProduct(cloudProduct, true);
@@ -146,6 +166,7 @@ public class ProbaVOp extends BasisOp {
         HashMap<String, Product> input = new HashMap<>();
         input.put("l1b", sourceProduct);
         input.put("probavCloud", cloudProduct);
+        input.put("inlandWaterMaskCollocated", inlandWaterMaskProduct);
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudBuffer", computeCloudBuffer);
@@ -172,6 +193,16 @@ public class ProbaVOp extends BasisOp {
                                             schillerNNCloudSureSnowSeparationValue);
 
         return cloudClassificationParameters;
+    }
+
+    private Product collocateInlandWaterProduct(Product sourceProduct, Product inlandWaterProduct) {
+        CollocateOp collocateOp = new CollocateOp();
+        collocateOp.setMasterProduct(sourceProduct);
+        collocateOp.setSlaveProduct(inlandWaterProduct);
+        collocateOp.setParameter("resamplingType", "NEAREST_NEIGHBOUR");
+        collocateOp.setRenameMasterComponents(false);
+        collocateOp.setRenameSlaveComponents(false);
+        return collocateOp.getTargetProduct();
     }
 
     /**

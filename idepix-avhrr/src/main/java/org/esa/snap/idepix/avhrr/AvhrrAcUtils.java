@@ -24,13 +24,14 @@ public class AvhrrAcUtils {
 
         FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
-        // additional flags for AVHRR-AC (tests):
-        flagCoding.addFlag("F_REFL1_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 1), null);
-        flagCoding.addFlag("F_REFL2_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 2), null);
-        flagCoding.addFlag("F_RATIO_REFL21_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 3), null);
-        flagCoding.addFlag("F_RATIO_REFL31_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 4), null);
-        flagCoding.addFlag("F_BT4_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 5), null);
-        flagCoding.addFlag("F_BT5_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 6), null);
+        flagCoding.addFlag("IDEPIX_INLAND_WATER", BitSetter.setFlag(0, AvhrrConstants.IDEPIX_INLAND_WATER),
+                AvhrrConstants.IDEPIX_INLAND_WATER_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_WATER", BitSetter.setFlag(0, AvhrrConstants.IDEPIX_WATER),
+                AvhrrConstants.IDEPIX_WATER_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLEAR_LAND", BitSetter.setFlag(0, AvhrrConstants.IDEPIX_CLEAR_LAND),
+                AvhrrConstants.IDEPIX_CLEAR_LAND_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLEAR_WATER", BitSetter.setFlag(0, AvhrrConstants.IDEPIX_CLEAR_WATER),
+                AvhrrConstants.IDEPIX_CLEAR_WATER_DESCR_TEXT);
 
         return flagCoding;
     }
@@ -46,35 +47,26 @@ public class AvhrrAcUtils {
         Random r = new Random(124567);
 
         // tests:
-        mask = Mask.BandMathsType.create("F_REFL1_ABOVE_THRESH", "TOA reflectance Channel 1 above threshold", w, h,
-                "pixel_classif_flags.F_REFL1_ABOVE_THRESH",
+        mask = Mask.BandMathsType.create("IDEPIX_INLAND_WATER", AvhrrConstants.IDEPIX_INLAND_WATER_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_INLAND_WATER",
                 IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_REFL2_ABOVE_THRESH", "TOA reflectance Channel 2 above threshold", w, h,
-                "pixel_classif_flags.F_REFL2_ABOVE_THRESH",
+        mask = Mask.BandMathsType.create("IDEPIX_WATER", AvhrrConstants.IDEPIX_WATER_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_WATER",
                 IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_RATIO_REFL21_ABOVE_THRESH", "Ratio of TOA reflectance Channel 2/1 above threshold", w, h,
-                "pixel_classif_flags.F_RATIO_REFL21_ABOVE_THRESH",
+        mask = Mask.BandMathsType.create("IDEPIX_CLEAR_LAND", AvhrrConstants.IDEPIX_CLEAR_LAND_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_CLEAR_LAND",
                 IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_RATIO_REFL31_ABOVE_THRESH", "Ratio of TOA reflectance Channel 3/1 above threshold", w, h,
-                "pixel_classif_flags.F_RATIO_REFL31_ABOVE_THRESH",
-                IdepixFlagCoding.getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
-
-        mask = Mask.BandMathsType.create("F_BT4_ABOVE_THRESH", "Brightness temperature Channel 4 above threshold", w, h,
-                "pixel_classif_flags.F_BT4_ABOVE_THRESH",
-                IdepixFlagCoding.getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
-
-        mask = Mask.BandMathsType.create("F_BT5_ABOVE_THRESH", "Brightness temperature Channel 5 above threshold", w, h,
-                "pixel_classif_flags.F_BT5_ABOVE_THRESH",
+        mask = Mask.BandMathsType.create("IDEPIX_CLEAR_WATER", AvhrrConstants.IDEPIX_CLEAR_WATER_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_CLEAR_WATER",
                 IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index, mask);
+
 
     }
 

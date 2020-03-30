@@ -52,6 +52,12 @@ public class AvhrrOp extends BasisOp {
     )
     private Product desertProduct;
 
+    @SourceProduct(alias = "inlandWaterProduct",
+            label = "External inland water product",
+            optional = true,
+            description = "External inland water product(optiona)")
+    private Product inlandWaterProduct;
+
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
 
@@ -63,6 +69,7 @@ public class AvhrrOp extends BasisOp {
 
     private Product desertMaskProduct;
 
+    private Product inlandWaterMaskProduct;
 
     @Parameter(defaultValue = "false", label = " Copy input radiance/reflectance bands")
     private boolean copyRadiances = false;
@@ -99,6 +106,8 @@ public class AvhrrOp extends BasisOp {
     public void initialize() throws OperatorException {
         sourceProduct = getSourceProduct("sourceProduct");
         desertProduct = getSourceProduct("desertMaskProduct");
+        inlandWaterProduct = getSourceProduct("inlandWaterProduct");
+
         final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.AVHRR);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
@@ -148,6 +157,16 @@ public class AvhrrOp extends BasisOp {
             timelineClassificationOp.setSourceProduct("desertMaskCollocated", desertMaskProduct);
             getLogger().info("desert mask " + desertMaskProduct.getName() + " applied");
         }
+
+
+        if (inlandWaterProduct != null) {
+            inlandWaterMaskProduct = collocateInlandWaterProduct(sourceProduct, inlandWaterProduct);
+        }
+        if (inlandWaterMaskProduct != null) {
+            timelineClassificationOp.setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+            getLogger().info("inland water mask " + inlandWaterMaskProduct.getName() + " applied");
+        }
+
 
         classificationProduct = timelineClassificationOp.getTargetProduct();
         postProcess();
@@ -208,6 +227,8 @@ public class AvhrrOp extends BasisOp {
         input.put("l1b", sourceProduct);
         input.put("avhrrCloud", classificationProduct);
         input.put("waterMask", waterMaskProduct);
+        input.put("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+
         Map<String, Object> params = new HashMap<>();
         params.put("cloudBufferWidth", cloudBufferWidth);
         params.put("computeCloudBuffer", computeCloudBuffer);
@@ -245,6 +266,15 @@ public class AvhrrOp extends BasisOp {
         return collocateOp.getTargetProduct();
     }
 
+    private Product collocateInlandWaterProduct(Product sourceProduct, Product inlandWaterProduct) {
+        CollocateOp collocateOp = new CollocateOp();
+        collocateOp.setMasterProduct(sourceProduct);
+        collocateOp.setSlaveProduct(inlandWaterProduct);
+        collocateOp.setParameter("resamplingType", "NEAREST_NEIGHBOUR");
+        collocateOp.setRenameMasterComponents(false);
+        collocateOp.setRenameSlaveComponents(false);
+        return collocateOp.getTargetProduct();
+    }
     /**
      * The Service Provider Interface (SPI) for the operator.
      * It provides operator meta-data and is a factory for new operator instances.

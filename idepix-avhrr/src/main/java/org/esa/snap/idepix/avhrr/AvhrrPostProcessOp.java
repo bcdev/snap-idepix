@@ -54,11 +54,16 @@ public class AvhrrPostProcessOp extends Operator {
     private Product avhrrCloudProduct;
     @SourceProduct(alias = "waterMask", optional = true)
     private Product waterMaskProduct;
+    @SourceProduct(alias = "inlandWaterMaskCollocated", optional = true)
+    private Product inlandWaterCollProduct;
+
+
 
     private Band landWaterBand;
     private Band origCloudFlagBand;
     private Band reflCh1Band;
     private Band btCh4Band;
+    private Band origInlandWaterFlagBand;
 
     private GeoCoding geoCoding;
 
@@ -79,6 +84,9 @@ public class AvhrrPostProcessOp extends Operator {
 
             reflCh1Band = l1bProduct.getBand("avhrr_b1");
             btCh4Band = l1bProduct.getBand("avhrr_b4");
+            if(inlandWaterCollProduct != null) {
+                origInlandWaterFlagBand = inlandWaterCollProduct.getBand("band_1");
+            }
 
             rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
                                                                  l1bProduct.getSceneRasterHeight()),
@@ -98,10 +106,27 @@ public class AvhrrPostProcessOp extends Operator {
 
         final Tile reflCh1Tile = applyUniformityTests ? getSourceTile(reflCh1Band, srcRectangle) : null;
         final Tile btCh4Tile = applyUniformityTests ? getSourceTile(btCh4Band, srcRectangle) : null;
+        Tile inlandWaterFlagTile = null;
+        if(inlandWaterCollProduct != null) {
+            inlandWaterFlagTile = getSourceTile(origInlandWaterFlagBand, srcRectangle);
+        }
+
+        boolean idepixLand;
+        int inlandWater;
+
+
+
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                if (inlandWaterCollProduct != null) {
+                    idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
+                    inlandWater = inlandWaterFlagTile.getSampleInt(x, y);
+                    if (!idepixLand && inlandWater > 0.5) {
+                        inlandWaterFlagTile.setSample(x, y, AvhrrConstants.IDEPIX_INLAND_WATER, true);
+                    }
+                }
                 combineFlags(x, y, sourceFlagTile, targetTile);
             }
         }

@@ -46,9 +46,12 @@ public class ProbaVPostProcessOp extends Operator {
     private Product l1bProduct;
     @SourceProduct(alias = "probavCloud")
     private Product probavCloudProduct;
+    @SourceProduct(alias = "inlandWaterMaskCollocated", optional = true)
+    private Product inlandWaterCollProduct;
 
     private Band origCloudFlagBand;
     private Band origSmFlagBand;
+    private Band origInlandWaterFlagBand;
 
     private RectangleExtender rectCalculator;
 
@@ -60,7 +63,9 @@ public class ProbaVPostProcessOp extends Operator {
 
         origCloudFlagBand = probavCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         origSmFlagBand = l1bProduct.getBand("SM_FLAGS");
-
+        if(inlandWaterCollProduct != null) {
+            origInlandWaterFlagBand = inlandWaterCollProduct.getBand("band_1");
+        }
         if (computeCloudBuffer) {
             rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
                                                                  l1bProduct.getSceneRasterHeight()),
@@ -95,10 +100,25 @@ public class ProbaVPostProcessOp extends Operator {
 
         final Tile cloudFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
         final Tile smFlagTile = getSourceTile(origSmFlagBand, srcRectangle);
+        Tile inlandWaterFlagTile = null;
+        if(inlandWaterCollProduct != null) {
+            inlandWaterFlagTile = getSourceTile(origInlandWaterFlagBand, srcRectangle);
+        }
+
+        boolean idepixLand;
+        int inlandWater;
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+
+                if (inlandWaterCollProduct != null) {
+                    idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
+                    inlandWater = inlandWaterFlagTile.getSampleInt(x, y);
+                    if(!idepixLand && inlandWater > 0.5) {
+                        inlandWaterFlagTile.setSample(x, y, ProbaVConstants.IDEPIX_INLAND_WATER, true);
+                    }
+                }
 
                 boolean isInvalid = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
                 if (!isInvalid) {
@@ -158,7 +178,7 @@ public class ProbaVPostProcessOp extends Operator {
         final boolean safeClearLandFinal = (((!safeSnowIce && !idepixCloud && !smCloud && !safeClearWaterFinal) && idepixLand) || safeClearLand) && !idepixInvalid;
         final boolean safeCloudFinal = safeCloud && (!safeClearLandFinal && !safeClearWaterFinal) && !idepixInvalid;;
 
-
+        final boolean idepixInlandWater = idepixWater &&
         // GK 20151201;
 
         targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
@@ -169,6 +189,8 @@ public class ProbaVPostProcessOp extends Operator {
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
         }
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, safeSnowIce);
+
+        if
     }
 
     public static class Spi extends OperatorSpi {
