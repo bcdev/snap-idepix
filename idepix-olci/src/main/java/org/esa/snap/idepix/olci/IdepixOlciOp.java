@@ -99,6 +99,11 @@ public class IdepixOlciOp extends BasisOp {
             description = " If cloud shadow is computed, write CTP value to the target product ")
     private boolean outputCtp;
 
+    @Parameter(defaultValue = "true",
+            label = " Write altitude to the target product",
+            description = " Write altitude to the target product (default=true for WV-CCI) ")
+    private boolean outputAltitude;
+
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
 
@@ -201,6 +206,10 @@ public class IdepixOlciOp extends BasisOp {
 
         if (outputSchillerNNValue) {
             ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
+        }
+
+        if (outputAltitude) {
+            ProductUtils.copyBand(IdepixOlciConstants.OLCI_ALTITUDE_BAND_NAME, sourceProduct, targetProduct, true);
         }
 
         if (computeCloudShadow && outputCtp) {

@@ -17,6 +17,7 @@ class IdepixOlciConstants {
 
 
     static final String OLCI_QUALITY_FLAGS_BAND_NAME = "quality_flags";
+    static final String OLCI_ALTITUDE_BAND_NAME = "altitude";
 
     static final double[] referencePressureLevels = {
             1000., 950., 925., 900., 850., 800., 700.,
