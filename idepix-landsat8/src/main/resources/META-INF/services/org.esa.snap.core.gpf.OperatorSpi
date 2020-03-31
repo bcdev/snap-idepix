@@ -1,5 +1,0 @@
-org.esa.snap.idepix.landsat8.Landsat8Op$Spi
-org.esa.snap.idepix.landsat8.OtsuBinarizeOp$Spi
-org.esa.snap.idepix.landsat8.ClostOp$Spi
-org.esa.snap.idepix.landsat8.Landsat8PostProcessOp$Spi
-org.esa.snap.idepix.landsat8.Landsat8ClassificationOp$Spi
