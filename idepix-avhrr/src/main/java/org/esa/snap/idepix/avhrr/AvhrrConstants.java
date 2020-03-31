@@ -50,7 +50,7 @@ public class AvhrrConstants {
     static final String IDEPIX_CLEAR_LAND_DESCR_TEXT = "Clear land pixels";
     static final String IDEPIX_CLEAR_WATER_DESCR_TEXT = "Clear water pixels";
     static final String IDEPIX_WATER_DESCR_TEXT = "Water pixels";
-    static final String IDEPIX_INLAND_WATER_DESCR_TEXT = "inland water pixels";
+    static final String IDEPIX_INLAND_WATER_DESCR_TEXT = "Inland water pixels";
 
 
     static final int SRC_USGS_SZA = 0;

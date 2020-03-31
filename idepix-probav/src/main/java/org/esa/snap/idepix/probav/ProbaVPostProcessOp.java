@@ -112,19 +112,19 @@ public class ProbaVPostProcessOp extends Operator {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
 
-                if (inlandWaterCollProduct != null) {
-                    idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
-                    inlandWater = inlandWaterFlagTile.getSampleInt(x, y);
-                    if(!idepixLand && inlandWater > 0.5) {
-                        inlandWaterFlagTile.setSample(x, y, ProbaVConstants.IDEPIX_INLAND_WATER, true);
-                    }
-                }
-
                 boolean isInvalid = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
                 if (!isInvalid) {
                     combineFlags(x, y, cloudFlagTile, targetTile);
                     consolidateFlagging(x, y, smFlagTile, targetTile);
                     setCloudShadow(x, y, smFlagTile, targetTile);
+                }
+
+                if (inlandWaterCollProduct != null) {
+                    idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
+                    inlandWater = inlandWaterFlagTile.getSampleInt(x, y);
+                    if(!idepixLand && (inlandWater > 0.5)) {
+                        inlandWaterFlagTile.setSample(x, y, ProbaVConstants.IDEPIX_INLAND_WATER, true);
+                    }
                 }
             }
         }
@@ -178,7 +178,7 @@ public class ProbaVPostProcessOp extends Operator {
         final boolean safeClearLandFinal = (((!safeSnowIce && !idepixCloud && !smCloud && !safeClearWaterFinal) && idepixLand) || safeClearLand) && !idepixInvalid;
         final boolean safeCloudFinal = safeCloud && (!safeClearLandFinal && !safeClearWaterFinal) && !idepixInvalid;;
 
-        final boolean idepixInlandWater = idepixWater &&
+
         // GK 20151201;
 
         targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
@@ -190,7 +190,6 @@ public class ProbaVPostProcessOp extends Operator {
         }
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, safeSnowIce);
 
-        if
     }
 
     public static class Spi extends OperatorSpi {

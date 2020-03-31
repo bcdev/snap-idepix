@@ -59,6 +59,11 @@
             <artifactId>idepix-core</artifactId>
             <version>${idepix.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-collocation</artifactId>
+            <version>7.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
