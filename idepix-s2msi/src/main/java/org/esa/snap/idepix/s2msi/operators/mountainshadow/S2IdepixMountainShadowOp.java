@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.s2msi.operators.mountainshadow;
 
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -15,6 +16,9 @@ import org.esa.snap.core.gpf.pointop.SourceSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.WritableSample;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Tonio Fincke
  */
@@ -26,6 +30,10 @@ import org.esa.snap.core.gpf.pointop.WritableSample;
         description = "Computes Mountain Shadow for a Sentinel 2 product with elevation data, solar angles, " +
                 "and a CRS geocoding.")
 public class S2IdepixMountainShadowOp extends PixelOperator {
+
+    @Parameter(description = "The elevation band name of the external DEM.",
+            defaultValue = "elevation", label = "Elevation Band Name of external DEM")
+    private String elevationBandName = "elevation";
 
     @SourceProduct
     private Product sourceProduct;
@@ -52,8 +60,10 @@ public class S2IdepixMountainShadowOp extends PixelOperator {
         if (sourceProduct.getBand(SlopeAspectOrientationOp.SLOPE_BAND_NAME) == null ||
                 sourceProduct.getBand(SlopeAspectOrientationOp.ASPECT_BAND_NAME) == null ||
                 sourceProduct.getBand(SlopeAspectOrientationOp.ORIENTATION_BAND_NAME) == null) {
+            Map<String, Object> saoParams = new HashMap<>();
+            saoParams.put("elevationBandName", elevationBandName);
             saoProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(SlopeAspectOrientationOp.class),
-                                           GPF.NO_PARAMS, sourceProduct);
+                    saoParams, sourceProduct);
         }
     }
 
@@ -80,8 +90,8 @@ public class S2IdepixMountainShadowOp extends PixelOperator {
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         final double cosBeta = computeCosBeta(sourceSamples[SZA_INDEX].getFloat(), sourceSamples[SAA_INDEX].getFloat(),
-                                              sourceSamples[SLOPE_INDEX].getFloat(), sourceSamples[ASPECT_INDEX].getFloat(),
-                                              sourceSamples[ORIENTATION_INDEX].getFloat());
+                sourceSamples[SLOPE_INDEX].getFloat(), sourceSamples[ASPECT_INDEX].getFloat(),
+                sourceSamples[ORIENTATION_INDEX].getFloat());
         targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(cosBeta < SHADOW_THRESHOLD);
     }
 

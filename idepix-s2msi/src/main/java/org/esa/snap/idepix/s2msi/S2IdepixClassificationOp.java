@@ -25,6 +25,7 @@ import org.esa.snap.watermask.operator.WatermaskClassifier;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -109,6 +110,13 @@ public class S2IdepixClassificationOp extends Operator {
 
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
+
+    @Parameter(label = "External DEM")
+    private File externalDEMFile = null;
+
+    @Parameter(description = "The elevation band name of the external DEM.",
+            defaultValue = S2IdepixConstants.ELEVATION_BAND_NAME, label = "Elevation Band Name of external DEM")
+    private String elevationBandName = "elevation";
 
     // NN stuff is deactivated unless we have a better net
 
@@ -224,6 +232,11 @@ public class S2IdepixClassificationOp extends Operator {
         } else {
             AddElevationOp elevationOp = new AddElevationOp();
             elevationOp.setParameterDefaultValues();
+            if (externalDEMFile != null) {
+                demName = AddElevationOp.externalDEMStr;
+                elevationOp.setParameter("elevationBandName", elevationBandName);
+                elevationOp.setParameter("externalDEMFile", externalDEMFile);
+            }
             elevationOp.setParameter("demName", demName);
             elevationOp.setSourceProduct(sourceProduct);
             elevationProduct = elevationOp.getTargetProduct();
@@ -256,7 +269,7 @@ public class S2IdepixClassificationOp extends Operator {
             nnTargetTile = targetTiles.get(nnTargetBand);
         }
 
-        final Band elevationBand = targetProduct.getBand(S2IdepixConstants.ELEVATION_BAND_NAME);
+        final Band elevationBand = targetProduct.getBand(elevationBandName);
         final Tile elevationTile = getSourceTile(elevationBand, rectangle);
         final Tile validPixelTile = getSourceTile(validPixelMask, rectangle);
 
@@ -378,7 +391,7 @@ public class S2IdepixClassificationOp extends Operator {
             b.setUnit("dl");
         }
 
-        Band b = ProductUtils.copyBand(S2IdepixConstants.ELEVATION_BAND_NAME, elevationProduct, targetProduct, true);
+        Band b = ProductUtils.copyBand(elevationBandName, elevationProduct, targetProduct, true);
         b.setUnit("m");
 
         if (sourceProduct.containsBand("lat") && !targetProduct.containsBand("lat")) {

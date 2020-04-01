@@ -19,6 +19,7 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.Rectangle;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,6 +75,13 @@ public class S2IdepixPostProcessOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(label = "External DEM")
+    private File externalDEMFile = null;
+
+    @Parameter(description = "The elevation band name of the external DEM.",
+            defaultValue = "elevation", label = "Elevation Band Name of external DEM")
+    private String elevationBandName = "elevation";
+
     private Band s2ClassifFlagBand;
     private Band cloudBufferFlagBand;
     private Band mountainShadowFlagBand;
@@ -91,8 +99,10 @@ public class S2IdepixPostProcessOp extends Operator {
         }
 
         if (computeMountainShadow) {
+            Map<String, Object> mtShadowParams = new HashMap<>();
+            mtShadowParams.put("elevationBandName", elevationBandName);
             final Product mountainShadowProduct = GPF.createProduct(
-                    OperatorSpi.getOperatorAlias(S2IdepixMountainShadowOp.class), GPF.NO_PARAMS, s2ClassifProduct);
+                    OperatorSpi.getOperatorAlias(S2IdepixMountainShadowOp.class), mtShadowParams, s2ClassifProduct);
             mountainShadowFlagBand = mountainShadowProduct.getBand(
                     S2IdepixMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
         }
@@ -109,6 +119,8 @@ public class S2IdepixPostProcessOp extends Operator {
             params.put("gclThresh", gclThresh);
             params.put("clThresh", clThresh);
             params.put("demName", demName);
+            params.put("externalDEMFile", externalDEMFile);
+            params.put("elevationBandName", elevationBandName);
             final Product cloudShadowProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudShadowOp.class),
                     params, input);
             cloudShadowFlagBand = cloudShadowProduct.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW);

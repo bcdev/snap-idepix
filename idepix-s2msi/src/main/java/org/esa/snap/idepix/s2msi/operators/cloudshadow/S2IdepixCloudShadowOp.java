@@ -26,6 +26,7 @@ import javax.media.jai.PointOpImage;
 import javax.media.jai.TileCache;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +78,13 @@ public class S2IdepixCloudShadowOp extends Operator {
 
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
+
+    @Parameter(label = "External DEM")
+    private File externalDEMFile = null;
+
+    @Parameter(description = "The elevation band name of the external DEM.",
+            defaultValue = "elevation", label = "Elevation Band Name of external DEM")
+    private String elevationBandName = "elevation";
 
     public final static String BAND_NAME_CLOUD_SHADOW = "FlagBand";
 
@@ -197,6 +205,8 @@ public class S2IdepixCloudShadowOp extends Operator {
         classificationParams.put("gclThresh", gclThresh);
         classificationParams.put("clThresh", clThresh);
         classificationParams.put("demName", demName);
+        classificationParams.put("externalDEMFile", externalDEMFile);
+        classificationParams.put("elevationBandName", elevationBandName);
 
         return GPF.createProduct("Idepix.S2", classificationParams, classificationInput);
     }

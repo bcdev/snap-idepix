@@ -1,6 +1,7 @@
 package org.esa.snap.idepix.s2msi.operators.mountainshadow;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
@@ -33,6 +34,10 @@ import java.util.Map;
         description = "Computes Slope, Aspect and Orientation for a Sentinel-2 product " +
                 "with elevation data and a CRS geocoding.")
 public class SlopeAspectOrientationOp extends Operator {
+
+    @Parameter(description = "The elevation band name of the external DEM.",
+            defaultValue = "elevation", label = "Elevation Band Name of external DEM")
+    private String elevationBandName = "elevation";
 
     @SourceProduct
     private Product sourceProduct;
@@ -78,7 +83,7 @@ public class SlopeAspectOrientationOp extends Operator {
         } else {
             throw new OperatorException("Could not retrieve spatial resolution from Geo-coding");
         }
-        elevationBand = sourceProduct.getBand(S2IdepixConstants.ELEVATION_BAND_NAME);
+        elevationBand = sourceProduct.getBand(elevationBandName);
         if (elevationBand == null) {
             throw new OperatorException("Elevation band required to compute slope or aspect");
         }

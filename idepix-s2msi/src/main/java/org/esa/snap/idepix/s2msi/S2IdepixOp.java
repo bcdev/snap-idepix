@@ -15,6 +15,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -120,6 +121,13 @@ public class S2IdepixOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(label = "External DEM")
+    private File externalDEMFile = null;
+
+    @Parameter(description = "The elevation band name of the external DEM.",
+            defaultValue = "elevation", label = "Elevation Band Name of external DEM")
+    private String elevationBandName = "elevation";
+
 
     @SourceProduct(alias = "l1cProduct",
             label = "Sentinel-2 MSI L1C product",
@@ -201,28 +209,32 @@ public class S2IdepixOp extends Operator {
             params.put("computeCloudShadow", computeCloudShadow);
             params.put("mode", "LandWater");
             params.put("demName", demName);
+            params.put("externalDEMFile", externalDEMFile);
+            params.put("elevationBandName", elevationBandName);
             postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixPostProcessOp.class),
                                                       params, inputShadow);
         }
     }
 
     private Map<String, Object> createPixelClassificationParameters() {
-        Map<String, Object> gaCloudClassificationParameters = new HashMap<>(1);
-        gaCloudClassificationParameters.put("copyToaReflectances", copyToaReflectances);
-        gaCloudClassificationParameters.put("copyFeatureValues", copyFeatureValues);
-        gaCloudClassificationParameters.put("computeCloudShadow", computeCloudShadow);
-        gaCloudClassificationParameters.put("applyNNPure", applyNNPure);
-        gaCloudClassificationParameters.put("ignoreNN", ignoreNN);
-        gaCloudClassificationParameters.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
-        gaCloudClassificationParameters.put("nnCloudAmbiguousSureSeparationValue", nnCloudAmbiguousSureSeparationValue);
-        gaCloudClassificationParameters.put("nnCloudSureSnowSeparationValue", nnCloudSureSnowSeparationValue);
-        gaCloudClassificationParameters.put("cloudBufferWidth", cloudBufferWidth);
-        gaCloudClassificationParameters.put("cwThresh", cwThresh);
-        gaCloudClassificationParameters.put("gclThresh", gclThresh);
-        gaCloudClassificationParameters.put("clThresh", clThresh);
-        gaCloudClassificationParameters.put("demName", demName);
+        Map<String, Object> pixelClassificationParameters = new HashMap<>(1);
+        pixelClassificationParameters.put("copyToaReflectances", copyToaReflectances);
+        pixelClassificationParameters.put("copyFeatureValues", copyFeatureValues);
+        pixelClassificationParameters.put("computeCloudShadow", computeCloudShadow);
+        pixelClassificationParameters.put("applyNNPure", applyNNPure);
+        pixelClassificationParameters.put("ignoreNN", ignoreNN);
+        pixelClassificationParameters.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
+        pixelClassificationParameters.put("nnCloudAmbiguousSureSeparationValue", nnCloudAmbiguousSureSeparationValue);
+        pixelClassificationParameters.put("nnCloudSureSnowSeparationValue", nnCloudSureSnowSeparationValue);
+        pixelClassificationParameters.put("cloudBufferWidth", cloudBufferWidth);
+        pixelClassificationParameters.put("cwThresh", cwThresh);
+        pixelClassificationParameters.put("gclThresh", gclThresh);
+        pixelClassificationParameters.put("clThresh", clThresh);
+        pixelClassificationParameters.put("demName", demName);
+        pixelClassificationParameters.put("externalDEMFile", externalDEMFile);
+        pixelClassificationParameters.put("elevationBandName", elevationBandName);
 
-        return gaCloudClassificationParameters;
+        return pixelClassificationParameters;
     }
 
 
