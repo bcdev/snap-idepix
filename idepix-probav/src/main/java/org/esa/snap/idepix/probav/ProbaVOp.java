@@ -116,11 +116,15 @@ public class ProbaVOp extends BasisOp {
 
     @Override
     public void initialize() throws OperatorException {
+        sourceProduct = getSourceProduct("sourceProduct");
+        vitoCloudProduct = getSourceProduct("vitoCloudProduct");
+        inlandWaterProduct = getSourceProduct("inlandWaterProduct");
+
         final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.PROBAV);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
-        inlandWaterProduct = getSourceProduct("inlandWaterProduct");
+
         processProbav();
     }
 
@@ -137,10 +141,6 @@ public class ProbaVOp extends BasisOp {
         cloudInput.put("vitoCm", vitoCloudProduct);
         cloudInput.put("waterMask", waterMaskProduct);
 
-        Map<String, Object> cloudClassificationParameters = createCloudClassificationParameters();
-
-        cloudProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ProbaVClassificationOp.class),
-                                         cloudClassificationParameters, cloudInput);
 
         if (inlandWaterProduct != null) {
             inlandWaterMaskProduct = collocateInlandWaterProduct(sourceProduct, inlandWaterProduct);
@@ -149,6 +149,13 @@ public class ProbaVOp extends BasisOp {
             setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
             getLogger().info("inland water mask " + inlandWaterMaskProduct.getName() + " applied");
         }
+
+        cloudInput.put("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+
+        Map<String, Object> cloudClassificationParameters = createCloudClassificationParameters();
+
+        cloudProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ProbaVClassificationOp.class),
+                                         cloudClassificationParameters, cloudInput);
 
         computePostProcessProduct();
 

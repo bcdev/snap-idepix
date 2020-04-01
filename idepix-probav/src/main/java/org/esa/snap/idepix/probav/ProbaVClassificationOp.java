@@ -104,6 +104,9 @@ public class ProbaVClassificationOp extends Operator {
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
+    @SourceProduct(alias = "inlandWaterMaskProduct", description = "External inland water product(optional)", optional = true)
+    private Product inlandWaterMaskProduct;
+
     // Proba-V bands:
     private Band[] probavReflectanceBands;
 

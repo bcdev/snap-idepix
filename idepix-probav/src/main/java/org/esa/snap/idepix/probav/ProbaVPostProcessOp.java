@@ -122,7 +122,7 @@ public class ProbaVPostProcessOp extends Operator {
                 if (inlandWaterCollProduct != null) {
                     idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
                     inlandWater = inlandWaterFlagTile.getSampleInt(x, y);
-                    if(!idepixLand && (inlandWater > 0.5)) {
+                    if(!idepixLand && (inlandWater == 1)) {
                         inlandWaterFlagTile.setSample(x, y, ProbaVConstants.IDEPIX_INLAND_WATER, true);
                     }
                 }

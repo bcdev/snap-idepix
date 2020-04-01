@@ -155,7 +155,7 @@ public class VgtOp extends BasisOp {
             setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
             getLogger().info("inland water mask " + inlandWaterMaskProduct.getName() + " applied");
         }
-
+        classificationInputProducts.put("waterMask", waterMaskProduct);
         computeVgtPostProcessProduct();
 
         targetProduct = IdepixIO.cloneProduct(cloudProduct, true);
