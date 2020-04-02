@@ -104,7 +104,7 @@ public class ProbaVOp extends BasisOp {
     @SourceProduct(alias = "inlandWaterProduct",
             label = "External inland water product",
             optional = true,
-            description = "External inland water product(optiona)")
+            description = "External inland water product (optional)")
     private Product inlandWaterProduct;
 
 
@@ -146,7 +146,7 @@ public class ProbaVOp extends BasisOp {
             inlandWaterMaskProduct = collocateInlandWaterProduct(sourceProduct, inlandWaterProduct);
         }
         if (inlandWaterMaskProduct != null) {
-            setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+            //setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
             getLogger().info("inland water mask " + inlandWaterMaskProduct.getName() + " applied");
         }
 

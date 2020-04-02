@@ -82,8 +82,6 @@ public class VgtClassificationOp extends Operator {
             description = "If set, processing mode for C3S-Lot5 project is applied (uses specific tests)")
     private boolean isProcessingForC3SLot5;
 
-
-
     // VGT bands:
     private Band[] vgtReflectanceBands;
 
@@ -116,6 +114,9 @@ public class VgtClassificationOp extends Operator {
 
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
+
+    @SourceProduct(alias = "inlandWaterMaskCollocated", description = "External inland water product(optional)", optional = true)
+    private Product inlandWaterMaskProduct;
 
 
     private static final String VGT_NET_NAME = "3x2x2_341.8.net";

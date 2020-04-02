@@ -143,19 +143,23 @@ public class VgtOp extends BasisOp {
         classificationInputProducts.put("l1b", sourceProduct);
         classificationInputProducts.put("waterMask", waterMaskProduct);
 
+        if (inlandWaterProduct != null) {
+            inlandWaterMaskProduct = collocateInlandWaterProduct(sourceProduct, inlandWaterProduct);
+        }
+        if (inlandWaterMaskProduct != null) {
+            //setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+            getLogger().info("inland water mask " + inlandWaterMaskProduct.getName() + " applied");
+        }
+
+        classificationInputProducts.put("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+
+
         Map<String, Object> cloudClassificationParameters = createVgtCloudClassificationParameters();
 
         cloudProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(VgtClassificationOp.class),
                                          cloudClassificationParameters, classificationInputProducts);
 
-        if (inlandWaterProduct != null) {
-            inlandWaterMaskProduct = collocateInlandWaterProduct(sourceProduct, inlandWaterProduct);
-        }
-        if (inlandWaterMaskProduct != null) {
-            setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
-            getLogger().info("inland water mask " + inlandWaterMaskProduct.getName() + " applied");
-        }
-        classificationInputProducts.put("waterMask", waterMaskProduct);
+
         computeVgtPostProcessProduct();
 
         targetProduct = IdepixIO.cloneProduct(cloudProduct, true);
