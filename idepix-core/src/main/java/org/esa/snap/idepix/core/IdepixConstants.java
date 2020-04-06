@@ -32,7 +32,7 @@ public class IdepixConstants {
     public static final int OVERSAMPLING_FACTOR_X = 3;
     public static final int OVERSAMPLING_FACTOR_Y = 3;
 
-    public static          String SPOT_VGT_PRODUCT_TYPE_PREFIX = "VGT";
+    public static String SPOT_VGT_PRODUCT_TYPE_PREFIX = "VGT";
     public static final String PROBAV_PRODUCT_TYPE_PREFIX = "PROBA-V";
 
     public static final String AVHRR_L1b_PRODUCT_TYPE = "AVHRR";

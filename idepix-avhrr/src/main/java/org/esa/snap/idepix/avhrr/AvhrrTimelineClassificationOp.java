@@ -18,6 +18,7 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -42,6 +43,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
     private static final int CLASSIF_SAMPLE_INDEX = 0;
     private static final int NDSI_SAMPLE_INDEX = 1;
     private static final int SOURCE_DESERT_SAMPLE_INDEX = 11;
+    private static final int SOURCE_INLAND_WATER_SAMPLE_INDEX = 12;
 
     private String sensor;
     private boolean isAvhrrB3aInactive;
@@ -57,6 +59,9 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
 
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
+
+    @SourceProduct(alias = "inlandWaterMaskCollocated", optional = true)
+    private Product inlandWaterCollProduct;
 
     @TargetProduct(description = "The target product.")
     Product targetProduct;
@@ -85,7 +90,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         sensor = sourceProduct.getMetadataRoot().getElement("Global_Attributes").getAttributeString("sensor");
         if (!sensor.equals("AVHRR/2") && !sensor.equals("AVHRR/3")) {
             throw new OperatorException("Sensor '" + sensor + "' is not supported in Timeline product. " +
-                                                "Must be 'AVHRR/2' or 'AVHRR/3'.");
+                    "Must be 'AVHRR/2' or 'AVHRR/3'.");
         }
 
         // for AVHRR/3, check if avhrr_b3a is active
@@ -117,78 +122,90 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         algorithmToUse.setWaterFraction(waterFraction);
         targetSamples[CLASSIF_SAMPLE_INDEX].set(IdepixConstants.IDEPIX_LAND, algorithmToUse.isLand());
         targetSamples[CLASSIF_SAMPLE_INDEX].set(IdepixConstants.IDEPIX_COASTLINE, algorithmToUse.isCoastline());
+        targetSamples[CLASSIF_SAMPLE_INDEX].set(AvhrrConstants.IDEPIX_WATER, !algorithmToUse.isLand());
+        targetSamples[CLASSIF_SAMPLE_INDEX].set(AvhrrConstants.IDEPIX_CLEAR_WATER, false);
 
-        if (albedo1 >= 0.0 && albedo2 >= 0.0 && AvhrrAcUtils.anglesValid(sza, vza, saa, vaa) && algorithmToUse.isLand()) {
-            final double vaa_r = toRadians(vaa);
-            final double saa_r = toRadians(saa);
 
-            final double relAzi = acos(cos(saa_r) * cos(vaa_r) + sin(saa_r) * sin(vaa_r));
-            final double altitude = computeGetasseAltitude(x, y);
-
-            //        final double bt3 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_3b].getDouble();    // brightness temp !!
-            final double bt4 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_4].getDouble();
-            final double bt5 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_5].getDouble();
-
-            // GK, 20150325: convert albedo1, 2 to 'normalized' albedo:
-            // norm_albedo_i = albedo_i / (d^2_sun * cos(theta_sun))    , effect is a few % only
-            final double d = getDistanceCorr() * Math.cos(sza * MathUtils.DTOR);
-            final double albedo1Norm = albedo1 / d;
-            final double albedo2Norm = albedo2 / d;
-
-            double[] avhrrRadiance = new double[AvhrrConstants.AVHRR_AC_RADIANCE_BAND_NAMES.length];
-
-            avhrrRadiance[0] = convertBetweenAlbedoAndRadiance(albedo1, sza, ALBEDO_TO_RADIANCE, 0);
-            avhrrRadiance[1] = convertBetweenAlbedoAndRadiance(albedo2, sza, ALBEDO_TO_RADIANCE, 1);
-            double ndsi;
-            algorithmToUse.setLatitude(getGeoPos(x, y).lat);
-            algorithmToUse.setLongitude(getGeoPos(x, y).lon);
-            if (sourceSamples.length == 12) {
-                algorithmToUse.setDesert(sourceSamples[SOURCE_DESERT_SAMPLE_INDEX].getBoolean());
+        if (inlandWaterCollProduct != null) {
+             boolean idepixLandPrior = algorithmToUse.isLand();
+             int inlandWater = sourceSamples[SOURCE_INLAND_WATER_SAMPLE_INDEX].getInt();
+            if (!idepixLandPrior && (inlandWater == 1)) {
+                targetSamples[CLASSIF_SAMPLE_INDEX].set(AvhrrConstants.IDEPIX_INLAND_WATER, true);
             }
-            if (sensor.equals("AVHRR/2") || isAvhrrB3aInactive) {
-                final double bt3 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_3b].getDouble();    // brightness temp !!
-                avhrrRadiance[2] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt3, 3, waterFraction);
-                final double albedo3b = calculateReflectancePartChannel3b(avhrrRadiance[2], bt4, bt5, sza);
-                algorithmToUse.setReflCh3(albedo3b); // on [0,1]
+        }
+        if (albedo1 >= 0.0 && albedo2 >= 0.0 && AvhrrAcUtils.anglesValid(sza, vza, saa, vaa)) {
+            if (algorithmToUse.isLand()) {
+                final double vaa_r = toRadians(vaa);
+                final double saa_r = toRadians(saa);
+
+                final double relAzi = acos(cos(saa_r) * cos(vaa_r) + sin(saa_r) * sin(vaa_r));
+                final double altitude = computeGetasseAltitude(x, y);
+
+                //        final double bt3 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_3b].getDouble();    // brightness temp !!
+                final double bt4 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_4].getDouble();
+                final double bt5 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_5].getDouble();
+
+                // GK, 20150325: convert albedo1, 2 to 'normalized' albedo:
+                // norm_albedo_i = albedo_i / (d^2_sun * cos(theta_sun))    , effect is a few % only
+                final double d = getDistanceCorr() * Math.cos(sza * MathUtils.DTOR);
+                final double albedo1Norm = albedo1 / d;
+                final double albedo2Norm = albedo2 / d;
+
+                double[] avhrrRadiance = new double[AvhrrConstants.AVHRR_AC_RADIANCE_BAND_NAMES.length];
+
+                avhrrRadiance[0] = convertBetweenAlbedoAndRadiance(albedo1, sza, ALBEDO_TO_RADIANCE, 0);
+                avhrrRadiance[1] = convertBetweenAlbedoAndRadiance(albedo2, sza, ALBEDO_TO_RADIANCE, 1);
+                double ndsi;
+                algorithmToUse.setLatitude(getGeoPos(x, y).lat);
+                algorithmToUse.setLongitude(getGeoPos(x, y).lon);
+                if (sourceSamples.length == 12) {
+                    algorithmToUse.setDesert(sourceSamples[SOURCE_DESERT_SAMPLE_INDEX].getBoolean());
+                }
+                if (sensor.equals("AVHRR/2") || isAvhrrB3aInactive) {
+                    final double bt3 = sourceSamples[AvhrrConstants.SRC_TIMELINE_RAD_3b].getDouble();    // brightness temp !!
+                    avhrrRadiance[2] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt3, 3, waterFraction);
+                    final double albedo3b = calculateReflectancePartChannel3b(avhrrRadiance[2], bt4, bt5, sza);
+                    algorithmToUse.setReflCh3(albedo3b); // on [0,1]
+                    algorithmToUse.setElevation(altitude);
+                    algorithmToUse.setBtCh3(bt3);
+                    ndsi = ((albedo1Norm / 100.) - albedo3b) / (albedo3b + (albedo1Norm / 100.));
+                } else {
+                    final double albedo3a = sourceSamples[AvhrrConstants.SRC_TIMELINE_ALBEDO_3a].getDouble();
+                    avhrrRadiance[2] = convertBetweenAlbedoAndRadiance(albedo3a, sza, ALBEDO_TO_RADIANCE, 2);
+                    final double albedo3Norm = albedo3a / d;
+                    final double albedo3Norm100 = albedo3Norm / 100.0;
+                    algorithmToUse.setReflCh3(albedo3Norm100); // on [0,1]
+                    ndsi = ((albedo1Norm / 100.) - albedo3Norm100) / (albedo3Norm100 + (albedo1Norm / 100.));
+                }
+                algorithmToUse.setNdsi(ndsi);
+
+                avhrrRadiance[3] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt4, 4, waterFraction);
+                avhrrRadiance[4] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt5, 5, waterFraction);
+
+                SchillerNeuralNetWrapper nnWrapper = avhrrNeuralNet.get();
+                double[] inputVector = nnWrapper.getInputVector();
+                inputVector[0] = sza;
+                inputVector[1] = vza;
+                inputVector[2] = relAzi;
+                inputVector[3] = Math.sqrt(avhrrRadiance[0]);
+                inputVector[4] = Math.sqrt(avhrrRadiance[1]);
+                inputVector[5] = Math.sqrt(avhrrRadiance[3]);
+                inputVector[6] = Math.sqrt(avhrrRadiance[4]);
+
+                double[] nnOutput = nnWrapper.getNeuralNet().calc(inputVector);
+
+                algorithmToUse.setRadiance(avhrrRadiance);
+                algorithmToUse.setNnOutput(nnOutput);
+                algorithmToUse.setAmbiguousSureSeparationValue(avhrrNNCloudAmbiguousSureSeparationValue);
+                algorithmToUse.setSureSnowSeparationValue(avhrrNNCloudSureSnowSeparationValue);
+                algorithmToUse.setReflCh1(albedo1Norm / 100.0); // on [0,1]        --> put here albedo_norm now!!
+                algorithmToUse.setReflCh2(albedo2Norm / 100.0); // on [0,1]
+                algorithmToUse.setBtCh4(bt4);
+                algorithmToUse.setBtCh5(bt5);
                 algorithmToUse.setElevation(altitude);
-                algorithmToUse.setBtCh3(bt3);
-                ndsi = ((albedo1Norm / 100.) - albedo3b) / (albedo3b + (albedo1Norm / 100.));
-            } else {
-                final double albedo3a = sourceSamples[AvhrrConstants.SRC_TIMELINE_ALBEDO_3a].getDouble();
-                avhrrRadiance[2] = convertBetweenAlbedoAndRadiance(albedo3a, sza, ALBEDO_TO_RADIANCE, 2);
-                final double albedo3Norm = albedo3a / d;
-                final double albedo3Norm100 = albedo3Norm / 100.0;
-                algorithmToUse.setReflCh3(albedo3Norm100); // on [0,1]
-                ndsi = ((albedo1Norm / 100.) - albedo3Norm100) / (albedo3Norm100 + (albedo1Norm / 100.));
+                setClassifFlag(targetSamples, algorithmToUse);
+                targetSamples[NDSI_SAMPLE_INDEX].set(ndsi);
             }
-            algorithmToUse.setNdsi(ndsi);
-
-            avhrrRadiance[3] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt4, 4, waterFraction);
-            avhrrRadiance[4] = AvhrrAcUtils.convertBtToRadiance(noaaId, rad2BTTable, bt5, 5, waterFraction);
-
-            SchillerNeuralNetWrapper nnWrapper = avhrrNeuralNet.get();
-            double[] inputVector = nnWrapper.getInputVector();
-            inputVector[0] = sza;
-            inputVector[1] = vza;
-            inputVector[2] = relAzi;
-            inputVector[3] = Math.sqrt(avhrrRadiance[0]);
-            inputVector[4] = Math.sqrt(avhrrRadiance[1]);
-            inputVector[5] = Math.sqrt(avhrrRadiance[3]);
-            inputVector[6] = Math.sqrt(avhrrRadiance[4]);
-
-            double[] nnOutput = nnWrapper.getNeuralNet().calc(inputVector);
-
-            algorithmToUse.setRadiance(avhrrRadiance);
-            algorithmToUse.setNnOutput(nnOutput);
-            algorithmToUse.setAmbiguousSureSeparationValue(avhrrNNCloudAmbiguousSureSeparationValue);
-            algorithmToUse.setSureSnowSeparationValue(avhrrNNCloudSureSnowSeparationValue);
-            algorithmToUse.setReflCh1(albedo1Norm / 100.0); // on [0,1]        --> put here albedo_norm now!!
-            algorithmToUse.setReflCh2(albedo2Norm / 100.0); // on [0,1]
-            algorithmToUse.setBtCh4(bt4);
-            algorithmToUse.setBtCh5(bt5);
-            algorithmToUse.setElevation(altitude);
-            setClassifFlag(targetSamples, algorithmToUse);
-            targetSamples[NDSI_SAMPLE_INDEX].set(ndsi);
         } else {
             targetSamples[CLASSIF_SAMPLE_INDEX].set(IdepixConstants.IDEPIX_INVALID, true);
         }
@@ -237,6 +254,9 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         if (desertMaskProduct != null) {
             sampleConfigurer.defineSample(SOURCE_DESERT_SAMPLE_INDEX, "DesertMaskArea", desertMaskProduct);
         }
+        if (inlandWaterCollProduct != null) {
+            sampleConfigurer.defineSample(SOURCE_INLAND_WATER_SAMPLE_INDEX, "InlandWaterMaskArea", inlandWaterCollProduct);
+        }
     }
 
     @Override
@@ -273,7 +293,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         if (copyRadiances) {
             for (int i = 0; i < AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES.length; i++) {
                 ProductUtils.copyBand(AvhrrConstants.SRC_TIMELINE_SPECTRAL_BAND_NAMES[i],
-                                      sourceProduct, getTargetProduct(), true);
+                        sourceProduct, getTargetProduct(), true);
             }
         }
 
@@ -293,7 +313,6 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
             throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
         }
     }
-
 
 
     /**

@@ -54,16 +54,11 @@ public class AvhrrPostProcessOp extends Operator {
     private Product avhrrCloudProduct;
     @SourceProduct(alias = "waterMask", optional = true)
     private Product waterMaskProduct;
-    @SourceProduct(alias = "inlandWaterMaskCollocated", optional = true)
-    private Product inlandWaterCollProduct;
 
 
-
-    private Band landWaterBand;
     private Band origCloudFlagBand;
     private Band reflCh1Band;
     private Band btCh4Band;
-    private Band origInlandWaterFlagBand;
 
     private GeoCoding geoCoding;
 
@@ -72,11 +67,11 @@ public class AvhrrPostProcessOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        if (!computeCloudShadow) {
+        if (computeCloudShadow) {
             setTargetProduct(avhrrCloudProduct);
         } else {
             Product postProcessedCloudProduct = OperatorUtils.createCompatibleProduct(avhrrCloudProduct,
-                                                                                      "postProcessedCloud", "postProcessedCloud");
+                    "postProcessedCloud", "postProcessedCloud");
 
             geoCoding = l1bProduct.getSceneGeoCoding();
 
@@ -84,13 +79,10 @@ public class AvhrrPostProcessOp extends Operator {
 
             reflCh1Band = l1bProduct.getBand("avhrr_b1");
             btCh4Band = l1bProduct.getBand("avhrr_b4");
-            if(inlandWaterCollProduct != null) {
-                origInlandWaterFlagBand = inlandWaterCollProduct.getBand("band_1");
-            }
 
             rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
-                                                                 l1bProduct.getSceneRasterHeight()),
-                                                   1, 1);
+                    l1bProduct.getSceneRasterHeight()),
+                    0, 0);
 
             ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, avhrrCloudProduct, postProcessedCloudProduct, false);
             setTargetProduct(postProcessedCloudProduct);
@@ -106,30 +98,6 @@ public class AvhrrPostProcessOp extends Operator {
 
         final Tile reflCh1Tile = applyUniformityTests ? getSourceTile(reflCh1Band, srcRectangle) : null;
         final Tile btCh4Tile = applyUniformityTests ? getSourceTile(btCh4Band, srcRectangle) : null;
-        Tile inlandWaterFlagTile = null;
-        if(inlandWaterCollProduct != null) {
-            inlandWaterFlagTile = getSourceTile(origInlandWaterFlagBand, srcRectangle);
-        }
-
-        boolean idepixLand;
-        int inlandWater;
-
-
-
-
-        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
-            checkForCancellation();
-            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                if (inlandWaterCollProduct != null) {
-                    idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
-                    inlandWater = inlandWaterFlagTile.getSampleInt(x, y);
-                    if (!idepixLand && inlandWater > 0.5) {
-                        inlandWaterFlagTile.setSample(x, y, AvhrrConstants.IDEPIX_INLAND_WATER, true);
-                    }
-                }
-                combineFlags(x, y, sourceFlagTile, targetTile);
-            }
-        }
 
         if (applyUniformityTests) {
             applyUniformityTest(targetTile, srcRectangle, sourceFlagTile, btCh4Tile, TUTCLR_THRESH);
@@ -139,9 +107,13 @@ public class AvhrrPostProcessOp extends Operator {
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                combineFlags(x, y, sourceFlagTile, targetTile);
+                consolidateFlagging(x, y, targetTile);
                 boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                 if (isCloud) {
                     targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+                    targetTile.setSample(x, y, AvhrrConstants.IDEPIX_CLEAR_WATER, false);
+                    targetTile.setSample(x, y, AvhrrConstants.IDEPIX_CLEAR_LAND, false);
                 }
             }
         }
@@ -158,54 +130,65 @@ public class AvhrrPostProcessOp extends Operator {
 
                 // determine the land pixels in a 2x2 window
                 boolean[] isLand2x2 = new boolean[4];
+                boolean[] isSnow2x2 = new boolean[4];
+                boolean[] isInvalid2x2 = new boolean[4];
                 int index = 0;
                 for (int i = x; i <= RIGHT_BORDER; i++) {
                     for (int j = y; j <= BOTTOM_BORDER; j++) {
-                        isLand2x2[index++] = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_LAND);
+                        isLand2x2[index] = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_LAND);
+                        isSnow2x2[index] = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_SNOW_ICE);
+                        isInvalid2x2[index] = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_INVALID);
+                        index++;
                     }
                 }
 
                 // if ALL pixels are land in the 2x2 window, apply uniformity test:
-                if (isLand2x2[0] && isLand2x2[1] && isLand2x2[2] && isLand2x2[3]) {
-                    // determine 2x2 min and max of incoming refl1 (RUT test) or bt4 (TUT test):
-                    double[] spectralValues = new double[4];
-                    index = 0;
-                    for (int i = x; i <= RIGHT_BORDER; i++) {
-                        for (int j = y; j <= BOTTOM_BORDER; j++) {
-                            spectralValues[index++] = spectralTile.getSampleDouble(i, j);
-                        }
-                    }
-                    final double utClrMin = Doubles.min(spectralValues);
-                    final double utClrMax = Doubles.max(spectralValues);
-                    final boolean isUtClr = utClrMax - utClrMin < spectralThresh;
-
-                    if (isUtClr) {
-                        // if uniformity is given, set all 2x2 pixels as clear:
-                        for (int i = x; i <= RIGHT_BORDER; i++) {
-                            for (int j = y; j <= BOTTOM_BORDER; j++) {
-                                targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD, false);
-                                targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
-                                targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_SURE, false);
-                            }
-                        }
-                    } else {
-                        // if one of the 4 pixels is cloudy, set all 2x2 pixels as cloud (sure)
-                        boolean[] isCloud2x2 = new boolean[4];
+                if(isSnow2x2[0] || isSnow2x2[1] || isSnow2x2[2] || isSnow2x2[3] ||
+                        isInvalid2x2[0] || isInvalid2x2[1] || isInvalid2x2[2] || isInvalid2x2[3] ) {
+                } else {
+                    if (isLand2x2[0] && isLand2x2[1] && isLand2x2[2] && isLand2x2[3]) {
+                        // determine 2x2 min and max of incoming refl1 (RUT test) or bt4 (TUT test):
+                        double[] spectralValues = new double[4];
                         index = 0;
                         for (int i = x; i <= RIGHT_BORDER; i++) {
                             for (int j = y; j <= BOTTOM_BORDER; j++) {
-                                isCloud2x2[index++] = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
+                                spectralValues[index++] = spectralTile.getSampleDouble(i, j);
                             }
                         }
-                        if (isCloud2x2[0] || isCloud2x2[1] || isCloud2x2[2] || isCloud2x2[3]) {
+                        final double utClrMin = Doubles.min(spectralValues);
+                        final double utClrMax = Doubles.max(spectralValues);
+                        final boolean isUtClr = utClrMax - utClrMin < spectralThresh && (utClrMax < 25);
+
+                        if (isUtClr) {
+                            // if uniformity is given, set all 2x2 pixels as clear:
                             for (int i = x; i <= RIGHT_BORDER; i++) {
                                 for (int j = y; j <= BOTTOM_BORDER; j++) {
-                                    targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD, true);
-                                    targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_SURE, true);
+                                    targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD, false);
                                     targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                                    targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                                    targetTile.setSample(i, j, AvhrrConstants.IDEPIX_CLEAR_LAND, true);
                                 }
                             }
+                        } else {
+                            // if one of the 4 pixels is cloudy, set all 2x2 pixels as cloud (sure)
+                            boolean[] isCloud2x2 = new boolean[4];
+                            index = 0;
+                            for (int i = x; i <= RIGHT_BORDER; i++) {
+                                for (int j = y; j <= BOTTOM_BORDER; j++) {
+                                    isCloud2x2[index++] = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
+                                }
+                            }
+                            if (isCloud2x2[0] || isCloud2x2[1] || isCloud2x2[2] || isCloud2x2[3]) {
+                                for (int i = x; i <= RIGHT_BORDER; i++) {
+                                    for (int j = y; j <= BOTTOM_BORDER; j++) {
+                                        targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD, true);
+                                        targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_SURE, true);
+                                        targetTile.setSample(i, j, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                                        targetTile.setSample(i, j, AvhrrConstants.IDEPIX_CLEAR_LAND, false);
+                                    }
+                                }
 
+                            }
                         }
                     }
                 }
@@ -239,6 +222,18 @@ public class AvhrrPostProcessOp extends Operator {
         final PixelPos pixelPos = new PixelPos(x, y);
         geoCoding.getGeoPos(pixelPos, geoPos);
         return geoPos;
+    }
+
+    private void consolidateFlagging(int x, int y, Tile targetTile) {
+        boolean idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
+        boolean idepixClearSnow = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
+        boolean idepixCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+        boolean idepixInvalid = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
+        if (!(idepixCloud || idepixInvalid || idepixClearSnow)) {
+            if (idepixLand) {
+                targetTile.setSample(x, y, AvhrrConstants.IDEPIX_CLEAR_LAND, true);
+            }
+        }
     }
 
     private boolean isNearCoastline(int x, int y, Tile waterFractionTile, Rectangle rectangle) {

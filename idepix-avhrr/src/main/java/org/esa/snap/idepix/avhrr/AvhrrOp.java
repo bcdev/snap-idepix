@@ -158,7 +158,6 @@ public class AvhrrOp extends BasisOp {
             getLogger().info("desert mask " + desertMaskProduct.getName() + " applied");
         }
 
-
         if (inlandWaterProduct != null) {
             inlandWaterMaskProduct = collocateInlandWaterProduct(sourceProduct, inlandWaterProduct);
         }
@@ -166,7 +165,6 @@ public class AvhrrOp extends BasisOp {
             timelineClassificationOp.setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
             getLogger().info("inland water mask " + inlandWaterMaskProduct.getName() + " applied");
         }
-
 
         classificationProduct = timelineClassificationOp.getTargetProduct();
         postProcess();
@@ -227,7 +225,6 @@ public class AvhrrOp extends BasisOp {
         input.put("l1b", sourceProduct);
         input.put("avhrrCloud", classificationProduct);
         input.put("waterMask", waterMaskProduct);
-        input.put("inlandWaterMaskCollocated", inlandWaterMaskProduct);
 
         Map<String, Object> params = new HashMap<>();
         params.put("cloudBufferWidth", cloudBufferWidth);
