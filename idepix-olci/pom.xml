@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>idepix-olci</artifactId>
-    <version>7.0.3-SNAPSHOT</version>
+    <version>7.0.4-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
     
@@ -34,7 +34,7 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from OLCI.</description>
 
     <properties>
-        <idepix.version>7.0.2</idepix.version>
+        <idepix.version>7.0.3</idepix.version>
     </properties>
 
     <dependencies>

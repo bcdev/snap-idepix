@@ -44,10 +44,15 @@ import java.util.Map;
         description = "Pixel identification and classification for OLCI.")
 public class IdepixOlciOp extends BasisOp {
 
-    @SourceProduct(alias = "sourceProduct",
+    @SourceProduct(alias = "l1bProduct",
             label = "OLCI L1b product",
             description = "The OLCI L1b source product.")
-    private Product sourceProduct;
+    private Product l1bProduct;
+
+//    @SourceProduct(alias = "iceMask",
+//            label = "Ice mask product", optional = true,
+//            description = "User defined ice mask product. If not provided, default climatology is used.")
+//    private Product iceMaskProduct;
 
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
@@ -130,12 +135,12 @@ public class IdepixOlciOp extends BasisOp {
     @Override
     public void initialize() throws OperatorException {
 
-        final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.OLCI);
+        final boolean inputProductIsValid = IdepixIO.validateInputProduct(l1bProduct, AlgorithmSelector.OLCI);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        final Geometry productGeometry = IdepixOlciUtils.computeProductGeometry(sourceProduct);
+        final Geometry productGeometry = IdepixOlciUtils.computeProductGeometry(l1bProduct);
         if (productGeometry != null) {
             final Polygon arcticPolygon =
                     IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ARCTIC_POLYGON_COORDS);
@@ -157,10 +162,10 @@ public class IdepixOlciOp extends BasisOp {
         computeCloudProduct();
 
         Product olciIdepixProduct = classificationProduct;
-        olciIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
+        olciIdepixProduct.setName(l1bProduct.getName() + "_IDEPIX");
         olciIdepixProduct.setAutoGrouping("Oa*_radiance:Oa*_reflectance");
 
-        ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
+        ProductUtils.copyFlagBands(l1bProduct, olciIdepixProduct, true);
 
         if (computeCloudBuffer) {
             postProcess(olciIdepixProduct);
@@ -193,7 +198,7 @@ public class IdepixOlciOp extends BasisOp {
         IdepixOlciUtils.setupOlciClassifBitmask(targetProduct);
 
         if (outputRadiance) {
-            IdepixIO.addRadianceBands(sourceProduct, targetProduct, radianceBandsToCopy);
+            IdepixIO.addRadianceBands(l1bProduct, targetProduct, radianceBandsToCopy);
         }
         if (outputRad2Refl) {
             IdepixOlciUtils.addOlciRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
@@ -212,11 +217,11 @@ public class IdepixOlciOp extends BasisOp {
 
 
     private void preProcess() {
-        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
+        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(l1bProduct);
 
         if (considerCloudsOverSnow) {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
-            o2corrSourceProducts.put("l1bProduct", sourceProduct);
+            o2corrSourceProducts.put("l1bProduct", l1bProduct);
             final String o2CorrOpName = "OlciO2aHarmonisation";
             Map<String, Object> o2corrParms = new HashMap<>();
             o2corrParms.put("writeHarmonisedRadiances", false);
@@ -228,7 +233,7 @@ public class IdepixOlciOp extends BasisOp {
         }
 
         if (computeCloudShadow) {
-            ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
+            ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(l1bProduct,
                                                                         o2CorrProduct,
                                                                         alternativeNNDirPath,
                                                                         outputCtp);
@@ -251,7 +256,8 @@ public class IdepixOlciOp extends BasisOp {
 
     private void setClassificationInputProducts() {
         classificationInputProducts = new HashMap<>();
-        classificationInputProducts.put("l1b", sourceProduct);
+        classificationInputProducts.put("l1b", l1bProduct);
+//        classificationInputProducts.put("iceMask", iceMaskProduct);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
         if (considerCloudsOverSnow) {
             classificationInputProducts.put("o2Corr", o2CorrProduct);
@@ -260,7 +266,7 @@ public class IdepixOlciOp extends BasisOp {
 
     private void postProcess(Product olciIdepixProduct) {
         HashMap<String, Product> input = new HashMap<>();
-        input.put("l1b", sourceProduct);
+        input.put("l1b", l1bProduct);
         input.put("ctp", ctpProduct);
         input.put("olciCloud", olciIdepixProduct);
 

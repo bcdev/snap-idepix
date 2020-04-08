@@ -12,6 +12,7 @@ import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.util.ProductUtils;
@@ -27,6 +28,7 @@ import java.awt.geom.PathIterator;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,7 +94,7 @@ class IdepixOlciUtils {
 
     static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct, String alternativeNNDirPath, boolean outputCtp) {
         Map<String, Product> ctpSourceProducts = new HashMap<>();
-        ctpSourceProducts.put("sourceProduct", sourceProduct);
+        ctpSourceProducts.put("l1bProduct", sourceProduct);
         ctpSourceProducts.put("o2CorrProduct", o2CorrProduct);
         Map<String, Object> params = new HashMap<>(2);
         params.put("alternativeNNDirPath", alternativeNNDirPath);
@@ -219,6 +221,16 @@ class IdepixOlciUtils {
             height = getHeightFromCtp(ctp, slp, ts);
         }
         return height;
+    }
+
+    /**
+     * Returns month (1-12) from given start/stop time
+     *
+     * @param startStopTime - start/stop time given as {@link ProductData.UTC}
+     * @return month
+     */
+    static int getMonthFromStartStopTime(ProductData.UTC startStopTime) {
+        return startStopTime.getAsCalendar().get(Calendar.MONTH) + 1;
     }
 
     private static double getHeightFromCtp(double ctp, double p0, double ts) {
