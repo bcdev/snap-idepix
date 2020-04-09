@@ -20,6 +20,7 @@ import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.seaice.LakeSeaIceClassification;
 import org.esa.snap.idepix.core.seaice.SeaIceClassification;
 import org.esa.snap.idepix.core.seaice.SeaIceClassifier;
 import org.esa.snap.idepix.core.util.IdepixIO;
@@ -106,6 +107,8 @@ public class IdepixMerisWaterClassificationOp extends Operator {
 
     private RectangleExtender rectExtender;
 
+    private LakeSeaIceClassification lakeSeaIceClassification;
+
     @Override
     public void initialize() throws OperatorException {
         try {
@@ -117,7 +120,16 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         readSchillerNets();
         createTargetProduct();
 
-        initSeaIceClassifier();
+//        initSeaIceClassifier();
+        String auxdataIceMapsPath;
+        try {
+            auxdataIceMapsPath = IdepixIO.installAuxdataIceMaps();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new OperatorException("Cannot install ice maps auxdata:" + e.getMessage());
+        }
+
+        initLakeSeaIceClassification(auxdataIceMapsPath);
 
         landWaterBand = waterMaskProduct.getBand("land_water_fraction");
 
@@ -133,14 +145,20 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         }
     }
 
-    private void initSeaIceClassifier() {
-        final ProductData.UTC startTime = getSourceProduct().getStartTime();
+//    private void initSeaIceClassifier() {
+//        final ProductData.UTC startTime = getSourceProduct().getStartTime();
+//        final int monthIndex = startTime.getAsCalendar().get(Calendar.MONTH);
+//        try {
+//            seaIceClassifier = new SeaIceClassifier(monthIndex + 1);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    private void initLakeSeaIceClassification(String auxdataIceMapsPath) {
+        final ProductData.UTC startTime = l1bProduct.getStartTime();
         final int monthIndex = startTime.getAsCalendar().get(Calendar.MONTH);
-        try {
-            seaIceClassifier = new SeaIceClassifier(monthIndex + 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        lakeSeaIceClassification = new LakeSeaIceClassification(null, auxdataIceMapsPath, monthIndex + 1);
     }
 
     private void createTargetProduct() {
@@ -261,12 +279,14 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         boolean is_glint_risk = !isCoastline && 
                 isGlintRisk(x, y, rhoToaTiles, winduTile, windvTile, szaTile, vzaTile, saaTile, vaaTile);
         boolean checkForSeaIce = false;
-        if (!isCoastline) {
+        if (!isCoastline) {  // todo: check if we really need this condition! was removed for OLCI
             // over water
             final GeoPos geoPos = getGeoPos(x, y);
-            checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsSeaice(geoPos);
+//            checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsSeaice(geoPos);
+            checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsLakeSeaIce(geoPos);
             // glint makes sense only if we have no sea ice
-            is_glint_risk = is_glint_risk && !isPixelClassifiedAsSeaice(geoPos);
+//            is_glint_risk = is_glint_risk && !isPixelClassifiedAsSeaice(geoPos);
+            is_glint_risk = is_glint_risk && !isPixelClassifiedAsLakeSeaIce(geoPos);
 
         }
 
@@ -357,29 +377,36 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         return Interp.interpolate(auxData.rog.getJavaArray(), rogIndex);
     }
 
-    private boolean isPixelClassifiedAsSeaice(GeoPos geoPos) {
-        // check given pixel, but also neighbour cell from 1x1 deg sea ice climatology...
-        final double maxLon = 360.0;
-        final double minLon = 0.0;
-        final double maxLat = 180.0;
-        final double minLat = 0.0;
+//    private boolean isPixelClassifiedAsSeaice(GeoPos geoPos) {
+//        // check given pixel, but also neighbour cell from 1x1 deg sea ice climatology...
+//        final double maxLon = 360.0;
+//        final double minLon = 0.0;
+//        final double maxLat = 180.0;
+//        final double minLat = 0.0;
+//
+//        for (int y = -1; y <= 1; y++) {
+//            for (int x = -1; x <= 1; x++) {
+//                // for sea ice climatology indices, we need to shift lat/lon onto [0,180]/[0,360]...
+//                double lon = geoPos.lon + 180.0 + x * 1.0;
+//                double lat = 90.0 - geoPos.lat + y * 1.0;
+//                lon = Math.max(lon, minLon);
+//                lon = Math.min(lon, maxLon);
+//                lat = Math.max(lat, minLat);
+//                lat = Math.min(lat, maxLat);
+//                final SeaIceClassification classification = seaIceClassifier.getClassification(lat, lon);
+//                if (classification.max >= SEA_ICE_CLIM_THRESHOLD) {
+//                    return true;
+//                }
+//            }
+//        }
+//        return false;
+//    }
 
-        for (int y = -1; y <= 1; y++) {
-            for (int x = -1; x <= 1; x++) {
-                // for sea ice climatology indices, we need to shift lat/lon onto [0,180]/[0,360]...
-                double lon = geoPos.lon + 180.0 + x * 1.0;
-                double lat = 90.0 - geoPos.lat + y * 1.0;
-                lon = Math.max(lon, minLon);
-                lon = Math.min(lon, maxLon);
-                lat = Math.max(lat, minLat);
-                lat = Math.min(lat, maxLat);
-                final SeaIceClassification classification = seaIceClassifier.getClassification(lat, lon);
-                if (classification.max >= SEA_ICE_CLIM_THRESHOLD) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    private boolean isPixelClassifiedAsLakeSeaIce(GeoPos geoPos) {
+        final int lakeSeaIceMaskX = (int) (180.0 + geoPos.lon);
+        final int lakeSeaIceMaskY = (int) (90.0 - geoPos.lat);
+        final float monthlyMaskValue = lakeSeaIceClassification.getMonthlyMaskValue(lakeSeaIceMaskX, lakeSeaIceMaskY);
+        return monthlyMaskValue >= SEA_ICE_CLIM_THRESHOLD;
     }
 
     private GeoPos getGeoPos(int x, int y) {
