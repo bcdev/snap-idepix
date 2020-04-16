@@ -73,6 +73,7 @@ public class AvhrrConstants {
     static final String SRC_TIMELINE_VZA_BAND_NAME = "sat_zenith";
     static final String SRC_TIMELINE_VAA_BAND_NAME = "sat_azimuth";
     static final String SRC_TIMELINE_ALTITUDE_BAND_NAME = "altitude";
+    static final String SRC_TIMELINE_CLM_BAND_NAME = "CLM";
 
     static final int SRC_TIMELINE_SZA = 0;
     static final int SRC_TIMELINE_SAA = 1;
@@ -85,6 +86,8 @@ public class AvhrrConstants {
     static final int SRC_TIMELINE_RAD_4 = 8;
     static final int SRC_TIMELINE_RAD_5 = 9;
     static final int SRC_TIMELINE_WATERFRACTION = 10;
+    static final int SRC_TIMELINE_CLM = 11;
+    static final int SRC_TIMELINE_END_INDEX = 11;
 
     static final double SOLAR_3b = 4.448;
 

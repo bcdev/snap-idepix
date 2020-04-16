@@ -62,10 +62,15 @@ public class Avhrr2Algorithm extends AvhrrAlgorithm {
             return false;
         }
 
+        if ((reflCh1 + reflCh2)/2. > 0.3 && clm == 0){
+            return false;
+        }
+
         final boolean isCloudAdditional = isCloudSnowIceFromDecisionTree();
         if (isCloudAdditional) {
             return true;
         }
+
         final boolean isCloudSureSchiller = isCloudSureSchiller();
         if (isCloudSureSchiller) {
             return true;
@@ -96,13 +101,18 @@ public class Avhrr2Algorithm extends AvhrrAlgorithm {
 
     private boolean isResidualCloud() {
 
+        boolean residualCloud;
         if (isDesertArea()) {
-            return (reflCh3 < 0.18 && reflCh1>0.15 && (btCh4 / btCh3) < 0.927 && btCh4<280)
+            residualCloud = (reflCh3 < 0.18 && reflCh1>0.15 && (btCh4 / btCh3) < 0.927 && btCh4<280)
                     || ((reflCh1 + reflCh2 + reflCh3) / 3 > 0.23 && btCh4 < 302 && (btCh4 / btCh3) < 0.95 && reflCh3 < 0.38 && reflCh3 > 0.219);
         } else {
-            return (reflCh3 < 0.18 && reflCh1>0.15 && (btCh4 / btCh3) < 0.927)
+            residualCloud = (reflCh3 < 0.18 && reflCh1>0.15 && (btCh4 / btCh3) < 0.927)
                     || ((reflCh1 + reflCh2 + reflCh3) / 3 > 0.2 && btCh4 < 302 && (btCh4 / btCh3) < 0.95 && reflCh3 < 0.4);
         }
+        if ((reflCh1 + reflCh2)/2. > 0.3 && clm == 0){
+            residualCloud = false;
+        }
+        return residualCloud;
     }
 
     private boolean isCloudSnowIceFromDecisionTree() {

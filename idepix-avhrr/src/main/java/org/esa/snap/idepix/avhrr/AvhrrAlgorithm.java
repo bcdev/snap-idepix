@@ -23,6 +23,7 @@ public abstract class AvhrrAlgorithm implements AvhrrPixelProperties {
     double rho3b;
     double emissivity3b;
     double ndsi;
+    int clm;
 
     double latitude;
     double elevation;
@@ -33,6 +34,7 @@ public abstract class AvhrrAlgorithm implements AvhrrPixelProperties {
     private double avhrracSchillerNNCloudAmbiguousSureSeparationValue;
     private boolean isDesertSet;
     private boolean isDesert;
+
 
     public AvhrrAlgorithm() {
         isDesertSet = false;
@@ -228,5 +230,9 @@ public abstract class AvhrrAlgorithm implements AvhrrPixelProperties {
 
     void setElevation(double elevation) {
         this.elevation = elevation;
+    }
+
+    void setCLM(int clm) {
+        this.clm = clm;
     }
 }

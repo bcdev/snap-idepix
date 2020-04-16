@@ -42,8 +42,8 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
 
     private static final int CLASSIF_SAMPLE_INDEX = 0;
     private static final int NDSI_SAMPLE_INDEX = 1;
-    private static final int SOURCE_DESERT_SAMPLE_INDEX = 11;
-    private static final int SOURCE_INLAND_WATER_SAMPLE_INDEX = 12;
+    private static final int SOURCE_DESERT_SAMPLE_INDEX = AvhrrConstants.SRC_TIMELINE_END_INDEX + 1;
+    private static final int SOURCE_INLAND_WATER_SAMPLE_INDEX = AvhrrConstants.SRC_TIMELINE_END_INDEX + 2;
 
     private String sensor;
     private boolean isAvhrrB3aInactive;
@@ -110,6 +110,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         final double vza = sourceSamples[AvhrrConstants.SRC_TIMELINE_VZA].getDouble();
         final double saa = sourceSamples[AvhrrConstants.SRC_TIMELINE_SAA].getDouble();
         final double vaa = sourceSamples[AvhrrConstants.SRC_TIMELINE_VAA].getDouble();
+        final int clm = sourceSamples[AvhrrConstants.SRC_TIMELINE_CLM].getInt();
 
         final double albedo1 = sourceSamples[AvhrrConstants.SRC_TIMELINE_ALBEDO_1].getDouble();
         final double albedo2 = sourceSamples[AvhrrConstants.SRC_TIMELINE_ALBEDO_2].getDouble();
@@ -158,7 +159,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
                 double ndsi;
                 algorithmToUse.setLatitude(getGeoPos(x, y).lat);
                 algorithmToUse.setLongitude(getGeoPos(x, y).lon);
-                if (sourceSamples.length == 12) {
+                if (desertMaskProduct != null) {
                     algorithmToUse.setDesert(sourceSamples[SOURCE_DESERT_SAMPLE_INDEX].getBoolean());
                 }
                 if (sensor.equals("AVHRR/2") || isAvhrrB3aInactive) {
@@ -203,6 +204,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
                 algorithmToUse.setBtCh4(bt4);
                 algorithmToUse.setBtCh5(bt5);
                 algorithmToUse.setElevation(altitude);
+                algorithmToUse.setCLM(clm);
                 setClassifFlag(targetSamples, algorithmToUse);
                 targetSamples[NDSI_SAMPLE_INDEX].set(ndsi);
             }
@@ -257,6 +259,7 @@ public class AvhrrTimelineClassificationOp extends AbstractAvhrrClassificationOp
         if (inlandWaterCollProduct != null) {
             sampleConfigurer.defineSample(SOURCE_INLAND_WATER_SAMPLE_INDEX, "InlandWaterMaskArea", inlandWaterCollProduct);
         }
+        sampleConfigurer.defineSample(AvhrrConstants.SRC_TIMELINE_CLM, AvhrrConstants.SRC_TIMELINE_CLM_BAND_NAME);
     }
 
     @Override
