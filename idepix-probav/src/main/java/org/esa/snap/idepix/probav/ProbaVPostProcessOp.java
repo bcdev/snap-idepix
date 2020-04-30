@@ -64,7 +64,7 @@ public class ProbaVPostProcessOp extends Operator {
         origCloudFlagBand = probavCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         origSmFlagBand = l1bProduct.getBand("SM_FLAGS");
         if(inlandWaterCollProduct != null) {
-            origInlandWaterFlagBand = inlandWaterCollProduct.getBand("band_1");
+            origInlandWaterFlagBand = inlandWaterCollProduct.getBand("InlandWaterMaskArea");
         }
         if (computeCloudBuffer) {
             rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
