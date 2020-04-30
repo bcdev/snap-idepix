@@ -53,7 +53,7 @@ public abstract class AvhrrAlgorithm implements AvhrrPixelProperties {
 
     @Override
     public boolean isCloudAmbiguous() {
-        return isCloudSure(); // todo: discuss if we need specific ambiguous flag
+        return false; // isCloudSure(); // todo: discuss if we need specific ambiguous flag
         // CB: cloud sure gives enough clouds, no ambiguous needed, 20141111
     }
 
