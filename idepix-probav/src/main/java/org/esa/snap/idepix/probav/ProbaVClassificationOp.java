@@ -255,11 +255,12 @@ public class ProbaVClassificationOp extends Operator {
                     // final check for c3sLot5 processing and VITO CM product present (GK 20200317):
                     if (isProcessingForC3SLot5 && vitoCmTile != null) {
                         final boolean isInvalid = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
+                        final boolean isSnowIce = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
+                        final boolean isLand = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
+                        final boolean isCloudBuffer = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_BUFFER);
+
                         final int vitoCmValue = vitoCmTile.getSampleInt(x, y);
                         if (!isInvalid && vitoCmValue == 2) {
-//                            if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD))  {
-//                                System.out.println("x,y = " + x + ", " + y);
-//                            }
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
@@ -268,6 +269,19 @@ public class ProbaVClassificationOp extends Operator {
                             cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, false);
                             cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, false);
                         }
+                        if (!isInvalid && vitoCmValue == 1 && !isSnowIce && (smCloud || isCloudBuffer)) {
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, false);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_BUFFER, false);
+                            if (isLand) {
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, true);
+                            } else {
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, true);
+                            }
+                        }
+
                     }
 
                     for (Band band : targetProduct.getBands()) {
