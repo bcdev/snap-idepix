@@ -95,7 +95,7 @@ public class VgtPostProcessOp extends Operator {
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Rectangle targetRectangle = targetTile.getRectangle();
 
-        Rectangle srcRectangle = null;
+        Rectangle srcRectangle = targetRectangle;
         if (computeCloudBuffer) {
             srcRectangle = rectCalculator.extend(targetRectangle);
         }

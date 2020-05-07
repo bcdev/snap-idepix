@@ -48,10 +48,18 @@ public class ProbaVPostProcessOp extends Operator {
     private Product probavCloudProduct;
     @SourceProduct(alias = "inlandWaterMaskCollocated", optional = true)
     private Product inlandWaterCollProduct;
+    @SourceProduct(alias = "vitoCm", description = "Proba-V VITO cloud product.", optional = true)
+    private Product vitoCloudProduct;
+
+    @Parameter(defaultValue = "false",
+            label = " Apply processing mode for C3S-Lot5 project",
+            description = "If set, processing mode for C3S-Lot5 project is applied (uses specific tests)")
+    private boolean isProcessingForC3SLot5;
 
     private Band origCloudFlagBand;
     private Band origSmFlagBand;
     private Band origInlandWaterFlagBand;
+    private Band vitoCmBand;
 
     private RectangleExtender rectCalculator;
 
@@ -59,17 +67,21 @@ public class ProbaVPostProcessOp extends Operator {
     public void initialize() throws OperatorException {
 
         Product postProcessedCloudProduct = createTargetProduct(probavCloudProduct,
-                                                                "postProcessedCloud", "postProcessedCloud");
+                "postProcessedCloud", "postProcessedCloud");
 
         origCloudFlagBand = probavCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         origSmFlagBand = l1bProduct.getBand("SM_FLAGS");
-        if(inlandWaterCollProduct != null) {
+        if (inlandWaterCollProduct != null) {
             origInlandWaterFlagBand = inlandWaterCollProduct.getBand("InlandWaterMaskArea");
+        }
+
+        if (vitoCloudProduct != null && isProcessingForC3SLot5) {
+            vitoCmBand = vitoCloudProduct.getBand("cloud_mask");
         }
         if (computeCloudBuffer) {
             rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
-                                                                 l1bProduct.getSceneRasterHeight()),
-                                                   cloudBufferWidth, cloudBufferWidth
+                    l1bProduct.getSceneRasterHeight()),
+                    cloudBufferWidth, cloudBufferWidth
             );
         }
 
@@ -92,8 +104,7 @@ public class ProbaVPostProcessOp extends Operator {
     @Override
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Rectangle targetRectangle = targetTile.getRectangle();
-
-        Rectangle srcRectangle = null;
+        Rectangle srcRectangle = targetRectangle;
         if (computeCloudBuffer) {
             srcRectangle = rectCalculator.extend(targetRectangle);
         }
@@ -101,8 +112,12 @@ public class ProbaVPostProcessOp extends Operator {
         final Tile cloudFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
         final Tile smFlagTile = getSourceTile(origSmFlagBand, srcRectangle);
         Tile inlandWaterFlagTile = null;
-        if(inlandWaterCollProduct != null) {
+        if (inlandWaterCollProduct != null) {
             inlandWaterFlagTile = getSourceTile(origInlandWaterFlagBand, srcRectangle);
+        }
+        Tile vitoCmTile = null;
+        if (vitoCloudProduct != null && isProcessingForC3SLot5) {
+            vitoCmTile = getSourceTile(vitoCmBand, srcRectangle);
         }
 
         boolean idepixLand;
@@ -115,17 +130,22 @@ public class ProbaVPostProcessOp extends Operator {
                 boolean isInvalid = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
                 if (!isInvalid) {
                     combineFlags(x, y, cloudFlagTile, targetTile);
-                    consolidateFlagging(x, y, smFlagTile, targetTile);
+                    if (vitoCmTile != null && isProcessingForC3SLot5) {
+                        consolidateFlaggingVitoCloudProduct(x, y, targetTile);
+                    } else {
+                        consolidateFlagging(x, y, smFlagTile, targetTile);;
+                    }
                     setCloudShadow(x, y, smFlagTile, targetTile);
                 }
 
                 if (inlandWaterCollProduct != null) {
                     idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
                     inlandWater = inlandWaterFlagTile.getSampleInt(x, y);
-                    if(!idepixLand && (inlandWater == 1)) {
+                    if (!idepixLand && (inlandWater == 1)) {
                         targetTile.setSample(x, y, ProbaVConstants.IDEPIX_INLAND_WATER, true);
                     }
                 }
+                copyFlags(x, y, targetTile, cloudFlagTile);
             }
         }
 
@@ -157,6 +177,11 @@ public class ProbaVPostProcessOp extends Operator {
         targetTile.setSample(x, y, sourceFlags | computedFlags);
     }
 
+    private void copyFlags(int x, int y, Tile sourceFlagTile, Tile copyFlagTile) {
+        int sourceFlags = sourceFlagTile.getSampleInt(x, y);
+        copyFlagTile.setSample(x, y, sourceFlags);
+    }
+
     private void consolidateFlagging(int x, int y, Tile smFlagTile, Tile targetTile) {
         final boolean smClear = smFlagTile.getSampleBit(x, y, ProbaVClassificationOp.SM_F_CLEAR);
         final boolean idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
@@ -176,17 +201,53 @@ public class ProbaVPostProcessOp extends Operator {
         final boolean safeCloud = idepixCloud || (potentialCloudSnow && (!safeSnowIce && !safeClearWater));
         final boolean safeClearWaterFinal = (((!safeClearLand && !safeSnowIce && !safeCloud && !smCloud) && idepixWater) || safeClearWater) && !idepixInvalid;
         final boolean safeClearLandFinal = (((!safeSnowIce && !idepixCloud && !smCloud && !safeClearWaterFinal) && idepixLand) || safeClearLand) && !idepixInvalid;
-        final boolean safeCloudFinal = safeCloud && (!safeClearLandFinal && !safeClearWaterFinal) && !idepixInvalid;;
-
+        final boolean safeCloudFinal = safeCloud && (!safeClearLandFinal && !safeClearWaterFinal) && !idepixInvalid;
+        ;
 
         // GK 20151201;
-
         targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
         targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, safeClearWaterFinal);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, safeCloudFinal);
         if (safeCloudFinal) {
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+        }
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, safeSnowIce);
+
+    }
+
+    private void consolidateFlaggingVitoCloudProduct(int x, int y, Tile targetTile) {
+        final boolean idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
+        final boolean idepixClearLand = targetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND);
+        final boolean idepixWater = targetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_WATER);
+        final boolean idepixClearWater = targetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER);
+        final boolean idepixClearSnow = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
+        final boolean idepixCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+        final boolean idepixCloudAmbiguous = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS);
+        final boolean idepixInvalid = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
+
+
+        final boolean safeClearLand = idepixLand && idepixClearLand && !idepixClearSnow;
+        final boolean safeClearWater = idepixWater && idepixClearWater && !idepixClearSnow;
+        final boolean potentialCloudSnow = !safeClearLand && idepixLand;
+        final boolean safeSnowIce = potentialCloudSnow && idepixClearSnow;
+        final boolean safeCloud = idepixCloud || (potentialCloudSnow && (!safeSnowIce && !safeClearWater));
+        final boolean safeClearWaterFinal = (((!safeClearLand && !safeSnowIce && !safeCloud) && idepixWater) || safeClearWater) && !idepixInvalid;
+        final boolean safeClearLandFinal = (((!safeSnowIce && !idepixCloud && !safeClearWaterFinal) && idepixLand) || safeClearLand) && !idepixInvalid;
+        final boolean safeCloudFinal = safeCloud && (!safeClearLandFinal && !safeClearWaterFinal) && !idepixInvalid;
+        ;
+
+        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
+        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, safeClearWaterFinal);
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, safeCloudFinal);
+        if (safeCloudFinal) {
+            if (idepixCloudAmbiguous) {
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
+            } else {
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+            }
         }
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, safeSnowIce);
 

@@ -174,10 +174,12 @@ public class ProbaVOp extends BasisOp {
         input.put("l1b", sourceProduct);
         input.put("probavCloud", cloudProduct);
         input.put("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+        input.put("vitoCm", vitoCloudProduct);
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
+        params.put("isProcessingForC3SLot5", isProcessingForC3SLot5);
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ProbaVPostProcessOp.class),
                                                             params, input);
     }
