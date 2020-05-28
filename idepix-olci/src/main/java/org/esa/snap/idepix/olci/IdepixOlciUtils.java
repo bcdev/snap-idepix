@@ -159,7 +159,7 @@ class IdepixOlciUtils {
                 2.0 * Math.tan(szaRad) * Math.tan(ozaRad) * Math.cos(deltaPhiRad));
 
         double delta = Math.acos(numerator / denominator);
-        if (saa < 270. && saa > 90){
+        if (saa > 270. || saa < 90){
             //sun towards the South
             delta *= -1.0;
         }
