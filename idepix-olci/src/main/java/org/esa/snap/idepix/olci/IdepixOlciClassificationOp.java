@@ -262,10 +262,13 @@ public class IdepixOlciClassificationOp extends Operator {
 
                     final boolean isLandFromAppliedMask = isOlciLandPixel(x, y, olciQualityFlagTile, waterFraction);
                     final boolean isInlandWaterFromAppliedMask = isOlciInlandWaterPixel(x, y, olciQualityFlagTile, waterFraction);
-                    cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLandFromAppliedMask);
+                    //todo: for cglops, coastlines are added to LAND to exclude them from L2 processing
+                    cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLandFromAppliedMask ||
+                            isCoastlineFromAppliedMask);
 
 //                    if (isLandFromAppliedMask && !isOlciInlandWaterPixel(x, y, olciQualityFlagTile)) {
-                    if (isLandFromAppliedMask && !isInlandWaterFromAppliedMask) {
+                    // todo: for cglops, coastlines are treated as LAND
+                    if ((isLandFromAppliedMask && !isInlandWaterFromAppliedMask) || isCoastlineFromAppliedMask) {
                         classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
                                          surface13Tile, trans13Tile, y, x);
                     } else {
@@ -326,6 +329,8 @@ public class IdepixOlciClassificationOp extends Operator {
                     //catches mixed pixels at coast lines.
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+                    // todo: for cglops it is OK, if these mixed pixels are classified as LAND!
+                    cloudFlagTargetTile.setSample(x, y, IDEPIX_LAND, true);
 
                 }
                 if(olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_BRIGHT)){
