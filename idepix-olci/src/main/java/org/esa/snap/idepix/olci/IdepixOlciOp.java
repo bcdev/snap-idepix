@@ -39,7 +39,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Idepix.Olci",
         category = "Optical/Pre-Processing",
-        version = "3.0",
+        version = "3.0.2",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
         description = "Pixel identification and classification for OLCI.")

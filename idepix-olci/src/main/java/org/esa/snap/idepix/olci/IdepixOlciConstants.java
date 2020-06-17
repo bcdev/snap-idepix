@@ -10,7 +10,7 @@ class IdepixOlciConstants {
     /* Level 1 Quality Flags Positions */
     static final int L1_F_LAND = 31;
     static final int L1_F_COASTLINE = 30;
-    //    static final int L1_F_FRESH_INLAND_WATER = 29;
+    static final int L1_F_FRESH_INLAND_WATER = 29;
     static final int L1_F_BRIGHT = 27;
     static final int L1_F_INVALID = 25;
     static final int L1_F_GLINT = 22;

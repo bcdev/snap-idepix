@@ -191,8 +191,6 @@ class IdepixOlciCloudShadowFronts {
             }
         }
 //        final double saaRad = Math.toRadians(saa);
-        final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa);
-        final double saaRadApparent = Math.toRadians(saaApparent);
 
         PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
 
@@ -200,6 +198,10 @@ class IdepixOlciCloudShadowFronts {
         double tanSza = Math.tan(Math.toRadians(90.0 - sza));
         final double cloudHeightMax = 12_000;
         final double cloudDistanceMax = cloudHeightMax / tanSza;
+
+        final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, geoPos.getLat());
+        final double saaRadApparent = Math.toRadians(saaApparent);
+
 
         GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, saaRadApparent + Math.PI);
         PixelPos endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
