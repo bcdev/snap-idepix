@@ -104,6 +104,11 @@ public class IdepixOlciOp extends BasisOp {
             description = " If cloud shadow is computed, write CTP value to the target product ")
     private boolean outputCtp;
 
+    @Parameter(defaultValue = "false",
+            label = " If cloud shadow is computed, write harmonised radiances to the target product",
+            description = " If cloud shadow is computed, write harmonised radiances (bands 13-15) to the target product ")
+    private boolean outputHarmonisedRadiances;
+
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
 
@@ -212,6 +217,16 @@ public class IdepixOlciOp extends BasisOp {
             ProductUtils.copyBand(IdepixConstants.CTP_OUTPUT_BAND_NAME, ctpProduct, targetProduct, true);
         }
 
+        if (computeCloudShadow && outputHarmonisedRadiances) {
+            for (int i = 0; i < o2CorrProduct.getNumBands(); i++) {
+                final String bandName = o2CorrProduct.getBandAt(i).getName();
+                if (bandName.startsWith("radiance")) {
+                    ProductUtils.copyBand(bandName, o2CorrProduct, targetProduct, true);
+                }
+            }
+        }
+
+
         return targetProduct;
     }
 
@@ -219,24 +234,21 @@ public class IdepixOlciOp extends BasisOp {
     private void preProcess() {
         rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(l1bProduct);
 
-        if (considerCloudsOverSnow) {
+        if (considerCloudsOverSnow || computeCloudShadow) {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
             o2corrSourceProducts.put("l1bProduct", l1bProduct);
             final String o2CorrOpName = "OlciO2aHarmonisation";
             Map<String, Object> o2corrParms = new HashMap<>();
-            o2corrParms.put("writeHarmonisedRadiances", false);
             if (computeCloudShadow) {
+                o2corrParms.put("writeHarmonisedRadiances", outputHarmonisedRadiances);
                 o2corrParms.put("processOnlyBand13", false);
             }
-            o2corrParms.put("processOnlyBand13", false); // test!
             o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
-        }
-
-        if (computeCloudShadow) {
-            ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(l1bProduct,
-                                                                        o2CorrProduct,
-                                                                        alternativeNNDirPath,
-                                                                        outputCtp);
+            if (computeCloudShadow) {
+                ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(l1bProduct,
+                        o2CorrProduct,
+                        alternativeNNDirPath);
+            }
         }
 
     }
