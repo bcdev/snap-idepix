@@ -14,6 +14,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
+import org.esa.snap.idepix.core.CloudShadowFronts;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.CloudBuffer;
 import org.esa.snap.idepix.core.util.IdepixIO;
@@ -54,6 +55,11 @@ public class IdepixOlciPostProcessOp extends Operator {
             label = " Compute cloud shadow",
             description = " Compute cloud shadow with latest 'fronts' algorithm. Requires CTP.")
     private boolean computeCloudShadow;
+
+    @Parameter(defaultValue = "true",
+            label = " Refine pixel classification near coastlines",
+            description = "Refine pixel classification near coastlines. ")
+    private boolean refineClassificationNearCoastlines;
 
     @SourceProduct(alias = "l1b")
     private Product l1bProduct;
@@ -145,8 +151,22 @@ public class IdepixOlciPostProcessOp extends Operator {
                 if (targetRectangle.contains(x, y)) {
                     boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     combineFlags(x, y, sourceFlagTile, targetTile);
-                    if (isCloud) {
-                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);   // necessary??
+//                    if (isCloud) {
+//                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);   // necessary??
+//                    }
+
+                    boolean isCoastline = sourceFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_COASTLINE);
+                    
+                    if (refineClassificationNearCoastlines) {
+                        if (isCloud && isCoastline) { //MERIS has a test isNearCoastline
+                            if (isCloud) {
+                                refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, targetTile, srcRectangle);
+                            }
+                        }
+                    }
+                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+                    if (isCloudAfterRefinement) {
+                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                     }
                 }
             }
@@ -194,6 +214,37 @@ public class IdepixOlciPostProcessOp extends Operator {
         int computedFlags = targetTile.getSampleInt(x, y);
         targetTile.setSample(x, y, sourceFlags | computedFlags);
     }
+
+    private void refineCloudFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile, Rectangle srcRectangle) {
+        final int windowWidth = 1;
+        final int LEFT_BORDER = Math.max(x - windowWidth, srcRectangle.x);
+        final int RIGHT_BORDER = Math.min(x + windowWidth, srcRectangle.x + srcRectangle.width - 1);
+        final int TOP_BORDER = Math.max(y - windowWidth, srcRectangle.y);
+        final int BOTTOM_BORDER = Math.min(y + windowWidth, srcRectangle.y + srcRectangle.height - 1);
+        boolean removeCloudFlag = true;
+        if (CloudShadowFronts.isPixelSurrounded(x, y, sourceFlagTile, IdepixConstants.IDEPIX_CLOUD)) {
+            removeCloudFlag = false;
+        } else {
+            Rectangle targetTileRectangle = targetTile.getRectangle();
+            for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
+                for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
+                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
+                    boolean is_coastline = sourceFlagTile.getSampleBit(i, j, IdepixOlciConstants.L1_F_COASTLINE);
+                    if (is_cloud && targetTileRectangle.contains(i, j) && !is_coastline) {
+                        removeCloudFlag = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (removeCloudFlag) {
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+        }
+    }
+
 
     /**
      * The Service Provider Interface (SPI) for the operator.

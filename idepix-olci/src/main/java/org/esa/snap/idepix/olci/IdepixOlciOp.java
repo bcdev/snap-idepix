@@ -172,9 +172,11 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(l1bProduct, olciIdepixProduct, true);
 
-        if (computeCloudBuffer) {
-            postProcess(olciIdepixProduct);
-        }
+        // postprocessing is always needed both for ice and for coastline postprocessing!
+        postProcess(olciIdepixProduct);
+//        if (computeCloudBuffer || computeCloudShadow) {
+//            postProcess(olciIdepixProduct);
+//        }
 
         targetProduct = createTargetProduct(olciIdepixProduct);
         targetProduct.setAutoGrouping(olciIdepixProduct.getAutoGrouping());
