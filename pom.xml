@@ -127,7 +127,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>23.0</version>
+                <version>24.1.1</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -264,19 +264,6 @@
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
             <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>bc-nexus-repo</id>
-            <name>Public Nexus Repository for BC</name>
-            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
             <releases>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
