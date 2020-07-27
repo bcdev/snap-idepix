@@ -82,9 +82,9 @@ public class IdepixOlciPostProcessOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         Product postProcessedCloudProduct = IdepixIO.createCompatibleTargetProduct(olciCloudProduct,
-                                                                                   "postProcessedCloud",
-                                                                                   "postProcessedCloud",
-                                                                                   true);
+                "postProcessedCloud",
+                "postProcessedCloud",
+                true);
 
         geoCoding = l1bProduct.getSceneGeoCoding();
 
@@ -103,12 +103,10 @@ public class IdepixOlciPostProcessOp extends Operator {
                     l1bProduct.getTiePointGrid("atmospheric_temperature_profile_pressure_level_" + (i + 1));
         }
 
-        if (computeCloudBuffer) {
-            rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
-                                                                 l1bProduct.getSceneRasterHeight()),
-                                                   cloudBufferWidth, cloudBufferWidth
-            );
-        }
+        rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
+                l1bProduct.getSceneRasterHeight()),
+                cloudBufferWidth, cloudBufferWidth
+        );
         if (computeCloudShadow && ctpProduct != null) {
             ctpBand = ctpProduct.getBand("ctp");
             int extendedWidth;
@@ -121,8 +119,8 @@ public class IdepixOlciPostProcessOp extends Operator {
                 extendedHeight = 16;
             }
             rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
-                                                                 l1bProduct.getSceneRasterHeight()),
-                                                   extendedWidth, extendedHeight
+                    l1bProduct.getSceneRasterHeight()),
+                    extendedWidth, extendedHeight
             );
         }
 
@@ -180,11 +178,11 @@ public class IdepixOlciPostProcessOp extends Operator {
             // - more advanced CTH computation
             // - use of 'apparent sun azimuth angle
             IdepixOlciCloudShadowFronts cloudShadowFronts = new IdepixOlciCloudShadowFronts(geoCoding,
-                                                                                            szaTile, saaTile,
-                                                                                            ozaTile, oaaTile,
-                                                                                            ctpTile, slpTile,
-                                                                                            temperatureProfileTPGTiles,
-                                                                                            altTile);
+                    szaTile, saaTile,
+                    ozaTile, oaaTile,
+                    ctpTile, slpTile,
+                    temperatureProfileTPGTiles,
+                    altTile);
             cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
         }
     }
