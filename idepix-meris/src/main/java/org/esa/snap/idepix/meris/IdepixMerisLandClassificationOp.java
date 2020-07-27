@@ -164,50 +164,56 @@ public class IdepixMerisLandClassificationOp extends Operator {
                             nnTargetTile.setSample(x, y, Float.NaN);
                         }
                     } else {
-                        // only use Schiller NN approach...
-                        for (int i = 0; i < EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS; i++) {
-                            merisReflectance[i] = merisReflectanceTiles[i].getSampleFloat(x, y);
-                        }
-
-                        SchillerNeuralNetWrapper nnWrapper = merisLandNeuralNet.get();
-                        double[] inputVector = nnWrapper.getInputVector();
-                        for (int i = 0; i < inputVector.length; i++) {
-                            inputVector[i] = Math.sqrt(merisReflectance[i]);
-                        }
-
-                        final double[] nnOutput = nnWrapper.getNeuralNet().calc(inputVector);
-
-                        if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
-                            if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
-                                    nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue) {
-                                // this would be as 'CLOUD_AMBIGUOUS'...
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
-                            }
-                            if (nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue &&
-                                    nnOutput[0] <= schillerNNCloudSureSnowSeparationValue) {
-                                // this would be as 'CLOUD_SURE'...
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
-                            }
-                            if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue) {
-                                // this would be as 'SNOW/ICE'...
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
-                            }
-                        }
-
-                        if (nnTargetTile != null) {
-                            nnTargetTile.setSample(x, y, nnOutput[0]);
-                        }
+                        classifyPixel(merisReflectanceTiles, merisReflectance,
+                                cloudFlagTargetTile, nnTargetTile, y, x);
                     }
                 }
             }
         } catch (Exception e) {
             throw new OperatorException("Failed to provide GA cloud screening:\n" + e.getMessage(), e);
+        }
+    }
+
+    private void classifyPixel(Tile[] merisReflectanceTiles, float[] merisReflectance,
+                               Tile cloudFlagTargetTile, Tile nnTargetTile, int y, int x) {
+        // only use Schiller NN approach...
+        for (int i = 0; i < EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS; i++) {
+            merisReflectance[i] = merisReflectanceTiles[i].getSampleFloat(x, y);
+        }
+
+        SchillerNeuralNetWrapper nnWrapper = merisLandNeuralNet.get();
+        double[] inputVector = nnWrapper.getInputVector();
+        for (int i = 0; i < inputVector.length; i++) {
+            inputVector[i] = Math.sqrt(merisReflectance[i]);
+        }
+
+        final double[] nnOutput = nnWrapper.getNeuralNet().calc(inputVector);
+
+        if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
+            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+            if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
+                    nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue) {
+                // this would be as 'CLOUD_AMBIGUOUS'...
+                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
+                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
+            }
+            if (nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue &&
+                    nnOutput[0] <= schillerNNCloudSureSnowSeparationValue) {
+                // this would be as 'CLOUD_SURE'...
+                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
+                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
+            }
+            if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue) {
+                // this would be as 'SNOW/ICE'...
+                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
+            }
+        }
+
+        if (nnTargetTile != null) {
+            nnTargetTile.setSample(x, y, nnOutput[0]);
         }
     }
 

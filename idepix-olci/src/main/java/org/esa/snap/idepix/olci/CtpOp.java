@@ -41,7 +41,7 @@ import java.util.Map;
         description = "CTP for OLCI based on Tensorflow neural nets.")
 public class CtpOp extends BasisOp {
 
-    @SourceProduct(alias = "sourceProduct",
+    @SourceProduct(alias = "l1bProduct",
             label = "OLCI L1b product",
             description = "The OLCI L1b source product.")
     private Product sourceProduct;

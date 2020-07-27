@@ -126,7 +126,8 @@ public class IdepixMerisPostProcessOp extends Operator {
                     if (refineClassificationNearCoastlines) {
                         if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
                             targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, true);
-                            refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
+                            // this causes problems for 'coastlines' over frozen inland lakes (OD 20200421):
+//                            refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
                             if (isCloud) {
                                 refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, waterFractionTile, targetTile, srcRectangle);
                             }
