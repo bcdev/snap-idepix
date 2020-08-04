@@ -1,9 +1,6 @@
 package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Polygon;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
@@ -22,8 +19,11 @@ import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.watermask.operator.WatermaskClassifier;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;

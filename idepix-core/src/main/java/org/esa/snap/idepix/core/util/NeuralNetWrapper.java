@@ -56,12 +56,7 @@ public class NeuralNetWrapper {
 
     public static ThreadLocal<NeuralNetWrapper> create(InputStream inputStream, final int in, final int out) {
         final JnnNet jnnNet = loadNeuralNet(inputStream);
-        return new ThreadLocal<NeuralNetWrapper>() {
-            @Override
-            protected NeuralNetWrapper initialValue() {
-                return new NeuralNetWrapper(jnnNet.clone(), in, out);
-            }
-        };
+        return ThreadLocal.withInitial(() -> new NeuralNetWrapper(jnnNet.clone(), in, out));
     }
 
     private static JnnNet loadNeuralNet(InputStream inputStream) {

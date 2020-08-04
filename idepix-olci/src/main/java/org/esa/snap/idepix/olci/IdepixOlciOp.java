@@ -1,7 +1,5 @@
 package org.esa.snap.idepix.olci;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -17,6 +15,8 @@ import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.BasisOp;
 import org.esa.snap.idepix.core.util.IdepixIO;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,8 +63,8 @@ public class IdepixOlciOp extends BasisOp {
                     "Oa11_radiance", "Oa12_radiance", "Oa13_radiance", "Oa14_radiance", "Oa15_radiance",
                     "Oa16_radiance", "Oa17_radiance", "Oa18_radiance", "Oa19_radiance", "Oa20_radiance",
                     "Oa21_radiance"
-            },
-            defaultValue = "")
+            }
+    )
     private String[] radianceBandsToCopy;
 
     @Parameter(description = "The list of reflectance bands to write to target product.",
@@ -75,8 +75,8 @@ public class IdepixOlciOp extends BasisOp {
                     "Oa11_reflectance", "Oa12_reflectance", "Oa13_reflectance", "Oa14_reflectance", "Oa15_reflectance",
                     "Oa16_reflectance", "Oa17_reflectance", "Oa18_reflectance", "Oa19_reflectance", "Oa20_reflectance",
                     "Oa21_reflectance"
-            },
-            defaultValue = "")
+            }
+    )
     private String[] reflBandsToCopy;
 
     @Parameter(defaultValue = "false",
