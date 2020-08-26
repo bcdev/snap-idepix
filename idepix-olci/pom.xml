@@ -85,6 +85,11 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>snap-netcdf</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>snap-csv-dataio</artifactId>
             <version>${snap.version}</version>
         </dependency>
@@ -113,7 +118,8 @@
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-o2a-harmonisation</artifactId>
-            <version>${s3tbx.version}</version>
+            <!--<version>${s3tbx.version}</version>-->
+            <version>7.0.4.1</version>
         </dependency>
 
         <dependency>
@@ -148,7 +154,19 @@
         <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow</artifactId>
-            <version>1.9.0-rc1</version>
+            <version>1.15.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>libtensorflow</artifactId>
+            <version>1.15.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>libtensorflow_jni</artifactId>
+            <version>1.15.0</version>
         </dependency>
 
         <dependency>
