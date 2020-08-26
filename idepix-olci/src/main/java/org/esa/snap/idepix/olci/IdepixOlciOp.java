@@ -131,6 +131,7 @@ public class IdepixOlciOp extends BasisOp {
     private Product rad2reflProduct;
     private Product ctpProduct;
     private Product o2CorrProduct;
+    private Product rBRRProduct;
 
     private Map<String, Product> classificationInputProducts;
     private Map<String, Object> classificationParameters;
@@ -172,11 +173,12 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(l1bProduct, olciIdepixProduct, true);
 
-        // postprocessing is always needed both for ice and for coastline postprocessing!
-        postProcess(olciIdepixProduct);
-//        if (computeCloudBuffer || computeCloudShadow) {
-//            postProcess(olciIdepixProduct);
-//        }
+        //7.0.5: postprocessing is always needed both for ice and for coastline postprocessing!
+//        postProcess(olciIdepixProduct);
+        //7.0.6: with new LAND tests before classification
+        if (computeCloudBuffer || computeCloudShadow) {
+            postProcess(olciIdepixProduct);
+        }
 
         targetProduct = createTargetProduct(olciIdepixProduct);
         targetProduct.setAutoGrouping(olciIdepixProduct.getAutoGrouping());
@@ -185,7 +187,11 @@ public class IdepixOlciOp extends BasisOp {
             Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
             cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
         }
+
     }
+
+
+
 
     private Product createTargetProduct(Product idepixProduct) {
         Product targetProduct = new Product(idepixProduct.getName(),
@@ -211,6 +217,9 @@ public class IdepixOlciOp extends BasisOp {
             IdepixOlciUtils.addOlciRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
         }
 
+        IdepixOlciUtils.addOlcirBRRBands(rBRRProduct, targetProduct);
+        ProductUtils.copyBand("waterfraction", idepixProduct, targetProduct, true);
+
         if (outputSchillerNNValue) {
             ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
         }
@@ -235,6 +244,8 @@ public class IdepixOlciOp extends BasisOp {
 
     private void preProcess() {
         rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(l1bProduct);
+
+        rBRRProduct = IdepixOlciUtils.computeRayleighCorrectedProduct(l1bProduct);
 
         if (considerCloudsOverSnow || computeCloudShadow) {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
@@ -273,6 +284,7 @@ public class IdepixOlciOp extends BasisOp {
         classificationInputProducts.put("l1b", l1bProduct);
 //        classificationInputProducts.put("iceMask", iceMaskProduct);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
+        classificationInputProducts.put("rBRR", rBRRProduct);
         if (considerCloudsOverSnow) {
             classificationInputProducts.put("o2Corr", o2CorrProduct);
         }

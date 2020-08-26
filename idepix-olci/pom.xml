@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>idepix-olci</artifactId>
-    <version>7.0.5</version>
+    <version>7.0.6-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
     
@@ -113,6 +113,12 @@
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-o2a-harmonisation</artifactId>
+            <version>${s3tbx.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-olci-radiometry</artifactId>
             <version>${s3tbx.version}</version>
         </dependency>
 
