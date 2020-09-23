@@ -53,13 +53,15 @@ class IdepixOlciCloudShadowFronts {
     private final Tile slpTile;
     private final Tile[] temperatureProfileTPGTiles;
     private final Tile altTile;
+    private final double cloudHeightMax;
 
     IdepixOlciCloudShadowFronts(GeoCoding geoCoding,
                                 Tile szaTile, Tile saaTile,
                                 Tile ozaTile, Tile oaaTile,
                                 Tile ctpTile, Tile slpTile,
                                 Tile[] temperatureProfileTPGTiles,
-                                Tile altTile) {
+                                Tile altTile,
+                                double cloudHeightMax) {
         this.geoCoding = geoCoding;
         this.szaTile = szaTile;
         this.saaTile = saaTile;
@@ -69,6 +71,7 @@ class IdepixOlciCloudShadowFronts {
         this.slpTile = slpTile;
         this.temperatureProfileTPGTiles = temperatureProfileTPGTiles;
         this.altTile = altTile;
+        this.cloudHeightMax = cloudHeightMax;
     }
 
     void computeCloudShadow(Tile sourceFlagTile, Tile targetTile) {
@@ -176,6 +179,67 @@ class IdepixOlciCloudShadowFronts {
         }
     }
 
+    private double checkDistanceInDirection( double saaApparent, double aNorth, double sza, int x, int y,
+                                             float Height, float Width, GeoPos geoPos){
+
+        double buffer =2;
+        //angles in the observation plane, based on pixel coordinates
+        double a = -Math.toDegrees(Math.atan((Width - x) / (0. - y)));
+        double b = -Math.toDegrees(Math.atan((Width - x) / (Height - y))) + 180.;
+        double c = -Math.toDegrees(Math.atan((0. - x) / (Height - y))) + 180.;
+        double d = 360. -Math.toDegrees(Math.atan((0. - x) / (0. - y)));
+
+        //converting saaApparent into angle in observation plane, against angle towards North
+        saaApparent = saaApparent - aNorth;
+        //alpha: angle of slope
+        double alpha = Math.toRadians(saaApparent - 90.);
+        double xnew=0;
+        double ynew=0;
+        if (saaApparent > d || saaApparent < a){
+            ynew=0 +buffer;
+            xnew = (ynew-y) / Math.tan(alpha) + x;
+        }
+        else if(saaApparent> a && saaApparent <b){
+            xnew=Width-buffer;
+            ynew = Math.tan(alpha)*(xnew-x) + y;
+        }
+        else if(saaApparent>b && saaApparent<c){
+            ynew=Height-buffer;
+            xnew = (ynew-y) / Math.tan(alpha) + x;
+        }
+        else if(saaApparent> c && saaApparent <d){
+            xnew=0 +buffer;
+            ynew = Math.tan(alpha)*(xnew-x) + y;
+        }
+
+        PixelPos pixelPosBoundary = new PixelPos( (Math.floor(xnew)) + 0.5f, Math.floor(ynew) + 0.5f);
+
+        final GeoPos geoPosBoundary = geoCoding.getGeoPos(pixelPosBoundary, null);
+
+        return computeDistance(geoPosBoundary, geoPos);
+    }
+
+    private double computeNorthDirection(int x, int y, Tile sourceTile){
+        final Rectangle sourceRectangle = sourceTile.getRectangle();
+        final int h = sourceRectangle.height;
+        final int w = sourceRectangle.width;
+        double alpha = 43.60281897270362; //constant angle between AP, BP with P(x,y), A(x-4, y-10), B(x+4,y-10), in pixel coordinates
+
+        if (x<4) x =4;
+        if (x>w-4) x =w;
+        if (y<10) y = 10;
+
+        PixelPos pixelPosP = new PixelPos(x + 0.5f, y + 0.5f);
+        PixelPos pixelPosA = new PixelPos(x + 0.5f -4.f, y + 0.5f -10.f);
+        PixelPos pixelPosB = new PixelPos(x + 0.5f +4.f, y + 0.5f -10.f);
+
+        final GeoPos geoPosP = geoCoding.getGeoPos(pixelPosP, null);
+        final GeoPos geoPosA = geoCoding.getGeoPos(pixelPosA, null);
+        final GeoPos geoPosB = geoCoding.getGeoPos(pixelPosB, null);
+
+        return alpha * (geoPosA.getLon()-geoPosB.getLon())/(geoPosP.getLon()-geoPosB.getLon());
+    }
+
     private boolean getCloudShadow(Tile sourceFlagTile, Tile targetTile, int x, int y) {
 
         final Rectangle sourceRectangle = sourceFlagTile.getRectangle();
@@ -196,12 +260,26 @@ class IdepixOlciCloudShadowFronts {
 
         final GeoPos geoPos = geoCoding.getGeoPos(pixelPos, null);
         double tanSza = Math.tan(Math.toRadians(90.0 - sza));
-        final double cloudHeightMax = 12_000;
-        final double cloudDistanceMax = cloudHeightMax / tanSza;
 
-        final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, geoPos.getLat());
+        final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa);
         final double saaRadApparent = Math.toRadians(saaApparent);
 
+        final double aNorth = computeNorthDirection(x, y, sourceFlagTile);
+
+        double cloudDistanceMax = checkDistanceInDirection(saaApparent, aNorth, sza, x, y, sourceFlagTile.getHeight(),
+                sourceFlagTile.getWidth(), geoPos);
+
+        //cloudHeightMax as function of center pixel Lat.
+        double cloudDistanceMax2 = cloudHeightMax / tanSza;
+        if (cloudDistanceMax > cloudDistanceMax2) cloudDistanceMax = cloudDistanceMax2;
+        if (cloudDistanceMax*tanSza < 300.){
+            //lower boundary of clouds (300m minimum); if lower, no calculation of shadow from that position.
+            return false;
+        }
+
+        //done: at high latitudes and low sun, this can lead to endGeoPoint always outside the scene!
+        //done:  That is the reason, why cloud shadow is sometimes not calculated!
+        //done: does the saaRadApparent has to be changed with the North direction? No! lineWithAngle works on Lat Lon!
 
         GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, saaRadApparent + Math.PI);
         PixelPos endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);

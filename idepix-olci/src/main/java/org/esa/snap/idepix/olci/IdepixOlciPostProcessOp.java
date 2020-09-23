@@ -84,6 +84,9 @@ public class IdepixOlciPostProcessOp extends Operator {
 
     private RectangleExtender rectCalculator;
 
+    static int mincloudBase = 300;
+    static int maxcloudTop = 12000;
+
     @Override
     public void initialize() throws OperatorException {
         Product postProcessedCloudProduct = IdepixIO.createCompatibleTargetProduct(olciCloudProduct,
@@ -128,11 +131,26 @@ public class IdepixOlciPostProcessOp extends Operator {
                     l1bProduct.getSceneRasterHeight()),
                     extendedWidth, extendedHeight
             );
+
+            final GeoPos centerGeoPos =
+                    getCenterGeoPos(l1bProduct.getSceneGeoCoding(), l1bProduct.getSceneRasterWidth(),
+                            l1bProduct.getSceneRasterHeight());
+            maxcloudTop = setCloudTopHeight(centerGeoPos.getLat());
         }
 
 
         ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, olciCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
+    }
+
+    private GeoPos getCenterGeoPos(GeoCoding geoCoding, int width, int height) {
+        final PixelPos centerPixelPos = new PixelPos(0.5 * width + 0.5,
+                0.5 * height + 0.5);
+        return geoCoding.getGeoPos(centerPixelPos, null);
+    }
+
+    private int setCloudTopHeight(double lat) {
+        return (int) Math.ceil(0.5 * Math.pow(90. - Math.abs(lat), 2.) + (90. - Math.abs(lat)) * 25 + 5000);
     }
 
     @Override
@@ -201,7 +219,7 @@ public class IdepixOlciPostProcessOp extends Operator {
                     ozaTile, oaaTile,
                     ctpTile, slpTile,
                     temperatureProfileTPGTiles,
-                    altTile);
+                    altTile, maxcloudTop);
             cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
         }
     }

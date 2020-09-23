@@ -189,10 +189,9 @@ class IdepixOlciUtils {
      * @param saa - sun azimuth (deg)
      * @param oza - view zenith (deg)
      * @param oaa - view azimuth (deg)
-     * @param lat - latitude (deg)
      * @return the apparent saa (deg)
      */
-    static double computeApparentSaa(double sza, double saa, double oza, double oaa, double lat) {
+    static double computeApparentSaa(double sza, double saa, double oza, double oaa) {
         final double szaRad = sza * MathUtils.DTOR;
         final double ozaRad = oza * MathUtils.DTOR;
 
