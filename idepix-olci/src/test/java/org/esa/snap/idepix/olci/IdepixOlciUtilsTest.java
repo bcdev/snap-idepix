@@ -250,4 +250,17 @@ public class IdepixOlciUtilsTest {
         assertEquals(4, IdepixOlciUtils.getMonthFromStartStopTime(startStopTime));
     }
 
+    @Test
+    public void testGetStartEndTimesFromOlciFilename() {
+        String filename = "S3A_OL_1_EFR____20170522T090453_20170522T090653_20171018T123841_0119_018_050______MR1" +
+                "_R_NT_002.SEN3.extract_5x5.nc";
+
+        final ProductData.UTC startTime = IdepixOlciUtils.getStartTimeFromOlciFileName(filename);
+        assertNotNull(startTime);
+        assertEquals("22-MAY-2017 09:04:53.000000", startTime.toString());
+
+        final ProductData.UTC endTime = IdepixOlciUtils.getEndTimeFromOlciFileName(filename);
+        assertNotNull(endTime);
+        assertEquals("22-MAY-2017 09:06:53.000000", endTime.toString());
+    }
 }

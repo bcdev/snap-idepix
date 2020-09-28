@@ -25,6 +25,7 @@ import org.esa.snap.idepix.core.IdepixFlagCoding;
 import org.esa.snap.core.datamodel.Mask;
 
 import java.awt.Color;
+import java.text.ParseException;
 import java.util.Random;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
@@ -219,6 +220,27 @@ class IdepixOlciUtils {
         }
     }
 
+    static ProductData.UTC getStartTimeFromOlciFileName(String filename) {
+        // filename e.g. S3A_OL_1_EFR____20170522T090453_20170522T090653_20171018T123841_0119_018_050______MR1_R_NT_002.SEN3.extract_5x5.nc
+        final String startTimeString = filename.substring(16, 24) + " " + filename.substring(25, 31);
+        try {
+            return ProductData.UTC.parse(startTimeString, "yyyyMMdd HHmmss");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    static ProductData.UTC getEndTimeFromOlciFileName(String filename) {
+        // filename e.g. S3A_OL_1_EFR____20170522T090453_20170522T090653_20171018T123841_0119_018_050______MR1_R_NT_002.SEN3.extract_5x5.nc
+        final String endTimeString = filename.substring(32, 40) + " " + filename.substring(41, 47);
+        try {
+            return ProductData.UTC.parse(endTimeString, "yyyyMMdd HHmmss");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     private static Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
         final PathIterator pathIterator = path.getPathIterator(null);

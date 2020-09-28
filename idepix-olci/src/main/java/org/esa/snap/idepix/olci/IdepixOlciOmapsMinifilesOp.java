@@ -1,12 +1,9 @@
 package org.esa.snap.idepix.olci;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
-import org.esa.snap.core.dataio.ProductIO;
+import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -15,7 +12,6 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
-
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.BasisOp;
@@ -44,23 +40,18 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Olci",
+@OperatorMetadata(alias = "Idepix.Olci.Omaps.Minifiles",
         category = "Optical/Pre-Processing",
         version = "3.0.2",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
         description = "Pixel identification and classification for OLCI.")
-public class IdepixOlciOp extends BasisOp {
+public class IdepixOlciOmapsMinifilesOp extends BasisOp {
 
     @SourceProduct(alias = "l1bProduct",
             label = "OLCI L1b product",
             description = "The OLCI L1b source product.")
     private Product l1bProduct;
-
-//    @SourceProduct(alias = "iceMask",
-//            label = "Ice mask product", optional = true,
-//            description = "User defined ice mask product. If not provided, default climatology is used.")
-//    private Product iceMaskProduct;
 
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
@@ -92,30 +83,10 @@ public class IdepixOlciOp extends BasisOp {
             defaultValue = "")
     private String[] reflBandsToCopy;
 
-    @Parameter(defaultValue = "false",
-            label = " Write NN value to the target product",
-            description = " If applied, write NN value to the target product ")
-    private boolean outputSchillerNNValue;
-
     @Parameter(defaultValue = "true",
             label = " Compute cloud shadow",
             description = " Compute cloud shadow with the algorithm from 'Fronts' project")
     private boolean computeCloudShadow;
-
-    @Parameter(description = "Path to alternative tensorflow neuronal net directory for CTP retrieval " +
-            "Use this to replace the standard neuronal net 'nn_training_20190131_I7x30x30x30xO1'.",
-            label = "Path to alternative NN for CTP retrieval")
-    private String alternativeNNDirPath;
-
-    @Parameter(defaultValue = "false",
-            label = " If cloud shadow is computed, write CTP value to the target product",
-            description = " If cloud shadow is computed, write CTP value to the target product ")
-    private boolean outputCtp;
-
-    @Parameter(defaultValue = "false",
-            label = " If cloud shadow is computed, write harmonised radiances to the target product",
-            description = " If cloud shadow is computed, write harmonised radiances (bands 13-15) to the target product ")
-    private boolean outputHarmonisedRadiances;
 
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
@@ -124,7 +95,6 @@ public class IdepixOlciOp extends BasisOp {
             description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy.",
             label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
-
 
     @Parameter(defaultValue = "false",
             label = " Use SRTM Land/Water mask",
@@ -136,15 +106,12 @@ public class IdepixOlciOp extends BasisOp {
     private Product classificationProduct;
     private Product postProcessingProduct;
 
+    private Product l1bClonedProduct;
     private Product rad2reflProduct;
-    private Product ctpProduct;
-    private Product o2CorrProduct;
-    private Product rBRRProduct;
 
     private Map<String, Product> classificationInputProducts;
     private Map<String, Object> classificationParameters;
 
-    private boolean considerCloudsOverSnow;
 
     @Override
     public void initialize() throws OperatorException {
@@ -154,17 +121,31 @@ public class IdepixOlciOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        final Geometry productGeometry = IdepixOlciUtils.computeProductGeometry(l1bProduct);
-        if (productGeometry != null) {
-            final Polygon arcticPolygon =
-                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ARCTIC_POLYGON_COORDS);
-            final Polygon antarcticaPolygon =
-                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ANTARCTICA_POLYGON_COORDS);
-            considerCloudsOverSnow =
-                    productGeometry.intersects(arcticPolygon) || productGeometry.intersects(antarcticaPolygon);
-            arcticPolygon.contains(productGeometry);
-        } else {
-            throw new OperatorException("Product geometry is null - cannot proceed.");
+        // neglect cloud shadow for a 3x3 or 5x5 macro pixel. Cloud buffer is enough...
+        computeCloudShadow = false;
+
+        // 1. create idepix branch 'omaps' --> DONE
+        // 2. new operator 'IdepixOlciOmapsMinifilesOp --> DONE
+        // 3. here: clone minifile source product, --> DOME
+        // add solar fluxes extracted from nc file as below, add start/stop time from file name --> DONE
+        l1bClonedProduct = cloneL1bProduct();
+        final File inputFile = (File) l1bProduct.getProductReader().getInput();
+        try {
+            float[][] solarFluxArr = new float[0][];
+            NetcdfFile netcdfInputFile = NetcdfFile.open(inputFile.getAbsolutePath());
+            final List<Variable> variables = netcdfInputFile.getVariables();
+            for (final Variable variable : variables) {
+                final int bandsDimensionIndex = variable.findDimensionIndex("bands");
+                final int detectorsDimensionIndex = variable.findDimensionIndex("detectors");
+                if (bandsDimensionIndex != -1 && detectorsDimensionIndex != -1) {
+                    if (variable.getShortName().equals("solar_flux")) {
+                        solarFluxArr = (float[][]) variable.read().copyToNDJavaArray();
+                    }
+                }
+            }
+            addSolarFluxesToL1bProduct(solarFluxArr, l1bClonedProduct);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
@@ -176,14 +157,12 @@ public class IdepixOlciOp extends BasisOp {
         computeCloudProduct();
 
         Product olciIdepixProduct = classificationProduct;
-        olciIdepixProduct.setName(l1bProduct.getName() + "_IDEPIX");
+        olciIdepixProduct.setName(l1bClonedProduct.getName() + "_IDEPIX");
         olciIdepixProduct.setAutoGrouping("Oa*_radiance:Oa*_reflectance");
 
-        ProductUtils.copyFlagBands(l1bProduct, olciIdepixProduct, true);
+        ProductUtils.copyFlagBands(l1bClonedProduct, olciIdepixProduct, true);
+//        setTargetProduct(olciIdepixProduct);  // test
 
-        //7.0.5: postprocessing is always needed both for ice and for coastline postprocessing!
-//        postProcess(olciIdepixProduct);
-        //7.0.6: with new LAND tests before classification
         if (computeCloudBuffer || computeCloudShadow) {
             postProcess(olciIdepixProduct);
         }
@@ -198,11 +177,59 @@ public class IdepixOlciOp extends BasisOp {
 
     }
 
+    private void addSolarFluxesToL1bProduct(float[][] solarFluxArr,
+                                            Product l1bClonedProduct) throws IOException {
+
+        // solarFluxArr: 21 x 3700
+        // detectorIndexArr: 5 x 5
+        Band detectorIndexBand = l1bProduct.getBand("detector_index");
+        detectorIndexBand.readRasterDataFully();
+        final ProductData.Short detectorIndexBandRasterData = (ProductData.Short) detectorIndexBand.getRasterData();
+
+        Band[] solar_flux_bands = new Band[Rad2ReflConstants.OLCI_RAD_BAND_NAMES.length];
+        for (int i = 0; i < solar_flux_bands.length; i++) {
+            solar_flux_bands[i] = l1bClonedProduct.addBand("solar_flux_band_" + (i+1), ProductData.TYPE_FLOAT32);
+            solar_flux_bands[i].ensureRasterData();
+            int index = 0;
+            for (int j = 0; j < l1bClonedProduct.getSceneRasterWidth(); j++) {
+                for (int k = 0; k < l1bClonedProduct.getSceneRasterHeight(); k++) {
+                    solar_flux_bands[i].setPixelFloat(j, k, solarFluxArr[i][detectorIndexBandRasterData.getElemIntAt(index++)]);
+                }
+            }
+        }
+    }
+
+    private Product cloneL1bProduct() {
+        Product l1bClonedPeoduct = new Product(l1bProduct.getName(), "OL_1_",
+                l1bProduct.getSceneRasterWidth(),
+                l1bProduct.getSceneRasterHeight());
+        ProductUtils.copyMetadata(l1bProduct, l1bClonedPeoduct);
+        ProductUtils.copyGeoCoding(l1bProduct, l1bClonedPeoduct);
+        ProductUtils.copyFlagBands(l1bProduct, l1bClonedPeoduct, true);
+        ProductUtils.copyFlagCodings(l1bProduct, l1bClonedPeoduct);
+        ProductUtils.copyMasks(l1bProduct, l1bClonedPeoduct);
+        ProductUtils.copyTimeInformation(l1bProduct, l1bClonedPeoduct);
+
+        final ProductData.UTC startTime = IdepixOlciUtils.getStartTimeFromOlciFileName(l1bProduct.getName());
+        l1bClonedPeoduct.setStartTime(startTime);
+        final ProductData.UTC endTime = IdepixOlciUtils.getEndTimeFromOlciFileName(l1bProduct.getName());
+        l1bClonedPeoduct.setEndTime(endTime);
+
+        for (Band sourceBand : l1bProduct.getBands()) {
+            if (!l1bClonedPeoduct.containsBand(sourceBand.getName())) {
+                ProductUtils.copyBand(sourceBand.getName(), l1bProduct, l1bClonedPeoduct, true);
+                ProductUtils.copyRasterDataNodeProperties(sourceBand, l1bClonedPeoduct.getBand(sourceBand.getName()));
+            }
+        }
+
+        return l1bClonedPeoduct;
+    }
+
     private Product createTargetProduct(Product idepixProduct) {
         Product targetProduct = new Product(idepixProduct.getName(),
-                                            idepixProduct.getProductType(),
-                                            idepixProduct.getSceneRasterWidth(),
-                                            idepixProduct.getSceneRasterHeight());
+                idepixProduct.getProductType(),
+                idepixProduct.getSceneRasterWidth(),
+                idepixProduct.getSceneRasterHeight());
 
         ProductUtils.copyMetadata(idepixProduct, targetProduct);
         ProductUtils.copyGeoCoding(idepixProduct, targetProduct);
@@ -216,72 +243,30 @@ public class IdepixOlciOp extends BasisOp {
         IdepixOlciUtils.setupOlciClassifBitmask(targetProduct);
 
         if (outputRadiance) {
-            IdepixIO.addRadianceBands(l1bProduct, targetProduct, radianceBandsToCopy);
+            IdepixIO.addRadianceBands(l1bClonedProduct, targetProduct, radianceBandsToCopy);
         }
         if (outputRad2Refl) {
             IdepixOlciUtils.addOlciRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
         }
-
-        IdepixOlciUtils.addOlcirBRRBands(rBRRProduct, targetProduct);
-        ProductUtils.copyBand("waterfraction", idepixProduct, targetProduct, true);
-
-        if (outputSchillerNNValue) {
-            ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
-        }
-
-        if (computeCloudShadow && outputCtp) {
-            ProductUtils.copyBand(IdepixConstants.CTP_OUTPUT_BAND_NAME, ctpProduct, targetProduct, true);
-        }
-
-        if (computeCloudShadow && outputHarmonisedRadiances) {
-            for (int i = 0; i < o2CorrProduct.getNumBands(); i++) {
-                final String bandName = o2CorrProduct.getBandAt(i).getName();
-                if (bandName.startsWith("radiance")) {
-                    ProductUtils.copyBand(bandName, o2CorrProduct, targetProduct, true);
-                }
-            }
-        }
-
 
         return targetProduct;
     }
 
 
     private void preProcess() {
-        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(l1bProduct);
-
-        rBRRProduct = IdepixOlciUtils.computeRayleighCorrectedProduct(l1bProduct);
-
-        if (considerCloudsOverSnow || computeCloudShadow) {
-            Map<String, Product> o2corrSourceProducts = new HashMap<>();
-            o2corrSourceProducts.put("l1bProduct", l1bProduct);
-            final String o2CorrOpName = "OlciO2aHarmonisation";
-            Map<String, Object> o2corrParms = new HashMap<>();
-            if (computeCloudShadow) {
-                o2corrParms.put("writeHarmonisedRadiances", outputHarmonisedRadiances);
-                o2corrParms.put("processOnlyBand13", false);
-            }
-            o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
-            if (computeCloudShadow) {
-                ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(l1bProduct,
-                        o2CorrProduct,
-                        alternativeNNDirPath);
-            }
-        }
-
+        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(l1bClonedProduct);
     }
 
     private void setClassificationParameters() {
         classificationParameters = new HashMap<>();
         classificationParameters.put("copyAllTiePoints", true);
-        classificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
         classificationParameters.put("useSrtmLandWaterMask", useSrtmLandWaterMask);
     }
 
     private void computeCloudProduct() {
         setClassificationParameters();
         classificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciClassificationOp.class),
-                                                  classificationParameters, classificationInputProducts);
+                classificationParameters, classificationInputProducts);
     }
 
     private void setClassificationInputProducts() {
@@ -289,26 +274,20 @@ public class IdepixOlciOp extends BasisOp {
         classificationInputProducts.put("l1b", l1bProduct);
 //        classificationInputProducts.put("iceMask", iceMaskProduct);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
-        classificationInputProducts.put("rBRR", rBRRProduct);
-        if (considerCloudsOverSnow) {
-            classificationInputProducts.put("o2Corr", o2CorrProduct);
-        }
     }
 
     private void postProcess(Product olciIdepixProduct) {
         HashMap<String, Product> input = new HashMap<>();
-        input.put("l1b", l1bProduct);
-        input.put("ctp", ctpProduct);
+        input.put("l1b", l1bClonedProduct);
         input.put("olciCloud", olciIdepixProduct);
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
         params.put("computeCloudShadow", computeCloudShadow);
-//        params.put("computeCloudShadow", false);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciPostProcessOp.class),
-                                                  params, input);
+                params, input);
     }
 
     /**
@@ -318,7 +297,7 @@ public class IdepixOlciOp extends BasisOp {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(IdepixOlciOp.class);
+            super(IdepixOlciOmapsMinifilesOp.class);
         }
     }
 }
