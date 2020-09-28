@@ -139,8 +139,8 @@ public class IdepixMerisOp extends BasisOp {
         outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
 
         preProcess();
-        computeWaterCloudProduct();
-        computeLandCloudProduct();
+        computeWaterClassificationProduct();
+        computeLandClassificationProduct();
         mergeLandWater();
         postProcess();
 
@@ -193,7 +193,7 @@ public class IdepixMerisOp extends BasisOp {
                                           schillerWaterNNCloudSureSnowSeparationValue);
     }
 
-    private void computeWaterCloudProduct() {
+    private void computeWaterClassificationProduct() {
         setWaterClassificationParameters();
         classificationInputProducts = new HashMap<>();
         classificationInputProducts.put("l1b", sourceProduct);
@@ -204,7 +204,7 @@ public class IdepixMerisOp extends BasisOp {
                                                        waterClassificationParameters, classificationInputProducts);
     }
 
-    private void computeLandCloudProduct() {
+    private void computeLandClassificationProduct() {
         setLandClassificationParameters();
         landClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixMerisLandClassificationOp.class),
                                                       landClassificationParameters, classificationInputProducts);

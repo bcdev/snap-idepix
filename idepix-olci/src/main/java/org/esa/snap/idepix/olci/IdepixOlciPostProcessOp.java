@@ -1,10 +1,7 @@
 package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -14,6 +11,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
+import org.esa.snap.idepix.core.CloudShadowFronts;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.CloudBuffer;
 import org.esa.snap.idepix.core.util.IdepixIO;
@@ -50,10 +48,15 @@ public class IdepixOlciPostProcessOp extends Operator {
             label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
-    @Parameter(defaultValue = "false",
+    @Parameter(defaultValue = "true",
             label = " Compute cloud shadow",
             description = " Compute cloud shadow with latest 'fronts' algorithm. Requires CTP.")
     private boolean computeCloudShadow;
+
+//    @Parameter(defaultValue = "true",
+//            label = " Refine pixel classification near coastlines",
+//            description = "Refine pixel classification near coastlines. ")
+//    private boolean refineClassificationNearCoastlines;
 
     @SourceProduct(alias = "l1b")
     private Product l1bProduct;
@@ -75,6 +78,8 @@ public class IdepixOlciPostProcessOp extends Operator {
     private TiePointGrid[] temperatureProfileTPGs;
     private Band altBand;
 
+    private Band distanceBand;
+
     private GeoCoding geoCoding;
 
     private RectangleExtender rectCalculator;
@@ -89,6 +94,7 @@ public class IdepixOlciPostProcessOp extends Operator {
         geoCoding = l1bProduct.getSceneGeoCoding();
 
         origCloudFlagBand = olciCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
+        String[] a= origCloudFlagBand.getFlagCoding().getFlagNames();
 
         szaTPG = l1bProduct.getTiePointGrid("SZA");
         saaTPG = l1bProduct.getTiePointGrid("SAA");
@@ -146,6 +152,19 @@ public class IdepixOlciPostProcessOp extends Operator {
                     if (isCloud) {
                         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);   // necessary??
                     }
+
+                    // refine classification near coastline is not necessayr, if coast line pixels are processed as land!
+//                    boolean isCoastline = sourceFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_COASTLINE);
+//
+//                    if (refineClassificationNearCoastlines) {
+//                        if (isCloud && isCoastline) { //MERIS has a test isNearCoastline
+//                            refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, targetTile, srcRectangle);
+//                        }
+//                    }
+//                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+//                    if (isCloudAfterRefinement) {
+//                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+//                    }
                 }
             }
         }
@@ -192,6 +211,139 @@ public class IdepixOlciPostProcessOp extends Operator {
         int computedFlags = targetTile.getSampleInt(x, y);
         targetTile.setSample(x, y, sourceFlags | computedFlags);
     }
+
+    public static  boolean isPixelSurrounded_2Flags(int x, int y, Tile sourceFlagTile, int pixelFlag, int pixelFlagNOT,
+                                             int buffer) {
+        // check if pixel is surrounded by other pixels flagged as 'pixelFlag' and not 'pixelFlagNOT'
+        int surroundingPixelCount = 0;
+        Rectangle rectangle = sourceFlagTile.getRectangle();
+        for (int i = x - buffer; i <= x + buffer; i++) {
+            for (int j = y - buffer; j <= y + buffer; j++) {
+                if (rectangle.contains(i, j) && sourceFlagTile.getSampleBit(i, j, pixelFlag) &&
+                    !sourceFlagTile.getSampleBit(i, j, pixelFlagNOT)) {
+                    surroundingPixelCount++;
+                }
+            }
+        }
+//        return (surroundingPixelCount * 1.0 / 9 >= 0.7);  // at least 6 pixel in a 3x3 box
+//        return (surroundingPixelCount * 1.0 / ((2*buffer+1)*(2*buffer+1)) >= 0.7);
+        return (surroundingPixelCount>0);
+    }
+
+    private boolean isCoastalZone(Tile sourceFlagTile, int x, int y, Integer bufferValue){
+        int buffer = bufferValue != null ? bufferValue : 3; //default value 3 for dilation 7x7
+        // check if in window is at least one, but not all of them.
+        int pixelCount = 0;
+        int sizeRectangle = 0;
+        Rectangle rectangle = sourceFlagTile.getRectangle();
+        for (int i = x - buffer; i <= x + buffer; i++) {
+            for (int j = y - buffer; j <= y + buffer; j++) {
+                if (rectangle.contains(i, j)){
+                    sizeRectangle++;
+                    if (sourceFlagTile.getSampleBit(i, j, IdepixOlciConstants.L1_F_LAND) &&
+                            !sourceFlagTile.getSampleBit(i, j, IdepixOlciConstants.L1_F_FRESH_INLAND_WATER)) {
+                        pixelCount++;
+                    }
+                }
+
+            }
+        }
+        return (pixelCount>0 && pixelCount < sizeRectangle);
+    }
+
+    private float getDistanceToShoreORCloud(int x, int y, Tile sourceFlagTile, Integer bufferValue){
+        int buffer = bufferValue != null ? bufferValue : 7; //
+        // find minimum distance in window from LAND or CLOUD to central pixel, which is processable water.
+        double maxDist = (double) buffer * Math.sqrt(2.);
+        double pixelDist = maxDist;
+
+        Rectangle rectangle = sourceFlagTile.getRectangle();
+        boolean noLandCloudFound = true;
+        for (int bf = 1; bf <= buffer; bf++) {
+            for (int i = x - bf; i <= x + bf; i++) {
+                int ix = i;
+                int iy = y + bf;
+                if (rectangle.contains(ix, iy)) { //oben
+                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
+                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
+                        if (thisDist < pixelDist){
+                            pixelDist = thisDist;
+                        }
+                    }
+                }
+                ix = i;
+                iy = y - bf;
+                if (rectangle.contains(ix, iy)) { //unten
+                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
+                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
+                        if (thisDist < pixelDist){
+                            pixelDist = thisDist;
+                        }
+                    }
+                }
+                ix = x - bf;
+                iy = i;
+                if (rectangle.contains(ix, iy)) { //links
+                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
+                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
+                        if (thisDist < pixelDist){
+                            pixelDist = thisDist;
+                        }
+                    }
+                }
+                ix = x + bf;
+                iy = i;
+                if (rectangle.contains(ix, iy)) { //rechts
+                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
+                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
+                        if (thisDist < pixelDist){
+                            pixelDist = thisDist;
+                        }
+                    }
+                }
+            }
+            if (pixelDist < maxDist){
+                break;
+            }
+        }
+        return (float)pixelDist;
+    }
+
+    private boolean CloudOrLandTest(int ix, int iy, Tile sourceFlagTile){
+        return sourceFlagTile.getSampleBit(ix, iy, IdepixConstants.IDEPIX_LAND) || sourceFlagTile.getSampleBit(ix, iy, IdepixConstants.IDEPIX_CLOUD);
+    }
+
+    private void refineCloudFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile, Rectangle srcRectangle) {
+        final int windowWidth = 2;
+        final int LEFT_BORDER = Math.max(x - windowWidth, srcRectangle.x);
+        final int RIGHT_BORDER = Math.min(x + windowWidth, srcRectangle.x + srcRectangle.width - 1);
+        final int TOP_BORDER = Math.max(y - windowWidth, srcRectangle.y);
+        final int BOTTOM_BORDER = Math.min(y + windowWidth, srcRectangle.y + srcRectangle.height - 1);
+        boolean removeCloudFlag = true;
+        if (isPixelSurrounded_2Flags(x, y, sourceFlagTile, IdepixConstants.IDEPIX_CLOUD, IdepixOlciConstants.L1_F_COASTLINE, windowWidth)) {
+            removeCloudFlag = false;
+        }
+//        else {
+//            Rectangle targetTileRectangle = targetTile.getRectangle();
+//            for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
+//                for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
+//                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
+//                    boolean is_coastline = sourceFlagTile.getSampleBit(i, j, IdepixOlciConstants.L1_F_COASTLINE);
+//                    if (is_cloud && targetTileRectangle.contains(i, j) && !is_coastline) {
+//                        removeCloudFlag = false;
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+
+        if (removeCloudFlag) {
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+        }
+    }
+
 
     /**
      * The Service Provider Interface (SPI) for the operator.

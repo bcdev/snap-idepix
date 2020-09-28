@@ -1,5 +1,7 @@
 package org.esa.snap.idepix.olci;
 
+import org.esa.snap.idepix.core.IdepixConstants;
+
 /**
  * Constants for IdePix OLCI algorithm
  *
@@ -14,6 +16,10 @@ class IdepixOlciConstants {
     static final int L1_F_BRIGHT = 27;
     static final int L1_F_INVALID = 25;
     static final int L1_F_GLINT = 22;
+
+    /* OLCI specific Flag Positions */
+    static final int IDEPIX_WATER_PROCESSABLE = IdepixConstants.NUM_DEFAULT_FLAGS + 1;
+    static final String IDEPIX_WATER_PROCESSABLE_DESCR_TEXT = "water that can be processed. Static mask + radiometric tests";
 
 
     static final String OLCI_QUALITY_FLAGS_BAND_NAME = "quality_flags";

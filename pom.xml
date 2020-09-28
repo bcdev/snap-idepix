@@ -22,15 +22,15 @@
     <name>snap-idepix</name>
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-idepix</artifactId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>7.0.1</version>
     <packaging>pom</packaging>
 
     <description>SNAP IdePix Parent project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>8.0.0-SNAPSHOT</snap.version>
-        <s3tbx.version>8.0.0-SNAPSHOT</s3tbx.version>
+        <snap.version>7.0.0</snap.version>
+        <s3tbx.version>7.0.0</s3tbx.version>
         <netbeans.version>RELEASE82</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
     </properties>
@@ -49,7 +49,8 @@
         <module>idepix-seawifs</module>
         <module>idepix-spotvgt</module>
         <module>idepix-viirs</module>
-        <module>idepix-assembly</module>
+        <!-- todo cleanup versions in assembly module-->
+        <!--<module>idepix-assembly</module>-->
     </modules>
 
     <dependencyManagement>
@@ -127,7 +128,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>24.1.1-jre</version>
+                <version>23.0</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -157,7 +158,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
         </plugins>
-
+        
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -184,7 +185,7 @@
                     </dependencies>
                     <configuration>
                         <licenseName>GPL 3</licenseName>
-                        <licenseFile>${project.basedir}/../LICENSE.txt</licenseFile>
+                        <licenseFile>LICENSE.txt</licenseFile>
                         <requiresRestart>true</requiresRestart>
                         <cluster>idepix</cluster>
                         <brandingToken>idepix</brandingToken>
@@ -210,9 +211,8 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M4</version>
                     <configuration>
-                        <enableAssertions>false</enableAssertions>
+                        <enableAssertions>true</enableAssertions>
                         <!--<skip>true</skip>-->
                         <printSummary>true</printSummary>
                         <useFile>false</useFile>
@@ -265,6 +265,19 @@
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
             <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>bc-nexus-repo</id>
+            <name>Public Nexus Repository for BC</name>
+            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
             <releases>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
