@@ -19,10 +19,7 @@ package org.esa.snap.idepix.olci;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
-import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
-
-import java.text.ParseException;
 
 import static org.junit.Assert.*;
 
@@ -232,35 +229,12 @@ public class IdepixOlciUtilsTest {
         double oza = 2.3104007;
         double oaa = -76.864624;
         double lat = 25.;
-        assertEquals(146.03134, IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, lat), 1.E-4);
+        assertEquals(146.03139, IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, lat), 1.E-4);
 
         sza = 45.74776;
         saa = 140.51381;
         oza = 40.13199;
         oaa = 100.81727;
-        assertEquals(195.46023, IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, lat), 1.E-4);
-    }
-
-    @Test
-    public void testGetMonthFromStartStopTime() throws ParseException {
-        ProductData.UTC startStopTime = ProductData.UTC.parse("09-DEC-2019 20:12:13"); // dd-MMM-yyyy HH:mm:ss
-        assertEquals(12, IdepixOlciUtils.getMonthFromStartStopTime(startStopTime));
-
-        startStopTime = ProductData.UTC.parse("11-APR-2019 17:21:52.053827");
-        assertEquals(4, IdepixOlciUtils.getMonthFromStartStopTime(startStopTime));
-    }
-
-    @Test
-    public void testGetStartEndTimesFromOlciFilename() {
-        String filename = "S3A_OL_1_EFR____20170522T090453_20170522T090653_20171018T123841_0119_018_050______MR1" +
-                "_R_NT_002.SEN3.extract_5x5.nc";
-
-        final ProductData.UTC startTime = IdepixOlciUtils.getStartTimeFromOlciFileName(filename);
-        assertNotNull(startTime);
-        assertEquals("22-MAY-2017 09:04:53.000000", startTime.toString());
-
-        final ProductData.UTC endTime = IdepixOlciUtils.getEndTimeFromOlciFileName(filename);
-        assertNotNull(endTime);
-        assertEquals("22-MAY-2017 09:06:53.000000", endTime.toString());
+        assertEquals(195.46022, IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, lat), 1.E-4);
     }
 }

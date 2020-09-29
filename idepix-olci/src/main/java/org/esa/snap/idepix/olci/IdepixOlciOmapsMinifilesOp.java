@@ -48,10 +48,10 @@ import java.util.Map;
         description = "Pixel identification and classification for OLCI.")
 public class IdepixOlciOmapsMinifilesOp extends BasisOp {
 
-    @SourceProduct(alias = "l1bProduct",
+    @SourceProduct(alias = "sourceProduct",
             label = "OLCI L1b product",
             description = "The OLCI L1b source product.")
-    private Product l1bProduct;
+    private Product sourceProduct;
 
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
@@ -116,7 +116,7 @@ public class IdepixOlciOmapsMinifilesOp extends BasisOp {
     @Override
     public void initialize() throws OperatorException {
 
-        final boolean inputProductIsValid = IdepixIO.validateInputProduct(l1bProduct, AlgorithmSelector.OLCI);
+        final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.OLCI);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
@@ -128,8 +128,14 @@ public class IdepixOlciOmapsMinifilesOp extends BasisOp {
         // 2. new operator 'IdepixOlciOmapsMinifilesOp --> DONE
         // 3. here: clone minifile source product, --> DOME
         // add solar fluxes extracted from nc file as below, add start/stop time from file name --> DONE
-        l1bClonedProduct = cloneL1bProduct();
-        final File inputFile = (File) l1bProduct.getProductReader().getInput();
+//        l1bClonedProduct = cloneL1bProduct();
+        l1bClonedProduct = IdepixIO.cloneProduct(sourceProduct, true);
+        final ProductData.UTC startTime = IdepixOlciUtils.getStartTimeFromOlciFileName(sourceProduct.getName());
+        l1bClonedProduct.setStartTime(startTime);
+        final ProductData.UTC endTime = IdepixOlciUtils.getEndTimeFromOlciFileName(sourceProduct.getName());
+        l1bClonedProduct.setEndTime(endTime);
+
+        final File inputFile = (File) sourceProduct.getProductReader().getInput();
         try {
             float[][] solarFluxArr = new float[0][];
             NetcdfFile netcdfInputFile = NetcdfFile.open(inputFile.getAbsolutePath());
@@ -182,7 +188,7 @@ public class IdepixOlciOmapsMinifilesOp extends BasisOp {
 
         // solarFluxArr: 21 x 3700
         // detectorIndexArr: 5 x 5
-        Band detectorIndexBand = l1bProduct.getBand("detector_index");
+        Band detectorIndexBand = sourceProduct.getBand("detector_index");
         detectorIndexBand.readRasterDataFully();
         final ProductData.Short detectorIndexBandRasterData = (ProductData.Short) detectorIndexBand.getRasterData();
 
@@ -199,31 +205,31 @@ public class IdepixOlciOmapsMinifilesOp extends BasisOp {
         }
     }
 
-    private Product cloneL1bProduct() {
-        Product l1bClonedPeoduct = new Product(l1bProduct.getName(), "OL_1_",
-                l1bProduct.getSceneRasterWidth(),
-                l1bProduct.getSceneRasterHeight());
-        ProductUtils.copyMetadata(l1bProduct, l1bClonedPeoduct);
-        ProductUtils.copyGeoCoding(l1bProduct, l1bClonedPeoduct);
-        ProductUtils.copyFlagBands(l1bProduct, l1bClonedPeoduct, true);
-        ProductUtils.copyFlagCodings(l1bProduct, l1bClonedPeoduct);
-        ProductUtils.copyMasks(l1bProduct, l1bClonedPeoduct);
-        ProductUtils.copyTimeInformation(l1bProduct, l1bClonedPeoduct);
-
-        final ProductData.UTC startTime = IdepixOlciUtils.getStartTimeFromOlciFileName(l1bProduct.getName());
-        l1bClonedPeoduct.setStartTime(startTime);
-        final ProductData.UTC endTime = IdepixOlciUtils.getEndTimeFromOlciFileName(l1bProduct.getName());
-        l1bClonedPeoduct.setEndTime(endTime);
-
-        for (Band sourceBand : l1bProduct.getBands()) {
-            if (!l1bClonedPeoduct.containsBand(sourceBand.getName())) {
-                ProductUtils.copyBand(sourceBand.getName(), l1bProduct, l1bClonedPeoduct, true);
-                ProductUtils.copyRasterDataNodeProperties(sourceBand, l1bClonedPeoduct.getBand(sourceBand.getName()));
-            }
-        }
-
-        return l1bClonedPeoduct;
-    }
+//    private Product cloneL1bProduct() {
+//        Product l1bClonedPeoduct = new Product(l1bProduct.getName(), "OL_1_",
+//                l1bProduct.getSceneRasterWidth(),
+//                l1bProduct.getSceneRasterHeight());
+//        ProductUtils.copyMetadata(l1bProduct, l1bClonedPeoduct);
+//        ProductUtils.copyGeoCoding(l1bProduct, l1bClonedPeoduct);
+//        ProductUtils.copyFlagBands(l1bProduct, l1bClonedPeoduct, true);
+//        ProductUtils.copyFlagCodings(l1bProduct, l1bClonedPeoduct);
+//        ProductUtils.copyMasks(l1bProduct, l1bClonedPeoduct);
+//        ProductUtils.copyTimeInformation(l1bProduct, l1bClonedPeoduct);
+//
+//        final ProductData.UTC startTime = IdepixOlciUtils.getStartTimeFromOlciFileName(l1bProduct.getName());
+//        l1bClonedPeoduct.setStartTime(startTime);
+//        final ProductData.UTC endTime = IdepixOlciUtils.getEndTimeFromOlciFileName(l1bProduct.getName());
+//        l1bClonedPeoduct.setEndTime(endTime);
+//
+//        for (Band sourceBand : l1bProduct.getBands()) {
+//            if (!l1bClonedPeoduct.containsBand(sourceBand.getName())) {
+//                ProductUtils.copyBand(sourceBand.getName(), l1bProduct, l1bClonedPeoduct, true);
+//                ProductUtils.copyRasterDataNodeProperties(sourceBand, l1bClonedPeoduct.getBand(sourceBand.getName()));
+//            }
+//        }
+//
+//        return l1bClonedPeoduct;
+//    }
 
     private Product createTargetProduct(Product idepixProduct) {
         Product targetProduct = new Product(idepixProduct.getName(),
@@ -271,7 +277,7 @@ public class IdepixOlciOmapsMinifilesOp extends BasisOp {
 
     private void setClassificationInputProducts() {
         classificationInputProducts = new HashMap<>();
-        classificationInputProducts.put("l1b", l1bProduct);
+        classificationInputProducts.put("l1b", sourceProduct);
 //        classificationInputProducts.put("iceMask", iceMaskProduct);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
     }
