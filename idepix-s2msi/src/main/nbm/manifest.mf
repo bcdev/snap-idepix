@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: true
 AutoUpdate-Essential-Module: false
 OpenIDE-Module-Java-Dependencies: Java > 1.8
-OpenIDE-Module-Display-Category: SNAP Idepix
+OpenIDE-Module-Display-Category: SNAP Supported Plugins
 OpenIDE-Module-Long-Description: <p>Providing classification of pixels (cloud, cloud shadow, mountain shadow, snow, ice, land, water)
  on Sentinel-2 MSI data.</p><p><b>Vendor:</b> Brockmann Consult Gmb
  H</p><p><b>Contact address:</b> Chrysanderstr. 1, 21029 Hamburg (
