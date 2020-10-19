@@ -4,6 +4,8 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.jai.util.SunTileCache;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
@@ -170,8 +172,38 @@ public class S2IdepixCloudShadowOp extends Operator {
             if (imageToMapTransform instanceof AffineTransform) {
                 return (int) ((AffineTransform) imageToMapTransform).getScaleX();
             }
+        } else {
+            return (int) S2IdepixCloudShadowOp.determineResolution(product);
         }
         throw new OperatorException("Invalid product");
+    }
+
+    public static double determineResolution(Product product) {
+        int width = product.getSceneRasterWidth();
+        int height = product.getSceneRasterHeight();
+        GeoPos geoPos1 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, 0), null);
+        GeoPos geoPos2 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, height - 1), null);
+        double deltaLatInMeters = (geoPos1.lat - geoPos2.lat) / (height-1) / 180.0 * 6367500 * Math.PI;
+        double deltaLonInMeters = (geoPos1.lon - geoPos2.lon) / (height-1) / 180.0 * 6367500 * Math.PI * Math.cos((geoPos1.lat + geoPos2.lat) / 2 / 180 * Math.PI);
+        double resolution = (int) Math.round(Math.sqrt(deltaLatInMeters * deltaLatInMeters + deltaLonInMeters * deltaLonInMeters));
+        System.out.println("resolution=" + resolution);
+        return resolution;
+    }
+
+    public static void getPixels(GeoCoding sceneGeoCoding,
+                                 final int x1, final int y1, final int w, final int h,
+                                 final float[] latPixels, final float[] lonPixels) {
+        PixelPos pixelPos = new PixelPos();
+        GeoPos geoPos = new GeoPos();
+        int i = 0;
+        for (int y = y1; y < y1 + h; ++y) {
+            for (int x = x1; x < x1 + w; ++x) {
+                pixelPos.setLocation(x + 0.5f, y + 0.5f);
+                sceneGeoCoding.getGeoPos(pixelPos, geoPos);
+                lonPixels[i] = (float) geoPos.lon;
+                latPixels[i++] = (float) geoPos.lat;
+            }
+        }
     }
 
     private Product getClassificationProduct(int resolution) {
