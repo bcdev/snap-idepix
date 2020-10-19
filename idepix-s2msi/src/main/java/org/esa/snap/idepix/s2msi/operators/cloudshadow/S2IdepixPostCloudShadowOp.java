@@ -20,17 +20,22 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
-import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.BitSetter;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtenderConstant;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Tonio Fincke, Dagmar Müller
@@ -305,6 +310,8 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             if (imageToMapTransform instanceof AffineTransform) {
                 return ((AffineTransform) imageToMapTransform).getScaleX();
             }
+        } else {
+            return S2IdepixCloudShadowOp.determineResolution(getSourceProduct());
         }
         throw new OperatorException("Invalid product: ");
     }
@@ -376,12 +383,24 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
         float[] sourceLatitudes = new float[sourceLength];
         float[] sourceLongitudes = new float[sourceLength];
-        ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).getPixels((int) sourceRectangle.getMinX(),
-                (int) sourceRectangle.getMinY(),
-                (int) sourceRectangle.getWidth(),
-                (int) sourceRectangle.getHeight(),
-                sourceLatitudes,
-                sourceLongitudes);
+        if (getSourceProduct().getSceneGeoCoding() instanceof CrsGeoCoding) {
+            ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).
+                    getPixels((int) sourceRectangle.getMinX(),
+                              (int) sourceRectangle.getMinY(),
+                              (int) sourceRectangle.getWidth(),
+                              (int) sourceRectangle.getHeight(),
+                              sourceLatitudes,
+                              sourceLongitudes);
+        } else {
+            S2IdepixCloudShadowOp.
+                    getPixels(getSourceProduct().getSceneGeoCoding(),
+                              (int) sourceRectangle.getMinX(),
+                              (int) sourceRectangle.getMinY(),
+                              (int) sourceRectangle.getWidth(),
+                              (int) sourceRectangle.getHeight(),
+                              sourceLatitudes,
+                              sourceLongitudes);
+        }
 
         Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle,
                 new BorderExtenderConstant(new double[]{Double.NaN}));

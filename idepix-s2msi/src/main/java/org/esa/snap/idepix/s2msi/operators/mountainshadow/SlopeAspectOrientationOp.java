@@ -1,6 +1,9 @@
 package org.esa.snap.idepix.s2msi.operators.mountainshadow;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixCloudShadowOp;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
@@ -76,7 +79,7 @@ public class SlopeAspectOrientationOp extends Operator {
                 throw new OperatorException("Could not retrieve spatial resolution from Geo-coding");
             }
         } else {
-            throw new OperatorException("Could not retrieve spatial resolution from Geo-coding");
+            spatialResolution = S2IdepixCloudShadowOp.determineResolution(sourceProduct);
         }
         elevationBand = sourceProduct.getBand(S2IdepixConstants.ELEVATION_BAND_NAME);
         if (elevationBand == null) {
@@ -107,12 +110,24 @@ public class SlopeAspectOrientationOp extends Operator {
         float[] elevationData = elevationTile.getDataBufferFloat();
         float[] sourceLatitudes = new float[(int) (sourceRectangle.getWidth() * sourceRectangle.getHeight())];
         float[] sourceLongitudes = new float[(int) (sourceRectangle.getWidth() * sourceRectangle.getHeight())];
-        ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).getPixels((int) sourceRectangle.getMinX(),
-                                                                          (int) sourceRectangle.getMinY(),
-                                                                          (int) sourceRectangle.getWidth(),
-                                                                          (int) sourceRectangle.getHeight(),
-                                                                          sourceLatitudes,
-                                                                          sourceLongitudes);
+        if (getSourceProduct().getSceneGeoCoding() instanceof CrsGeoCoding) {
+            ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).
+                    getPixels((int) sourceRectangle.getMinX(),
+                              (int) sourceRectangle.getMinY(),
+                              (int) sourceRectangle.getWidth(),
+                              (int) sourceRectangle.getHeight(),
+                              sourceLatitudes,
+                              sourceLongitudes);
+        } else {
+            S2IdepixCloudShadowOp.
+                    getPixels(getSourceProduct().getSceneGeoCoding(),
+                              (int) sourceRectangle.getMinX(),
+                              (int) sourceRectangle.getMinY(),
+                              (int) sourceRectangle.getWidth(),
+                              (int) sourceRectangle.getHeight(),
+                              sourceLatitudes,
+                              sourceLongitudes);
+        }
         int sourceIndex = sourceRectangle.width;
         final Tile slopeTile = targetTiles.get(slopeBand);
         final Tile aspectTile = targetTiles.get(aspectBand);

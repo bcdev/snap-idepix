@@ -7,6 +7,7 @@ import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.PixelGeoCoding;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -172,6 +173,8 @@ public class S2IdepixPreCloudShadowOp extends Operator {
             if (imageToMapTransform instanceof AffineTransform) {
                 return ((AffineTransform) imageToMapTransform).getScaleX();
             }
+        } else {
+            return S2IdepixCloudShadowOp.determineResolution(getSourceProduct());
         }
         throw new OperatorException("Invalid product");
     }
@@ -281,12 +284,24 @@ public class S2IdepixPreCloudShadowOp extends Operator {
 
         float[] sourceLatitudes = new float[sourceLength];
         float[] sourceLongitudes = new float[sourceLength];
-        ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).getPixels((int) sourceRectangle.getMinX(),
-                (int) sourceRectangle.getMinY(),
-                (int) sourceRectangle.getWidth(),
-                (int) sourceRectangle.getHeight(),
-                sourceLatitudes,
-                sourceLongitudes);
+        if (getSourceProduct().getSceneGeoCoding() instanceof CrsGeoCoding) {
+            ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).
+                    getPixels((int) sourceRectangle.getMinX(),
+                              (int) sourceRectangle.getMinY(),
+                              (int) sourceRectangle.getWidth(),
+                              (int) sourceRectangle.getHeight(),
+                              sourceLatitudes,
+                              sourceLongitudes);
+        } else {
+            S2IdepixCloudShadowOp.
+                    getPixels(getSourceProduct().getSceneGeoCoding(),
+                              (int) sourceRectangle.getMinX(),
+                              (int) sourceRectangle.getMinY(),
+                              (int) sourceRectangle.getWidth(),
+                              (int) sourceRectangle.getHeight(),
+                              sourceLatitudes,
+                              sourceLongitudes);
+        }
 
         Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle, new BorderExtenderConstant(new double[]{Double.NaN}));
         FlagDetector flagDetector = new FlagDetector(sourceTileFlag1, sourceRectangle);
