@@ -74,6 +74,9 @@ public class S2IdepixPostProcessOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
+    private boolean classifyInvalid;
+
     private Band s2ClassifFlagBand;
     private Band cloudBufferFlagBand;
     private Band mountainShadowFlagBand;
@@ -109,6 +112,7 @@ public class S2IdepixPostProcessOp extends Operator {
             params.put("gclThresh", gclThresh);
             params.put("clThresh", clThresh);
             params.put("demName", demName);
+            params.put("classifyInvalid", classifyInvalid);
             final Product cloudShadowProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudShadowOp.class),
                     params, input);
             cloudShadowFlagBand = cloudShadowProduct.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW);

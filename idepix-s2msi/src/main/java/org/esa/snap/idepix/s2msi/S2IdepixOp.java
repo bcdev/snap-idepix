@@ -121,6 +121,9 @@ public class S2IdepixOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
+    private boolean classifyInvalid;
+
 
     @SourceProduct(alias = "l1cProduct",
             label = "Sentinel-2 MSI L1C product",
@@ -203,6 +206,7 @@ public class S2IdepixOp extends Operator {
             params.put("computeCloudShadow", computeCloudShadow);
             params.put("mode", "LandWater");
             params.put("demName", demName);
+            params.put("classifyInvalid", classifyInvalid);
             postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixPostProcessOp.class),
                                                       params, inputShadow);
         }
@@ -223,6 +227,7 @@ public class S2IdepixOp extends Operator {
         gaCloudClassificationParameters.put("gclThresh", gclThresh);
         gaCloudClassificationParameters.put("clThresh", clThresh);
         gaCloudClassificationParameters.put("demName", demName);
+        gaCloudClassificationParameters.put("classifyInvalid", classifyInvalid);
 
         return gaCloudClassificationParameters;
     }

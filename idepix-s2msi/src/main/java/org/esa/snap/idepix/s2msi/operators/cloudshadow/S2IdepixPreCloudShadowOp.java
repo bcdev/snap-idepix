@@ -17,6 +17,7 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.BitSetter;
@@ -45,6 +46,9 @@ import java.util.Map;
         description = "Pre-processing for algorithm detecting cloud shadow...")
 
 public class S2IdepixPreCloudShadowOp extends Operator {
+
+    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
+    private boolean classifyInvalid;
 
     @SourceProduct(description = "The classification product.")
     private Product s2ClassifProduct;
@@ -269,6 +273,10 @@ public class S2IdepixPreCloudShadowOp extends Operator {
                 getSourceProduct().getSceneRasterWidth(), spatialResolution, true, false);
 
         final Rectangle sourceRectangle = getSourceRectangle(targetRectangle, cloudShadowRelativePath);
+        Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle, new BorderExtenderConstant(new double[]{Double.NaN}));
+        if (!classifyInvalid && S2IdepixPostCloudShadowOp.isCompletelyInvalid(sourceTileFlag1)) {
+            return;
+        }
 
         int sourceLength = sourceRectangle.width * sourceRectangle.height;
 
@@ -303,7 +311,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
                               sourceLongitudes);
         }
 
-        Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle, new BorderExtenderConstant(new double[]{Double.NaN}));
         FlagDetector flagDetector = new FlagDetector(sourceTileFlag1, sourceRectangle);
 
         PreparationMaskBand.prepareMaskBand(s2ClassifProduct.getSceneRasterWidth(),

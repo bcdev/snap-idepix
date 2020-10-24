@@ -80,6 +80,9 @@ public class S2IdepixCloudShadowOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
+    private boolean classifyInvalid;
+
     public final static String BAND_NAME_CLOUD_SHADOW = "FlagBand";
 
     private Map<Integer, double[][]> meanReflPerTile = new HashMap<>();
@@ -109,6 +112,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         HashMap<String, Product> preInput = new HashMap<>();
         preInput.put("s2ClassifProduct", classificationProduct);
         Map<String, Object> preParams = new HashMap<>();
+        preParams.put("classifyInvalid", classifyInvalid);
 
         //todo: test resolution of granule. Resample necessary bands to 60m. calculate cloud shadow on 60m.
         //todo: let mountain shadow benefit from higher resolution in DEM. Adjust sun zenith according to smoothing.
@@ -154,6 +158,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         postParams.put("computeMountainShadow", computeMountainShadow);
         postParams.put("bestOffset", bestOffset);
         postParams.put("mode", mode);
+        postParams.put("classifyInvalid", classifyInvalid);
         //put in here any parameters that might be requested by the post-processing operator
 
         //
@@ -274,7 +279,12 @@ public class S2IdepixCloudShadowOp extends Operator {
     }
 
     private int[] findOverallMinimumReflectance() {
-        double[][] scaledTotalReflectance = new double[3][meanReflPerTile.get(0)[0].length];
+        // catch cases of tiles completely invalid are skipped
+        if (meanReflPerTile.keySet().size() == 0) {
+            return new int[3];
+        }
+        Integer someKey = meanReflPerTile.keySet().iterator().next();
+        double[][] scaledTotalReflectance = new double[3][meanReflPerTile.get(someKey)[0].length];
         for (int j = 0; j < 3; j++) {
             /*Checking the meanReflPerTile:
                 - if it has no relative minimum other than the first or the last value, it is excluded.
