@@ -157,7 +157,8 @@ public class S2IdepixOp extends Operator {
 
         s2ClassifProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixClassificationOp.class),
                                              pixelClassificationParameters, inputProducts);
-        s2ClassifProduct = computeTileCacheProduct(s2ClassifProduct,1600);
+        int cacheSize = Integer.parseInt(System.getProperty("snap.idepix.s2msi.tilecache", "1600"));
+        s2ClassifProduct = computeTileCacheProduct(s2ClassifProduct, cacheSize);
 
         if (computeCloudShadow || computeCloudBuffer || computeMountainShadow) {
             // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
