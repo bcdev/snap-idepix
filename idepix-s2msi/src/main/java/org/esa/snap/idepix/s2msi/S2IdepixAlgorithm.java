@@ -148,10 +148,10 @@ public class S2IdepixAlgorithm {
 //                !(isB3B11Water() && (tc1Value() < getTc1Threshold()));  // JM, 20160526
 
         // JM 20160713:
-        return (!isInvalid() && isLand() && !(lat < 30 && lat > -30) &&
+        return (!isInvalid() && !(lat < 30 && lat > -30) &&
                 ndsiValue() > getNdsiThreshold() &&
                 !(isB3B11Water() && (tc1Value() < getTc1Threshold()))) ||
-                (!isInvalid() && isLand() && (lat < 30 && lat > -30) &&
+                (!isInvalid() && (lat < 30 && lat > -30) &&
                         elevation > getElevationSnowThreshold() &&
                         ndsiValue() > getNdsiThreshold() &&
                         !(isB3B11Water() && (tc1Value() < getTc1Threshold())));
