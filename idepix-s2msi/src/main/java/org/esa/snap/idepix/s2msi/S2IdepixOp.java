@@ -1,6 +1,7 @@
 package org.esa.snap.idepix.s2msi;
 
 import org.esa.snap.core.gpf.internal.TileCacheOp;
+import org.esa.snap.dem.gpf.AddElevationOp;
 import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudBufferOp;
 import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
@@ -150,8 +151,20 @@ public class S2IdepixOp extends Operator {
 
     private void processSentinel2() {
 
+        Product elevationProduct;
+        if (sourceProduct.containsBand(S2IdepixConstants.ELEVATION_BAND_NAME)) {
+            elevationProduct = sourceProduct;
+        } else {
+            AddElevationOp elevationOp = new AddElevationOp();
+            elevationOp.setParameterDefaultValues();
+            elevationOp.setParameter("demName", demName);
+            elevationOp.setSourceProduct(sourceProduct);
+            elevationProduct = elevationOp.getTargetProduct();
+        }
+
         Map<String, Product> inputProducts = new HashMap<>(4);
         inputProducts.put("l1c", sourceProduct);
+        inputProducts.put("elevation", elevationProduct);
 
         final Map<String, Object> pixelClassificationParameters = createPixelClassificationParameters();
 

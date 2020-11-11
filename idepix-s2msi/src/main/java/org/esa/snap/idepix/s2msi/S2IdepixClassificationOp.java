@@ -155,6 +155,9 @@ public class S2IdepixClassificationOp extends Operator {
     @SourceProduct(alias = "l1c", description = "The MSI L1C source product.")
     Product sourceProduct;
 
+    @SourceProduct(alias = "elevation", description = "The elevation product.")
+    Product elevationProduct;
+
 //    @SourceProduct(alias = "waterMask", optional = true)
 //    private Product waterMaskProduct;
 
@@ -189,7 +192,6 @@ public class S2IdepixClassificationOp extends Operator {
     Band tc4CirrusBand;
     Band ndwiBand;
 
-    private Product elevationProduct;
     private WatermaskClassifier watermaskClassifier;
 
 
@@ -221,16 +223,6 @@ public class S2IdepixClassificationOp extends Operator {
 
 //        readSchillerNeuralNets();
         createTargetProduct();
-
-        if (sourceProduct.containsBand(S2IdepixConstants.ELEVATION_BAND_NAME)) {
-            elevationProduct = sourceProduct;
-        } else {
-            AddElevationOp elevationOp = new AddElevationOp();
-            elevationOp.setParameterDefaultValues();
-            elevationOp.setParameter("demName", demName);
-            elevationOp.setSourceProduct(sourceProduct);
-            elevationProduct = elevationOp.getTargetProduct();
-        }
 
         extendTargetProduct();
     }
