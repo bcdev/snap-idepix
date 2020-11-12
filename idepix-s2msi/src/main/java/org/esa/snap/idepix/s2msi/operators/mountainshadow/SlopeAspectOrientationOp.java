@@ -1,6 +1,7 @@
 package org.esa.snap.idepix.s2msi.operators.mountainshadow;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.idepix.s2msi.operators.cloudshadow.CloudShadowUtils;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixCloudShadowOp;
@@ -150,20 +151,24 @@ public class SlopeAspectOrientationOp extends Operator {
     /* package local for testing */
     static float[] computeSlopeAndAspect(float[] elevationData, int sourceIndex, double spatialResolution,
                                          int sourceWidth) {
-        float elevA1 = elevationData[sourceIndex - sourceWidth - 1];
-        float elevA2 = elevationData[sourceIndex - sourceWidth];
-        float elevA3 = elevationData[sourceIndex - sourceWidth + 1];
-        float elevA4 = elevationData[sourceIndex - 1];
-        float elevA6 = elevationData[sourceIndex + 1];
-        float elevA7 = elevationData[sourceIndex + sourceWidth - 1];
-        float elevA8 = elevationData[sourceIndex + sourceWidth];
-        float elevA9 = elevationData[sourceIndex + sourceWidth + 1];
-        float b = (elevA3 + 2 * elevA6 + elevA9 - elevA1 - 2 * elevA4 - elevA7) / 8f;
-        float c = (elevA1 + 2 * elevA2 + elevA3 - elevA7 - 2 * elevA8 - elevA9) / 8f;
-        float slope = (float) Math.atan(Math.sqrt(Math.pow(b / spatialResolution, 2) +
-                                                          Math.pow(c / spatialResolution, 2)));
-        float aspect = (float) Math.atan2(-b, -c);
-        return new float[]{slope, aspect};
+        if (CloudShadowUtils.elevationBoxIsValid(elevationData, sourceIndex, sourceWidth)) {
+            float elevA1 = elevationData[sourceIndex - sourceWidth - 1];
+            float elevA2 = elevationData[sourceIndex - sourceWidth];
+            float elevA3 = elevationData[sourceIndex - sourceWidth + 1];
+            float elevA4 = elevationData[sourceIndex - 1];
+            float elevA6 = elevationData[sourceIndex + 1];
+            float elevA7 = elevationData[sourceIndex + sourceWidth - 1];
+            float elevA8 = elevationData[sourceIndex + sourceWidth];
+            float elevA9 = elevationData[sourceIndex + sourceWidth + 1];
+            float b = (elevA3 + 2 * elevA6 + elevA9 - elevA1 - 2 * elevA4 - elevA7) / 8f;
+            float c = (elevA1 + 2 * elevA2 + elevA3 - elevA7 - 2 * elevA8 - elevA9) / 8f;
+            float slope = (float) Math.atan(Math.sqrt(Math.pow(b / spatialResolution, 2) +
+                    Math.pow(c / spatialResolution, 2)));
+            float aspect = (float) Math.atan2(-b, -c);
+            return new float[]{slope, aspect};
+        } else {
+            return new float[]{Float.NaN, Float.NaN};
+        }
     }
 
     /* package local for testing */

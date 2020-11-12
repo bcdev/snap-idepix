@@ -8,10 +8,41 @@ import java.awt.geom.Point2D;
 /**
  * @author Tonio Fincke
  */
-class CloudShadowUtils {
+public class CloudShadowUtils {
 
     private static double QUARTER_DIVIDER = 0.7071067811865475;
     private static final int MEAN_EARTH_RADIUS = 6372000;
+
+    private final static float EARTH_MIN_ELEVATION = -428.0f;  // at shoreline of Dead Sea
+    private final static float EARTH_MAX_ELEVATION = 8848.0f;  // Mt. Everest
+
+    /**
+     * Checks if 3x3 box of elevations around given index is valid
+     * (i.e. not NaN and all values inside real values possible on Earth)
+     *
+     * @param elevations - elevation sample array on tile
+     * @param index0 - array index
+     * @param tileWidth - tile width
+     * @return boolean
+     */
+    public static boolean elevationBoxIsValid(float[] elevations, int index0, int tileWidth) {
+        float[] elevBox = new float[8];
+        elevBox[0] = elevations[Math.max(0, index0 - tileWidth - 1)];
+        elevBox[1] = elevations[Math.max(0, index0 - tileWidth)];
+        elevBox[2] = elevations[Math.max(0, index0 - tileWidth + 1)];
+        elevBox[3] = elevations[Math.max(0, index0 - 1)];
+        elevBox[4] = elevations[Math.min(tileWidth-1, index0 + 1)];
+        elevBox[5] = elevations[Math.min(tileWidth-1, index0 + tileWidth - 1)];
+        elevBox[6] = elevations[Math.min(tileWidth-1, index0 + tileWidth)];
+        elevBox[7] = elevations[Math.min(tileWidth-1, index0 + tileWidth + 1)];
+
+        for (float elev : elevBox) {
+            if (Float.isNaN(elev) || elev < EARTH_MIN_ELEVATION || elev > EARTH_MAX_ELEVATION) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     static Point2D[] getRelativePath(double minSurfaceAltitude, double sza, double saa, double maxObjectAltitude,
                                      Rectangle sourceRectangle, Rectangle targetRectangle,
