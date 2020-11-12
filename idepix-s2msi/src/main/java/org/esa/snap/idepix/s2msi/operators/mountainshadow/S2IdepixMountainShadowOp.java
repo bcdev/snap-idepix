@@ -79,10 +79,12 @@ public class S2IdepixMountainShadowOp extends PixelOperator {
 
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        final double cosBeta = computeCosBeta(sourceSamples[SZA_INDEX].getFloat(), sourceSamples[SAA_INDEX].getFloat(),
-                                              sourceSamples[SLOPE_INDEX].getFloat(), sourceSamples[ASPECT_INDEX].getFloat(),
-                                              sourceSamples[ORIENTATION_INDEX].getFloat());
-        targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(cosBeta < SHADOW_THRESHOLD);
+        if (!Float.isNaN(sourceSamples[SLOPE_INDEX].getFloat()) && !Float.isNaN(sourceSamples[ASPECT_INDEX].getFloat())) {
+            final double cosBeta = computeCosBeta(sourceSamples[SZA_INDEX].getFloat(), sourceSamples[SAA_INDEX].getFloat(),
+                    sourceSamples[SLOPE_INDEX].getFloat(), sourceSamples[ASPECT_INDEX].getFloat(),
+                    sourceSamples[ORIENTATION_INDEX].getFloat());
+            targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(cosBeta < SHADOW_THRESHOLD);
+        }
     }
 
     /* package local for testing */

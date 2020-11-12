@@ -103,7 +103,7 @@ class MountainShadowFlagger {
                                                float[] sourceAltitude, int[] flagArray, float maxAltitude) {
         int index0 = y0 * width + x0;
         float altitude0 = sourceAltitude[index0];
-        if (Float.isNaN(altitude0)) {
+        if (Float.isNaN(altitude0) || !CloudShadowUtils.elevationBoxIsValid(sourceAltitude, index0, width)) {
             return;
         }
 
