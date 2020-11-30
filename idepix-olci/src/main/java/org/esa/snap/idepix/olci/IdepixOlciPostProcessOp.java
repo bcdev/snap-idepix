@@ -99,6 +99,9 @@ public class IdepixOlciPostProcessOp extends Operator {
         origCloudFlagBand = olciCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         String[] a= origCloudFlagBand.getFlagCoding().getFlagNames();
 
+        ProductUtils.copyBand("distance", olciCloudProduct, postProcessedCloudProduct, true);
+        distanceBand = postProcessedCloudProduct.getBand("distance");
+
         szaTPG = l1bProduct.getTiePointGrid("SZA");
         saaTPG = l1bProduct.getTiePointGrid("SAA");
         ozaTPG = l1bProduct.getTiePointGrid("OZA");
@@ -135,7 +138,7 @@ public class IdepixOlciPostProcessOp extends Operator {
             final GeoPos centerGeoPos =
                     getCenterGeoPos(l1bProduct.getSceneGeoCoding(), l1bProduct.getSceneRasterWidth(),
                             l1bProduct.getSceneRasterHeight());
-            maxcloudTop = setCloudTopHeight(centerGeoPos.getLat());
+//            maxcloudTop = setCloudTopHeight(centerGeoPos.getLat());
         }
 
 
@@ -159,6 +162,7 @@ public class IdepixOlciPostProcessOp extends Operator {
         final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
 
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
+        //Tile distanceTile = getSourceTile(distanceBand, targetRectangle);
 
         for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
             checkForCancellation();
@@ -205,6 +209,7 @@ public class IdepixOlciPostProcessOp extends Operator {
             Tile ctpTile = getSourceTile(ctpBand, srcRectangle);
             Tile slpTile = getSourceTile(slpTPG, srcRectangle);
             Tile altTile = getSourceTile(altBand, targetRectangle);
+            Tile distanceTile = getSourceTile(distanceBand, targetRectangle);
 
             Tile[] temperatureProfileTPGTiles = new Tile[temperatureProfileTPGs.length];
             for (int i = 0; i < temperatureProfileTPGTiles.length; i++) {
@@ -219,7 +224,7 @@ public class IdepixOlciPostProcessOp extends Operator {
                     ozaTile, oaaTile,
                     ctpTile, slpTile,
                     temperatureProfileTPGTiles,
-                    altTile, maxcloudTop);
+                    altTile, distanceTile, maxcloudTop);
             cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
         }
     }

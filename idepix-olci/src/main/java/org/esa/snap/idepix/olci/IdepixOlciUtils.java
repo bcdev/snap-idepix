@@ -244,6 +244,10 @@ class IdepixOlciUtils {
         return factory.createPolygon(factory.createLinearRing(coordinates), null);
     }
 
+    static double getHeightFromCtp_MERISStyle(double ctp, double slp){
+        //slp sea level pressure
+        return -8000. * Math.log(ctp / slp);
+    }
 
     static double getRefinedHeightFromCtp(double ctp, double slp, double[] temperatures) {
         double height = 0.0;

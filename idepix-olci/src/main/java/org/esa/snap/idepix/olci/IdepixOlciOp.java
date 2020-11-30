@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -173,6 +174,12 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(l1bProduct, olciIdepixProduct, true);
 
+        Band distanceBand = olciIdepixProduct.addBand("distance", ProductData.TYPE_FLOAT32);
+        distanceBand.setNoDataValue(Float.NaN);
+        distanceBand.setNoDataValueUsed(true);
+        distanceBand.setUnit("m");
+        distanceBand.setDescription("Distance to scene border");
+
         //7.0.5: postprocessing is always needed both for ice and for coastline postprocessing!
 //        postProcess(olciIdepixProduct);
         //7.0.6: with new LAND tests before classification
@@ -186,6 +193,9 @@ public class IdepixOlciOp extends BasisOp {
         if (postProcessingProduct != null) {
             Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
             cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
+
+//            Band borderDistanceBand = targetProduct.getBand("distance");
+//            borderDistanceBand.setSourceImage(postProcessingProduct.getBand("distance").getSourceImage());
         }
 
     }
@@ -217,11 +227,20 @@ public class IdepixOlciOp extends BasisOp {
             IdepixOlciUtils.addOlciRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
         }
 
-        IdepixOlciUtils.addOlcirBRRBands(rBRRProduct, targetProduct);
-        ProductUtils.copyBand("waterfraction", idepixProduct, targetProduct, true);
+//        IdepixOlciUtils.addOlcirBRRBands(rBRRProduct, targetProduct);
+//        ProductUtils.copyBand("waterfraction", idepixProduct, targetProduct, true);
 
         if (outputSchillerNNValue) {
             ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
+        }
+
+        if (computeCloudShadow){
+            ProductUtils.copyBand("distance", idepixProduct, targetProduct, true);
+//            final Band distanceBand = targetProduct.addBand("distance", ProductData.TYPE_FLOAT32);
+//            distanceBand.setNoDataValue(Float.NaN);
+//            distanceBand.setNoDataValueUsed(true);
+//            distanceBand.setUnit("m");
+//            distanceBand.setDescription("distance to scene border");
         }
 
         if (computeCloudShadow && outputCtp) {

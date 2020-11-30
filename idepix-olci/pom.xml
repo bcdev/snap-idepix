@@ -118,64 +118,64 @@
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-o2a-harmonisation</artifactId>
-            <!--<version>${s3tbx.version}</version>-->
-            <version>7.0.4.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-olci-radiometry</artifactId>
             <version>${s3tbx.version}</version>
-        </dependency>
+        <!--<version>7.0.4.1</version>-->
+    </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
+    <dependency>
+        <groupId>org.esa.s3tbx</groupId>
+        <artifactId>s3tbx-olci-radiometry</artifactId>
+        <version>${s3tbx.version}</version>
+    </dependency>
 
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.9.5</version>
-            <scope>test</scope>
-        </dependency>
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+    </dependency>
 
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
-        </dependency>
+    <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>1.9.5</version>
+        <scope>test</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
+    <dependency>
+        <groupId>com.googlecode.json-simple</groupId>
+        <artifactId>json-simple</artifactId>
+        <version>1.1.1</version>
+    </dependency>
 
-        <dependency>
-            <groupId>org.tensorflow</groupId>
-            <artifactId>tensorflow</artifactId>
-            <version>1.15.0</version>
-        </dependency>
+    <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+    </dependency>
 
-        <dependency>
-            <groupId>org.tensorflow</groupId>
-            <artifactId>libtensorflow</artifactId>
-            <version>1.15.0</version>
-        </dependency>
+    <dependency>
+        <groupId>org.tensorflow</groupId>
+        <artifactId>tensorflow</artifactId>
+        <version>1.15.0</version>
+    </dependency>
 
-        <dependency>
-            <groupId>org.tensorflow</groupId>
-            <artifactId>libtensorflow_jni</artifactId>
-            <version>1.15.0</version>
-        </dependency>
+    <dependency>
+        <groupId>org.tensorflow</groupId>
+        <artifactId>libtensorflow</artifactId>
+        <version>1.15.0</version>
+    </dependency>
 
-        <dependency>
-            <groupId>com.github.haifengl</groupId>
-            <artifactId>smile-core</artifactId>
-            <version>1.5.0</version>
-        </dependency>
+    <dependency>
+        <groupId>org.tensorflow</groupId>
+        <artifactId>libtensorflow_jni</artifactId>
+        <version>1.15.0</version>
+    </dependency>
 
-        <!--<dependency>-->
+    <dependency>
+        <groupId>com.github.haifengl</groupId>
+        <artifactId>smile-core</artifactId>
+        <version>1.5.0</version>
+    </dependency>
+
+    <!--<dependency>-->
             <!--<groupId>org.tensorflow</groupId>-->
             <!--<artifactId>proto</artifactId>-->
             <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
