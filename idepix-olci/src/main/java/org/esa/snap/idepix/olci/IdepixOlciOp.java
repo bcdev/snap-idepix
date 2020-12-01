@@ -174,11 +174,11 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(l1bProduct, olciIdepixProduct, true);
 
-        Band distanceBand = olciIdepixProduct.addBand("distance", ProductData.TYPE_FLOAT32);
-        distanceBand.setNoDataValue(Float.NaN);
-        distanceBand.setNoDataValueUsed(true);
-        distanceBand.setUnit("m");
-        distanceBand.setDescription("Distance to scene border");
+//        Band distanceBand = olciIdepixProduct.addBand("distance", ProductData.TYPE_FLOAT32);
+//        distanceBand.setNoDataValue(Float.NaN);
+//        distanceBand.setNoDataValueUsed(true);
+//        distanceBand.setUnit("m");
+//        distanceBand.setDescription("Distance to scene border");
 
         //7.0.5: postprocessing is always needed both for ice and for coastline postprocessing!
 //        postProcess(olciIdepixProduct);
@@ -196,6 +196,7 @@ public class IdepixOlciOp extends BasisOp {
 
 //            Band borderDistanceBand = targetProduct.getBand("distance");
 //            borderDistanceBand.setSourceImage(postProcessingProduct.getBand("distance").getSourceImage());
+            ProductUtils.copyBand("distance", postProcessingProduct, targetProduct, true);
         }
 
     }

@@ -18,6 +18,7 @@ import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 
 import java.awt.*;
+import java.util.Map;
 
 //import org.esa.s3tbx.idepix.core.IdepixConstants;
 //import org.esa.s3tbx.idepix.core.operators.CloudBuffer;
@@ -68,6 +69,7 @@ public class IdepixOlciPostProcessOp extends Operator {
     private Product ctpProduct;
 
     private Band origCloudFlagBand;
+    private Band targetFlagBand;
 
     private Band ctpBand;
     private TiePointGrid szaTPG;
@@ -99,8 +101,14 @@ public class IdepixOlciPostProcessOp extends Operator {
         origCloudFlagBand = olciCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         String[] a= origCloudFlagBand.getFlagCoding().getFlagNames();
 
-        ProductUtils.copyBand("distance", olciCloudProduct, postProcessedCloudProduct, true);
-        distanceBand = postProcessedCloudProduct.getBand("distance");
+//        ProductUtils.copyBand("distance", olciCloudProduct, postProcessedCloudProduct, true);
+//        distanceBand = postProcessedCloudProduct.getBand("distance");
+
+        distanceBand = postProcessedCloudProduct.addBand("distance", ProductData.TYPE_FLOAT32);
+        distanceBand.setNoDataValue(Float.NaN);
+        distanceBand.setNoDataValueUsed(true);
+        distanceBand.setUnit("m");
+        distanceBand.setDescription("Distance to scene border");
 
         szaTPG = l1bProduct.getTiePointGrid("SZA");
         saaTPG = l1bProduct.getTiePointGrid("SAA");
@@ -142,7 +150,8 @@ public class IdepixOlciPostProcessOp extends Operator {
         }
 
 
-        ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, olciCloudProduct, postProcessedCloudProduct, false);
+        targetFlagBand = ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME,
+                olciCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
 
@@ -156,13 +165,91 @@ public class IdepixOlciPostProcessOp extends Operator {
         return (int) Math.ceil(0.5 * Math.pow(90. - Math.abs(lat), 2.) + (90. - Math.abs(lat)) * 25 + 5000);
     }
 
+//    @Override
+//    public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
+//        Rectangle targetRectangle = targetTile.getRectangle();
+//        final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
+//
+//        final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
+//        //Tile distanceTile = getSourceTile(distanceBand, targetRectangle);
+//
+//        for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
+//            checkForCancellation();
+//            for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
+//
+//                if (targetRectangle.contains(x, y)) {
+//                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+//                    combineFlags(x, y, sourceFlagTile, targetTile);
+//                    if (isCloud) {
+//                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);   // necessary??
+//                    }
+//
+//                    // refine classification near coastline is not necessayr, if coast line pixels are processed as land!
+////                    boolean isCoastline = sourceFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_COASTLINE);
+////
+////                    if (refineClassificationNearCoastlines) {
+////                        if (isCloud && isCoastline) { //MERIS has a test isNearCoastline
+////                            refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, targetTile, srcRectangle);
+////                        }
+////                    }
+////                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+////                    if (isCloudAfterRefinement) {
+////                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+////                    }
+//                }
+//            }
+//        }
+//
+//        if (computeCloudBuffer) {
+//            CloudBuffer.setCloudBuffer(targetTile, srcRectangle, sourceFlagTile, cloudBufferWidth);
+//            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+//                checkForCancellation();
+//                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+//                    IdepixUtils.consolidateCloudAndBuffer(targetTile, x, y);
+//                }
+//            }
+//        }
+//
+//        if (computeCloudShadow && ctpProduct != null) {
+//            Tile szaTile = getSourceTile(szaTPG, srcRectangle);
+//            Tile saaTile = getSourceTile(saaTPG, srcRectangle);
+//            Tile ozaTile = getSourceTile(ozaTPG, srcRectangle);
+//            Tile oaaTile = getSourceTile(oaaTPG, srcRectangle);
+//            Tile ctpTile = getSourceTile(ctpBand, srcRectangle);
+//            Tile slpTile = getSourceTile(slpTPG, srcRectangle);
+//            Tile altTile = getSourceTile(altBand, targetRectangle);
+//            Tile distanceTile = getSourceTile(distanceBand, targetRectangle);
+//
+//            Tile[] temperatureProfileTPGTiles = new Tile[temperatureProfileTPGs.length];
+//            for (int i = 0; i < temperatureProfileTPGTiles.length; i++) {
+//                temperatureProfileTPGTiles[i] = getSourceTile(temperatureProfileTPGs[i], srcRectangle);
+//            }
+//
+//            // CloudShadowFronts was modified for OLCI:
+//            // - more advanced CTH computation
+//            // - use of 'apparent sun azimuth angle
+//            IdepixOlciCloudShadowFronts cloudShadowFronts = new IdepixOlciCloudShadowFronts(geoCoding,
+//                    szaTile, saaTile,
+//                    ozaTile, oaaTile,
+//                    ctpTile, slpTile,
+//                    temperatureProfileTPGTiles,
+//                    altTile, distanceTile, maxcloudTop);
+//            cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
+//        }
+//    }
+
     @Override
-    public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        Rectangle targetRectangle = targetTile.getRectangle();
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
         final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
 
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
-        //Tile distanceTile = getSourceTile(distanceBand, targetRectangle);
+
+        Tile targetFlagTile = targetTiles.get(targetFlagBand);
+        Tile distanceTile = null;
+        if (distanceBand != null) {
+            distanceTile = targetTiles.get(distanceBand);
+        }
+
 
         for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
             checkForCancellation();
@@ -170,33 +257,20 @@ public class IdepixOlciPostProcessOp extends Operator {
 
                 if (targetRectangle.contains(x, y)) {
                     boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                    combineFlags(x, y, sourceFlagTile, targetTile);
+                    combineFlags(x, y, sourceFlagTile, targetFlagTile);
                     if (isCloud) {
-                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);   // necessary??
+                        targetFlagTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);   // necessary??
                     }
-
-                    // refine classification near coastline is not necessayr, if coast line pixels are processed as land!
-//                    boolean isCoastline = sourceFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_COASTLINE);
-//
-//                    if (refineClassificationNearCoastlines) {
-//                        if (isCloud && isCoastline) { //MERIS has a test isNearCoastline
-//                            refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, targetTile, srcRectangle);
-//                        }
-//                    }
-//                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-//                    if (isCloudAfterRefinement) {
-//                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
-//                    }
                 }
             }
         }
 
         if (computeCloudBuffer) {
-            CloudBuffer.setCloudBuffer(targetTile, srcRectangle, sourceFlagTile, cloudBufferWidth);
+            CloudBuffer.setCloudBuffer(targetFlagTile, srcRectangle, sourceFlagTile, cloudBufferWidth);
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
                 checkForCancellation();
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                    IdepixUtils.consolidateCloudAndBuffer(targetTile, x, y);
+                    IdepixUtils.consolidateCloudAndBuffer(targetFlagTile, x, y);
                 }
             }
         }
@@ -209,7 +283,6 @@ public class IdepixOlciPostProcessOp extends Operator {
             Tile ctpTile = getSourceTile(ctpBand, srcRectangle);
             Tile slpTile = getSourceTile(slpTPG, srcRectangle);
             Tile altTile = getSourceTile(altBand, targetRectangle);
-            Tile distanceTile = getSourceTile(distanceBand, targetRectangle);
 
             Tile[] temperatureProfileTPGTiles = new Tile[temperatureProfileTPGs.length];
             for (int i = 0; i < temperatureProfileTPGTiles.length; i++) {
@@ -225,8 +298,9 @@ public class IdepixOlciPostProcessOp extends Operator {
                     ctpTile, slpTile,
                     temperatureProfileTPGTiles,
                     altTile, distanceTile, maxcloudTop);
-            cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
+            cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetFlagTile);
         }
+
     }
 
     private void combineFlags(int x, int y, Tile sourceFlagTile, Tile targetTile) {
