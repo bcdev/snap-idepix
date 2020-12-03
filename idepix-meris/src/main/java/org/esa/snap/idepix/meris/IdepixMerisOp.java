@@ -123,6 +123,7 @@ public class IdepixMerisOp extends BasisOp {
     private Product rad2reflProduct;
     private Product ctpProduct;
     private Product waterMaskProduct;
+    private Product rBRRProduct;
 
     private Map<String, Product> classificationInputProducts;
     private Map<String, Object> waterClassificationParameters;
@@ -139,8 +140,8 @@ public class IdepixMerisOp extends BasisOp {
         outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
 
         preProcess();
-        computeWaterCloudProduct();
-        computeLandCloudProduct();
+        computeWaterClassificationProduct();
+        computeLandClassificationProduct();
         mergeLandWater();
         postProcess();
 
@@ -159,6 +160,7 @@ public class IdepixMerisOp extends BasisOp {
     private void preProcess() {
         rad2reflProduct = IdepixMerisUtils.computeRadiance2ReflectanceProduct(sourceProduct);
         ctpProduct = IdepixMerisUtils.computeCloudTopPressureProduct(sourceProduct);
+        rBRRProduct = IdepixMerisUtils.computeRayleighCorrectedProduct(sourceProduct);
 
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
         waterMaskParameters.put("resolution", IdepixConstants.LAND_WATER_MASK_RESOLUTION);
@@ -193,19 +195,21 @@ public class IdepixMerisOp extends BasisOp {
                                           schillerWaterNNCloudSureSnowSeparationValue);
     }
 
-    private void computeWaterCloudProduct() {
+    private void computeWaterClassificationProduct() {
         setWaterClassificationParameters();
         classificationInputProducts = new HashMap<>();
         classificationInputProducts.put("l1b", sourceProduct);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
         classificationInputProducts.put("waterMask", waterMaskProduct);
+        classificationInputProducts.put("rBRR", rBRRProduct);
 
         waterClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixMerisWaterClassificationOp.class),
                                                        waterClassificationParameters, classificationInputProducts);
     }
 
-    private void computeLandCloudProduct() {
+    private void computeLandClassificationProduct() {
         setLandClassificationParameters();
+        classificationInputProducts.put("waterClassProduct", waterClassificationProduct);
         landClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixMerisLandClassificationOp.class),
                                                       landClassificationParameters, classificationInputProducts);
     }

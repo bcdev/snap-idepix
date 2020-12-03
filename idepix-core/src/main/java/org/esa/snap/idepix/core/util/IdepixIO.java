@@ -1,11 +1,18 @@
 package org.esa.snap.idepix.core.util;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.ResourceInstaller;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.seaice.LakeSeaIceClassification;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * @author Olaf Danne
@@ -133,6 +140,22 @@ public class IdepixIO {
         }
     }
 
+    /**
+     * Installs auxiliary data, here for lake and sea ice maps.
+     *
+     * @return - the auxdata path for ice maps.
+     * @throws IOException -
+     */
+    public static String installAuxdataIceMaps() throws IOException {
+        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("idepix/icemaps");
+        final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(LakeSeaIceClassification.class).
+                resolve("auxdata/icemaps");
+        final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
+        resourceInstaller.install(".*", ProgressMonitor.NULL);
+        return auxdataDirectory.toString();
+    }
+
+
     /// END of public ///
 
     static boolean isValidLandsat8Product(Product product) {
@@ -182,8 +205,8 @@ public class IdepixIO {
                 !isValidOlciSlstrSynergyProduct(inputProduct) &&
                 !isValidVgtProduct(inputProduct)) {
             IdepixUtils.logErrorMessage("Input sensor must be either Landsat-8, MERIS, AATSR, AVHRR, " +
-                                                "OLCI, colocated OLCI/SLSTR, " +
-                                                "MODIS/SeaWiFS, PROBA-V or VGT!");
+                    "OLCI, colocated OLCI/SLSTR, " +
+                    "MODIS/SeaWiFS, PROBA-V or VGT!");
         }
         return true;
     }
@@ -198,7 +221,9 @@ public class IdepixIO {
 
     private static boolean isValidOlciProduct(Product product) {
 //        return product.getProductType().startsWith("S3A_OL_");  // todo: clarify
-        return product.getProductType().contains("OL_1");  // new products have product type 'OL_1_ERR'
+//        return product.getProductType().contains("OL_1");  // new products have product type 'OL_1_ERR'
+        return product.getName().contains("S3A_OL_1_") ||
+                product.getProductType().contains("OL_1");  // new products have product type 'OL_1_ERR'
     }
 
     private static boolean isValidOlciSlstrSynergyProduct(Product product) {

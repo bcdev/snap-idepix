@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>7.0.0</version>
+        <version>7.0.1</version>
     </parent>
 
     <artifactId>idepix-modis</artifactId>
@@ -34,7 +34,7 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from MODIS.</description>
 
     <properties>
-        <idepix.version>7.0.0</idepix.version>
+        <idepix.version>7.0.2</idepix.version>
     </properties>
 
     <dependencies>

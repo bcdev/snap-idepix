@@ -12,21 +12,27 @@ import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
+import org.esa.snap.core.datamodel.Mask;
 
+import java.awt.Color;
+import java.util.Random;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +65,10 @@ class IdepixOlciUtils {
      * @return - the flag coding
      */
     static FlagCoding createOlciFlagCoding() {
-        return IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding olciFlags = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        olciFlags.addFlag("IDEPIX_WATER_PROCESSABLE", BitSetter.setFlag(0, IdepixOlciConstants.IDEPIX_WATER_PROCESSABLE),
+                IdepixOlciConstants.IDEPIX_WATER_PROCESSABLE_DESCR_TEXT);
+        return olciFlags;
     }
 
     /**
@@ -68,7 +77,20 @@ class IdepixOlciUtils {
      * @param classifProduct - the pixel classification product
      */
     static void setupOlciClassifBitmask(Product classifProduct) {
-        IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
+//        IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
+
+        int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
+
+        int w = classifProduct.getSceneRasterWidth();
+        int h = classifProduct.getSceneRasterHeight();
+        Mask mask;
+        Random r = new Random();
+
+        mask = Mask.BandMathsType.create("IDEPIX_WATER_PROCESSABLE", IdepixOlciConstants.IDEPIX_WATER_PROCESSABLE_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_WATER_PROCESSABLE",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
+        classifProduct.getMaskGroup().add(index, mask);
+
     }
 
     static void addOlciRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
@@ -83,6 +105,18 @@ class IdepixOlciUtils {
         }
     }
 
+    static void addOlcirBRRBands(Product rBRRProduct, Product targetProduct) {
+        String [] rBRRBandname = new String[]{"01", "04", "06", "08", "17"};
+        for (int i = 0; i < rBRRBandname.length; i++) {
+            String bandname = "rBRR_" + rBRRBandname[i];
+            if (!targetProduct.containsBand(bandname)) {
+                ProductUtils.copyBand(bandname, rBRRProduct, targetProduct, true);
+                targetProduct.getBand(bandname).setUnit("");
+            }
+
+        }
+    }
+
     static Product computeRadiance2ReflectanceProduct(Product sourceProduct) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("sensor", Sensor.OLCI);
@@ -90,13 +124,30 @@ class IdepixOlciUtils {
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
     }
 
-    static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct, String alternativeNNDirPath, boolean outputCtp) {
+    static Product computeRayleighCorrectedProduct(Product sourceProduct) {
+        Map<String, Product> raylSourceProducts = new HashMap<>();
+        raylSourceProducts.put("sourceProduct", sourceProduct);
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("sourceBandNames", "Oa01_radiance,Oa04_radiance,Oa06_radiance,Oa08_radiance,Oa17_radiance");
+        params.put("computeTaur", false);
+        params.put("computeRBrr", true);
+        params.put("computeRtoaNg", false);
+        params.put("computeRtoa", false);
+        params.put("addAirMass", false);
+
+        return GPF.createProduct("RayleighCorrection", params, raylSourceProducts);
+    }
+
+
+    static Product computeCloudTopPressureProduct(Product sourceProduct,
+                                                  Product o2CorrProduct,
+                                                  String alternativeNNDirPath) {
         Map<String, Product> ctpSourceProducts = new HashMap<>();
         ctpSourceProducts.put("sourceProduct", sourceProduct);
         ctpSourceProducts.put("o2CorrProduct", o2CorrProduct);
         Map<String, Object> params = new HashMap<>(2);
         params.put("alternativeNNDirPath", alternativeNNDirPath);
-        params.put("outputCtp", outputCtp);
         return GPF.createProduct(OperatorSpi.getOperatorAlias(CtpOp.class), params, ctpSourceProducts);
     }
 
@@ -138,10 +189,9 @@ class IdepixOlciUtils {
      * @param saa - sun azimuth (deg)
      * @param oza - view zenith (deg)
      * @param oaa - view azimuth (deg)
-     * @param lat - latitude (deg)
      * @return the apparent saa (deg)
      */
-    static double computeApparentSaa(double sza, double saa, double oza, double oaa, double lat) {
+    static double computeApparentSaa(double sza, double saa, double oza, double oaa) {
         final double szaRad = sza * MathUtils.DTOR;
         final double ozaRad = oza * MathUtils.DTOR;
 
@@ -157,8 +207,9 @@ class IdepixOlciUtils {
                 2.0 * Math.tan(szaRad) * Math.tan(ozaRad) * Math.cos(deltaPhiRad));
 
         double delta = Math.acos(numerator / denominator);
-        if (lat < 0.0){
-            delta =-1.*delta;
+        if (saa > 270. || saa < 90){
+            //sun towards the South
+            delta *= -1.0;
         }
         if (oaa < 0.0) {
             return saa - delta * MathUtils.RTOD;
@@ -193,6 +244,10 @@ class IdepixOlciUtils {
         return factory.createPolygon(factory.createLinearRing(coordinates), null);
     }
 
+    static double getHeightFromCtp_MERISStyle(double ctp, double slp){
+        //slp sea level pressure
+        return -8000. * Math.log(ctp / slp);
+    }
 
     static double getRefinedHeightFromCtp(double ctp, double slp, double[] temperatures) {
         double height = 0.0;
@@ -219,6 +274,16 @@ class IdepixOlciUtils {
             height = getHeightFromCtp(ctp, slp, ts);
         }
         return height;
+    }
+
+    /**
+     * Returns month (1-12) from given start/stop time
+     *
+     * @param startStopTime - start/stop time given as {@link ProductData.UTC}
+     * @return month
+     */
+    static int getMonthFromStartStopTime(ProductData.UTC startStopTime) {
+        return startStopTime.getAsCalendar().get(Calendar.MONTH) + 1;
     }
 
     private static double getHeightFromCtp(double ctp, double p0, double ts) {
