@@ -79,6 +79,8 @@ public class S2IdepixMountainShadowOp extends PixelOperator {
 
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
+        // Based on:
+        // https://desktop.arcgis.com/en/arcmap/10.3/tools/spatial-analyst-toolbox/how-hillshade-works.htm
         if (!Float.isNaN(sourceSamples[SLOPE_INDEX].getFloat()) && !Float.isNaN(sourceSamples[ASPECT_INDEX].getFloat())) {
             final double cosBeta = computeCosBeta(sourceSamples[SZA_INDEX].getFloat(), sourceSamples[SAA_INDEX].getFloat(),
                     sourceSamples[SLOPE_INDEX].getFloat(), sourceSamples[ASPECT_INDEX].getFloat(),
