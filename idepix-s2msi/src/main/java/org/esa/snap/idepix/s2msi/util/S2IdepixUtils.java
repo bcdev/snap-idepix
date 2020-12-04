@@ -44,6 +44,8 @@ public class S2IdepixUtils {
     public static final String IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT = "Pixel is affected by mountain shadow";
     public static final String IDEPIX_POTENTIAL_SHADOW_DESCR_TEXT = "Potentially a cloud shadow pixel";
     public static final String IDEPIX_CLUSTERED_CLOUD_SHADOW_DESCR_TEXT= "Cloud shadow identified by clustering algorithm";
+    public static final String IDEPIX_HILLSHADE_MOUNTAIN_SHADOW_DESCR_TEXT = "Pixel is affected by mountain shadow (hillshade algorithm)";
+    public static final String IDEPIX_RELATIVE_PATH_MOUNTAIN_SHADOW_DESCR_TEXT = "Pixel is affected by mountain shadow (relative path algorithm)";
 
     private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("idepix");
 
@@ -143,6 +145,8 @@ public class S2IdepixUtils {
         flagCoding.addFlag("IDEPIX_MOUNTAIN_SHADOW", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW), IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT);
         flagCoding.addFlag("IDEPIX_POTENTIAL_SHADOW", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_POTENTIAL_SHADOW), IDEPIX_POTENTIAL_SHADOW_DESCR_TEXT);
         flagCoding.addFlag("IDEPIX_CLUSTERED_CLOUD_SHADOW", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CLUSTERED_CLOUD_SHADOW), IDEPIX_CLUSTERED_CLOUD_SHADOW_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_HILLSHADE_MOUNTAIN_SHADOW", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_HILLSHADE_MOUNTAIN_SHADOW), IDEPIX_HILLSHADE_MOUNTAIN_SHADOW_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_RELATIVE_PATH_MOUNTAIN_SHADOW", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_RELATIVE_PATH_MOUNTAIN_SHADOW), IDEPIX_RELATIVE_PATH_MOUNTAIN_SHADOW_DESCR_TEXT);
         return flagCoding;
     }
 
@@ -260,7 +264,16 @@ public class S2IdepixUtils {
                 "pixel_classif_flags.IDEPIX_CLUSTERED_CLOUD_SHADOW",
                 Color.red, 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-
+        mask = Mask.BandMathsType.create("IDEPIX_HILLSHADE_MOUNTAIN_SHADOW",
+                IDEPIX_HILLSHADE_MOUNTAIN_SHADOW_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_HILLSHADE_MOUNTAIN_SHADOW",
+                getRandomColour(r), 0.5f);
+        gaCloudProduct.getMaskGroup().add(index++, mask);
+        mask = Mask.BandMathsType.create("IDEPIX_RELATIVE_PATH_MOUNTAIN_SHADOW",
+                IDEPIX_RELATIVE_PATH_MOUNTAIN_SHADOW_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_RELATIVE_PATH_MOUNTAIN_SHADOW",
+                getRandomColour(r), 0.5f);
+        gaCloudProduct.getMaskGroup().add(index++, mask);
         return index;
     }
 

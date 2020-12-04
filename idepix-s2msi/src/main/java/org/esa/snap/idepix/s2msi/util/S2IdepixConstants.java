@@ -28,6 +28,8 @@ public class S2IdepixConstants {
     public static final int IDEPIX_MOUNTAIN_SHADOW = 18;
     public static final int IDEPIX_POTENTIAL_SHADOW = 19;
     public static final int IDEPIX_CLUSTERED_CLOUD_SHADOW = 20;
+    public static final int IDEPIX_HILLSHADE_MOUNTAIN_SHADOW = 21;
+    public static final int IDEPIX_RELATIVE_PATH_MOUNTAIN_SHADOW = 22;
 
     public static final int NO_DATA_VALUE = -1;
 
