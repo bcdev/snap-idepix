@@ -448,7 +448,7 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             getLogger().fine("potential shadow is ready");
             // shifting by offset, but looking into water, land and all pixel.
             // best offset is determined before (either from water, land, or all pixels).
-            if (bestOffset > 0) {
+            if (bestOffset > 0 && bestOffset < cloudShadowRelativePath.length) {
                 CloudBulkShifter.setTileShiftedCloudBulk(sourceRectangle, targetRectangle,
                         sunAzimuthMean, flagArray, cloudShadowRelativePath, bestOffset);
                 //offset: 0: all, 1: over land, 2: over water.

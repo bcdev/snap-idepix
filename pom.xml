@@ -127,12 +127,12 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>23.0</version>
+                <version>24.1.1-jre</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>4.13.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -210,8 +210,9 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.0.0-M4</version>
                     <configuration>
-                        <enableAssertions>true</enableAssertions>
+                        <enableAssertions>false</enableAssertions>
                         <!--<skip>true</skip>-->
                         <printSummary>true</printSummary>
                         <useFile>false</useFile>
