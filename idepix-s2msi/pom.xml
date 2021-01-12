@@ -26,12 +26,13 @@
     </parent>
 
     <artifactId>idepix-s2msi</artifactId>
-    <version>8.0.2-SNAPSHOT</version>
+    <version>8.0.1.1</version>
 
     <packaging>nbm</packaging>
     
     <name>IdePix S2-MSI</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from S2-MSI.
+        * Uses only hillshade algorithm
     </description>
 
     <properties>
