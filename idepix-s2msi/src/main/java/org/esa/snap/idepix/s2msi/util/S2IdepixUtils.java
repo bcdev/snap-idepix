@@ -161,7 +161,7 @@ public class S2IdepixUtils {
         gaCloudProduct.getMaskGroup().add(index++, mask);
         mask = Mask.BandMathsType.create("IDEPIX_CLOUD",
                                          IDEPIX_CLOUD_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CLOUD or pixel_classif_flags.IDEPIX_CLOUD_SURE or pixel_classif_flags.IDEPIX_CLOUD_AMBIGUOUS",
+                                         "pixel_classif_flags.IDEPIX_CLOUD",
                                          new Color(178, 178, 0), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
         mask = Mask.BandMathsType.create("IDEPIX_CLOUD_AMBIGUOUS",
