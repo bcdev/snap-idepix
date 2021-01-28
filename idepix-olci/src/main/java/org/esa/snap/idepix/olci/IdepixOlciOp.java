@@ -1,5 +1,8 @@
 package org.esa.snap.idepix.olci;
 
+import com.bc.ceres.binding.ConversionException;
+import com.bc.ceres.binding.Converter;
+import com.bc.ceres.binding.converters.BooleanConverter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -84,7 +87,7 @@ public class IdepixOlciOp extends BasisOp {
 
     @Parameter(defaultValue = "true",
             label = " Compute cloud shadow",
-            description = " Compute cloud shadow with the algorithm from 'Fronts' project")
+            description = " Compute cloud shadow with the algorithm from 'Fronts' project (triggers retrieval of CTP)")
     private boolean computeCloudShadow;
 
     @Parameter(description = "Path to alternative tensorflow neuronal net directory for CTP retrieval " +
@@ -93,8 +96,8 @@ public class IdepixOlciOp extends BasisOp {
     private String alternativeNNDirPath;
 
     @Parameter(defaultValue = "false",
-            label = " If cloud shadow is computed, write CTP value to the target product",
-            description = " If cloud shadow is computed, write CTP value to the target product ")
+            label = " Write CTP to the target product",
+            description = " Write CTP value to the target product (triggers retrieval of CTP)")
     private boolean outputCtp;
 
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
@@ -202,7 +205,7 @@ public class IdepixOlciOp extends BasisOp {
             ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
         }
 
-        if (computeCloudShadow && outputCtp) {
+        if (outputCtp) {
             ProductUtils.copyBand(IdepixConstants.CTP_OUTPUT_BAND_NAME, ctpProduct, targetProduct, true);
         }
 
@@ -226,7 +229,7 @@ public class IdepixOlciOp extends BasisOp {
             o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
         }
 
-        if (computeCloudShadow) {
+        if (computeCloudShadow || outputCtp) {
             ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
                                                                         o2CorrProduct,
                                                                         alternativeNNDirPath,
