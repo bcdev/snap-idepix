@@ -30,6 +30,7 @@ import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.util.Bresenham;
 
 import java.awt.*;
+import java.util.List;
 
 /**
  * Specific cloud shadow algorithm for OLCI based on fronts, using cloud top height computation based on
@@ -174,66 +175,54 @@ class IdepixOlciCloudShadowFronts {
     }
 
     private boolean isCloudShadow(Tile sourceTile, Tile targetTile, int x, int y) {
-
         final Rectangle sourceRectangle = sourceTile.getRectangle();
         final double sza = szaTile.getSampleDouble(x, y);
         final double saa = saaTile.getSampleDouble(x, y);
         final double oza = ozaTile.getSampleDouble(x, y);
         final double oaa = oaaTile.getSampleDouble(x, y);
-        double alt = 0;
-        if (altTile != null) {
-            alt = altTile.getSampleDouble(x, y);
-            if (alt < 0) {
-                alt = 0; // do NOT use bathimetry
-            }
-        }
-//        final double saaRad = Math.toRadians(saa);
+        final double alt = altTile == null ? 0.0 : Math.max(0.0, altTile.getSampleDouble(x, y));
 
-        PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
-
+        final PixelPos pixelPos = new PixelPos(x + 0.5, y + 0.5);
         final GeoPos geoPos = geoCoding.getGeoPos(pixelPos, null);
-        double tanSza = Math.tan(Math.toRadians(90.0 - sza));
-        final double cloudHeightMax = 12_000;
+        final double tanSza = Math.tan(Math.toRadians(90.0 - sza));
+        final double cloudHeightMax = 12000.0;
         final double cloudDistanceMax = cloudHeightMax / tanSza;
-
         final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, geoPos.getLat());
         final double saaRadApparent = Math.toRadians(saaApparent);
 
-
-        GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, saaRadApparent + Math.PI);
-        PixelPos endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
+        final GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, saaRadApparent + Math.PI);
+        final PixelPos endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
         if (endPixPoint.x == -1 || endPixPoint.y == -1) {
             return false;
         }
         final int endPointX = (int) Math.round(endPixPoint.x);
         final int endPointY = (int) Math.round(endPixPoint.y);
-        java.util.List<PixelPos> pathPixels = Bresenham.getPathPixels(x, y, endPointX, endPointY, sourceRectangle);
+        final List<PixelPos> pathPixels = Bresenham.getPathPixels(x, y, endPointX, endPointY, sourceRectangle);
+        final double[] temperature = new double[temperatureProfileTPGTiles.length];
 
-        double[] temperature = new double[temperatureProfileTPGTiles.length];
-
-        GeoPos geoPosCurrent = new GeoPos();
+        final GeoPos geoPosCurrent = new GeoPos();
         for (PixelPos pathPixel : pathPixels) {
-
             final int xCurrent = (int) pathPixel.getX();
             final int yCurrent = (int) pathPixel.getY();
 
             if (sourceRectangle.contains(xCurrent, yCurrent)) {
                 if (isCloudForShadow(sourceTile, targetTile, xCurrent, yCurrent)) {
-                    pixelPos.setLocation(xCurrent + 0.5f, yCurrent + 0.5f);
+                    pixelPos.setLocation(xCurrent + 0.5, yCurrent + 0.5);
                     geoCoding.getGeoPos(pixelPos, geoPosCurrent);
                     final double cloudSearchHeight = (computeDistance(geoPos, geoPosCurrent) * tanSza) + alt;
-                    final float ctp = ctpTile.getSampleFloat(xCurrent, yCurrent);
-                    final float slp = slpTile.getSampleFloat(xCurrent, yCurrent);
+                    final double ctp = ctpTile.getSampleFloat(xCurrent, yCurrent);
+                    final double slp = slpTile.getSampleFloat(xCurrent, yCurrent);
                     for (int i = 0; i < temperature.length; i++) {
                         temperature[i] = temperatureProfileTPGTiles[i].getSampleDouble(xCurrent, yCurrent);
                     }
-                    final float cloudHeight = (float) IdepixOlciUtils.getRefinedHeightFromCtp(ctp, slp, temperature);
-                    if (cloudSearchHeight <= cloudHeight + 300) {
+                    final double cloudHeight = IdepixOlciUtils.getRefinedHeightFromCtp(ctp, slp, temperature);
+                    if (cloudSearchHeight <= cloudHeight + 300.0) {
+                        double cloudBase;
                         // cloud thickness should also be at least 300m (OD, 2012/08/02)
-                        float cloudBase = cloudHeight - 300.0f;
+                        cloudBase = cloudHeight - 300.0;
                         // cloud base should be at least at 300m
-                        cloudBase = (float) Math.max(300.0, cloudBase);
-                        if (cloudSearchHeight >= cloudBase - 300) {
+                        cloudBase = Math.max(300.0, cloudBase);
+                        if (cloudSearchHeight >= cloudBase - 300.0) {
                             return true;
                         }
                     }
