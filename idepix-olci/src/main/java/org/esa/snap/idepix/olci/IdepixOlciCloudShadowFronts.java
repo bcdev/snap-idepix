@@ -244,10 +244,10 @@ class IdepixOlciCloudShadowFronts {
     }
 
     private double computeDistance(GeoPos geoPos1, GeoPos geoPos2) {
-        final float lon1 = (float) geoPos1.getLon();
-        final float lon2 = (float) geoPos2.getLon();
-        final float lat1 = (float) geoPos1.getLat();
-        final float lat2 = (float) geoPos2.getLat();
+        final double lon1 = geoPos1.getLon();
+        final double lon2 = geoPos2.getLon();
+        final double lat1 = geoPos1.getLat();
+        final double lat2 = geoPos2.getLat();
 
         final double cosLat1 = Math.cos(MathUtils.DTOR * lat1);
         final double cosLat2 = Math.cos(MathUtils.DTOR * lat2);
@@ -258,11 +258,11 @@ class IdepixOlciCloudShadowFronts {
         final double cosDelta = Math.cos(delta);
         final double sinDelta = Math.sin(delta);
 
-        final double y = Math.sqrt(Math.pow(cosLat2 * sinDelta, 2) + Math.pow(cosLat1 * sinLat2 - sinLat1 * cosLat2 * cosDelta, 2));
+        final double a = cosLat2 * sinDelta;
+        final double b = cosLat1 * sinLat2 - sinLat1 * cosLat2 * cosDelta;
+        final double y = Math.sqrt(a * a + b * b);
         final double x = sinLat1 * sinLat2 + cosLat1 * cosLat2 * cosDelta;
 
-        final double ad = Math.atan2(y, x);
-
-        return ad * MEAN_EARTH_RADIUS;
+        return Math.atan2(y, x) * MEAN_EARTH_RADIUS;
     }
 }
