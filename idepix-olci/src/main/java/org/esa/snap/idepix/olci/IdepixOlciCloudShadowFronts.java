@@ -92,14 +92,10 @@ class IdepixOlciCloudShadowFronts {
             }
         }
         // first 'post-correction': fill gaps surrounded by other cloud or cloud shadow pixels
-        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
-            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+        for (int y = y0; y < y0 + h; y++) {
+            for (int x = x0; x < x0 + w; x++) {
                 if (isCloudFree(sourceTile, x, y)) {
-                    final boolean pixelSurroundedByClouds = isSurroundedByCloud(sourceTile, x, y);
-                    final boolean pixelSurroundedByCloudShadow =
-                            isPixelSurroundedByCloudShadow(targetRectangle, x, y, cloudShadow);
-
-                    if (pixelSurroundedByClouds || pixelSurroundedByCloudShadow) {
+                    if (isSurroundedByCloud(sourceTile, x, y) || isPixelSurroundedByCloudShadow(targetRectangle, x, y, cloudShadow)) {
                         setCloudShadow(targetTile, x, y);
                     }
                 }
