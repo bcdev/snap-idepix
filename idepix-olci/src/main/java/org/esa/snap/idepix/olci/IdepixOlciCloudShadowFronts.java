@@ -82,7 +82,7 @@ class IdepixOlciCloudShadowFronts {
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
                 if (isCloudFree(sourceTile, x, y)) {
-                    cloudShadow[y - y0][x - x0] = getCloudShadow(sourceTile, targetTile, x, y);
+                    cloudShadow[y - y0][x - x0] = isCloudShadow(sourceTile, targetTile, x, y);
                     if (cloudShadow[y - y0][x - x0]) {
                         setCloudShadow(targetTile, x, y);
                     }
@@ -177,7 +177,7 @@ class IdepixOlciCloudShadowFronts {
         }
     }
 
-    private boolean getCloudShadow(Tile sourceTile, Tile targetTile, int x, int y) {
+    private boolean isCloudShadow(Tile sourceTile, Tile targetTile, int x, int y) {
 
         final Rectangle sourceRectangle = sourceTile.getRectangle();
         final double sza = szaTile.getSampleDouble(x, y);
