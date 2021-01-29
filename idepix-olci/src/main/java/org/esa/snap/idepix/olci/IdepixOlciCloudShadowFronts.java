@@ -154,18 +154,23 @@ class IdepixOlciCloudShadowFronts {
     }
 
     private boolean isPixelSurroundedByCloudShadow(Rectangle targetRectangle, int x, int y, boolean[][] cloudShadow) {
-        // check if pixel is surrounded by other cloud shadow pixels
-        int surroundingPixelCount = 0;
+        final int x0 = targetRectangle.x;
+        final int y0 = targetRectangle.y;
+
+        int count = 0;
         for (int j = y - 1; j <= y + 1; j++) {
             for (int i = x - 1; i <= x + 1; i++) {
                 if (targetRectangle.contains(i, j)) {
-                    if (cloudShadow[j - targetRectangle.y][i - targetRectangle.x]) {
-                        surroundingPixelCount++;
+                    if (cloudShadow[j - y0][i - x0]) {
+                        count++;
+                        if (count >= 6) {  // at least 6 cloudy pixels within a 3x3 box
+                            return true;
+                        }
                     }
                 }
             }
         }
-        return surroundingPixelCount * 1.0 / 9 >= 0.7; // at least 6 pixel in a 3x3 box
+        return false;
     }
 
     private boolean isCloudShadow(Tile sourceTile, Tile targetTile, int x, int y) {
