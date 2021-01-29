@@ -1,28 +1,35 @@
 package org.esa.snap.idepix.meris;
 
+import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.dataio.dimap.DimapProductWriter;
+import org.esa.snap.core.dataio.dimap.DimapProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.ProductUtils;
-
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.BasisOp;
 import org.esa.snap.idepix.core.operators.CloudBufferOp;
 import org.esa.snap.idepix.core.util.IdepixIO;
+import org.esa.snap.idepix.meris.reprocessing.Meris3rd4thReprocessingAdapter;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * The IdePix pixel classification operator for MERIS products.
- *
  *
  * @author olafd
  */
@@ -124,6 +131,8 @@ public class IdepixMerisOp extends BasisOp {
     private Product ctpProduct;
     private Product waterMaskProduct;
 
+    private Product inputProductToProcess;
+
     private Map<String, Product> classificationInputProducts;
     private Map<String, Object> waterClassificationParameters;
     private Map<String, Object> landClassificationParameters;
@@ -135,79 +144,109 @@ public class IdepixMerisOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
-        outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
+        if (IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType())) {
+            // adapt to 3rd reprocessing...
+            Meris3rd4thReprocessingAdapter reprocessingAdapter = new Meris3rd4thReprocessingAdapter();
+            inputProductToProcess = reprocessingAdapter.convertToLowerVersion(sourceProduct);
+        } else {
+            inputProductToProcess = sourceProduct;
+        }
 
-        preProcess();
-        computeWaterCloudProduct();
-        computeLandCloudProduct();
-        mergeLandWater();
-        postProcess();
+        setTargetProduct(inputProductToProcess);  // test
 
-        targetProduct = postProcessingProduct;
+//        END TEST
 
-        targetProduct = IdepixIO.cloneProduct(mergedClassificationProduct, true);
-        targetProduct.setAutoGrouping("radiance:reflectance");
+//        outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
+//        outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
+//
+//        preProcess();
+//        computeWaterCloudProduct();
+//        computeLandCloudProduct();
+//        mergeLandWater();
+//        postProcess();
+//
+//        targetProduct = postProcessingProduct;
+//
+//        targetProduct = IdepixIO.cloneProduct(mergedClassificationProduct, true);
+//        targetProduct.setAutoGrouping("radiance:reflectance");
+//
+//        Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
+//        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
+//
+//        copyOutputBands();
+//        ProductUtils.copyFlagBands(inputProductToProcess, targetProduct, true);   // we need the L1b flag!
+    }
 
-        Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
+//    @Override
+    public void initialize_test() throws OperatorException {
+        final int[] testUInt8s = new int[]{1, 2, 3, 4, 5, 6};
 
-        copyOutputBands();
-        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);   // we need the L1b flag!
+        Product targetProduct = new Product("x", "NO_TYPE", 3, 2);
+
+        Band bandUInt8 = new Band("bandUInt8", ProductData.TYPE_UINT8, 3, 2);
+        bandUInt8.ensureRasterData();
+        bandUInt8.setPixels(0, 0, 3, 2, testUInt8s);
+        bandUInt8.setSourceImage(bandUInt8.getSourceImage());
+        // alternative: this works certainly for INT32, but not as it is for UINT8
+//        bandUInt8.setSourceImage(ImageUtils.createRenderedImage(3, 2, ProductData.createInstance(testUInt8s)));
+        targetProduct.addBand(bandUInt8);
+        setTargetProduct(targetProduct);
     }
 
     private void preProcess() {
-        rad2reflProduct = IdepixMerisUtils.computeRadiance2ReflectanceProduct(sourceProduct);
-        ctpProduct = IdepixMerisUtils.computeCloudTopPressureProduct(sourceProduct);
+        rad2reflProduct = IdepixMerisUtils.computeRadiance2ReflectanceProduct(inputProductToProcess);
+        if (computeCloudShadow) {
+            ctpProduct = IdepixMerisUtils.computeCloudTopPressureProduct(inputProductToProcess);
+        }
 
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
         waterMaskParameters.put("resolution", IdepixConstants.LAND_WATER_MASK_RESOLUTION);
         waterMaskParameters.put("subSamplingFactorX", IdepixConstants.OVERSAMPLING_FACTOR_X);
         waterMaskParameters.put("subSamplingFactorY", IdepixConstants.OVERSAMPLING_FACTOR_Y);
-        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
+        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, inputProductToProcess);
     }
 
     private void setLandClassificationParameters() {
         landClassificationParameters = new HashMap<>();
         landClassificationParameters.put("copyAllTiePoints", true);
         landClassificationParameters.put("outputSchillerNNValue",
-                                         outputSchillerNNValue);
+                outputSchillerNNValue);
         landClassificationParameters.put("ccSchillerNNCloudAmbiguousLowerBoundaryValue",
-                                         schillerLandNNCloudAmbiguousLowerBoundaryValue);
+                schillerLandNNCloudAmbiguousLowerBoundaryValue);
         landClassificationParameters.put("ccSchillerNNCloudAmbiguousSureSeparationValue",
-                                         schillerLandNNCloudAmbiguousSureSeparationValue);
+                schillerLandNNCloudAmbiguousSureSeparationValue);
         landClassificationParameters.put("ccSchillerNNCloudSureSnowSeparationValue",
-                                         schillerLandNNCloudSureSnowSeparationValue);
+                schillerLandNNCloudSureSnowSeparationValue);
     }
 
     private void setWaterClassificationParameters() {
         waterClassificationParameters = new HashMap<>();
         waterClassificationParameters.put("copyAllTiePoints", true);
         waterClassificationParameters.put("outputSchillerNNValue",
-                                          outputSchillerNNValue);
+                outputSchillerNNValue);
         waterClassificationParameters.put("ccSchillerNNCloudAmbiguousLowerBoundaryValue",
-                                          schillerWaterNNCloudAmbiguousLowerBoundaryValue);
+                schillerWaterNNCloudAmbiguousLowerBoundaryValue);
         waterClassificationParameters.put("ccSchillerNNCloudAmbiguousSureSeparationValue",
-                                          schillerWaterNNCloudAmbiguousSureSeparationValue);
+                schillerWaterNNCloudAmbiguousSureSeparationValue);
         waterClassificationParameters.put("ccSchillerNNCloudSureSnowSeparationValue",
-                                          schillerWaterNNCloudSureSnowSeparationValue);
+                schillerWaterNNCloudSureSnowSeparationValue);
     }
 
     private void computeWaterCloudProduct() {
         setWaterClassificationParameters();
         classificationInputProducts = new HashMap<>();
-        classificationInputProducts.put("l1b", sourceProduct);
+        classificationInputProducts.put("l1b", inputProductToProcess);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
         classificationInputProducts.put("waterMask", waterMaskProduct);
 
         waterClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixMerisWaterClassificationOp.class),
-                                                       waterClassificationParameters, classificationInputProducts);
+                waterClassificationParameters, classificationInputProducts);
     }
 
     private void computeLandCloudProduct() {
         setLandClassificationParameters();
         landClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixMerisLandClassificationOp.class),
-                                                      landClassificationParameters, classificationInputProducts);
+                landClassificationParameters, classificationInputProducts);
     }
 
     private void mergeLandWater() {
@@ -218,12 +257,12 @@ public class IdepixMerisOp extends BasisOp {
         Map<String, Object> mergeClassificationParameters = new HashMap<>();
         mergeClassificationParameters.put("copyAllTiePoints", true);
         mergedClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixMerisMergeLandWaterOp.class),
-                                                        mergeClassificationParameters, mergeInputProducts);
+                mergeClassificationParameters, mergeInputProducts);
     }
 
     private void postProcess() {
         HashMap<String, Product> input = new HashMap<>();
-        input.put("l1b", sourceProduct);
+        input.put("l1b", inputProductToProcess);
         input.put("merisCloud", mergedClassificationProduct);
         input.put("ctp", ctpProduct);
         input.put("waterMask", waterMaskProduct);
@@ -233,7 +272,7 @@ public class IdepixMerisOp extends BasisOp {
         params.put("refineClassificationNearCoastlines", true);  // always an improvement
 
         final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixMerisPostProcessOp.class),
-                                                            params, input);
+                params, input);
 
         if (computeCloudBuffer) {
             input = new HashMap<>();
@@ -241,17 +280,17 @@ public class IdepixMerisOp extends BasisOp {
             params = new HashMap<>();
             params.put("cloudBufferWidth", cloudBufferWidth);
             postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(CloudBufferOp.class),
-                                                      params, input);
+                    params, input);
         } else {
             postProcessingProduct = classifiedProduct;
         }
     }
 
     private void copyOutputBands() {
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+        ProductUtils.copyMetadata(inputProductToProcess, targetProduct);
         IdepixMerisUtils.setupMerisClassifBitmask(targetProduct);
         if (outputRadiance) {
-            IdepixIO.addRadianceBands(sourceProduct, targetProduct, radianceBandsToCopy);
+            IdepixIO.addRadianceBands(inputProductToProcess, targetProduct, radianceBandsToCopy);
         }
         if (outputRad2Refl) {
             IdepixMerisUtils.addMerisRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
