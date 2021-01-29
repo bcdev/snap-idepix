@@ -1,8 +1,5 @@
 package org.esa.snap.idepix.olci;
 
-import com.bc.ceres.binding.ConversionException;
-import com.bc.ceres.binding.Converter;
-import com.bc.ceres.binding.converters.BooleanConverter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -87,18 +84,19 @@ public class IdepixOlciOp extends BasisOp {
 
     @Parameter(defaultValue = "true",
             label = " Compute cloud shadow",
-            description = " Compute cloud shadow with the algorithm from 'Fronts' project (triggers retrieval of CTP)")
+            description = " Compute cloud shadow with the algorithm from the 'Fronts' project (will compute cloud top pressure implicitly but will not include the computed values with the target product)")
     private boolean computeCloudShadow;
 
-    @Parameter(description = "Path to alternative tensorflow neuronal net directory for CTP retrieval " +
-            "Use this to replace the standard neuronal net 'nn_training_20190131_I7x30x30x30xO1'.",
-            label = "Path to alternative NN for CTP retrieval")
+    @Parameter(label = "Path to an alternative neural network for computing cloud top pressure",
+            description = "The path to an alternative tensorflow neural network directory for (implicit or explicit) computation of cloud top pressure. " +
+            "Use this option to replace the standard neural network 'nn_training_20190131_I7x30x30x30xO1' with a different version.")
     private String alternativeNNDirPath;
 
-    @Parameter(defaultValue = "false",
-            label = " Write CTP to the target product",
-            description = " Write CTP value to the target product (triggers retrieval of CTP)")
-    private boolean outputCtp;
+    @Parameter(alias = "outputCtp",
+            defaultValue = "false",
+            label = " Compute cloud top pressure",
+            description = " Computes cloud top pressure (CTP) explicitly, even if cloud shadow is not computed.")
+    private boolean computeCtp;
 
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
@@ -111,7 +109,7 @@ public class IdepixOlciOp extends BasisOp {
 
     @Parameter(defaultValue = "false",
             label = " Use SRTM Land/Water mask",
-            description = "If selected, SRTM Land/Water mask is used instead of L1b land flag. " +
+            description = "If selected, the SRTM Land/Water mask is used instead of the L1b land flag. " +
                     "Slower, but in general more precise.")
     private boolean useSrtmLandWaterMask;
 
@@ -205,7 +203,7 @@ public class IdepixOlciOp extends BasisOp {
             ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
         }
 
-        if (outputCtp) {
+        if (computeCtp) {
             ProductUtils.copyBand(IdepixConstants.CTP_OUTPUT_BAND_NAME, ctpProduct, targetProduct, true);
         }
 
@@ -229,11 +227,10 @@ public class IdepixOlciOp extends BasisOp {
             o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
         }
 
-        if (computeCloudShadow || outputCtp) {
+        if (computeCloudShadow || computeCtp) {
             ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
                                                                         o2CorrProduct,
-                                                                        alternativeNNDirPath,
-                                                                        outputCtp);
+                                                                        alternativeNNDirPath, computeCtp);
         }
 
     }
