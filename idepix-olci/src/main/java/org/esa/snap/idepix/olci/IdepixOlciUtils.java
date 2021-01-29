@@ -153,23 +153,17 @@ class IdepixOlciUtils {
      * @return the apparent saa (deg)
      */
     static double computeApparentSaa(double sza, double saa, double oza, double oaa, double lat) {
-        final double szaRad = sza * MathUtils.DTOR;
-        final double ozaRad = oza * MathUtils.DTOR;
-
-        double deltaPhi;
-        if (oaa < 0.0) {
-            deltaPhi = 360.0 - Math.abs(oaa) - saa;
+        final double tanSza = Math.tan(sza * MathUtils.DTOR);
+        final double tanOza = Math.tan(oza * MathUtils.DTOR);
+        final double deltaPhi = oaa < 0.0 ? 360.0 - Math.abs(oaa) - saa : saa - oaa;
+        final double cosDeltaPhi = Math.cos(deltaPhi * MathUtils.DTOR);
+        final double a = tanSza - tanOza * cosDeltaPhi;
+        final double b = Math.sqrt(tanOza * tanOza + tanSza * tanSza - 2.0 * tanSza * tanOza * cosDeltaPhi);
+        final double delta;
+        if (lat < 0.0) {
+            delta = -Math.acos(a / b);
         } else {
-            deltaPhi = saa - oaa;
-        }
-        final double deltaPhiRad = deltaPhi * MathUtils.DTOR;
-        final double numerator = Math.tan(szaRad) - Math.tan(ozaRad) * Math.cos(deltaPhiRad);
-        final double denominator = Math.sqrt(Math.tan(ozaRad) * Math.tan(ozaRad) + Math.tan(szaRad) * Math.tan(szaRad) -
-                2.0 * Math.tan(szaRad) * Math.tan(ozaRad) * Math.cos(deltaPhiRad));
-
-        double delta = Math.acos(numerator / denominator);
-        if (lat < 0.0){
-            delta =-1.*delta;
+            delta = Math.acos(a / b);
         }
         if (oaa < 0.0) {
             return saa - delta * MathUtils.RTOD;
