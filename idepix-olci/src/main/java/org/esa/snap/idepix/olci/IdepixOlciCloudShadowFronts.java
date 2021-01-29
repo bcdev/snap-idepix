@@ -71,7 +71,7 @@ class IdepixOlciCloudShadowFronts {
         this.altTile = altTile;
     }
 
-    void computeCloudShadow(Tile sourceFlagTile, Tile targetTile) {
+    void computeCloudShadow(Tile sourceTile, Tile targetTile) {
         final Rectangle targetRectangle = targetTile.getRectangle();
         final int h = targetRectangle.height;
         final int w = targetRectangle.width;
@@ -81,8 +81,8 @@ class IdepixOlciCloudShadowFronts {
 
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                if (isCloudFree(sourceFlagTile, x, y)) {
-                    cloudShadow[y - y0][x - x0] = getCloudShadow(sourceFlagTile, targetTile, x, y);
+                if (isCloudFree(sourceTile, x, y)) {
+                    cloudShadow[y - y0][x - x0] = getCloudShadow(sourceTile, targetTile, x, y);
                     if (cloudShadow[y - y0][x - x0]) {
                         setCloudShadow(targetTile, x, y);
                     }
@@ -92,8 +92,8 @@ class IdepixOlciCloudShadowFronts {
         // first 'post-correction': fill gaps surrounded by other cloud or cloud shadow pixels
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                if (isCloudFree(sourceFlagTile, x, y)) {
-                    final boolean pixelSurroundedByClouds = isSurroundedByCloud(sourceFlagTile, x, y);
+                if (isCloudFree(sourceTile, x, y)) {
+                    final boolean pixelSurroundedByClouds = isSurroundedByCloud(sourceTile, x, y);
                     final boolean pixelSurroundedByCloudShadow =
                             isPixelSurroundedByCloudShadow(targetRectangle, x, y, cloudShadow);
 
@@ -106,7 +106,7 @@ class IdepixOlciCloudShadowFronts {
         // second post-correction, called 'belt' (why??): flag a pixel as cloud shadow if neighbour pixel is shadow
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                if (isCloudFree(sourceFlagTile, x, y)) {
+                if (isCloudFree(sourceTile, x, y)) {
                     performCloudShadowBeltCorrection(targetTile, x, y, cloudShadow);
                 }
             }
@@ -115,13 +115,13 @@ class IdepixOlciCloudShadowFronts {
 
     ///////////////////// end of public ///////////////////////////////////////////////////////
 
-    private static boolean isPixelSurrounded(int x, int y, Tile sourceFlagTile) {
+    private static boolean isPixelSurrounded(int x, int y, Tile sourceTile) {
         // check if pixel is surrounded by other pixels flagged as 'pixelFlag'
         int surroundingPixelCount = 0;
-        Rectangle rectangle = sourceFlagTile.getRectangle();
+        Rectangle rectangle = sourceTile.getRectangle();
         for (int j = y - 1; j <= y + 1; j++) {
             for (int i = x - 1; i <= x + 1; i++) {
-                if (rectangle.contains(i, j) && sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD)) {
+                if (rectangle.contains(i, j) && sourceTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD)) {
                     surroundingPixelCount++;
                 }
             }
@@ -129,20 +129,20 @@ class IdepixOlciCloudShadowFronts {
         return (surroundingPixelCount * 1.0 / 9 >= 0.7);  // at least 6 pixel in a 3x3 box
     }
 
-    private boolean isCloudForShadow(Tile sourceFlagTile, Tile targetTile, int x, int y) {
+    private boolean isCloudForShadow(Tile sourceTile, Tile targetTile, int x, int y) {
         if (!targetTile.getRectangle().contains(x, y)) {
-            return sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+            return sourceTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
         } else {
             return targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
         }
     }
 
-    private boolean isCloudFree(Tile sourceFlagTile, int x, int y) {
-        return !sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+    private boolean isCloudFree(Tile sourceTile, int x, int y) {
+        return !sourceTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
     }
 
-    private boolean isSurroundedByCloud(Tile sourceFlagTile, int x, int y) {
-        return isPixelSurrounded(x, y, sourceFlagTile);
+    private boolean isSurroundedByCloud(Tile sourceTile, int x, int y) {
+        return isPixelSurrounded(x, y, sourceTile);
     }
 
     private void setCloudShadow(Tile targetTile, int x, int y) {
@@ -177,9 +177,9 @@ class IdepixOlciCloudShadowFronts {
         }
     }
 
-    private boolean getCloudShadow(Tile sourceFlagTile, Tile targetTile, int x, int y) {
+    private boolean getCloudShadow(Tile sourceTile, Tile targetTile, int x, int y) {
 
-        final Rectangle sourceRectangle = sourceFlagTile.getRectangle();
+        final Rectangle sourceRectangle = sourceTile.getRectangle();
         final double sza = szaTile.getSampleDouble(x, y);
         final double saa = saaTile.getSampleDouble(x, y);
         final double oza = ozaTile.getSampleDouble(x, y);
@@ -222,7 +222,7 @@ class IdepixOlciCloudShadowFronts {
             final int yCurrent = (int) pathPixel.getY();
 
             if (sourceRectangle.contains(xCurrent, yCurrent)) {
-                if (isCloudForShadow(sourceFlagTile, targetTile, xCurrent, yCurrent)) {
+                if (isCloudForShadow(sourceTile, targetTile, xCurrent, yCurrent)) {
                     pixelPos.setLocation(xCurrent + 0.5f, yCurrent + 0.5f);
                     geoCoding.getGeoPos(pixelPos, geoPosCurrent);
                     final double cloudSearchHeight = (computeDistance(geoPos, geoPosCurrent) * tanSza) + alt;
