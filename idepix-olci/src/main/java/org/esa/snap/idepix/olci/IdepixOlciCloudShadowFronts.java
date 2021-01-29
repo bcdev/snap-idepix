@@ -77,12 +77,12 @@ class IdepixOlciCloudShadowFronts {
         final int w = targetRectangle.width;
         final int x0 = targetRectangle.x;
         final int y0 = targetRectangle.y;
-        boolean[][] isCloudShadow = new boolean[w][h];
+        boolean[][] cloudShadow = new boolean[w][h];
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
                 if (isCloudFree(sourceFlagTile, x, y)) {
-                    isCloudShadow[x - x0][y - y0] = getCloudShadow(sourceFlagTile, targetTile, x, y);
-                    if (isCloudShadow[x - x0][y - y0]) {
+                    cloudShadow[x - x0][y - y0] = getCloudShadow(sourceFlagTile, targetTile, x, y);
+                    if (cloudShadow[x - x0][y - y0]) {
                         setCloudShadow(targetTile, x, y);
                     }
                 }
@@ -94,7 +94,7 @@ class IdepixOlciCloudShadowFronts {
                 if (isCloudFree(sourceFlagTile, x, y)) {
                     final boolean pixelSurroundedByClouds = isSurroundedByCloud(sourceFlagTile, x, y);
                     final boolean pixelSurroundedByCloudShadow =
-                            isPixelSurroundedByCloudShadow(targetRectangle, x, y, isCloudShadow);
+                            isPixelSurroundedByCloudShadow(targetRectangle, x, y, cloudShadow);
 
                     if (pixelSurroundedByClouds || pixelSurroundedByCloudShadow) {
                         setCloudShadow(targetTile, x, y);
@@ -106,7 +106,7 @@ class IdepixOlciCloudShadowFronts {
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
                 if (isCloudFree(sourceFlagTile, x, y)) {
-                    performCloudShadowBeltCorrection(targetTile, x, y, isCloudShadow);
+                    performCloudShadowBeltCorrection(targetTile, x, y, cloudShadow);
                 }
             }
         }
@@ -148,13 +148,13 @@ class IdepixOlciCloudShadowFronts {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, true);
     }
 
-    private boolean isPixelSurroundedByCloudShadow(Rectangle targetRectangle, int x, int y, boolean[][] isCloudShadow) {
+    private boolean isPixelSurroundedByCloudShadow(Rectangle targetRectangle, int x, int y, boolean[][] cloudShadow) {
         // check if pixel is surrounded by other cloud shadow pixels
         int surroundingPixelCount = 0;
         for (int i = x - 1; i <= x + 1; i++) {
             for (int j = y - 1; j <= y + 1; j++) {
                 if (targetRectangle.contains(i, j)) {
-                    if (isCloudShadow[i - targetRectangle.x][j - targetRectangle.y]) {
+                    if (cloudShadow[i - targetRectangle.x][j - targetRectangle.y]) {
                         surroundingPixelCount++;
                     }
                 }
@@ -163,12 +163,12 @@ class IdepixOlciCloudShadowFronts {
         return surroundingPixelCount * 1.0 / 9 >= 0.7; // at least 6 pixel in a 3x3 box
     }
 
-    private void performCloudShadowBeltCorrection(Tile targetTile, int x, int y, boolean[][] isCloudShadow) {
+    private void performCloudShadowBeltCorrection(Tile targetTile, int x, int y, boolean[][] cloudShadow) {
         // flag a pixel as cloud shadow if neighbour pixel is shadow
         final Rectangle targetRectangle = targetTile.getRectangle();
         for (int i = x - 1; i <= x + 1; i++) {
             for (int j = y - 1; j <= y + 1; j++) {
-                if (targetRectangle.contains(i, j) && isCloudShadow[i - targetRectangle.x][j - targetRectangle.y]) {
+                if (targetRectangle.contains(i, j) && cloudShadow[i - targetRectangle.x][j - targetRectangle.y]) {
                     setCloudShadow(targetTile, x, y);
                     break;
                 }
