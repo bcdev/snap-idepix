@@ -96,7 +96,7 @@ class IdepixOlciCloudShadowFronts {
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
                 if (isCloudFree(sourceTile, x, y)) {
-                    if (isSurroundedByCloud(sourceTile, x, y) || isPixelSurroundedByCloudShadow(targetRectangle, x, y, cloudShadow)) {
+                    if (isSurroundedByCloud(sourceTile, x, y) || isSurroundedByCloudShadow(targetRectangle, x, y, cloudShadow)) {
                         setCloudShadow(targetTile, x, y);
                     }
                 }
@@ -154,7 +154,7 @@ class IdepixOlciCloudShadowFronts {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, true);
     }
 
-    private boolean isPixelSurroundedByCloudShadow(Rectangle targetRectangle, int x, int y, boolean[][] cloudShadow) {
+    private boolean isSurroundedByCloudShadow(Rectangle targetRectangle, int x, int y, boolean[][] cloudShadow) {
         final int x0 = targetRectangle.x;
         final int y0 = targetRectangle.y;
 
