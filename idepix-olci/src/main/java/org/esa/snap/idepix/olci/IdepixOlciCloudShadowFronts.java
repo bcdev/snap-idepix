@@ -95,8 +95,8 @@ class IdepixOlciCloudShadowFronts {
         // first 'post-correction': fill gaps surrounded by other cloud or cloud shadow pixels
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                if (isCloudFree(sourceTile, x, y)) {
-                    if (isSurroundedByCloud(sourceTile, x, y) || isSurroundedByCloudShadow(targetRectangle, x, y, cloudShadow)) {
+                if (!cloudShadow[y][x] && isCloudFree(sourceTile, x, y)) {
+                    if (isSurroundedByCloudOrCloudShadow(sourceTile, targetRectangle, x, y, cloudShadow)) {
                         setCloudShadow(targetTile, x, y);
                     }
                 }
@@ -105,7 +105,7 @@ class IdepixOlciCloudShadowFronts {
         // second post-correction, called 'belt'
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                if (isCloudFree(sourceTile, x, y)) {
+                if (!cloudShadow[y][x] && isCloudFree(sourceTile, x, y)) {
                     // flag a pixel as cloud shadow if neighbour pixel is shadow
                     for (int j = y - 1; j <= y + 1; j++) {
                         for (int i = x - 1; i <= x + 1; i++) {
@@ -167,6 +167,25 @@ class IdepixOlciCloudShadowFronts {
                         if (count >= 6) {  // at least 6 cloudy pixels within a 3x3 box
                             return true;
                         }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isSurroundedByCloudOrCloudShadow(Tile sourceTile, Rectangle targetRectangle, int x, int y, boolean[][] cloudShadow) {
+        final Rectangle sourceRectangle = sourceTile.getRectangle();
+        final int x0 = targetRectangle.x;
+        final int y0 = targetRectangle.y;
+
+        int count = 0;
+        for (int j = y - 1; j <= y + 1; j++) {
+            for (int i = x - 1; i <= x + 1; i++) {
+                if ((sourceRectangle.contains(i, j) && sourceTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD)) || (targetRectangle.contains(i, j) && cloudShadow[j - y0][i - x0])) {
+                    count++;
+                    if (count >= 6) {  // at least 6 cloudy or shadowy pixels within a 3x3 box
+                        return true;
                     }
                 }
             }
