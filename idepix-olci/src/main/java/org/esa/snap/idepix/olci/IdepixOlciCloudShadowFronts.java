@@ -134,17 +134,19 @@ class IdepixOlciCloudShadowFronts {
     }
 
     private boolean isSurroundedByCloud(Tile sourceTile, int x, int y) {
-        // check if pixel is surrounded by other pixels flagged as 'pixelFlag'
-        int surroundingPixelCount = 0;
-        Rectangle rectangle = sourceTile.getRectangle();
+        final Rectangle rectangle = sourceTile.getRectangle();
+        int count = 0;
         for (int j = y - 1; j <= y + 1; j++) {
             for (int i = x - 1; i <= x + 1; i++) {
                 if (rectangle.contains(i, j) && sourceTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD)) {
-                    surroundingPixelCount++;
+                    count++;
+                    if (count >= 6) {  // at least 6 cloudy pixels within a 3x3 box
+                        return true;
+                    }
                 }
             }
         }
-        return (surroundingPixelCount * 1.0 / 9 >= 0.7);  // at least 6 pixel in a 3x3 box
+        return false;
     }
 
     private void setCloudShadow(Tile targetTile, int x, int y) {
