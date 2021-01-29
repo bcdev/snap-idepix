@@ -101,11 +101,19 @@ class IdepixOlciCloudShadowFronts {
                 }
             }
         }
-        // second post-correction, called 'belt' (why??): flag a pixel as cloud shadow if neighbour pixel is shadow
+        // second post-correction, called 'belt'
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
                 if (isCloudFree(sourceTile, x, y)) {
-                    performCloudShadowBeltCorrection(targetTile, x, y, cloudShadow);
+                    // flag a pixel as cloud shadow if neighbour pixel is shadow
+                    for (int j = y - 1; j <= y + 1; j++) {
+                        for (int i = x - 1; i <= x + 1; i++) {
+                            if (targetRectangle.contains(i, j) && cloudShadow[j - y0][i - x0]) {
+                                setCloudShadow(targetTile, x, y);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -160,19 +168,6 @@ class IdepixOlciCloudShadowFronts {
             }
         }
         return surroundingPixelCount * 1.0 / 9 >= 0.7; // at least 6 pixel in a 3x3 box
-    }
-
-    private void performCloudShadowBeltCorrection(Tile targetTile, int x, int y, boolean[][] cloudShadow) {
-        // flag a pixel as cloud shadow if neighbour pixel is shadow
-        final Rectangle targetRectangle = targetTile.getRectangle();
-        for (int j = y - 1; j <= y + 1; j++) {
-            for (int i = x - 1; i <= x + 1; i++) {
-                if (targetRectangle.contains(i, j) && cloudShadow[j - targetRectangle.y][i - targetRectangle.x]) {
-                    setCloudShadow(targetTile, x, y);
-                    break;
-                }
-            }
-        }
     }
 
     private boolean isCloudShadow(Tile sourceTile, Tile targetTile, int x, int y) {
