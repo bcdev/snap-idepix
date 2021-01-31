@@ -88,7 +88,7 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
     }
 
     /* package local for testing */
-    int convertQualityToL1FlagValue(int qualityFlagValue) {
+    int convertQualityToL1FlagValue(long qualityFlagValue) {
         int l1FlagValue = 0;
         for (int i = 0; i < Integer.SIZE; i++) {
             if (qualityToL1FlagMap.containsKey(i) && BitSetter.isFlagSet(qualityFlagValue, i)) {
@@ -115,6 +115,7 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         final int height = inputProduct.getSceneRasterHeight();
         int[] qualityFlagData = new int[width * height];
         int[] l1FlagData = new int[width * height];
+        // todo: qualityFlagData must be long!
         qualityFlagBand.readPixels(0, 0, width, height, qualityFlagData, ProgressMonitor.NULL);
         for (int i = 0; i < width * height; i++) {
             l1FlagData[i] = convertQualityToL1FlagValue(qualityFlagData[i]);

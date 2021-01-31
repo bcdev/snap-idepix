@@ -403,22 +403,22 @@ public class Meris3rd4thReprocessingAdapterTest {
         final Meris3rd4thReprocessingAdapter adapter = new Meris3rd4thReprocessingAdapter();
 
         // quality flag: pixel is cosmetic, dubious, coastline
-         int qualityFlagValue = (int) (Math.pow(2.0, 24) + Math.pow(2.0, 21) + Math.pow(2.0, 30));
-         int expectedL1FlagValue = 1 + 8 + 64;
-         int l1FlagValue = adapter.convertQualityToL1FlagValue(qualityFlagValue);
-         assertEquals(expectedL1FlagValue, l1FlagValue);
+        long qualityFlagValue = (int) (Math.pow(2.0, 24) + Math.pow(2.0, 21) + Math.pow(2.0, 30));
+        int expectedL1FlagValue = 1 + 8 + 64;
+        int l1FlagValue = adapter.convertQualityToL1FlagValue(qualityFlagValue);
+        assertEquals(expectedL1FlagValue, l1FlagValue);
 
-//        // quality flag: pixel is duplicated, sun glint risk, land, bright
-//        qualityFlagValue = (int) (Math.pow(2.0, 23) + Math.pow(2.0, 22) + Math.pow(2.0, 31) + Math.pow(2.0, 27));
-//        expectedL1FlagValue = 2 + 4 + 16 + 32;
-//        l1FlagValue = adapter.convertQualityToL1FlagValue(qualityFlagValue);
-//        assertEquals(expectedL1FlagValue, l1FlagValue);
-//
-//        // quality flag: pixel is invalid
-//        qualityFlagValue = (int) (Math.pow(2.0, 25));
-//        expectedL1FlagValue = 128;
-//        l1FlagValue = adapter.convertQualityToL1FlagValue(qualityFlagValue);
-//        assertEquals(expectedL1FlagValue, l1FlagValue);
+        // quality flag: pixel is duplicated, sun glint risk, land, bright
+        qualityFlagValue = (long) (Math.pow(2.0, 23) + Math.pow(2.0, 22) + Math.pow(2.0, 31) + Math.pow(2.0, 27));
+        expectedL1FlagValue = 2 + 4 + 16 + 32;
+        l1FlagValue = adapter.convertQualityToL1FlagValue(qualityFlagValue);
+        assertEquals(expectedL1FlagValue, l1FlagValue);
+
+        // quality flag: pixel is invalid
+        qualityFlagValue = (int) (Math.pow(2.0, 25));
+        expectedL1FlagValue = 128;
+        l1FlagValue = adapter.convertQualityToL1FlagValue(qualityFlagValue);
+        assertEquals(expectedL1FlagValue, l1FlagValue);
     }
 
     @Test
