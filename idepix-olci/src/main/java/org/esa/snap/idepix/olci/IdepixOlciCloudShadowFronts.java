@@ -95,7 +95,7 @@ class IdepixOlciCloudShadowFronts {
         // first 'post-correction': fill gaps surrounded by other cloud or cloud shadow pixels
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                if (!cloudShadow[y][x] && isCloudFree(sourceTile, x, y)) {
+                if (!cloudShadow[y - y0][x - x0] && isCloudFree(sourceTile, x, y)) {
                     if (isSurroundedByCloudOrCloudShadow(sourceTile, targetRectangle, x, y, cloudShadow)) {
                         setCloudShadow(targetTile, x, y);
                     }
@@ -105,7 +105,7 @@ class IdepixOlciCloudShadowFronts {
         // second post-correction, called 'belt'
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                if (!cloudShadow[y][x] && isCloudFree(sourceTile, x, y)) {
+                if (!cloudShadow[y - y0][x -x0] && isCloudFree(sourceTile, x, y)) {
                     // flag a pixel as cloud shadow if neighbour pixel is shadow
                     for (int j = y - 1; j <= y + 1; j++) {
                         for (int i = x - 1; i <= x + 1; i++) {
