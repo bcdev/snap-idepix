@@ -173,30 +173,33 @@ class IdepixOlciUtils {
     }
 
     static double getRefinedHeightFromCtp(double ctp, double slp, double[] temperatures) {
-        double height = 0.0;
         final double[] prsLevels = IdepixOlciConstants.referencePressureLevels;
+        final int i = binarySearch(prsLevels, ctp);
+        final double t1 = temperatures[i + 1];
+        final double t2 = temperatures[i];
+        final double ts = (t2 - t1) / (prsLevels[i] - prsLevels[i + 1]) * (ctp - prsLevels[i + 1]) + t1;
+        return getHeightFromCtp(ctp, slp, ts);
+    }
 
-        double t1;
-        double t2;
-        if (ctp >= prsLevels[prsLevels.length - 1]) {
-            for (int i = 0; i < prsLevels.length - 1; i++) {
-                if (ctp > prsLevels[0] || (ctp < prsLevels[i] && ctp > prsLevels[i + 1])) {
-                    t1 = temperatures[i];
-                    t2 = temperatures[i + 1];
-                    final double ts = (t2 - t1) / (prsLevels[i + 1] - prsLevels[i]) * (ctp - prsLevels[i]) + t1;
-                    height = getHeightFromCtp(ctp, slp, ts);
-                    break;
-                }
-            }
-        } else {
-            // CTP < 1 hPa? This should never happen...
-            t1 = temperatures[prsLevels.length - 2];
-            t2 = temperatures[prsLevels.length - 1];
-            final double ts = (t2 - t1) / (prsLevels[prsLevels.length - 2] - prsLevels[prsLevels.length - 1]) *
-                    (ctp - prsLevels[prsLevels.length - 1]) + t1;
-            height = getHeightFromCtp(ctp, slp, ts);
+    private static int binarySearch(double[] descending, double value) {
+        final int n = descending.length;
+        if (value > descending[0]) {
+            return 0;
         }
-        return height;
+        if (value < descending[n - 1]) {
+            return n - 2;
+        }
+        int up = 0;
+        int lo = n - 1;
+        while (lo > up + 1) {
+            final int m = (up + lo) >> 1;
+            if (value > descending[m]) {
+                lo = m;
+            } else {
+                up = m;
+            }
+        }
+        return up; // return the index of the smallest sequence element, which is larger than the given value
     }
 
     private static Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
