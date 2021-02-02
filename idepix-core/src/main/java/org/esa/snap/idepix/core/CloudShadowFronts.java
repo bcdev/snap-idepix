@@ -229,9 +229,8 @@ public abstract class CloudShadowFronts {
         final double deltaY = lengthInMeters * Math.cos(azimuthAngleInRadiance);
 
         // distLat and distLon are in degrees
-        final float distLat = (float) (-(deltaY / MEAN_EARTH_RADIUS) * MathUtils.RTOD);
-        final float distLon = (float) (-(deltaX / (MEAN_EARTH_RADIUS * Math
-                .cos(startPoint.lat * MathUtils.DTOR))) * MathUtils.RTOD);
+        final double distLat = -(deltaY / MEAN_EARTH_RADIUS) * MathUtils.RTOD;
+        final double distLon = -(deltaX / (MEAN_EARTH_RADIUS * Math.cos(startPoint.lat * MathUtils.DTOR))) * MathUtils.RTOD;
 
         return new GeoPos(startPoint.lat + distLat, startPoint.lon + distLon);
     }
