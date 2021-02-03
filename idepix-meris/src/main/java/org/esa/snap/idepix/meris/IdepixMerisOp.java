@@ -152,9 +152,8 @@ public class IdepixMerisOp extends BasisOp {
             inputProductToProcess = sourceProduct;
         }
 
-        setTargetProduct(inputProductToProcess);  // test
+        targetProduct = inputProductToProcess;  // test
 
-//        END TEST
 
 //        outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
 //        outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
@@ -168,16 +167,18 @@ public class IdepixMerisOp extends BasisOp {
 //        targetProduct = postProcessingProduct;
 //
 //        targetProduct = IdepixIO.cloneProduct(mergedClassificationProduct, true);
-//        targetProduct.setAutoGrouping("radiance:reflectance");
+        targetProduct.setAutoGrouping("radiance:reflectance");
 //
 //        Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
 //        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
 //
 //        copyOutputBands();
-//        ProductUtils.copyFlagBands(inputProductToProcess, targetProduct, true);   // we need the L1b flag!
+//        if (!IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType())) {
+//            ProductUtils.copyFlagBands(inputProductToProcess, targetProduct, true);   // we need the L1b flag!
+//        }
     }
 
-//    @Override
+    //    @Override
     public void initialize_test() throws OperatorException {
         final int[] testUInt8s = new int[]{1, 2, 3, 4, 5, 6};
 

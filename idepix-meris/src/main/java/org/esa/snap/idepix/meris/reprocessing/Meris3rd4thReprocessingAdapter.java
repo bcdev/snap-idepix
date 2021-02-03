@@ -9,15 +9,21 @@ import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.MeanDescriptor;
+import java.awt.*;
 import java.awt.image.renderable.ParameterBlock;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class providing the adaptation of a MERIS L1b product from fourth to third reprocessing version.
+ *
+ * @author olafd
+ *
+ */
 public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
 
-    private Map<Integer, Integer> qualityToL1FlagMap = new HashMap<>();
+    private final Map<Integer, Integer> qualityToL1FlagMap = new HashMap<>();
 
     public Meris3rd4thReprocessingAdapter() {
         setupQualityToL1FlagMap();
@@ -29,6 +35,9 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
                 inputProduct.getProductType(),
                 inputProduct.getSceneRasterWidth(),
                 inputProduct.getSceneRasterHeight());
+
+        ProductUtils.copyGeoCoding(inputProduct, thirdReproProduct);
+        adaptProductInformationToThirdRepro(inputProduct, thirdReproProduct);
 
         // adapt band names:
         // ## M%02d_radiance --> radiance_%d
@@ -49,8 +58,8 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         // horiz_wind_vector_1 --> zonal_wind
         // horiz_wind_vector_2 --> merid_wind
         // sea_level_pressure --> atm_press
-        // total_ozone --> ozone  // todo: check units!
-        // n.a. --> rel_hum  // todo: clarify this!
+        // total_ozone --> ozone , convert units
+        // humidity_pressure_level_14 --> rel_hum  // relative humidity at 850 hPa
         adaptTiePointGridsToThirdRepro(inputProduct, thirdReproProduct);
 
         // adapt flag band and coding:
@@ -66,25 +75,21 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         try {
             adaptFlagBandToThirdRepro(inputProduct, thirdReproProduct);
         } catch (IOException e) {
-            // todo
             e.printStackTrace();
         }
 
         // adapt metadata:
         // Idepix MERIS does not use any product metadata
         // --> for the moment, copy just a few elements from element metadataSection:
-        // ## acquisition period
-        // ## platform
-        // ## generalProductInformation
-        // ## orbitReference
-        // ## qualityInformation
-        // ## frameSet
-        // ## merisProductInformation
-        // todo: discuss what else might be useful
-        fillMetadataInThirdRepro(inputProduct, thirdReproProduct);
-
+        Meris3rd4thReprocessingMetadata.fillMetadataInThirdRepro(inputProduct, thirdReproProduct);
 
         return thirdReproProduct;
+    }
+
+    @Override
+    public Product convertToHigherVersion(Product inputProduct) {
+        // todo: implement
+        return null;
     }
 
     /* package local for testing */
@@ -98,24 +103,39 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         return l1FlagValue;
     }
 
-    private void fillMetadataInThirdRepro(Product inputProduct, Product thirdReproProduct) {
+    private void adaptProductInformationToThirdRepro(Product inputProduct, Product thirdReproProduct) {
+        // we often need the start/stop times for downstream processors...
+        thirdReproProduct.setStartTime(inputProduct.getStartTime());
+        thirdReproProduct.setEndTime(inputProduct.getEndTime());
+        // todo: discuss what else we want to set back to 3RP here
+        thirdReproProduct.setPreferredTileSize(inputProduct.getPreferredTileSize());
 
+        if (isMerisRR(inputProduct)) {
+            // we often need the 3RP product type for downstream processors (e.g. for loading MER Auxdata)
+            thirdReproProduct.setProductType("MER_RR__1P");
+        } else if (isMerisFR(inputProduct)) {
+            thirdReproProduct.setProductType("MER_FRG_1P");
+        }
+    }
+
+    private boolean isMerisRR(Product inputProduct) {
+        return inputProduct.getProductType().startsWith("ME_1_R");
+    }
+
+    private boolean isMerisFR(Product inputProduct) {
+        return inputProduct.getProductType().startsWith("ME_1_F");
     }
 
     private void adaptFlagBandToThirdRepro(Product inputProduct, Product thirdReproProduct) throws IOException {
-        // test
-//        ProductUtils.copyFlagBands(inputProduct, thirdReproProduct, true);
-//        ProductUtils.copyFlagCodings(inputProduct, thirdReproProduct);
 
         Band l1FlagBand = createL1bFlagBand(thirdReproProduct);
-//        initL1bFlagBandData(l1FlagBand);
+        setupL1FlagsBitmask(thirdReproProduct);
 
         final Band qualityFlagBand = inputProduct.getBand("quality_flags");
         final int width = inputProduct.getSceneRasterWidth();
         final int height = inputProduct.getSceneRasterHeight();
         int[] qualityFlagData = new int[width * height];
         int[] l1FlagData = new int[width * height];
-        // todo: qualityFlagData must be long!
         qualityFlagBand.readPixels(0, 0, width, height, qualityFlagData, ProgressMonitor.NULL);
         for (int i = 0; i < width * height; i++) {
             l1FlagData[i] = convertQualityToL1FlagValue(qualityFlagData[i]);
@@ -125,14 +145,6 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         l1FlagBand.setPixels(0, 0, width, height, l1FlagData);
         l1FlagBand.setSourceImage(l1FlagBand.getSourceImage());
         thirdReproProduct.addBand(l1FlagBand);
-    }
-
-    private static void initL1bFlagBandData(Band dataBand) {
-        final int width = dataBand.getRasterWidth();
-        final int height = dataBand.getRasterHeight();
-        final int[] data = new int[width * height];
-        Arrays.fill(data, 1);
-        dataBand.setPixels(0, 0, width, height, data);
     }
 
     private void adaptTiePointGridsToThirdRepro(Product inputProduct, Product thirdReproProduct) {
@@ -151,16 +163,20 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         // horizontal_wind_vector_2 --> merid_wind
         // sea_level_pressure --> atm_press
         // total_ozone --> ozone  // todo: check units!
-        // n.a. --> rel_hum  // todo: clarify this!
+        // humidity_pressure_level_14 --> rel_hum  // relative humidity at 850 hPa
 
-        final TiePointGrid latitudeTargetTPG =
-                ProductUtils.copyTiePointGrid("TP_latitude", inputProduct, thirdReproProduct);
+        if (!thirdReproProduct.containsTiePointGrid("TP_latitude")) {
+            ProductUtils.copyTiePointGrid("TP_latitude", inputProduct, thirdReproProduct);
+        }
+        final TiePointGrid latitudeTargetTPG = thirdReproProduct.getTiePointGrid("TP_latitude");
         latitudeTargetTPG.setName("latitude");
         latitudeTargetTPG.setDescription("Latitude of the tie points (WGS-84), positive N");
         latitudeTargetTPG.setUnit("deg");
 
-        final TiePointGrid longitudeTargetTPG =
-                ProductUtils.copyTiePointGrid("TP_longitude", inputProduct, thirdReproProduct);
+        if (!thirdReproProduct.containsTiePointGrid("TP_longitude")) {
+            ProductUtils.copyTiePointGrid("TP_longitude", inputProduct, thirdReproProduct);
+        }
+        final TiePointGrid longitudeTargetTPG = thirdReproProduct.getTiePointGrid("TP_longitude");
         longitudeTargetTPG.setName("longitude");
         longitudeTargetTPG.setDescription("Longitude of the tie points (WGS-84), Greenwich origin, positive E");
         longitudeTargetTPG.setUnit("deg");
@@ -230,12 +246,19 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         for (int i = 0; i < ozoneTiePoints.length; i++) {
             ozoneTiePoints[i] *= conversionFactor;
         }
+
+        // relative humidity: take humidity_pressure_level_14 which
+        //  corresponds to rel_hum in 3RP, which is at 850hPa according to MERIS Product Handbook v2.1, page 52,
+        //  https://earth.esa.int/pub/ESA_DOC/ENVISAT/MERIS/meris.ProductHandbook.2_1.pdf)
+        final TiePointGrid relHumTPG =
+                ProductUtils.copyTiePointGrid("humidity_pressure_level_14", inputProduct, thirdReproProduct);
+        relHumTPG.setName("rel_hum");
+        relHumTPG.setDescription("Relative humidity");
     }
 
     private void adaptBandNamesToThirdRepro(Product inputProduct, Product thirdReproProduct) {
-        // adapt band names:
-        // ## M%02d_radiance --> radiance_%d
         // ## detector_index --> detector_index
+        // ## M%02d_radiance --> radiance_%d
         Band detectorIndexTargetBand =
                 ProductUtils.copyBand(EnvisatConstants.MERIS_DETECTOR_INDEX_DS_NAME,
                         inputProduct, thirdReproProduct, true);
@@ -257,10 +280,12 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
             // set solar flux:
             final Band solarFluxBand = inputProduct.getBand("solar_flux_band_" + (i + 1));
             // todo: solar flux is not needed for Idepix, but later for general adapter. Discuss how to set.
+            // For the moment, compute the mean of the corresponding solar flux band image.
+            // Later, implement GK suggestion
             targetRadianceBand.setSolarFlux(getMeanSolarFluxFrom4thReprocessing(solarFluxBand));
 
             // set valid pixel expression:
-//            targetRadianceBand.setValidPixelExpression("!l1_flags.INVALID");
+            targetRadianceBand.setValidPixelExpression("!l1_flags.INVALID");
         }
     }
 
@@ -292,7 +317,7 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         return (float) mean[0];
     }
 
-    public static Band createL1bFlagBand(Product thirdReproProduct) {
+    private static Band createL1bFlagBand(Product thirdReproProduct) {
 
         Band l1FlagBand = new Band("l1_flags", ProductData.TYPE_INT32,
                 thirdReproProduct.getSceneRasterWidth(), thirdReproProduct.getSceneRasterHeight());
@@ -334,10 +359,48 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         qualityToL1FlagMap.put(25, 128);
     }
 
+    private static void setupL1FlagsBitmask(Product thirdReproProduct) {
 
-    @Override
-    public Product convertToHigherVersion(Product inputProduct) {
-        // todo: implement
-        return null;
+        int index = 0;
+        int w = thirdReproProduct.getSceneRasterWidth();
+        int h = thirdReproProduct.getSceneRasterHeight();
+        Mask mask;
+
+        mask = Mask.BandMathsType.create("cosmetic", "Pixel is cosmetic", w, h,
+                "l1_flags.COSMETIC", new Color(204, 153, 255), 0.5f);
+        thirdReproProduct.getMaskGroup().add(index++, mask);
+
+        mask = Mask.BandMathsType.create("duplicated", "Pixel has been duplicated (filled in)", w, h,
+                "l1_flags.DUPLICATED", new Color(255, 200, 0), 0.5f);
+        thirdReproProduct.getMaskGroup().add(index++, mask);
+
+        mask = Mask.BandMathsType.create("glint_risk", "Pixel has glint risk", w, h,
+                "l1_flags.GLINT_RISK", new Color(255, 0, 255), 0.5f);
+        thirdReproProduct.getMaskGroup().add(index++, mask);
+
+        mask = Mask.BandMathsType.create("suspect", "Pixel is suspect", w, h,
+                "l1_flags.SUSPECT", new Color(204, 102, 255), 0.5f);
+        thirdReproProduct.getMaskGroup().add(index++, mask);
+
+        mask = Mask.BandMathsType.create("land", "Pixel is over land, not ocean", w, h,
+                "l1_flags.LAND_OCEAN", new Color(51, 153, 0), 0.5f);
+        thirdReproProduct.getMaskGroup().add(index++, mask);
+
+        mask = Mask.BandMathsType.create("water", "Pixel is over ocean, not land", w, h,
+                "not l1_flags.LAND_OCEAN", new Color(153, 153, 255), 0.5f);
+        thirdReproProduct.getMaskGroup().add(index++, mask);
+
+        mask = Mask.BandMathsType.create("bright", "Pixel is bright", w, h,
+                "l1_flags.BRIGHT", new Color(255, 255, 0), 0.5f);
+        thirdReproProduct.getMaskGroup().add(index++, mask);
+
+        mask = Mask.BandMathsType.create("coastline", "Pixel is part of a coastline", w, h,
+                "l1_flags.COASTLINE", Color.GREEN, 0.5f);
+        thirdReproProduct.getMaskGroup().add(index++, mask);
+
+        mask = Mask.BandMathsType.create("invalid", "Pixel is invaid", w, h,
+                "l1_flags.INVALID", Color.RED, 0.5f);
+        thirdReproProduct.getMaskGroup().add(index, mask);
     }
+
 }
