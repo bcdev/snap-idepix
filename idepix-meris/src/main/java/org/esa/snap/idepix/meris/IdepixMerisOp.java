@@ -1,20 +1,15 @@
 package org.esa.snap.idepix.meris;
 
-import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.dataio.dimap.DimapProductWriter;
-import org.esa.snap.core.dataio.dimap.DimapProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
-import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
-import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
@@ -23,8 +18,6 @@ import org.esa.snap.idepix.core.operators.CloudBufferOp;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.meris.reprocessing.Meris3rd4thReprocessingAdapter;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +28,9 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Idepix.Meris",
         category = "Optical/Pre-Processing",
-        version = "3.0",
+        version = "3.1",
         authors = "Olaf Danne",
-        copyright = "(c) 2016 by Brockmann Consult",
+        copyright = "(c) 2016-2021 by Brockmann Consult",
         description = "Pixel identification and classification for MERIS.")
 public class IdepixMerisOp extends BasisOp {
 
@@ -152,30 +145,27 @@ public class IdepixMerisOp extends BasisOp {
             inputProductToProcess = sourceProduct;
         }
 
-        targetProduct = inputProductToProcess;  // test
+        outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
+        outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
 
+        preProcess();
+        computeWaterCloudProduct();
+        computeLandCloudProduct();
+        mergeLandWater();
+        postProcess();
 
-//        outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
-//        outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
-//
-//        preProcess();
-//        computeWaterCloudProduct();
-//        computeLandCloudProduct();
-//        mergeLandWater();
-//        postProcess();
-//
-//        targetProduct = postProcessingProduct;
-//
-//        targetProduct = IdepixIO.cloneProduct(mergedClassificationProduct, true);
+        targetProduct = postProcessingProduct;
+
+        targetProduct = IdepixIO.cloneProduct(mergedClassificationProduct, true);
         targetProduct.setAutoGrouping("radiance:reflectance");
-//
-//        Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
-//        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
-//
-//        copyOutputBands();
-//        if (!IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType())) {
-//            ProductUtils.copyFlagBands(inputProductToProcess, targetProduct, true);   // we need the L1b flag!
-//        }
+
+        Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
+
+        copyOutputBands();
+        if (!IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType())) {
+            ProductUtils.copyFlagBands(inputProductToProcess, targetProduct, true);   // we need the L1b flag!
+        }
     }
 
     //    @Override
