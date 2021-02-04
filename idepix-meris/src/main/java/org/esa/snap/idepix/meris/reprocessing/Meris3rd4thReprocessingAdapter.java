@@ -19,7 +19,6 @@ import java.util.Map;
  * Class providing the adaptation of a MERIS L1b product from fourth to third reprocessing version.
  *
  * @author olafd
- *
  */
 public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
 
@@ -101,6 +100,22 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
             }
         }
         return l1FlagValue;
+    }
+
+    /* package local for testing */
+    static float getMeanSolarFluxFrom4thReprocessing(Band solarFluxBand) {
+        final MultiLevelImage sourceImage = solarFluxBand.getSourceImage();
+        ParameterBlock pb = new ParameterBlock();
+        pb.addSource(sourceImage);// The source image
+        pb.add(null);    // null ROI means whole image
+        pb.add(1);       // check every pixel horizontally
+        pb.add(1);       // check every pixel vertically
+
+        // Perform the mean operation on the source image.
+        final RenderedOp meanImage = MeanDescriptor.create(sourceImage, null, 1, 1, null);
+        double[] mean = (double[]) meanImage.getProperty("mean");
+
+        return (float) mean[0];
     }
 
     private void adaptProductInformationToThirdRepro(Product inputProduct, Product thirdReproProduct) {
@@ -300,21 +315,6 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         targetBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
         targetBand.setNoDataValueUsed(false);
         targetBand.setNoDataValue(0.0);
-    }
-
-    private static float getMeanSolarFluxFrom4thReprocessing(Band solarFluxBand) {
-        final MultiLevelImage sourceImage = solarFluxBand.getSourceImage();
-        ParameterBlock pb = new ParameterBlock();
-        pb.addSource(sourceImage);// The source image
-        pb.add(null);    // null ROI means whole image
-        pb.add(1);       // check every pixel horizontally
-        pb.add(1);       // check every pixel vertically
-
-        // Perform the mean operation on the source image.
-        final RenderedOp meanImage = MeanDescriptor.create(sourceImage, null, 1, 1, null);
-        double[] mean = (double[]) meanImage.getProperty("mean");
-
-        return (float) mean[0];
     }
 
     private static Band createL1bFlagBand(Product thirdReproProduct) {
