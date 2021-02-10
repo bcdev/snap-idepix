@@ -65,6 +65,10 @@ public class S2IdepixAlgorithm {
     }
 
     public boolean isCloud() {
+        return isCloudSure() || isCloudAmbiguous();
+    }
+
+    public boolean isCloudSure() {
         // JM, 20160524:
         final boolean gcw = tc4CirrusValue() < GCW_THRESH;
         final boolean tcw = tc4Value() < TCW_TC_THRESH && ndwiValue() < TCW_NDWI_THRESH;
@@ -85,7 +89,7 @@ public class S2IdepixAlgorithm {
     // Add an ambiguous haze test isCloudAmbiguous()  (JM 20160713)
     public boolean isCloudAmbiguous() {
         final boolean tcl = !isB3B11Water() && tc4CirrusValue()  < TCL_TRESH && visbrightValue() > VISBRIGHT_THRESH;
-        return !isInvalid() && !isClearSnow() && !isCloud() && (tcl);
+        return !isInvalid() && !isClearSnow() && !isCloudSure() && (tcl);
     }
 
     // Add a cirrus test(JM 20160713)
@@ -120,7 +124,7 @@ public class S2IdepixAlgorithm {
 //        return (isLand() && !isCloud() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&
 //                landValue > LAND_THRESH);
         // JM 20170406:
-        return (!isCloud() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&  landValue > LAND_THRESH);
+        return (!isCloudSure() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&  landValue > LAND_THRESH);
     }
 
     public boolean isClearWater() {
@@ -138,7 +142,7 @@ public class S2IdepixAlgorithm {
 //        return (!isLand() && !isCloud() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&
 //                waterValue > WATER_THRESH);
         // JM 20170406:
-        return (!isCloud() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&  waterValue > WATER_THRESH);
+        return (!isCloudSure() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&  waterValue > WATER_THRESH);
     }
 
     public boolean isClearSnow() {

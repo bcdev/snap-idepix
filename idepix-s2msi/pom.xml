@@ -26,13 +26,12 @@
     </parent>
 
     <artifactId>idepix-s2msi</artifactId>
-    <version>8.0.1</version>
+    <version>8.0.3-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
     
     <name>IdePix S2-MSI</name>
-    <description>Classification of pixels (cloud, snow, ice, land, water) originating from S2-MSI.
-    </description>
+    <description>Classification of pixels (cloud, snow, ice, land, water) originating from S2-MSI.</description>
 
     <properties>
         <idepix.version>8.0.0</idepix.version>
@@ -41,16 +40,7 @@
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>idepix-core</artifactId>
-            <version>${idepix.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-glayer</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -58,11 +48,8 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-binding</artifactId>
+            <artifactId>idepix-core</artifactId>
+            <version>8.0.1-SNAPSHOT</version>
         </dependency>
         <!--include this dependency to run SNAP Desktop in IDE.-->
         <dependency>
