@@ -1,9 +1,9 @@
 package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * todo: add comment
@@ -19,7 +19,7 @@ class FindContinuousAreas {
     Map<Integer, List<Integer>> computeAreaID(int sourceWidth, int sourceHeight, int[] cloudIdArray, boolean useFlagBand) {
 
         int id = 0;
-        Map<Integer, List<Integer>> output = new HashMap<>();
+        Map<Integer, List<Integer>> output = new TreeMap<>();
 
         //first pixel (top left)
         if (isTarget(0, useFlagBand)) {
@@ -290,12 +290,13 @@ class FindContinuousAreas {
             for (int i = 0; i < sourceWidth; i++) {
                 int index = j * (sourceWidth) + i;
                 List<Integer> positions;
-                if (cloudIdArray[index] > 0) {
-                    if (output.containsKey(cloudIdArray[index])) {
-                        positions = output.get(cloudIdArray[index]);
+                int currentCloudId = cloudIdArray[index];
+                if (currentCloudId > 0) {
+                    if (output.containsKey(currentCloudId)) {
+                        positions = output.get(currentCloudId);
                     } else {
                         positions = new ArrayList<>();
-                        output.put(cloudIdArray[index], positions);
+                        output.put(currentCloudId, positions);
                     }
                     positions.add(index);
                 }
