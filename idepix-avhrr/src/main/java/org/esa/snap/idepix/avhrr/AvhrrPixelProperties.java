@@ -76,4 +76,6 @@ public interface AvhrrPixelProperties {
      */
     boolean isLand();
 
+
+
 }

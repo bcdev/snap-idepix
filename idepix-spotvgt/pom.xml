@@ -60,6 +60,10 @@
             <artifactId>idepix-core</artifactId>
             <version>8.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-collocation</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

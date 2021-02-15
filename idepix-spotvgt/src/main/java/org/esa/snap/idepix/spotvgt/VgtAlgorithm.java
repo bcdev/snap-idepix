@@ -38,8 +38,18 @@ public class VgtAlgorithm extends AbstractPixelProperties {
     private boolean usel1bLandWaterFlag;
     private boolean isCoastline;
 
+    private boolean isUndefined;
+
+    private boolean isProcessingForC3SLot5;
+    private boolean isBlueGood;
+    private boolean isRedGood;
+    private boolean isNirGood;
+    private boolean isSwirGood;
+
+
     public boolean isInvalid() {
-        return !IdepixIO.areAllReflectancesValid(refl);
+        //return !IdepixIO.areAllReflectancesValid(refl);
+        return !(isBlueGood && isRedGood && isNirGood && isSwirGood);
     }
 
     public boolean isClearSnow() {
@@ -88,16 +98,43 @@ public class VgtAlgorithm extends AbstractPixelProperties {
 
     public boolean isLand() {
         final boolean isLand1 = !usel1bLandWaterFlag && !isWater;
-        return !isInvalid() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
-    }
-
-    public boolean isWater() {
-        return !isInvalid() && isWater;
+        if (isProcessingForC3SLot5) {
+            //   TODO MASK
+            return (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+            //           return !isUndefined() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        } else {
+            return !isInvalid() && (isLand1 || (aPrioriLandValue() > LAND_THRESH));
+        }
     }
 
     @Override
-    public boolean isL1Water() {
-        return false;
+    public boolean isWater() {
+        if (isProcessingForC3SLot5) {
+            //   TODO MASK
+            return isWater;
+//            return !isUndefined() && isWater;
+        } else {
+            return !isInvalid() && isWater;
+        }
+    }
+
+    public void setIsWater(boolean isWater) {
+        if (isProcessingForC3SLot5) {
+            //   TODO MASK
+            this.isWater =  isWater;
+//            this.isWater = !isUndefined() && isWater;
+        } else {
+            this.isWater = !isInvalid() && isWater;
+        }
+    }
+    private boolean isUndefined() {
+        return isUndefined;
+    }
+
+    public boolean isL1Water()
+    {
+        //return false;
+        return (!isInvalid() && aPrioriWaterValue() > WATER_THRESH);
     }
 
     public boolean isBrightWhite() {
@@ -265,8 +302,26 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         this.isCoastline = isCoastline;
     }
 
-    public void setIsWater(boolean isWater) {
-        this.isWater = !isInvalid() && isWater;
+    void setProcessingForC3SLot5(boolean isProcessingForC3SLot5) {
+        this.isProcessingForC3SLot5 = isProcessingForC3SLot5;
+    }
+
+    void setIsBlueGood(boolean isBlueGood) { this.isBlueGood = isBlueGood; }
+
+    void setIsRedGood(boolean isRedGood) {
+        this.isRedGood = isRedGood;
+    }
+
+    void setIsNirGood(boolean isNirGood) {
+        this.isNirGood = isNirGood;
+    }
+
+    void setIsSwirGood(boolean isSwirGood) {
+        this.isSwirGood = isSwirGood;
+    }
+
+    void setIsUndefined(boolean isUndefined) {
+        this.isUndefined = isUndefined;
     }
 
     void setRefl(float[] refl) {
@@ -275,6 +330,22 @@ public class VgtAlgorithm extends AbstractPixelProperties {
                                                 "] - must be " + IdepixConstants.VGT_WAVELENGTHS.length);
         }
         this.refl = refl;
+    }
+
+    boolean isBlueGood() {
+        return isBlueGood;
+    }
+
+    boolean isRedGood() {
+        return isRedGood;
+    }
+
+    boolean isNirGood() {
+        return isNirGood;
+    }
+
+    boolean isSwirGood() {
+        return isSwirGood;
     }
 
     void setNnOutput(double[] nnOutput) {

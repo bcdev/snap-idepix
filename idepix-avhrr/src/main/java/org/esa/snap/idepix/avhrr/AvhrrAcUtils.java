@@ -1,12 +1,12 @@
 package org.esa.snap.idepix.avhrr;
 
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.IdepixFlagCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.BitSetter;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.IdepixFlagCoding;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -18,25 +18,26 @@ import java.util.TimeZone;
  *
  * @author olafd
  */
-class AvhrrAcUtils {
+public class AvhrrAcUtils {
 
     static FlagCoding createAvhrrAcFlagCoding() {
 
         FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
-        // additional flags for AVHRR-AC (tests):
-        flagCoding.addFlag("F_REFL1_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 1), null);
-        flagCoding.addFlag("F_REFL2_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 2), null);
-        flagCoding.addFlag("F_RATIO_REFL21_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 3), null);
-        flagCoding.addFlag("F_RATIO_REFL31_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 4), null);
-        flagCoding.addFlag("F_BT4_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 5), null);
-        flagCoding.addFlag("F_BT5_ABOVE_THRESH", BitSetter.setFlag(0, IdepixConstants.NUM_DEFAULT_FLAGS + 6), null);
+        flagCoding.addFlag("IDEPIX_INLAND_WATER", BitSetter.setFlag(0, AvhrrConstants.IDEPIX_INLAND_WATER),
+                AvhrrConstants.IDEPIX_INLAND_WATER_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_WATER", BitSetter.setFlag(0, AvhrrConstants.IDEPIX_WATER),
+                AvhrrConstants.IDEPIX_WATER_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLEAR_LAND", BitSetter.setFlag(0, AvhrrConstants.IDEPIX_CLEAR_LAND),
+                AvhrrConstants.IDEPIX_CLEAR_LAND_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLEAR_WATER", BitSetter.setFlag(0, AvhrrConstants.IDEPIX_CLEAR_WATER),
+                AvhrrConstants.IDEPIX_CLEAR_WATER_DESCR_TEXT);
 
         return flagCoding;
     }
 
 
-    static int setupAvhrrAcClassifBitmask(Product classifProduct) {
+    static void setupAvhrrAcClassifBitmask(Product classifProduct) {
 
         int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
 
@@ -46,37 +47,27 @@ class AvhrrAcUtils {
         Random r = new Random(124567);
 
         // tests:
-        mask = Mask.BandMathsType.create("F_REFL1_ABOVE_THRESH", "TOA reflectance Channel 1 above threshold", w, h,
-                                         "pixel_classif_flags.F_REFL1_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+        mask = Mask.BandMathsType.create("IDEPIX_INLAND_WATER", AvhrrConstants.IDEPIX_INLAND_WATER_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_INLAND_WATER",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_REFL2_ABOVE_THRESH", "TOA reflectance Channel 2 above threshold", w, h,
-                                         "pixel_classif_flags.F_REFL2_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+        mask = Mask.BandMathsType.create("IDEPIX_WATER", AvhrrConstants.IDEPIX_WATER_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_WATER",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_RATIO_REFL21_ABOVE_THRESH", "Ratio of TOA reflectance Channel 2/1 above threshold", w, h,
-                                         "pixel_classif_flags.F_RATIO_REFL21_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+        mask = Mask.BandMathsType.create("IDEPIX_CLEAR_LAND", AvhrrConstants.IDEPIX_CLEAR_LAND_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_CLEAR_LAND",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_RATIO_REFL31_ABOVE_THRESH", "Ratio of TOA reflectance Channel 3/1 above threshold", w, h,
-                                         "pixel_classif_flags.F_RATIO_REFL31_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
+        mask = Mask.BandMathsType.create("IDEPIX_CLEAR_WATER", AvhrrConstants.IDEPIX_CLEAR_WATER_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_CLEAR_WATER",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
+        classifProduct.getMaskGroup().add(index, mask);
 
-        mask = Mask.BandMathsType.create("F_BT4_ABOVE_THRESH", "Brightness temperature Channel 4 above threshold", w, h,
-                                         "pixel_classif_flags.F_BT4_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_BT5_ABOVE_THRESH", "Brightness temperature Channel 5 above threshold", w, h,
-                                         "pixel_classif_flags.F_BT5_ABOVE_THRESH",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
-
-        return index;
     }
 
     static Calendar getProductDateAsCalendar(String ddmmyy) {
@@ -93,22 +84,22 @@ class AvhrrAcUtils {
         return calendar;
     }
 
-    static boolean anglesInvalid(double sza, double vza, double saa, double vaa) {
+    static boolean anglesValid(double sza, double vza, double saa, double vaa) {
         // todo: we have a discontinuity in angle retrieval at sza=90deg. Check!
 //        final double eps = 1.E-6;
 //        final boolean szaInvalid = sza < 90.0 + eps && sza > 90.0 - eps;
 //        final boolean szaInvalid = sza  > 85.0; // GK, 20150326
-        final boolean szaInvalid = sza > 70.0; // GK, 20150922
+//        final boolean szaInvalid = sza > 70.0; // GK, 20150922
+        final boolean szaInvalid = sza > 80.0; // GK, 20191017
 
         final boolean vzaInvalid = Double.isNaN(vza);
         final boolean saaInvalid = Double.isNaN(saa);
         final boolean vaaInvalid = Double.isNaN(vaa);
 
-        return szaInvalid || saaInvalid || vzaInvalid || vaaInvalid;
+        return !szaInvalid && !saaInvalid && !vzaInvalid && !vaaInvalid;
     }
 
-    static double convertRadianceToBt(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable, double radianceOrig, int ch,
-                                      float waterFraction) {
+    static double convertRadianceToBt(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable, double radianceOrig, int ch, float waterFraction) {
         final double c1 = 1.1910659E-5;
         final double c2 = 1.438833;
 
@@ -117,8 +108,71 @@ class AvhrrAcUtils {
         double nuStart = rad2BTTable.getNuMid(ch);
         double tRef = c2 * nuStart / (Math.log(1.0 + c1 * nuStart * nuStart * nuStart / rad));
 
-        double nuFinal = nuStart;
+        double nuFinal = getNuFinalFromAuxdata(noaaId, rad2BTTable, ch, waterFraction, tRef);
+
+        return c2 * nuFinal / (Math.log(1.0 + c1 * nuFinal * nuFinal * nuFinal / rad));
+    }
+
+
+    static double convertBtToRadiance(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable, double bt, int ch, float waterFraction) {
+        final double c1 = 1.1910659E-5;
+        final double c2 = 1.438833;
+
+        if (ch < 3 || ch > 5) {
+            throw new IllegalArgumentException(String.format("Channel '%d' not supported. Only channels 3,4 and 5 are supported, .", ch));
+        }
+
+        double nuFinal = getNuFinalFromAuxdata(noaaId, rad2BTTable, ch, waterFraction, bt);
+        double rad = (c1 * nuFinal * nuFinal * nuFinal) / (Math.exp(c2 * nuFinal / bt) - 1.0);
+
+        double radOri1;
+        double radOri2;
+
+        if (ch == 3) {
+            switch (noaaId) {
+                case "7":
+                case "11":
+                    radOri1 = rad;
+                    radOri2 = radOri1;
+                    break;
+                case "14":
+                    radOri1 = (rad - rad2BTTable.getD(ch)) / rad2BTTable.getA(ch);
+                    radOri2 = radOri1;
+                    break;
+                case "15":
+                case "16":
+                case "17":
+                case "18":
+                case "METOP-A":
+                case "19":
+                case "METOP-B":
+                    double pHalf = rad2BTTable.getA(ch) / rad2BTTable.getB(ch) / 2.0;
+                    double q = (-rad) / rad2BTTable.getB(ch);
+                    radOri1 = -pHalf - Math.sqrt((pHalf * pHalf) - q);
+                    radOri2 = -pHalf + Math.sqrt((pHalf * pHalf) - q);
+                    break;
+                default:
+                    throw new OperatorException("AVHRR version " + noaaId + " not supported.");
+            }
+        } else {
+                    double pHalf = rad2BTTable.getA(ch) / rad2BTTable.getB(ch) / 2.0;
+                    double q = (rad2BTTable.getD(ch) - rad) / rad2BTTable.getB(ch);
+                    radOri1 = -pHalf - Math.sqrt((pHalf * pHalf) - q);
+                    radOri2 = -pHalf + Math.sqrt((pHalf * pHalf) - q);
+        }
+
+        if (Math.max(radOri1, radOri2) >= 0) {
+            return Math.max(radOri1, radOri2);
+        } else {
+            return rad;
+        }
+    }
+
+    private static double getNuFinalFromAuxdata(String noaaId, AvhrrAuxdata.Rad2BTTable rad2BTTable,
+                                                int ch, float waterFraction, double tRef) {
+        double nuFinal = rad2BTTable.getNuMid(ch);
         switch (noaaId) {
+            case "7":
             case "11":
                 if (tRef < 225.0) {
                     nuFinal = rad2BTTable.getNuLow(ch);
@@ -152,11 +206,19 @@ class AvhrrAcUtils {
                     }
                 }
                 break;
+            case "15":
+            case "16":
+            case "17":
+            case "18":
+            case "METOP-A":
+            case "19":
+            case "METOP-B":
+                nuFinal = rad2BTTable.getNuMid(ch);
+                break;
             default:
                 throw new OperatorException("AVHRR version " + noaaId + " not supported.");
         }
-
-        return c2 * nuFinal / (Math.log(1.0 + c1 * nuFinal * nuFinal * nuFinal / rad));
+        return nuFinal;
     }
 
 }

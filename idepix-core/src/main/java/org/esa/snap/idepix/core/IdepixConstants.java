@@ -38,6 +38,8 @@ public class IdepixConstants {
     public static final String AVHRR_L1b_PRODUCT_TYPE = "AVHRR";
     public static final String AVHRR_L1b_USGS_PRODUCT_TYPE = "NOAA_POD_AVHRR_HRPT";
 
+    public static final String AVHRR_L1b_TIMELINE_DESCRIPTION = "AVHRR FCDR";
+
     public static final int NO_DATA_VALUE = -1;
 
     public static final String NN_OUTPUT_BAND_NAME = "nn_value";

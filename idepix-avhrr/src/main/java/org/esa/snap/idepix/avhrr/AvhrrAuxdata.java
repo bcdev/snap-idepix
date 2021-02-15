@@ -8,22 +8,27 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
+import static org.esa.snap.core.util.SystemUtils.LOG;
+
 /**
- * AVHRR auxiliary data utility class
+ * todo: add comment
+ * To change this template use File | Settings | File Templates.
+ * Date: 01.12.2014
+ * Time: 18:00
  *
  * @author olafd
  */
-class AvhrrAuxdata {
+public class AvhrrAuxdata {
 
-    private static final int VZA_TABLE_LENGTH = 2048;
-    private static final String VZA_FILE_NAME = "view_zenith.txt";
+    public static final int VZA_TABLE_LENGTH = 2048;
+    public static final String VZA_FILE_NAME = "view_zenith.txt";
 
-    private static final int RAD2BT_TABLE_LENGTH = 3;
-    private static final String RAD2BT_FILE_NAME_PREFIX = "rad2bt_noaa";
+    public static final int RAD2BT_TABLE_LENGTH = 3;
+    public static final String RAD2BT_FILE_NAME_PREFIX = "rad2bt_noaa";
 
     private static AvhrrAuxdata instance;
 
-    static AvhrrAuxdata getInstance() {
+    public static AvhrrAuxdata getInstance() {
         if (instance == null) {
             instance = new AvhrrAuxdata();
         }
@@ -32,8 +37,9 @@ class AvhrrAuxdata {
     }
 
 
-    Line2ViewZenithTable createLine2ViewZenithTable() throws IOException {
+    public Line2ViewZenithTable createLine2ViewZenithTable() throws IOException {
         final InputStream inputStream = getClass().getResourceAsStream(VZA_FILE_NAME);
+//        final InputStream inputStream = AvhrrAuxdata.class.getResourceAsStream(VZA_FILE_NAME);
         Line2ViewZenithTable vzaTable = new Line2ViewZenithTable();
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -63,10 +69,13 @@ class AvhrrAuxdata {
         return vzaTable;
     }
 
-    Rad2BTTable createRad2BTTable(String noaaId) throws IOException {
+    public Rad2BTTable createRad2BTTable(String noaaId) throws IOException {
 
-        final String filename = RAD2BT_FILE_NAME_PREFIX + noaaId + ".txt";
+        final String filename = RAD2BT_FILE_NAME_PREFIX + "_" + noaaId + ".txt";
+        LOG.info("createRad2BTTable filename: " + filename);
+        System.out.println("createRad2BTTable filename = " + filename);
         final InputStream inputStream = getClass().getResourceAsStream(filename);
+//        final InputStream inputStream = AvhrrAuxdata.class.getResourceAsStream(filename);
         Rad2BTTable rad2BTTable = new Rad2BTTable();
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -124,19 +133,19 @@ class AvhrrAuxdata {
     /**
      * Class providing a temperature-radiance conversion data table
      */
-    class Line2ViewZenithTable {
+    public class Line2ViewZenithTable {
         private int[] xIndex = new int[VZA_TABLE_LENGTH];
         private double[] vza = new double[VZA_TABLE_LENGTH];
 
-        void setxIndex(int index, int xIndex) {
+        public void setxIndex(int index, int xIndex) {
             this.xIndex[index] = xIndex;
         }
 
-        double getVza(int index) {
+        public double getVza(int index) {
             return vza[index];
         }
 
-        void setVza(int index, double vza) {
+        public void setVza(int index, double vza) {
             this.vza[index] = vza;
         }
 
@@ -144,8 +153,14 @@ class AvhrrAuxdata {
 
     /**
      *  Class providing a radiance-to-BT coefficients table
+     *
+     *  Walton, C. C., Sullivan, J. T., Rao, C. R. N., & Weinreb, M. P. (1998). Corrections for detector nonlinearities
+     *  and calibration inconsistencies of the infrared channels of the advanced very high resolution radiometer.
+     *  Journal of Geophysical Research: Oceans, 103(C2), 3323–3337. https://doi.org/10.1029/97JC02018
+     *
+     *  KLM + PODD user Guide
      */
-    class Rad2BTTable {
+    public class Rad2BTTable {
         private final int OFFSET = 3;
 
         private double[] A = new double[RAD2BT_TABLE_LENGTH];
@@ -156,59 +171,59 @@ class AvhrrAuxdata {
         private double[] nuHighland = new double[RAD2BT_TABLE_LENGTH];
         private double[] nuHighWater = new double[RAD2BT_TABLE_LENGTH];
 
-        double getA(int index) {
+        public double getA(int index) {
             return A[index - OFFSET];
         }
 
-        void setA(int index, double a) {
+        public void setA(int index, double a) {
             this.A[index] = a;
         }
 
-        double getB(int index) {
+        public double getB(int index) {
             return B[index - OFFSET];
         }
 
-        void setB(int index, double b) {
+        public void setB(int index, double b) {
             this.B[index] = b;
         }
 
-        double getD(int index) {
+        public double getD(int index) {
             return D[index - OFFSET];
         }
 
-        void setD(int index, double d) {
+        public void setD(int index, double d) {
             this.D[index] = d;
         }
 
-        double getNuLow(int index) {
+        public double getNuLow(int index) {
             return nuLow[index - OFFSET];
         }
 
-        void setNuLow(int index, double nuLow) {
+        public void setNuLow(int index, double nuLow) {
             this.nuLow[index] = nuLow;
         }
 
-        double getNuMid(int index) {
+        public double getNuMid(int index) {
             return nuMid[index - OFFSET];
         }
 
-        void setNuMid(int index, double nuMid) {
+        public void setNuMid(int index, double nuMid) {
             this.nuMid[index] = nuMid;
         }
 
-        double getNuHighLand(int index) {
+        public double getNuHighLand(int index) {
             return nuHighland[index - OFFSET];
         }
 
-        void setNuHighland(int index, double nuHighland) {
+        public void setNuHighland(int index, double nuHighland) {
             this.nuHighland[index] = nuHighland;
         }
 
-        double getNuHighWater(int index) {
+        public double getNuHighWater(int index) {
             return nuHighWater[index - OFFSET];
         }
 
-        void setNuHighWater(int index, double nuHighWater) {
+        public void setNuHighWater(int index, double nuHighWater) {
             this.nuHighWater[index] = nuHighWater;
         }
     }

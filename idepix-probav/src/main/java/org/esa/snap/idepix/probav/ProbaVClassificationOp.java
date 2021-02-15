@@ -65,6 +65,12 @@ public class ProbaVClassificationOp extends Operator {
             description = " NN cloud ambiguous lower boundary")
     private double schillerNNCloudAmbiguousLowerBoundaryValue;
 
+    @Parameter(defaultValue = "1.2",
+            label = " NN cloud ambiguous lower boundary",
+            description = " NN cloud ambiguous lower boundary")
+    private double schillerNNCloudAmbiguousUpperBoundaryValue;
+
+
     @Parameter(defaultValue = "2.7",
             label = " NN cloud ambiguous/sure separation value",
             description = " NN cloud ambiguous cloud ambiguous/sure separation value")
@@ -95,13 +101,16 @@ public class ProbaVClassificationOp extends Operator {
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
+    @SourceProduct(alias = "inlandWaterMaskCollocated", description = "External inland water product(optional)", optional = true)
+    private Product inlandWaterMaskProduct;
+
     // Proba-V bands:
     private Band[] probavReflectanceBands;
 
     private Band landWaterBand;
 
     static final int SM_F_CLEAR = 0;
-//    static final int SM_F_UNDEFINED = 1;
+    static final int SM_F_UNDEFINED = 1;
     static final int SM_F_CLOUD = 2;
 //    static final int SM_F_SNOWICE = 3;
     static final int SM_F_CLOUDSHADOW = 4;
@@ -193,30 +202,42 @@ public class ProbaVClassificationOp extends Operator {
                                                                                     y, x);
 
                     setCloudFlag(cloudFlagTargetTile, y, x, probaVAlgorithm);
-
+                    //TODO
                     // apply improvement from NN approach...
                     final double[] nnOutput = probaVAlgorithm.getNnOutput();
+                    final boolean smCloud = smFlagTile.getSampleBit(x, y, ProbaVClassificationOp.SM_F_CLOUD);
                     if (applySchillerNN) {
                         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                             if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
-                                    nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue) {
+                                    nnOutput[0] <= schillerNNCloudAmbiguousUpperBoundaryValue && smCloud) {
                                 // this would be as 'CLOUD_AMBIGUOUS'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, false);
                             }
                             if (nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue &&
-                                    nnOutput[0] <= schillerNNCloudSureSnowSeparationValue) {
+                                    nnOutput[0] <= schillerNNCloudSureSnowSeparationValue && smCloud) {
                                 // this would be as 'CLOUD_SURE'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, false);
                             }
-                            if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue) {
+                            if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue && cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE)) {
                                 // this would be as 'SNOW/ICE'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, false);
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, false);
+                            } else {
+                                    cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                             }
                         }
                         nnTargetTile.setSample(x, y, nnOutput[0]);
@@ -285,10 +306,33 @@ public class ProbaVClassificationOp extends Operator {
             probavReflectance[i] = probavReflectanceTiles[i].getSampleFloat(x, y);
         }
 
+        final boolean isBlueGood = smFlagTile.getSampleBit(x, y, SM_F_BLUE_GOOD);
+        final boolean isRedGood = smFlagTile.getSampleBit(x, y, SM_F_RED_GOOD);
+        final boolean isNirGood = smFlagTile.getSampleBit(x, y, SM_F_NIR_GOOD);
+        final boolean isSwirGood = smFlagTile.getSampleBit(x, y, SM_F_SWIR_GOOD);
+        final boolean isUndefined = smFlagTile.getSampleBit(x, y, SM_F_UNDEFINED);
+        probaVAlgorithm.setIsBlueGood(isBlueGood);
+        probaVAlgorithm.setIsRedGood(isRedGood);
+        probaVAlgorithm.setIsNirGood(isNirGood);
+        probaVAlgorithm.setIsSwirGood(isSwirGood);
+        probaVAlgorithm.setIsUndefined(isUndefined);
+
         final double altitude = computeGetasseAltitude(x, y);
         probaVAlgorithm.setElevation(altitude);
 
-        checkProbavReflectanceQuality(probaVAlgorithm, probavReflectance, smFlagTile, x, y);
+        boolean isLand;
+        if (useL1bLandWaterFlag) {
+            isLand = smFlagTile.getSampleBit(x, y, SM_F_LAND);
+            probaVAlgorithm.setL1bLand(isLand);
+            probaVAlgorithm.setIsWater(!isLand);
+        } else {
+            isLand = smFlagTile.getSampleBit(x, y, SM_F_LAND) &&
+                    watermaskFraction < WATERMASK_FRACTION_THRESH;
+            probaVAlgorithm.setL1bLand(isLand);
+            setIsWaterByFraction(watermaskFraction, probaVAlgorithm);
+        }
+
+        checkProbavReflectanceQuality(probaVAlgorithm, probavReflectance, isLand, isProcessingForC3SLot5, x, y);
         probaVAlgorithm.setRefl(probavReflectance);
 
         SchillerNeuralNetWrapper nnWrapper = vgtNeuralNet.get();
@@ -297,17 +341,6 @@ public class ProbaVClassificationOp extends Operator {
             inputVector[i] = Math.sqrt(probavReflectance[i]);
         }
         probaVAlgorithm.setNnOutput(nnWrapper.getNeuralNet().calc(inputVector));
-
-        if (useL1bLandWaterFlag) {
-            final boolean isLand = smFlagTile.getSampleBit(x, y, SM_F_LAND);
-            probaVAlgorithm.setL1bLand(isLand);
-            probaVAlgorithm.setIsWater(!isLand);
-        } else {
-            final boolean isLand = smFlagTile.getSampleBit(x, y, SM_F_LAND) &&
-                    watermaskFraction < WATERMASK_FRACTION_THRESH;
-            probaVAlgorithm.setL1bLand(isLand);
-            setIsWaterByFraction(watermaskFraction, probaVAlgorithm);
-        }
 
         return probaVAlgorithm;
     }
@@ -411,15 +444,15 @@ public class ProbaVClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, probaVAlgorithm.isWhite());
     }
 
-    private void setIsWaterByFraction(byte watermaskFraction, AbstractPixelProperties pixelProperties) {
+    private void setIsWaterByFraction(byte watermaskFraction, ProbaVAlgorithm probaVAlgorithm) {
         boolean isWater;
         if (watermaskFraction == WatermaskClassifier.INVALID_VALUE) {
             // fallback
-            isWater = pixelProperties.isL1Water();
+            isWater = probaVAlgorithm.isL1Water();
         } else {
             isWater = watermaskFraction >= WATERMASK_FRACTION_THRESH;
         }
-        pixelProperties.setIsWater(isWater);
+        probaVAlgorithm.setIsWater(isWater);
     }
 
     private double computeGetasseAltitude(float x, float y) {
@@ -438,22 +471,26 @@ public class ProbaVClassificationOp extends Operator {
 
     private void checkProbavReflectanceQuality(ProbaVAlgorithm probaVAlgorithm,
                                                float[] probavReflectance,
-                                               Tile smFlagTile,
+                                               boolean isProcessingLand,
+                                               boolean isProcessingForC3SLot5,
                                                int x, int y) {
-        final boolean isBlueGood = smFlagTile.getSampleBit(x, y, SM_F_BLUE_GOOD);
-        final boolean isRedGood = smFlagTile.getSampleBit(x, y, SM_F_RED_GOOD);
-        final boolean isNirGood = smFlagTile.getSampleBit(x, y, SM_F_NIR_GOOD);
-        final boolean isSwirGood = smFlagTile.getSampleBit(x, y, SM_F_SWIR_GOOD);
-        final boolean isProcessingLand = smFlagTile.getSampleBit(x, y, SM_F_LAND);
-        probaVAlgorithm.setIsBlueGood(isBlueGood);
-        probaVAlgorithm.setIsRedGood(isRedGood);
-        probaVAlgorithm.setIsNirGood(isNirGood);
-        probaVAlgorithm.setIsSwirGood(isSwirGood);
+        final boolean isBlueGood = probaVAlgorithm.isBlueGood();
+        final boolean isRedGood = probaVAlgorithm.isRedGood();
+        final boolean isNirGood = probaVAlgorithm.isNirGood();
+        final boolean isSwirGood = probaVAlgorithm.isSwirGood();
         probaVAlgorithm.setProcessingLand(isProcessingLand);
 
-        if (!isBlueGood || !isRedGood || !isNirGood || !isSwirGood || !isProcessingLand) {
-            for (int i = 0; i < probavReflectance.length; i++) {
-                probavReflectance[i] = Float.NaN;
+        if (isProcessingForC3SLot5){
+            if (!isSwirGood || !isProcessingLand) {
+                for (int i = 0; i < probavReflectance.length; i++) {
+                    probavReflectance[i] = Float.NaN;
+                }
+            }
+        } else {
+            if (!isBlueGood || !isRedGood || !isNirGood || !isSwirGood || !isProcessingLand) {
+                for (int i = 0; i < probavReflectance.length; i++) {
+                    probavReflectance[i] = Float.NaN;
+                }
             }
         }
     }

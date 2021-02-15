@@ -1,14 +1,12 @@
 package org.esa.snap.idepix.avhrr;
 
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.dem.ElevationModelRegistry;
 import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
-import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.pointop.*;
@@ -35,8 +33,14 @@ import java.io.InputStream;
         description = "Basic operator for pixel classification from AVHRR L1b data.")
 public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
 
-    @SourceProduct(alias = "aacl1b", description = "The source product.")
+    @SourceProduct(alias = "l1b", description = "The source product.")
     Product sourceProduct;
+
+    @SourceProduct(alias = "desertMask", optional = true)
+    private Product desertProduct;
+
+    @SourceProduct(alias = "desertMaskCollocated", optional = true)
+    private Product desertMaskProduct;
 
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
@@ -44,22 +48,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
     @TargetProduct(description = "The target product.")
     Product targetProduct;
 
-    @Parameter(defaultValue = "2.15",
-            label = " Schiller NN cloud ambiguous lower boundary ",
-            description = " Schiller NN cloud ambiguous lower boundary ")
-    double avhrracSchillerNNCloudAmbiguousLowerBoundaryValue;
-
-    @Parameter(defaultValue = "3.45",
-            label = " Schiller NN cloud ambiguous/sure separation value ",
-            description = " Schiller NN cloud ambiguous cloud ambiguous/sure separation value ")
-    double avhrracSchillerNNCloudAmbiguousSureSeparationValue;
-
-    @Parameter(defaultValue = "4.45",
-            label = " Schiller NN cloud sure/snow separation value ",
-            description = " Schiller NN cloud ambiguous cloud sure/snow separation value ")
-    double avhrracSchillerNNCloudSureSnowSeparationValue;
-
-    ElevationModel getasseElevationModel;
+    private static final int SOURCE_DESERT_SAMPLE_INDEX = 11;
 
     @Override
     public void prepareInputs() throws OperatorException {
@@ -91,11 +80,11 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         getasseElevationModel = demDescriptor.createDem(Resampling.BILINEAR_INTERPOLATION);
     }
 
-    static double computeRelativeAzimuth(double vaaRad, double saaRad) {
+    private static double computeRelativeAzimuth(double vaaRad, double saaRad) {
         return correctRelAzimuthRange(vaaRad, saaRad);
     }
 
-    static double[] computeAzimuthAngles(double sza, double vza,
+    private static double[] computeAzimuthAngles(double sza, double vza,
                                          GeoPos satPosition,
                                          GeoPos pointPosition,
                                          SunPosition sunPosition) {
@@ -127,7 +116,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         return new double[]{saaRad, vaaRad, greatCirclePointToSatRad};
     }
 
-    static double correctRelAzimuthRange(double vaaRad, double saaRad) {
+    private static double correctRelAzimuthRange(double vaaRad, double saaRad) {
         double relAzimuth = saaRad - vaaRad;
         if (relAzimuth < -Math.PI) {
             relAzimuth += 2.0 * Math.PI;
@@ -137,7 +126,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         return Math.abs(relAzimuth);
     }
 
-    static double computeGreatCircleFromPointToSat(double latPointRad, double lonPointRad, double latSatRad, double lonSatRad) {
+    private static double computeGreatCircleFromPointToSat(double latPointRad, double lonPointRad, double latSatRad, double lonSatRad) {
         // http://mathworld.wolfram.com/GreatCircle.html, eq. (5):
         final double greatCirclePointToSat = 0.001 * RsMathUtils.MEAN_EARTH_RADIUS *
                 Math.acos(Math.cos(latPointRad) * Math.cos(latSatRad) * Math.cos(lonPointRad - lonSatRad) +
@@ -147,54 +136,18 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         return greatCirclePointToSat / (0.001 * RsMathUtils.MEAN_EARTH_RADIUS);
     }
 
-    static double computeSaa(double sza, double latPointRad, double lonPointRad, double latSunRad, double lonSunRad) {
-        double arg = (Math.sin(latSunRad) - Math.sin(latPointRad) * Math.cos(sza * MathUtils.DTOR)) /
-                (Math.cos(latPointRad) * Math.sin(sza * MathUtils.DTOR));
-        arg = Math.min(Math.max(arg, -1.0), 1.0);    // keep in range [-1.0, 1.0]
-        double saaRad = Math.acos(arg);
-        if (Math.sin(lonSunRad - lonPointRad) < 0.0) {
-            saaRad = 2.0 * Math.PI - saaRad;
-        }
-        return saaRad;
-    }
-
-    static double computeVaa(double latPointRad, double lonPointRad, double latSatRad, double lonSatRad,
-                             double greatCirclePointToSatRad) {
-        double arg = (Math.sin(latSatRad) - Math.sin(latPointRad) * Math.cos(greatCirclePointToSatRad)) /
-                (Math.cos(latPointRad) * Math.sin(greatCirclePointToSatRad));
-        arg = Math.min(Math.max(arg, -1.0), 1.0);    // keep in range [-1.0, 1.0]
-        double vaaRad = Math.acos(arg);
-        if (Math.sin(lonSatRad - lonPointRad) < 0.0) {
-            vaaRad = 2.0 * Math.PI - vaaRad;
-        }
-
-        return vaaRad;
-    }
-
-    void readSchillerNets() {
-        try (InputStream is = getClass().getResourceAsStream(AVHRRAC_NET_NAME)) {
-            avhrracNeuralNet = SchillerNeuralNetWrapper.create(is);
-        } catch (IOException e) {
-            throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
-        }
-    }
-
-    GeoPos computeSatPosition(int y) {
-        return getGeoPos(sourceProduct.getSceneRasterWidth() / 2, y);    // LAC_NADIR = 1024.5
-    }
-
     @Override
-    void runAvhrrAcAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        AvhrrAlgorithm aacAlgorithm = new AvhrrAlgorithm();
-//        aacAlgorithm.setNoaaId(noaaId);
-//        aacAlgorithm.setDistanceCorr(getDistanceCorr());
+    void runAvhrrAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
+        Avhrr2Algorithm avhrr2Algorithm = new Avhrr2Algorithm();
 
         final double sza = sourceSamples[AvhrrConstants.SRC_USGS_SZA].getDouble();
         final double latitude = sourceSamples[AvhrrConstants.SRC_USGS_LAT].getDouble();
         final double longitude = sourceSamples[AvhrrConstants.SRC_USGS_LON].getDouble();
-        aacAlgorithm.setLatitude(latitude);
-        aacAlgorithm.setLongitude(longitude);
-//        aacAlgorithm.setSza(sza);
+        avhrr2Algorithm.setLatitude(latitude);
+        avhrr2Algorithm.setLongitude(longitude);
+        if (sourceSamples.length == 10) {
+            avhrr2Algorithm.setDesert(sourceSamples[AvhrrConstants.SRC_USGS_DESERTMASK].getBoolean());
+        }
         double vza = Math.abs(vzaTable.getVza(x));  // !!!
 
         final GeoPos satPosition = computeSatPosition(y);
@@ -217,14 +170,14 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         final double albedo2Norm = albedo2 / d;
 
         int targetSamplesIndex;
-        if (albedo1 >= 0.0 && albedo2 >= 0.0 && !AvhrrAcUtils.anglesInvalid(sza, vza, azimuthAngles[0], azimuthAngles[1])) {
+        if (albedo1 >= 0.0 && albedo2 >= 0.0 && AvhrrAcUtils.anglesValid(sza, vza, azimuthAngles[0], azimuthAngles[1])) {
 
             avhrrRadiance[0] = convertBetweenAlbedoAndRadiance(albedo1, sza, ALBEDO_TO_RADIANCE, 0);
             avhrrRadiance[1] = convertBetweenAlbedoAndRadiance(albedo2, sza, ALBEDO_TO_RADIANCE, 1);
             avhrrRadiance[2] = sourceSamples[AvhrrConstants.SRC_USGS_RADIANCE_3].getDouble();           // mW*cm/(m^2*sr)
             avhrrRadiance[3] = sourceSamples[AvhrrConstants.SRC_USGS_RADIANCE_4].getDouble();           // mW*cm/(m^2*sr)
             avhrrRadiance[4] = sourceSamples[AvhrrConstants.SRC_USGS_RADIANCE_5].getDouble();           // mW*cm/(m^2*sr)
-            aacAlgorithm.setRadiance(avhrrRadiance);
+            avhrr2Algorithm.setRadiance(avhrrRadiance);
 
             float waterFraction = Float.NaN;
             // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
@@ -232,7 +185,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
                 waterFraction = sourceSamples[AvhrrConstants.SRC_USGS_WATERFRACTION].getFloat();
             }
 
-            SchillerNeuralNetWrapper nnWrapper = avhrracNeuralNet.get();
+            SchillerNeuralNetWrapper nnWrapper = avhrrNeuralNet.get();
             double[] inputVector = nnWrapper.getInputVector();
             inputVector[0] = sza;
             inputVector[1] = vza;
@@ -241,36 +194,29 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
             inputVector[4] = Math.sqrt(avhrrRadiance[1]);
             inputVector[5] = Math.sqrt(avhrrRadiance[3]);
             inputVector[6] = Math.sqrt(avhrrRadiance[4]);
-            aacAlgorithm.setRadiance(avhrrRadiance);
-            aacAlgorithm.setWaterFraction(waterFraction);
+            avhrr2Algorithm.setRadiance(avhrrRadiance);
+            avhrr2Algorithm.setWaterFraction(waterFraction);
 
             double[] nnOutput = nnWrapper.getNeuralNet().calc(inputVector);
 
-            aacAlgorithm.setNnOutput(nnOutput);
-            aacAlgorithm.setAmbiguousLowerBoundaryValue(avhrracSchillerNNCloudAmbiguousLowerBoundaryValue);
-            aacAlgorithm.setAmbiguousSureSeparationValue(avhrracSchillerNNCloudAmbiguousSureSeparationValue);
-            aacAlgorithm.setSureSnowSeparationValue(avhrracSchillerNNCloudSureSnowSeparationValue);
+            avhrr2Algorithm.setNnOutput(nnOutput);
+            avhrr2Algorithm.setAmbiguousSureSeparationValue(avhrrNNCloudAmbiguousSureSeparationValue);
+            avhrr2Algorithm.setSureSnowSeparationValue(avhrrNNCloudSureSnowSeparationValue);
 
-            aacAlgorithm.setReflCh1(albedo1Norm / 100.0); // on [0,1]        --> put here albedo_norm now!!
-            aacAlgorithm.setReflCh2(albedo2Norm / 100.0); // on [0,1]
+            avhrr2Algorithm.setReflCh1(albedo1Norm / 100.0); // on [0,1]        --> put here albedo_norm now!!
+            avhrr2Algorithm.setReflCh2(albedo2Norm / 100.0); // on [0,1]
 
-//            final double btCh3 = AvhrrAcUtils.convertRadianceToBtOld(avhrrRadiance[2], 3) - 273.15;     // !! todo: K or C, make uniform!
-//            final double btCh3 = AvhrrAcUtils.convertRadianceToBtOld(avhrrRadiance[2], 3);     // GK,MB 20151102: use K everywhere!!
             final double btCh3 = AvhrrAcUtils.convertRadianceToBt(noaaId, rad2BTTable, avhrrRadiance[2], 3, waterFraction);     // GK,MB 20151102: use K everywhere!!
-//            aacAlgorithm.setBtCh3(btCh3 + 273.15);
-            aacAlgorithm.setBtCh3(btCh3);
-//            final double btCh4 = AvhrrAcUtils.convertRadianceToBtOld(avhrrRadiance[3], 4);
             final double btCh4 = AvhrrAcUtils.convertRadianceToBt(noaaId, rad2BTTable, avhrrRadiance[3], 4, waterFraction);
-            aacAlgorithm.setBtCh4(btCh4);
-//            final double btCh5 = AvhrrAcUtils.convertRadianceToBtOld(avhrrRadiance[4], 5);
+            avhrr2Algorithm.setBtCh4(btCh4);
             final double btCh5 = AvhrrAcUtils.convertRadianceToBt(noaaId, rad2BTTable, avhrrRadiance[4], 5, waterFraction);
-            aacAlgorithm.setBtCh5(btCh5);
-            aacAlgorithm.setElevation(altitude);
+            avhrr2Algorithm.setBtCh5(btCh5);
+            avhrr2Algorithm.setElevation(altitude);
 
             final double albedo3 = calculateReflectancePartChannel3b(avhrrRadiance[2], btCh4, btCh5, sza);
-            aacAlgorithm.setReflCh3(albedo3); // on [0,1]
+            avhrr2Algorithm.setReflCh3(albedo3); // on [0,1]
 
-            setClassifFlag(targetSamples, aacAlgorithm);
+            setClassifFlag(targetSamples, avhrr2Algorithm);
             targetSamplesIndex = 1;
             targetSamples[targetSamplesIndex++].set(vza);
             targetSamples[targetSamplesIndex++].set(sza);
@@ -304,27 +250,12 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
             avhrrRadiance[1] = Float.NaN;
         }
 
-        if (aacCopyRadiances) {
-//            for (int i = 0; i < AvhrrAcConstants.AVHRR_AC_RADIANCE_BAND_NAMES.length; i++) {
+        if (copyRadiances) {
             for (int i = 2; i < AvhrrConstants.AVHRR_AC_RADIANCE_BAND_NAMES.length; i++) {
                 // do just radiances 3-5
                 targetSamples[targetSamplesIndex + (i-2)].set(avhrrRadiance[i]);
             }
         }
-    }
-
-    private double computeGetasseAltitude(float x, float y)  {
-        final PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
-        GeoPos geoPos = sourceProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
-        double altitude;
-        try {
-            altitude = getasseElevationModel.getElevation(geoPos);
-        } catch (Exception e) {
-            // todo
-            e.printStackTrace();
-            altitude = 0.0;
-        }
-        return altitude;
     }
 
     @Override
@@ -367,12 +298,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         for (int i = 0; i < 3; i++) {
             sampleConfigurer.defineSample(index++, AvhrrConstants.AVHRR_AC_RADIANCE_BAND_NAMES[i + 2]);
         }
-
-        // BEAM: todo reactivate this once we have our SRTM mask in SNAP
         sampleConfigurer.defineSample(index, IdepixConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
-
-        // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
-//        sampleConfigurer.defineSample(index, AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME, waterMaskProduct);
     }
 
     @Override
@@ -394,7 +320,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         sampleConfigurer.defineSample(index++, "rt_3");
 
         // radiances:
-        if (aacCopyRadiances) {
+        if (copyRadiances) {
             for (int i = 2; i < AvhrrConstants.AVHRR_AC_RADIANCE_BAND_NAMES.length; i++) {
                 sampleConfigurer.defineSample(index++, AvhrrConstants.AVHRR_AC_RADIANCE_BAND_NAMES[i]);
             }
@@ -489,7 +415,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         refl3Band.setNoDataValueUsed(true);
 
         // radiances:
-        if (aacCopyRadiances) {
+        if (copyRadiances) {
             for (int i = 2; i < AvhrrConstants.AVHRR_AC_RADIANCE_BAND_NAMES.length; i++) {
                 Band radianceBand = productConfigurer.addBand("radiance_" + (i + 1), ProductData.TYPE_FLOAT32);
                 radianceBand.setDescription("TOA radiance band " + (i + 1));
@@ -499,6 +425,43 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
             }
         }
     }
+
+    void readSchillerNets() {
+        try (InputStream is = getClass().getResourceAsStream(AVHRRAC_NET_NAME)) {
+            avhrrNeuralNet = SchillerNeuralNetWrapper.create(is);
+        } catch (IOException e) {
+            throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
+        }
+    }
+
+    GeoPos computeSatPosition(int y) {
+        return getGeoPos(sourceProduct.getSceneRasterWidth() / 2, y);    // LAC_NADIR = 1024.5
+    }
+
+    private static double computeSaa(double sza, double latPointRad, double lonPointRad, double latSunRad, double lonSunRad) {
+        double arg = (Math.sin(latSunRad) - Math.sin(latPointRad) * Math.cos(sza * MathUtils.DTOR)) /
+                (Math.cos(latPointRad) * Math.sin(sza * MathUtils.DTOR));
+        arg = Math.min(Math.max(arg, -1.0), 1.0);    // keep in range [-1.0, 1.0]
+        double saaRad = Math.acos(arg);
+        if (Math.sin(lonSunRad - lonPointRad) < 0.0) {
+            saaRad = 2.0 * Math.PI - saaRad;
+        }
+        return saaRad;
+    }
+
+    private static double computeVaa(double latPointRad, double lonPointRad, double latSatRad, double lonSatRad,
+                                     double greatCirclePointToSatRad) {
+        double arg = (Math.sin(latSatRad) - Math.sin(latPointRad) * Math.cos(greatCirclePointToSatRad)) /
+                (Math.cos(latPointRad) * Math.sin(greatCirclePointToSatRad));
+        arg = Math.min(Math.max(arg, -1.0), 1.0);    // keep in range [-1.0, 1.0]
+        double vaaRad = Math.acos(arg);
+        if (Math.sin(lonSatRad - lonPointRad) < 0.0) {
+            vaaRad = 2.0 * Math.PI - vaaRad;
+        }
+
+        return vaaRad;
+    }
+
 
     /**
      * The Service Provider Interface (SPI) for the operator.

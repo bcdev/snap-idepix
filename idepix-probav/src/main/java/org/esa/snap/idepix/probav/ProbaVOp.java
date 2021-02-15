@@ -1,9 +1,6 @@
 package org.esa.snap.idepix.probav;
 
-import org.esa.snap.idepix.core.AlgorithmSelector;
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.util.IdepixIO;
-import org.esa.snap.idepix.core.operators.BasisOp;
+import org.esa.snap.collocation.CollocateOp;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -12,6 +9,10 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.idepix.core.AlgorithmSelector;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.BasisOp;
+import org.esa.snap.idepix.core.util.IdepixIO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +55,11 @@ public class ProbaVOp extends BasisOp {
             description = " NN cloud ambiguous lower boundary")
     private double schillerNNCloudAmbiguousLowerBoundaryValue;
 
+    @Parameter(defaultValue = "1.2",
+            label = " NN cloud ambiguous upper boundary",
+            description = " NN cloud ambiguous upper boundary")
+    private double schillerNNCloudAmbiguousUpperBoundaryValue;
+
     @Parameter(defaultValue = "2.7",
             label = " NN cloud ambiguous/sure separation value",
             description = " NN cloud ambiguous cloud ambiguous/sure separation value")
@@ -88,11 +94,24 @@ public class ProbaVOp extends BasisOp {
             description = "The Proba-V L1b source product.")
     private Product sourceProduct;
 
+
+    @SourceProduct(alias = "inlandWaterProduct",
+            label = "External inland water product",
+            optional = true,
+            description = "External inland water product (optional)")
+    private Product inlandWaterProduct;
+
+
+
     private Product cloudProduct;
+    private Product inlandWaterMaskProduct;
     private Product postProcessingProduct;
 
     @Override
     public void initialize() throws OperatorException {
+        sourceProduct = getSourceProduct("sourceProduct");
+        inlandWaterProduct = getSourceProduct("inlandWaterProduct");
+
         final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.PROBAV);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
@@ -112,6 +131,17 @@ public class ProbaVOp extends BasisOp {
         Map<String, Product> cloudInput = new HashMap<>(4);
         cloudInput.put("l1b", sourceProduct);
         cloudInput.put("waterMask", waterMaskProduct);
+
+
+        if (inlandWaterProduct != null) {
+            inlandWaterMaskProduct = collocateInlandWaterProduct(sourceProduct, inlandWaterProduct);
+        }
+        if (inlandWaterMaskProduct != null) {
+            //setSourceProduct("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+            getLogger().info("inland water mask " + inlandWaterMaskProduct.getName() + " applied");
+        }
+
+        cloudInput.put("inlandWaterMaskCollocated", inlandWaterMaskProduct);
 
         Map<String, Object> cloudClassificationParameters = createCloudClassificationParameters();
 
@@ -134,10 +164,13 @@ public class ProbaVOp extends BasisOp {
         HashMap<String, Product> input = new HashMap<>();
         input.put("l1b", sourceProduct);
         input.put("probavCloud", cloudProduct);
+        input.put("inlandWaterMaskCollocated", inlandWaterMaskProduct);
+
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
+        params.put("isProcessingForC3SLot5", isProcessingForC3SLot5);
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ProbaVPostProcessOp.class),
                                                             params, input);
     }
@@ -152,12 +185,24 @@ public class ProbaVOp extends BasisOp {
         cloudClassificationParameters.put("isProcessingForC3SLot5", isProcessingForC3SLot5);
         cloudClassificationParameters.put("schillerNNCloudAmbiguousLowerBoundaryValue",
                                             schillerNNCloudAmbiguousLowerBoundaryValue);
+        cloudClassificationParameters.put("schillerNNCloudAmbiguousUpperBoundaryValue",
+                                            schillerNNCloudAmbiguousUpperBoundaryValue);
         cloudClassificationParameters.put("schillerNNCloudAmbiguousSureSeparationValue",
                                             schillerNNCloudAmbiguousSureSeparationValue);
         cloudClassificationParameters.put("schillerNNCloudSureSnowSeparationValue",
                                             schillerNNCloudSureSnowSeparationValue);
 
         return cloudClassificationParameters;
+    }
+
+    private Product collocateInlandWaterProduct(Product sourceProduct, Product inlandWaterProduct) {
+        CollocateOp collocateOp = new CollocateOp();
+        collocateOp.setMasterProduct(sourceProduct);
+        collocateOp.setSlaveProduct(inlandWaterProduct);
+        collocateOp.setParameter("resamplingType", "NEAREST_NEIGHBOUR");
+        collocateOp.setRenameMasterComponents(false);
+        collocateOp.setRenameSlaveComponents(false);
+        return collocateOp.getTargetProduct();
     }
 
     /**
