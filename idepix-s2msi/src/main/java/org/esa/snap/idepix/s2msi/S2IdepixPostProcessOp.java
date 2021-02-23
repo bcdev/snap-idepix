@@ -1,6 +1,9 @@
 package org.esa.snap.idepix.s2msi;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.datamodel.GeneralFilterBand;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixCloudShadowOp;
 import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixPreCloudShadowOp;
 import org.esa.snap.idepix.s2msi.operators.mountainshadow.S2IdepixMountainShadowOp;
@@ -122,6 +125,19 @@ public class S2IdepixPostProcessOp extends Operator {
         ProductUtils.copyBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS, s2ClassifProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
+
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        pm.beginTask("Preparing post-processing", -1);
+        try {
+
+
+        }finally {
+            pm.done();
+        }
+    }
+
+
 
     private Product createTargetProduct(String name, String type) {
         final int sceneWidth = s2ClassifProduct.getSceneRasterWidth();
