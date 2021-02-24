@@ -23,7 +23,13 @@ import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.VirtualBand;
+
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CIRRUS_AMBIGUOUS_NAME;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CIRRUS_SURE_NAME;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_WATER_NAME;
 
 /**
  * <p>Currently, bright urban areas are flagged within the Idepix MSI cloud flag. To distinguish urban areas from clouds
@@ -69,15 +75,38 @@ import org.esa.snap.core.datamodel.VirtualBand;
  */
 public class CloudUrbanDistinction {
 
+    private static final double CDI_THRESHOLD = -0.5;
+
     private final Product l1cProduct;
+    private final Product s2ClassifProduct;
+    private final Band filteredIdepixCloudFlag;
+    private final Band cdiBand;
 
     /**
      * Creates a new instance of the Cloud-Urban-Distinction algorithm
-     * @param l1cProduct the product which is used to get the necessary bands from and also a owner
-     *                   of temporary virtual bands.
+     *
+     * @param l1cProduct       the product which is used to get the necessary bands from and also a owner
+     *                         of temporary virtual bands.
+     * @param s2ClassifProduct the already classified product and where the the IDEPIX_CLOUD flag shall be refined
      */
-    public CloudUrbanDistinction(Product l1cProduct) {
+    public CloudUrbanDistinction(Product l1cProduct, Product s2ClassifProduct) {
         this.l1cProduct = l1cProduct;
+        this.s2ClassifProduct = s2ClassifProduct;
+        filteredIdepixCloudFlag = createFilteredIdepixCloudFlag();
+        cdiBand = createCdiBand();
+    }
+
+    public boolean correctCloudFlag(int x, int y) {
+        // if IDEPIX_CIRRUS_SURE or IDEPIX_CIRRUS_AMIGUOUS or IDEPIX_WATER then IDEPIX_CLOUD else if cloud_filter = 255 then IDEPIX_CLOUD else CDI<-0.5 and IDEPIX_CLOUD
+        final ProductNodeGroup<Mask> maskGroup = s2ClassifProduct.getMaskGroup();
+        final boolean idepix_cirrus_sure = maskGroup.get(IDEPIX_CIRRUS_SURE_NAME).isPixelValid(x, y);
+        final boolean idepix_cirrus_ambiguous = maskGroup.get(IDEPIX_CIRRUS_AMBIGUOUS_NAME).isPixelValid(x, y);
+        final boolean idepix_water = maskGroup.get(IDEPIX_WATER_NAME).isPixelValid(x, y);
+        final boolean idepix_cloud = maskGroup.get(IDEPIX_CLOUD).isPixelValid(x, y);
+        if (idepix_cirrus_sure || idepix_cirrus_ambiguous || idepix_water || filteredIdepixCloudFlag.getSampleFloat(x, y) == 255) {
+            return idepix_cloud;
+        }
+        return cdiBand.getSampleFloat(x, y) < CDI_THRESHOLD && idepix_cloud;
     }
 
     /**
@@ -86,7 +115,7 @@ public class CloudUrbanDistinction {
      *
      * @return the CDI band
      */
-    public Band calculateCdiBand() {
+    public Band createCdiBand() {
         Band ratio7_8A = getRatio7_8A();
         Band ratio8_8A = getRatio8_8A();
         Band stdDev7_ratio7_8A = computeStdDev7(ratio7_8A);
@@ -101,8 +130,8 @@ public class CloudUrbanDistinction {
      *
      * @return the filtered cloud flag
      */
-    public Band filterIdepixCloudFlag() {
-        final Mask cloudMask = l1cProduct.getMaskGroup().get("IDEPIX_CLOUD)");
+    public Band createFilteredIdepixCloudFlag() {
+        final Mask cloudMask = s2ClassifProduct.getMaskGroup().get("IDEPIX_CLOUD)");
         return computeMean11(cloudMask);
     }
 
