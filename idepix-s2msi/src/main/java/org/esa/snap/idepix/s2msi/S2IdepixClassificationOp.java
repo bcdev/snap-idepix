@@ -233,7 +233,7 @@ public class S2IdepixClassificationOp extends Operator {
         }
 
 
-        final Band cloudFlagTargetBand = targetProduct.getBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        final Band cloudFlagTargetBand = targetProduct.getBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS);
         final Tile cloudFlagTargetTile = targetTiles.get(cloudFlagTargetBand);
 
         final Tile szaTile = getSourceTile(szaBand, rectangle);
@@ -538,8 +538,8 @@ public class S2IdepixClassificationOp extends Operator {
 
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
-        classifFlagBand = targetProduct.addBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT32);
-        FlagCoding flagCoding = S2IdepixUtils.createIdepixFlagCoding(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        classifFlagBand = targetProduct.addBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT32);
+        FlagCoding flagCoding = S2IdepixUtils.createIdepixFlagCoding(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS);
         classifFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 

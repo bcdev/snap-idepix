@@ -55,8 +55,8 @@ public class S2IdepixCloudBufferOp extends Operator {
                                                              classifiedProduct.getSceneRasterHeight()),
                                                cloudBufferWidth, cloudBufferWidth);
 
-        origClassifFlagBand = classifiedProduct.getBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-        ProductUtils.copyBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
+        origClassifFlagBand = classifiedProduct.getBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS);
+        ProductUtils.copyBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
         setTargetProduct(cloudBufferProduct);
     }
 

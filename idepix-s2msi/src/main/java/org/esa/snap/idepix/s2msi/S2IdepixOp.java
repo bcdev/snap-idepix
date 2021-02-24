@@ -176,8 +176,8 @@ public class S2IdepixOp extends Operator {
                 S2IdepixUtils.removeReflectancesForCloudShadow(targetProduct);
             }
 
-            Band cloudFlagBand = targetProduct.getBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-            cloudFlagBand.setSourceImage(postProcessingProduct.getBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS).getSourceImage());
+            Band cloudFlagBand = targetProduct.getBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS);
+            cloudFlagBand.setSourceImage(postProcessingProduct.getBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS).getSourceImage());
         } else {
             targetProduct = s2ClassifProduct;
         }

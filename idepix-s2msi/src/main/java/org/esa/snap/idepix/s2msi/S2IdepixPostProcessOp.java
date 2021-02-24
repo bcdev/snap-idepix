@@ -1,14 +1,6 @@
 package org.esa.snap.idepix.s2msi;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.GeneralFilterBand;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.VirtualBand;
-import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixCloudShadowOp;
-import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixPreCloudShadowOp;
-import org.esa.snap.idepix.s2msi.operators.mountainshadow.S2IdepixMountainShadowOp;
-import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
-import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -20,10 +12,21 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixCloudShadowOp;
+import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixPreCloudShadowOp;
+import org.esa.snap.idepix.s2msi.operators.mountainshadow.S2IdepixMountainShadowOp;
 
 import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLASSIF_FLAGS;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_BUFFER;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_SHADOW;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLUSTERED_CLOUD_SHADOW;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_INVALID;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_POTENTIAL_SHADOW;
 
 /**
  * Operator used to consolidate cloud flag for Sentinel-2:
@@ -88,9 +91,9 @@ public class S2IdepixPostProcessOp extends Operator {
         Product postProcessedCloudProduct = createTargetProduct(s2ClassifProduct.getName(),
                                                                 s2ClassifProduct.getProductType());
 
-        s2ClassifFlagBand = s2ClassifProduct.getBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        s2ClassifFlagBand = s2ClassifProduct.getBand(IDEPIX_CLASSIF_FLAGS);
         if (s2CloudBufferProduct != null) {
-            cloudBufferFlagBand = s2CloudBufferProduct.getBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+            cloudBufferFlagBand = s2CloudBufferProduct.getBand(IDEPIX_CLASSIF_FLAGS);
         }
 
         if (computeMountainShadow) {
@@ -122,21 +125,9 @@ public class S2IdepixPostProcessOp extends Operator {
             cloudShadowFlagBand = cloudShadowProduct.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW);
         }
 
-        ProductUtils.copyBand(S2IdepixUtils.IDEPIX_CLASSIF_FLAGS, s2ClassifProduct, postProcessedCloudProduct, false);
+        ProductUtils.copyBand(IDEPIX_CLASSIF_FLAGS, s2ClassifProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
-
-    @Override
-    public void doExecute(ProgressMonitor pm) throws OperatorException {
-        pm.beginTask("Preparing post-processing", -1);
-        try {
-
-
-        }finally {
-            pm.done();
-        }
-    }
-
 
 
     private Product createTargetProduct(String name, String type) {
@@ -166,7 +157,7 @@ public class S2IdepixPostProcessOp extends Operator {
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
 
                 if (targetRectangle.contains(x, y)) {
-                    boolean isInvalid = targetTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_INVALID);
+                    boolean isInvalid = targetTile.getSampleBit(x, y, IDEPIX_INVALID);
                     if (!isInvalid) {
                         combineFlags(x, y, classifFlagTile, targetTile);
                         if (s2CloudBufferProduct != null) {
@@ -182,7 +173,7 @@ public class S2IdepixPostProcessOp extends Operator {
                 checkForCancellation();
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                     final boolean mountainShadow = mountainShadowFlagTile.getSampleInt(x, y) > 0;
-                    targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW, mountainShadow);
+                    targetTile.setSample(x, y, IDEPIX_MOUNTAIN_SHADOW, mountainShadow);
                 }
             }
         }
@@ -197,16 +188,16 @@ public class S2IdepixPostProcessOp extends Operator {
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                     final int flagValue = flagTile.getSampleInt(x, y);
                     if ((flagValue & recommendedCloudShadow) == recommendedCloudShadow ) {
-                        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD_SHADOW, true);
+                        targetTile.setSample(x, y, IDEPIX_CLOUD_SHADOW, true);
                     }
                     if ((flagValue & cloudBufferFlag) == cloudBufferFlag) {
-                        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD_BUFFER, true);
+                        targetTile.setSample(x, y, IDEPIX_CLOUD_BUFFER, true);
                     }
                     if ((flagValue & potentialShadowFlag) == potentialShadowFlag) {
-                        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_POTENTIAL_SHADOW, true);
+                        targetTile.setSample(x, y, IDEPIX_POTENTIAL_SHADOW, true);
                     }
                     if ((flagValue & clusteredCloudShadowFlag) == clusteredCloudShadowFlag) {
-                        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLUSTERED_CLOUD_SHADOW, true);
+                        targetTile.setSample(x, y, IDEPIX_CLUSTERED_CLOUD_SHADOW, true);
                     }
                 }
             }
