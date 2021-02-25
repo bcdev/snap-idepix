@@ -1,11 +1,6 @@
 package org.esa.snap.idepix.spotvgt;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.pixel.AbstractPixelProperties;
-import org.esa.snap.idepix.core.util.IdepixIO;
-import org.esa.snap.idepix.core.util.IdepixUtils;
-import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -16,6 +11,11 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.pixel.AbstractPixelProperties;
+import org.esa.snap.idepix.core.util.IdepixIO;
+import org.esa.snap.idepix.core.util.IdepixUtils;
+import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.watermask.operator.WatermaskClassifier;
 
 import java.awt.*;
@@ -82,8 +82,6 @@ public class VgtClassificationOp extends Operator {
             description = "If set, processing mode for C3S-Lot5 project is applied (uses specific tests)")
     private boolean isProcessingForC3SLot5;
 
-
-
     // VGT bands:
     private Band[] vgtReflectanceBands;
 
@@ -101,7 +99,7 @@ public class VgtClassificationOp extends Operator {
 
     static final int SM_F_CLOUD_1 = 0;
     static final int SM_F_CLOUD_2 = 1;
-//    public static final int SM_F_ICE_SNOW = 2;
+    static final int SM_F_ICE_SNOW = 2;
     private static final int SM_F_LAND = 3;
     private static final int SM_F_MIR_GOOD = 4;
     private static final int SM_F_B3_GOOD = 5;
@@ -181,13 +179,17 @@ public class VgtClassificationOp extends Operator {
                    // apply improvement from NN approach...
                     final double[] nnOutput = vgtAlgorithm.getNnOutput();
                     final boolean smCloud = smFlagTile.getSampleBit(x, y, VgtClassificationOp.SM_F_CLOUD_1) &&smFlagTile.getSampleBit(x, y, VgtClassificationOp.SM_F_CLOUD_2);
+                    final boolean smSnow = smFlagTile.getSampleBit(x, y, VgtClassificationOp.SM_F_ICE_SNOW);
+                    final boolean idepixSnow = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
+                    final boolean idepixCloudSure = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+                    final boolean idepixCloudAmbiguous = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS);
                     if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
                         cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
                         cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
                         cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
                         cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                         if (nnOutput[0] > nnCloudAmbiguousLowerBoundaryValue &&
-                                nnOutput[0] <= nnCloudAmbiguousSureSeparationValue && smCloud) {
+                                nnOutput[0] <= nnCloudAmbiguousSureSeparationValue && (smCloud || idepixCloudSure)) {
                             // this would be as 'CLOUD_AMBIGUOUS'...
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
@@ -197,7 +199,7 @@ public class VgtClassificationOp extends Operator {
                             cloudFlagTargetTile.setSample(x, y, VgtConstants.IDEPIX_CLEAR_WATER, false);
                         }
                         if (nnOutput[0] > nnCloudAmbiguousSureSeparationValue &&
-                                nnOutput[0] <= nnCloudSureSnowSeparationValue && smCloud) {
+                                nnOutput[0] <= nnCloudSureSnowSeparationValue && (smCloud || idepixCloudAmbiguous) ) {
                             // this would be as 'CLOUD_SURE'...
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
@@ -206,7 +208,7 @@ public class VgtClassificationOp extends Operator {
                             cloudFlagTargetTile.setSample(x, y, VgtConstants.IDEPIX_CLEAR_LAND, false);
                             cloudFlagTargetTile.setSample(x, y, VgtConstants.IDEPIX_CLEAR_WATER, false);
                         }
-                        if (nnOutput[0] > nnCloudSureSnowSeparationValue && cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE)) {
+                        if (nnOutput[0] > nnCloudSureSnowSeparationValue && (idepixSnow || smSnow)) {
                             // this would be as 'SNOW/ICE'...
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
@@ -437,6 +439,8 @@ public class VgtClassificationOp extends Operator {
         pixelProperties.setIsWater(isWater);
     }
 
+
+
     private boolean isCoastlinePixel(int x, int y, int waterFraction) {
         // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
         // values bigger than 100 indicate no data
@@ -454,6 +458,11 @@ public class VgtClassificationOp extends Operator {
     }
 
     private void checkVgtReflectanceQuality(float[] vgtReflectance, Tile smFlagTile, int x, int y) {
+
+//        final boolean isB0Good = smFlagTile.getSampleBit(x, y, SM_F_B0_GOOD);
+//        final boolean isB2Good = smFlagTile.getSampleBit(x, y, SM_F_B2_GOOD);
+//        final boolean isB3Good = smFlagTile.getSampleBit(x, y, SM_F_B3_GOOD);
+//        final boolean isMirGood = smFlagTile.getSampleBit(x, y, SM_F_MIR_GOOD) || vgtReflectance[3] <= 0.65; // MIR_refl
         final boolean isBlueGood = smFlagTile.getSampleBit(x, y, SM_F_B0_GOOD);
         final boolean isRedGood = smFlagTile.getSampleBit(x, y, SM_F_B2_GOOD);
         final boolean isNirGood =  smFlagTile.getSampleBit(x, y, SM_F_B3_GOOD);
