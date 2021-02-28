@@ -12,36 +12,42 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
-import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
+import org.esa.snap.idepix.s2msi.UrbanCloudDistinction;
 import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
 import java.awt.*;
 
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.*;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS;
+
 /**
  * Adds a cloud buffer to cloudy pixels.
- *
- * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.S2Cloudbuffer",
+@OperatorMetadata(alias = "Idepix.S2CloudPostProcess",
         version = "3.0",
         internal = true,
         authors = "Olaf Danne",
-        copyright = "(c) 2016 by Brockmann Consult",
-        description = "Adds a cloud buffer to cloudy pixels.")
-public class S2IdepixCloudBufferOp extends Operator {
-
-    @Parameter(defaultValue = "2", label = "Width of cloud buffer (# of pixels)")
-    private int cloudBufferWidth;
-
-    @Parameter(defaultValue = "true", label = " Compute a cloud buffer also for cloud ambiguous pixels")
-    private boolean computeCloudBufferForCloudAmbiguous;
+        copyright = "(c) 2016-2021 by Brockmann Consult",
+        description = "Performs post processing of cloudy pixels and adds optional cloud buffer.")
+public class S2IdepixCloudPostProcessOp extends Operator {
 
     @SourceProduct(alias = "classifiedProduct")
     private Product classifiedProduct;
 
+    @Parameter(defaultValue = "false", label = "Add cloud buffer")
+    private boolean computeCloudBuffer;
+
+    @Parameter(defaultValue = "true", label = "Compute cloud buffer for cloud ambiguous pixels too.")
+    private boolean computeCloudBufferForCloudAmbiguous;
+
+    @Parameter(defaultValue = "2", label = "Width of cloud buffer (# of pixels)")
+    private int cloudBufferWidth;
+
+
     private Band origClassifFlagBand;
 
     private RectangleExtender rectCalculator;
+    private UrbanCloudDistinction urbanCloudDistinction;
 
 
     @Override
@@ -55,8 +61,12 @@ public class S2IdepixCloudBufferOp extends Operator {
                                                              classifiedProduct.getSceneRasterHeight()),
                                                cloudBufferWidth, cloudBufferWidth);
 
-        origClassifFlagBand = classifiedProduct.getBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS);
-        ProductUtils.copyBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
+        origClassifFlagBand = classifiedProduct.getBand(IDEPIX_CLASSIF_FLAGS);
+        ProductUtils.copyBand(IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
+
+        urbanCloudDistinction = new UrbanCloudDistinction(classifiedProduct);
+        urbanCloudDistinction.addDebugBandsToTargetProduct();
+
         setTargetProduct(cloudBufferProduct);
     }
 
@@ -84,23 +94,21 @@ public class S2IdepixCloudBufferOp extends Operator {
             checkForCancellation();
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
+                boolean isCloud;
                 if (targetRectangle.contains(x, y)) {
                     S2IdepixUtils.combineFlags(x, y, sourceFlagTile, targetTile);
+                    urbanCloudDistinction.correctCloudFlag(x,y, sourceFlagTile, targetTile);
+                    isCloud = isCloudPixel(targetTile, y, x);
+                }else {
+                    isCloud = isCloudPixel(sourceFlagTile, y, x);
                 }
 
-                boolean isCloud;
-                if (computeCloudBufferForCloudAmbiguous) {
-                    isCloud = sourceFlagTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_CLOUD_SURE) ||
-                            sourceFlagTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS);
-                } else {
-                    isCloud = sourceFlagTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_CLOUD_SURE);
-                }
                 if (isCloud) {
                     S2IdepixCloudBuffer.computeSimpleCloudBuffer(x, y,
                                                                  targetTile,
                                                                  srcRectangle,
                                                                  cloudBufferWidth,
-                                                                 S2IdepixConstants.IDEPIX_CLOUD_BUFFER);
+                                                                 IDEPIX_CLOUD_BUFFER);
                 }
             }
         }
@@ -113,10 +121,19 @@ public class S2IdepixCloudBufferOp extends Operator {
         }
     }
 
+    private boolean isCloudPixel(Tile targetTile, int y, int x) {
+        boolean isCloud;
+        isCloud = targetTile.getSampleBit(x, y, IDEPIX_CLOUD_SURE);
+        if (computeCloudBufferForCloudAmbiguous) {
+            isCloud = isCloud || targetTile.getSampleBit(x, y, IDEPIX_CLOUD_AMBIGUOUS);
+        }
+        return isCloud;
+    }
+
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(S2IdepixCloudBufferOp.class);
+            super(S2IdepixCloudPostProcessOp.class);
         }
     }
 }

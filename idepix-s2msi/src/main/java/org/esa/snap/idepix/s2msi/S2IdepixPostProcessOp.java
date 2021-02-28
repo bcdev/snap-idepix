@@ -146,7 +146,7 @@ public class S2IdepixPostProcessOp extends Operator {
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Rectangle targetRectangle = targetTile.getRectangle();
 
-        final Tile classifFlagTile = getSourceTile(s2ClassifFlagBand, targetRectangle);
+//        final Tile classifFlagTile = getSourceTile(s2ClassifFlagBand, targetRectangle);
         Tile cloudBufferFlagTile = null;
         if (s2CloudBufferProduct != null) {
             cloudBufferFlagTile = getSourceTile(cloudBufferFlagBand, targetRectangle);
@@ -159,7 +159,7 @@ public class S2IdepixPostProcessOp extends Operator {
                 if (targetRectangle.contains(x, y)) {
                     boolean isInvalid = targetTile.getSampleBit(x, y, IDEPIX_INVALID);
                     if (!isInvalid) {
-                        combineFlags(x, y, classifFlagTile, targetTile);
+//                        combineFlags(x, y, classifFlagTile, targetTile);
                         if (s2CloudBufferProduct != null) {
                             combineFlags(x, y, cloudBufferFlagTile, targetTile);
                         }

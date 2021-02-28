@@ -1,10 +1,5 @@
 package org.esa.snap.idepix.s2msi;
 
-import org.esa.snap.dem.gpf.AddElevationOp;
-import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudBufferOp;
-import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
-import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
-import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -15,6 +10,11 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.dem.gpf.AddElevationOp;
+import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudPostProcessOp;
+import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
+import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -106,13 +106,13 @@ public class S2IdepixOp extends Operator {
 //    private double cwThresh;
     private double cwThresh = 0.01;
 
-//    @Parameter(defaultValue = "-0.11",
+    //    @Parameter(defaultValue = "-0.11",
 //            label = " Threshold GCL_THRESH",
 //            description = " Threshold GCL_THRESH")
 //    private double gclThresh;
     private double gclThresh = -0.11;
 
-//    @Parameter(defaultValue = "0.01",
+    //    @Parameter(defaultValue = "0.01",
 //            label = " Threshold CL_THRESH",
 //            description = " Threshold CL_THRESH")
 //    private double clThresh;
@@ -167,20 +167,16 @@ public class S2IdepixOp extends Operator {
         s2ClassifProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixClassificationOp.class),
                                              pixelClassificationParameters, inputProducts);
 
-        if (computeCloudShadow || computeCloudBuffer || computeMountainShadow) {
-            // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
-            computePostProcessProduct();
+        // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
+        computePostProcessProduct();
 
-            targetProduct = S2IdepixUtils.cloneProduct(s2ClassifProduct, true);
-            if (!copyToaReflectances && computeCloudShadow) {
-                S2IdepixUtils.removeReflectancesForCloudShadow(targetProduct);
-            }
-
-            Band cloudFlagBand = targetProduct.getBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS);
-            cloudFlagBand.setSourceImage(postProcessingProduct.getBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS).getSourceImage());
-        } else {
-            targetProduct = s2ClassifProduct;
+        targetProduct = S2IdepixUtils.cloneProduct(s2ClassifProduct, true);
+        if (!copyToaReflectances && computeCloudShadow) {
+            S2IdepixUtils.removeReflectancesForCloudShadow(targetProduct);
         }
+
+        Band cloudFlagBand = targetProduct.getBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(S2IdepixConstants.IDEPIX_CLASSIF_FLAGS).getSourceImage());
 
         // new bit masks:
         S2IdepixUtils.setupIdepixCloudscreeningBitmasks(targetProduct);
@@ -190,19 +186,18 @@ public class S2IdepixOp extends Operator {
 
     private void computePostProcessProduct() {
         postProcessingProduct = s2ClassifProduct;
-        Product cloudBufferProduct = null;
-        if (computeCloudBuffer) {
-            HashMap<String, Product> input = new HashMap<>();
-            input.put("l1c", sourceProduct);
-            input.put("s2Cloud", s2ClassifProduct);
-            input.put("classifiedProduct", s2ClassifProduct);
-            Map<String, Object> paramsBuffer = new HashMap<>();
-            paramsBuffer.put("cloudBufferWidth", cloudBufferWidth);
-            paramsBuffer.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
-            cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudBufferOp.class),
-                                                   paramsBuffer, input);
-            postProcessingProduct = cloudBufferProduct;
-        }
+        Product cloudBufferProduct;
+        HashMap<String, Product> input = new HashMap<>();
+        input.put("l1c", sourceProduct);
+        input.put("s2Cloud", s2ClassifProduct);
+        input.put("classifiedProduct", s2ClassifProduct);
+        Map<String, Object> paramsBuffer = new HashMap<>();
+        paramsBuffer.put("computeCloudBuffer", computeCloudBuffer);
+        paramsBuffer.put("cloudBufferWidth", cloudBufferWidth);
+        paramsBuffer.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
+        cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
+                                               paramsBuffer, input);
+        postProcessingProduct = cloudBufferProduct;
 
         if (computeCloudShadow || computeMountainShadow) {
             HashMap<String, Product> inputShadow = new HashMap<>();
