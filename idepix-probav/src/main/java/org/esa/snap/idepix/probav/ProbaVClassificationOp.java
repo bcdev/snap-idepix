@@ -1,10 +1,6 @@
 package org.esa.snap.idepix.probav;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.pixel.AbstractPixelProperties;
-import org.esa.snap.idepix.core.util.IdepixIO;
-import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
@@ -19,6 +15,9 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.IdepixIO;
+import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.watermask.operator.WatermaskClassifier;
 
 import java.awt.*;
@@ -115,7 +114,7 @@ public class ProbaVClassificationOp extends Operator {
     static final int SM_F_CLEAR = 0;
     static final int SM_F_UNDEFINED = 1;
     static final int SM_F_CLOUD = 2;
-//    static final int SM_F_SNOWICE = 3;
+    static final int SM_F_SNOWICE = 3;
     static final int SM_F_CLOUDSHADOW = 4;
 
     private static final int SM_F_LAND = 5;
@@ -215,6 +214,8 @@ public class ProbaVClassificationOp extends Operator {
                     // apply improvement from NN approach...
                     final double[] nnOutput = probaVAlgorithm.getNnOutput();
                     final boolean smCloud = smFlagTile.getSampleBit(x, y, ProbaVClassificationOp.SM_F_CLOUD);
+                    final boolean smSnow = smFlagTile.getSampleBit(x, y, ProbaVClassificationOp.SM_F_SNOWICE);
+
                     if (applySchillerNN) {
                         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
                             if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
@@ -237,7 +238,7 @@ public class ProbaVClassificationOp extends Operator {
                                 cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, false);
                                 cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, false);
                             }
-                            if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue && cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE)) {
+                            if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue && (cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE)|| smSnow)) {
                                 // this would be as 'SNOW/ICE'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
