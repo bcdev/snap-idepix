@@ -211,6 +211,20 @@ public class ProbaVClassificationOp extends Operator {
 
                     setCloudFlag(cloudFlagTargetTile, y, x, probaVAlgorithm);
 
+
+//                    if (x == 2103 && y == 373) {
+//                        System.out.println("start Proba-V -FLAG");
+//                        System.out.println("idepixInvalid  " + cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID));
+//                        System.out.println("idepixLand  " + cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND));
+//                        System.out.println("idepixWater  " + cloudFlagTargetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_WATER));
+//                        System.out.println("idepixClearLand  " + cloudFlagTargetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND));
+//                        System.out.println("idepixClearWater  " + cloudFlagTargetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER));
+//                        System.out.println("idepixClearSnow  " + cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE));
+//                        System.out.println("idepixCloud  " + cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD));
+//                        System.out.println("idepixCloudAmbiguous  " + cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS));
+//                        System.out.println("idepixCloudSure  " + cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_SURE));
+//                    }
+
                     final boolean isBlueGood = probaVAlgorithm.isBlueGood();
                     final boolean isRedGood = probaVAlgorithm.isRedGood();
                     final boolean isNirGood = probaVAlgorithm.isNirGood();
@@ -274,6 +288,7 @@ public class ProbaVClassificationOp extends Operator {
                     final boolean isSnowIce = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
                     final boolean isLand = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
                     final boolean isCloudBuffer = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_BUFFER);
+                    int vitoCmValueTest;
                     if (isProcessingForC3SLot5 && vitoCmTile != null) {
                         final int vitoCmValue = vitoCmTile.getSampleInt(x, y);
                         if (!isInvalid && vitoCmValue == 2) {
@@ -316,8 +331,31 @@ public class ProbaVClassificationOp extends Operator {
                             cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, false);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, true);
                         }
-                    }
+                        final boolean smClear = smFlagTile.getSampleBit(x, y, ProbaVClassificationOp.SM_F_CLEAR);
+                        final boolean allCloud = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+                        final boolean allCloudSure = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_SURE);
+                        final boolean allCloudAmbigious = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS);
+                        final boolean allSnowIce = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
+                        final boolean allClearLand = cloudFlagTargetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND);
+                        final boolean allClearWater = cloudFlagTargetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER);
+                        final boolean allInvalid = cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
 
+                        if (vitoCmValue == 2 && !allCloud && !allSnowIce && !allClearLand && !allClearWater
+                                && !allInvalid && !allCloudSure && !allCloudAmbigious) {
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
+
+                        } else {
+                            if ((vitoCmValue == 1 || smClear) && (!allCloud && !allSnowIce && !allClearLand &&
+                                    !allClearWater && !allInvalid && !allCloudSure && !allCloudAmbigious)) {
+                                if (isLand) {
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, true);
+                                } else {
+                                cloudFlagTargetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, true);
+                                }
+                            }
+                        }
+                    }
                     consistencyCheck(x, y, cloudFlagTargetTile);
                     for (Band band : targetProduct.getBands()) {
                         final Tile targetTile = targetTiles.get(band);
@@ -394,7 +432,7 @@ public class ProbaVClassificationOp extends Operator {
             } else {
                 if (cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS)) {
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
-                } else{
+                } else {
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_BUFFER, false);
@@ -606,17 +644,17 @@ public class ProbaVClassificationOp extends Operator {
     }
 
     private void setCloudFlag(Tile targetTile, int y, int x) {
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, targetTile.getSampleBit(x,y,IdepixConstants.IDEPIX_INVALID));
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, targetTile.getSampleBit(x,y,IdepixConstants.IDEPIX_CLOUD));
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, targetTile.getSampleBit(x,y,IdepixConstants.IDEPIX_CLOUD_SURE));
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, targetTile.getSampleBit(x,y,IdepixConstants.IDEPIX_CLOUD_SHADOW)); // not computed here
-        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, targetTile.getSampleBit(x,y,ProbaVConstants.IDEPIX_CLEAR_LAND));
-        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, targetTile.getSampleBit(x,y,ProbaVConstants.IDEPIX_CLEAR_WATER));
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, targetTile.getSampleBit(x,y,IdepixConstants.IDEPIX_SNOW_ICE));
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, targetTile.getSampleBit(x,y,IdepixConstants.IDEPIX_LAND));
-        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_WATER, targetTile.getSampleBit(x,y,ProbaVConstants.IDEPIX_WATER));
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, targetTile.getSampleBit(x,y,IdepixConstants.IDEPIX_BRIGHT));
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, targetTile.getSampleBit(x,y,IdepixConstants.IDEPIX_WHITE));
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID));
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD));
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_SURE));
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW)); // not computed here
+        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, targetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND));
+        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, targetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER));
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE));
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND));
+        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_WATER, targetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_WATER));
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_BRIGHT));
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_WHITE));
     }
 
     private void setIsWaterByFraction(byte watermaskFraction, ProbaVAlgorithm probaVAlgorithm) {
