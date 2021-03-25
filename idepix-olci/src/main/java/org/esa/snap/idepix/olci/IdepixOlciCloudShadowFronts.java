@@ -17,9 +17,6 @@
 package org.esa.snap.idepix.olci;
 
 
-//import org.esa.s3tbx.idepix.core.CloudShadowFronts;
-//import org.esa.s3tbx.idepix.core.IdepixConstants;
-//import org.esa.s3tbx.idepix.core.util.Bresenham;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -29,7 +26,8 @@ import org.esa.snap.idepix.core.CloudShadowFronts;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.util.Bresenham;
 
-import java.awt.*;
+import java.awt.Rectangle;
+import java.util.List;
 
 /**
  * Specific cloud shadow algorithm for OLCI based on fronts, using cloud top height computation based on
@@ -203,14 +201,31 @@ class IdepixOlciCloudShadowFronts {
         final double saaRadApparent = Math.toRadians(saaApparent);
 
 
-        GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, saaRadApparent + Math.PI);
+        final double azimuthAngleInRadiance = saaRadApparent + Math.PI;
+        GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, azimuthAngleInRadiance);
         PixelPos endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
-        if (endPixPoint.x == -1 || endPixPoint.y == -1) {
-            return false;
+        int endPointX;
+        int endPointY;
+        if (!endPixPoint.isValid()) {
+            double cloudDistanceMin = 300.0 / tanSza;
+            double i = 1.0;
+            double cloudDistancePath = cloudDistanceMax;
+            while (!endPixPoint.isValid() && cloudDistancePath > 2.0 * cloudDistanceMin) {
+                cloudDistancePath = cloudDistanceMax - i * cloudDistanceMin;
+                endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistancePath, azimuthAngleInRadiance);
+                endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
+                i += 1.0;
+            }
+
+            if (!endPixPoint.isValid()) {
+                return false;
+            }
         }
-        final int endPointX = (int) Math.round(endPixPoint.x);
-        final int endPointY = (int) Math.round(endPixPoint.y);
-        java.util.List<PixelPos> pathPixels = Bresenham.getPathPixels(x, y, endPointX, endPointY, sourceRectangle);
+
+        endPointX = (int) Math.round(endPixPoint.x);
+        endPointY = (int) Math.round(endPixPoint.y);
+
+        List<PixelPos> pathPixels = Bresenham.getPathPixels(x, y, endPointX, endPointY, sourceRectangle);
 
         double[] temperature = new double[temperatureProfileTPGTiles.length];
 
