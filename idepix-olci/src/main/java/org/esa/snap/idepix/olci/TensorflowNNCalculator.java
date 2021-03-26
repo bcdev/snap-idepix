@@ -47,7 +47,6 @@ class TensorflowNNCalculator {
 
         this.transformMethod = transformMethod;
         this.modelDir = modelDir;
-        System.out.println("modelDir = " + modelDir);
         try {
             loadModel();
         } catch (Exception e) {
