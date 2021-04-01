@@ -80,6 +80,9 @@ public class S2IdepixCloudShadowOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
+    private boolean classifyInvalid;
+
     public final static String BAND_NAME_CLOUD_SHADOW = "FlagBand";
 
     private Map<Integer, double[][]> meanReflPerTile = new HashMap<>();
@@ -89,18 +92,18 @@ public class S2IdepixCloudShadowOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        final TileCache tileCache = JAI.getDefaultInstance().getTileCache();
-        final Observer observer = (o, arg) -> {
-            if (arg instanceof CachedTile && ((CachedTile) arg).getAction() == 0) {
-                CachedTile tile = (CachedTile) arg;
-                RenderedImage owner = tile.getOwner();
-                if (owner instanceof VectorDataMaskOpImage || owner instanceof PointOpImage) {
-                    int tileX = Math.round((float) tile.getTile().getMinX() / (float) owner.getTileWidth());
-                    int tileY = Math.round((float) tile.getTile().getMinY() / (float) owner.getTileHeight());
-                    tileCache.remove(owner, tileX, tileY);
-                }
-            }
-        };
+//        final TileCache tileCache = JAI.getDefaultInstance().getTileCache();
+//        final Observer observer = (o, arg) -> {
+//            if (arg instanceof CachedTile && ((CachedTile) arg).getAction() == 0) {
+//                CachedTile tile = (CachedTile) arg;
+//                RenderedImage owner = tile.getOwner();
+//                if (owner instanceof VectorDataMaskOpImage || owner instanceof PointOpImage) {
+//                    int tileX = Math.round((float) tile.getTile().getMinX() / (float) owner.getTileWidth());
+//                    int tileY = Math.round((float) tile.getTile().getMinY() / (float) owner.getTileHeight());
+//                    tileCache.remove(owner, tileX, tileY);
+//                }
+//            }
+//        };
 
         int sourceResolution = determineSourceResolution(l1cProduct);
 
@@ -109,6 +112,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         HashMap<String, Product> preInput = new HashMap<>();
         preInput.put("s2ClassifProduct", classificationProduct);
         Map<String, Object> preParams = new HashMap<>();
+        preParams.put("classifyInvalid", classifyInvalid);
 
         //todo: test resolution of granule. Resample necessary bands to 60m. calculate cloud shadow on 60m.
         //todo: let mountain shadow benefit from higher resolution in DEM. Adjust sun zenith according to smoothing.
@@ -121,15 +125,15 @@ public class S2IdepixCloudShadowOp extends Operator {
 
         //trigger computation of all tiles
         logger.info("Executing Cloud Shadow Pre-Processing");
-        if (tileCache instanceof SunTileCache) {
-            ((SunTileCache) tileCache).enableDiagnostics();
-            ((SunTileCache) tileCache).addObserver(observer);
-        }
+//        if (tileCache instanceof SunTileCache) {
+//            ((SunTileCache) tileCache).enableDiagnostics();
+//            ((SunTileCache) tileCache).addObserver(observer);
+//        }
         final OperatorExecutor operatorExecutor = OperatorExecutor.create(cloudShadowPreProcessingOperator);
         operatorExecutor.execute(ProgressMonitor.NULL);
-        if (tileCache instanceof SunTileCache) {
-            ((SunTileCache) tileCache).deleteObserver(observer);
-        }
+//        if (tileCache instanceof SunTileCache) {
+//            ((SunTileCache) tileCache).deleteObserver(observer);
+//        }
         logger.info("Executed Cloud Shadow Pre-Processing");
 
         NCloudOverLand = cloudShadowPreProcessingOperator.getNCloudOverLandPerTile();
@@ -154,6 +158,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         postParams.put("computeMountainShadow", computeMountainShadow);
         postParams.put("bestOffset", bestOffset);
         postParams.put("mode", mode);
+        postParams.put("classifyInvalid", classifyInvalid);
         //put in here any parameters that might be requested by the post-processing operator
 
         //
@@ -217,6 +222,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         resamplingParams.put("upsampling", "Nearest");
         resamplingParams.put("downsampling", "First");
         resamplingParams.put("targetResolution", 60);
+        resamplingParams.put("resampleOnPyramidLevels", "false");
         Product resampledProduct = GPF.createProduct("Resample", resamplingParams, resamplingInput);
 
         HashMap<String, Product> classificationInput = new HashMap<>();
@@ -273,7 +279,12 @@ public class S2IdepixCloudShadowOp extends Operator {
     }
 
     private int[] findOverallMinimumReflectance() {
-        double[][] scaledTotalReflectance = new double[3][meanReflPerTile.get(0)[0].length];
+        // catch cases of tiles completely invalid are skipped
+        if (meanReflPerTile.keySet().size() == 0) {
+            return new int[3];
+        }
+        Integer someKey = meanReflPerTile.keySet().iterator().next();
+        double[][] scaledTotalReflectance = new double[3][meanReflPerTile.get(someKey)[0].length];
         for (int j = 0; j < 3; j++) {
             /*Checking the meanReflPerTile:
                 - if it has no relative minimum other than the first or the last value, it is excluded.

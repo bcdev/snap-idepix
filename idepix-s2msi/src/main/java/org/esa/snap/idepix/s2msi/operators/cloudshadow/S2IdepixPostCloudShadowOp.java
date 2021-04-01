@@ -23,6 +23,7 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtenderConstant;
@@ -65,6 +66,9 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
     @Parameter(description = "Offset along cloud path to minimum reflectance (over all tiles)", defaultValue = "0")
     private int bestOffset;
+
+    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
+    private boolean classifyInvalid;
 
     private Band sourceBandClusterA;
     private Band sourceBandClusterB;
@@ -365,6 +369,12 @@ public class S2IdepixPostCloudShadowOp extends Operator {
                 targetRectangle, targetRectangle, getSourceProduct().getSceneRasterHeight(),
                 getSourceProduct().getSceneRasterWidth(), spatialResolution, true, false);
         final Rectangle sourceRectangle = getSourceRectangle(targetRectangle, cloudShadowRelativePath);
+
+        Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
+        if (!classifyInvalid && isCompletelyInvalid(sourceTileFlag1)) {
+            return;
+        }
         int sourceWidth = sourceRectangle.width;
         int sourceHeight = sourceRectangle.height;
         int sourceLength = sourceRectangle.width * sourceRectangle.height;
@@ -402,8 +412,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
                               sourceLongitudes);
         }
 
-        Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
         FlagDetector flagDetector = new FlagDetector(sourceTileFlag1, sourceRectangle);
 
         PreparationMaskBand.prepareMaskBand(targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight(),
@@ -440,7 +448,7 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             getLogger().fine("potential shadow is ready");
             // shifting by offset, but looking into water, land and all pixel.
             // best offset is determined before (either from water, land, or all pixels).
-            if (bestOffset > 0) {
+            if (bestOffset > 0 && bestOffset < cloudShadowRelativePath.length) {
                 CloudBulkShifter.setTileShiftedCloudBulk(sourceRectangle, targetRectangle,
                         sunAzimuthMean, flagArray, cloudShadowRelativePath, bestOffset);
                 //offset: 0: all, 1: over land, 2: over water.
@@ -476,6 +484,17 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             fillTile(shadowIDArray, targetRectangle, sourceRectangle, targetTileShadowID);
             fillTile(cloudTestArray, targetRectangle, sourceRectangle, targetTileCloudTest);
         }
+    }
+
+    static boolean isCompletelyInvalid(Tile sourceTileFlag1) {
+        int invalid_byte = (int) Math.pow(2, S2IdepixConstants.IDEPIX_INVALID);
+        int[] classifData = sourceTileFlag1.getSamplesInt();
+        for (int i=0; i<classifData.length; ++i) {
+            if ((classifData[i] & invalid_byte) == 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static class MountainShadowMaxFloatComparator implements Comparator<Float> {

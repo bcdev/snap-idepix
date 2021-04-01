@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.s2msi;
 
+import org.esa.snap.core.gpf.internal.TileCacheOp;
 import org.esa.snap.dem.gpf.AddElevationOp;
 import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudBufferOp;
 import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
@@ -121,6 +122,9 @@ public class S2IdepixOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
+    private boolean classifyInvalid;
+
 
     @SourceProduct(alias = "l1cProduct",
             label = "Sentinel-2 MSI L1C product",
@@ -166,6 +170,8 @@ public class S2IdepixOp extends Operator {
 
         s2ClassifProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixClassificationOp.class),
                                              pixelClassificationParameters, inputProducts);
+        int cacheSize = Integer.parseInt(System.getProperty("snap.idepix.s2msi.tilecache", "1600"));
+        s2ClassifProduct = computeTileCacheProduct(s2ClassifProduct, cacheSize);
 
         if (computeCloudShadow || computeCloudBuffer || computeMountainShadow) {
             // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
@@ -214,6 +220,7 @@ public class S2IdepixOp extends Operator {
             params.put("computeCloudShadow", computeCloudShadow);
             params.put("mode", "LandWater");
             params.put("demName", demName);
+            params.put("classifyInvalid", classifyInvalid);
             postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixPostProcessOp.class),
                                                       params, inputShadow);
         }
@@ -234,11 +241,21 @@ public class S2IdepixOp extends Operator {
         gaCloudClassificationParameters.put("gclThresh", gclThresh);
         gaCloudClassificationParameters.put("clThresh", clThresh);
         gaCloudClassificationParameters.put("demName", demName);
+        gaCloudClassificationParameters.put("classifyInvalid", classifyInvalid);
 
         return gaCloudClassificationParameters;
     }
 
-
+    public static Product computeTileCacheProduct(Product inputProduct, int cacheSize) {
+        if (Boolean.getBoolean("snap.gpf.disableTileCache")) {
+            TileCacheOp tileCacheOp = new TileCacheOp();
+            tileCacheOp.setSourceProduct("source", inputProduct);
+            tileCacheOp.setParameterDefaultValues();
+            tileCacheOp.setParameter("cacheSize", cacheSize);
+            inputProduct = tileCacheOp.getTargetProduct();
+        }
+        return inputProduct;
+    }
     /**
      * The Service Provider Interface (SPI) for the operator.
      * It provides operator meta-data and is a factory for new operator instances.

@@ -109,6 +109,9 @@ public class S2IdepixClassificationOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
+    private boolean classifyInvalid;
+
     // NN stuff is deactivated unless we have a better net
 
     //    @Parameter(defaultValue = "1.95",
@@ -256,6 +259,13 @@ public class S2IdepixClassificationOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
+
+                    // avoid application of algo for invalid inputs
+                    // TODO check whether land/water flag shall be set for invalid pixels as well
+                    if (! classifyInvalid && ! validPixelTile.getSampleBoolean(x, y)) {
+                        cloudFlagTargetTile.setSample(x, y, S2IdepixConstants.IDEPIX_INVALID, true);
+                        continue;
+                    }
 
                     // todo: later:
 //                    byte waterMaskSample = WatermaskClassifier.INVALID_VALUE;
