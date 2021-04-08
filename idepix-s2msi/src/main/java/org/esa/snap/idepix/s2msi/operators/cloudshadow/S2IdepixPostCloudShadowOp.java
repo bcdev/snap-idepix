@@ -26,11 +26,16 @@ import org.esa.snap.core.util.math.MathUtils;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtenderConstant;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Tonio Fincke, Dagmar Müller
@@ -61,6 +66,12 @@ public class S2IdepixPostCloudShadowOp extends Operator {
     @Parameter(description = "Offset along cloud path to minimum reflectance (over all tiles)", defaultValue = "0")
     private int bestOffset;
 
+     @Parameter(notNull=true)
+    private float sunZenithMean;
+
+    @Parameter(notNull=true)
+    private float sunAzimuthMean;
+
     private Band sourceBandClusterA;
     private Band sourceBandClusterB;
 
@@ -78,21 +89,12 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
     private static int maxcloudTop = 10000;
     //for calculating a single cloud path
-    private float sunZenithMean;
-    private float sunAzimuthMean;
-    private float viewAzimuthMean;
-    private float viewZenithMean;
     private float minAltitude = 0;
 
     private static double spatialResolution;  //[m]
     static int clusterCountDefine = 4;
     private static final String sourceBandNameClusterA = "B8A";
     private static final String sourceBandNameClusterB = "B3";
-    private static final String sourceSunZenithName = "sun_zenith";
-    private static final String sourceSunAzimuthName = "sun_azimuth";
-    private static final String sourceViewAzimuthName = "view_azimuth_mean";
-    private static final String sourceViewZenithName = "view_zenith_mean";
-    private static final String sourceAltitudeName = "elevation";
     private static final String sourceFlagName1 = "pixel_classif_flags";
     private final static String BAND_NAME_CLOUD_SHADOW = "FlagBand";
     private final static String BAND_NAME_CLOUD_ID = "cloud_ids";
@@ -148,11 +150,7 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         sourceBandClusterA = s2ClassifProduct.getBand(sourceBandNameClusterA);
         sourceBandClusterB = s2ClassifProduct.getBand(sourceBandNameClusterB);
 
-        RasterDataNode sourceSunZenith = s2ClassifProduct.getBand(sourceSunZenithName);
-        RasterDataNode sourceSunAzimuth = s2ClassifProduct.getBand(sourceSunAzimuthName);
-        sourceAltitude = s2ClassifProduct.getBand(sourceAltitudeName);
-        RasterDataNode sourceViewAzimuth = s2ClassifProduct.getBand(sourceViewAzimuthName);
-        RasterDataNode sourceViewZenith = s2ClassifProduct.getBand(sourceViewZenithName);
+        sourceAltitude = s2ClassifProduct.getBand(S2IdepixConstants.ELEVATION_BAND_NAME);
 
         final GeoPos centerGeoPos =
                 getCenterGeoPos(targetProduct.getSceneGeoCoding(), targetProduct.getSceneRasterWidth(),
@@ -162,17 +160,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         //create a single potential cloud path for the granule.
         // sunZenithMean, sunAzimuthMean is the value at the central pixel.
         minAltitude = 0;
-        sunZenithMean = getRasterNodeValueAtCenter(sourceSunZenith, targetProduct.getSceneRasterWidth(),
-                targetProduct.getSceneRasterHeight());
-        sunAzimuthMean = getRasterNodeValueAtCenter(sourceSunAzimuth, targetProduct.getSceneRasterWidth(),
-                targetProduct.getSceneRasterHeight());
-        viewAzimuthMean = getRasterNodeValueAtCenter(sourceViewAzimuth, targetProduct.getSceneRasterWidth(),
-                targetProduct.getSceneRasterHeight());
-        viewZenithMean = getRasterNodeValueAtCenter(sourceViewZenith, targetProduct.getSceneRasterWidth(),
-                targetProduct.getSceneRasterHeight());
-
-
-        sunAzimuthMean = convertToApparentSunAzimuth();
 
         sourceBandFlag1 = s2ClassifProduct.getBand(sourceFlagName1);
 
@@ -197,10 +184,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         final PixelPos centerPixelPos = new PixelPos(0.5 * width + 0.5,
                 0.5 * height + 0.5);
         return geoCoding.getGeoPos(centerPixelPos, null);
-    }
-
-    private float getRasterNodeValueAtCenter(RasterDataNode var, int width, int height) {
-        return var.getSampleFloat((int) (0.5 * width), (int) (0.5 * height));
     }
 
     private int setCloudTopHeigh(double lat) {
@@ -328,20 +311,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         int x1 = Math.min(productWidth, targetRectangle.x + targetRectangle.width + Math.max(0, Math.abs(relativeX)));
         int y1 = Math.min(productHeight, targetRectangle.y + targetRectangle.height + Math.max(0, Math.abs(relativeY)));
         return new Rectangle(x0, y0, x1 - x0, y1 - y0);
-    }
-
-    private float convertToApparentSunAzimuth() {
-        //here: cloud path is calculated for center pixel sunZenith and sunAzimuth.
-        // after correction of sun azimuth angle into apparent sun azimuth angle.
-        // Due to projection of the cloud at view_zenith>0 the position of the cloud becomes distorted.
-        // The true position still causes the shadow - and it cannot be determined without the cloud top height.
-        // So instead, the apparent sun azimuth angle is calculated and used to find the cloudShadowRelativePath.
-        double diff_phi = sunAzimuthMean - viewAzimuthMean;
-        if (diff_phi < 0) diff_phi = 180 + diff_phi;
-        if (diff_phi > 90) diff_phi = diff_phi - 90;
-        diff_phi = diff_phi * Math.tan(viewZenithMean * MathUtils.DTOR);
-        if (viewAzimuthMean > 180) diff_phi = -1. * diff_phi;
-        return (float) (sunAzimuthMean + diff_phi);
     }
 
     @Override
