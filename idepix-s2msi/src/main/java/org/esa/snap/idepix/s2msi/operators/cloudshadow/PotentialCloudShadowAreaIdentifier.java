@@ -126,7 +126,7 @@ class PotentialCloudShadowAreaIdentifier {
         }
 
         if (cloudPath.length < 3) {
-            logger.warning("identifyPotentialCloudShadowPLUS: cloudPath.length=" + cloudPath.length);
+            logger.fine("identifyPotentialCloudShadowPLUS: cloudPath.length=" + cloudPath.length);
             return;
         }
 

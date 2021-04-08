@@ -307,9 +307,9 @@ public class S2IdepixCloudShadowOp extends Operator {
             i++;
         }
         if (lx == 0) {
-            logger.warning("indecesRelativMaxInArray x.length=" + lx);
+            logger.fine("indecesRelativMaxInArray x.length=" + lx);
         } else if (lx == 1) {
-            logger.warning("indecesRelativMaxInArray x.length=" + lx);
+            logger.fine("indecesRelativMaxInArray x.length=" + lx);
             ID.add(0);
         } else if (valid) {
             double fac = -1.;
