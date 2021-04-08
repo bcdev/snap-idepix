@@ -48,11 +48,15 @@ class PotentialCloudShadowAreaIdentifier {
             //start at lower left (not necessary, direction of search is appointed in identifyPotentialCloudShadow)
             yOffset = targetRectangle.y - sourceRectangle.y;
         }
-        for (i = xOffset; i < sourceWidth; i++) {
-            for (int j = yOffset; j < sourceHeight; j++) {
-                identifyPotentialCloudShadowPLUS(i, j, sourceHeight, sourceWidth, cloudPath, sourceLongitude,
-                        sourceLatitude, sourceAltitude, flagArray, sunZenithCloudRad,
-                        cloudIDArray, indexToPositions, offsetAtPositions);
+        if (cloudPath.length < 3) {
+            logger.fine("identifyPotentialCloudShadowPLUS: cloudPath.length=" + cloudPath.length);
+        } else {
+            for (i = xOffset; i < sourceWidth; i++) {
+                for (int j = yOffset; j < sourceHeight; j++) {
+                    identifyPotentialCloudShadowPLUS(i, j, sourceHeight, sourceWidth, cloudPath, sourceLongitude,
+                            sourceLatitude, sourceAltitude, flagArray, sunZenithCloudRad,
+                            cloudIDArray, indexToPositions, offsetAtPositions);
+                }
             }
         }
 
@@ -122,11 +126,6 @@ class PotentialCloudShadowAreaIdentifier {
         int index0 = y0 * width + x0;
         //start from a cloud pixel, otherwise stop.
         if (!((flagArray[index0] & PreparationMaskBand.CLOUD_FLAG) == PreparationMaskBand.CLOUD_FLAG)) {
-            return;
-        }
-
-        if (cloudPath.length < 3) {
-            logger.fine("identifyPotentialCloudShadowPLUS: cloudPath.length=" + cloudPath.length);
             return;
         }
 
