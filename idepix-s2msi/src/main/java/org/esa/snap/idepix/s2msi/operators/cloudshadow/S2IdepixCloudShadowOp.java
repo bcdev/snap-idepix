@@ -7,6 +7,8 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.StxFactory;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -20,6 +22,8 @@ import org.esa.snap.core.gpf.internal.OperatorImage;
 import org.esa.snap.core.gpf.internal.OperatorImageTileStack;
 import org.esa.snap.core.image.VectorDataMaskOpImage;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.CachedTile;
@@ -109,10 +113,18 @@ public class S2IdepixCloudShadowOp extends Operator {
 
         Product classificationProduct = getClassificationProduct(sourceResolution);
 
+        float sunZenithMean = getGeometryMean(classificationProduct, S2IdepixConstants.SUN_ZENITH_BAND_NAME);
+        float sunAzimuthMean = getGeometryMean(classificationProduct, S2IdepixConstants.SUN_AZIMUTH_BAND_NAME);
+        float viewZenithMean = getGeometryMean(classificationProduct, S2IdepixConstants.VIEW_ZENITH_BAND_NAME);
+        float viewAzimuthMean = getGeometryMean(classificationProduct, S2IdepixConstants.VIEW_AZIMUTH_BAND_NAME);
+        sunAzimuthMean = convertToApparentSunAzimuth(sunAzimuthMean, viewZenithMean, viewAzimuthMean);
+
         HashMap<String, Product> preInput = new HashMap<>();
         preInput.put("s2ClassifProduct", classificationProduct);
         Map<String, Object> preParams = new HashMap<>();
         preParams.put("classifyInvalid", classifyInvalid);
+        preParams.put("sunZenithMean", sunZenithMean);
+        preParams.put("sunAzimuthMean", sunAzimuthMean);
 
         //todo: test resolution of granule. Resample necessary bands to 60m. calculate cloud shadow on 60m.
         //todo: let mountain shadow benefit from higher resolution in DEM. Adjust sun zenith according to smoothing.
@@ -159,6 +171,8 @@ public class S2IdepixCloudShadowOp extends Operator {
         postParams.put("bestOffset", bestOffset);
         postParams.put("mode", mode);
         postParams.put("classifyInvalid", classifyInvalid);
+        postParams.put("sunZenithMean", sunZenithMean);
+        postParams.put("sunAzimuthMean", sunAzimuthMean);
         //put in here any parameters that might be requested by the post-processing operator
 
         //
@@ -168,6 +182,37 @@ public class S2IdepixCloudShadowOp extends Operator {
         Product postProduct = GPF.createProduct("Idepix.S2.CloudShadow.Postprocess", postParams, postInput);
 
         setTargetProduct(prepareTargetProduct(sourceResolution, postProduct));
+    }
+
+    private float getGeometryMean(Product classificationProduct, String rdnName) {
+        // the author of these lines is aware that at no point the mean is computed,
+        // for historic reasons we will stick to the name, though
+        RasterDataNode node = classificationProduct.getRasterDataNode(rdnName);
+        float mean = getRasterNodeValueAtCenter(node, classificationProduct.getSceneRasterWidth(),
+                classificationProduct.getSceneRasterHeight());
+        if (Float.isNaN(mean)) {
+            mean = (float) new StxFactory().create(node, ProgressMonitor.NULL).getMedian();
+        }
+        return mean;
+    }
+
+    private float getRasterNodeValueAtCenter(RasterDataNode var, int width, int height) {
+        return var.getSampleFloat((int) (0.5 * width), (int) (0.5 * height));
+    }
+
+    private float convertToApparentSunAzimuth(float sunAzimuthMean, float viewZenithMean, float viewAzimuthMean) {
+        // here: cloud path is calculated for center pixel sunZenith and sunAzimuth.
+        // after correction of sun azimuth angle into apparent sun azimuth angle.
+        // Due to projection of the cloud at view_zenith>0 the position of the cloud becomes distorted.
+        // The true position still causes the shadow - and it cannot be determined without the cloud top height.
+        // So instead, the apparent sun azimuth angle is calculated and used to find the cloudShadowRelativePath.
+
+        double diff_phi = sunAzimuthMean - viewAzimuthMean;
+        if (diff_phi < 0) diff_phi = 180 + diff_phi;
+        if (diff_phi > 90) diff_phi = diff_phi - 90;
+        diff_phi = diff_phi * Math.tan(viewZenithMean * MathUtils.DTOR);
+        if (viewAzimuthMean > 180) diff_phi = -1. * diff_phi;
+        return (float) (sunAzimuthMean + diff_phi);
     }
 
     private int determineSourceResolution(Product product) throws OperatorException {
@@ -191,7 +236,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         double deltaLatInMeters = (geoPos1.lat - geoPos2.lat) / (height-1) / 180.0 * 6367500 * Math.PI;
         double deltaLonInMeters = (geoPos1.lon - geoPos2.lon) / (height-1) / 180.0 * 6367500 * Math.PI * Math.cos((geoPos1.lat + geoPos2.lat) / 2 / 180 * Math.PI);
         double resolution = (int) Math.round(Math.sqrt(deltaLatInMeters * deltaLatInMeters + deltaLonInMeters * deltaLonInMeters));
-        System.out.println("resolution=" + resolution);
+        SystemUtils.LOG.info("Determined resolution as " + resolution + " m");
         return resolution;
     }
 

@@ -32,7 +32,6 @@ public class S2IdepixConstants {
     public static final int NO_DATA_VALUE = -1;
 
     public static final String ELEVATION_BAND_NAME = "elevation";
-    public static final String LATITUDE_BAND_NAME = "lat";
 
     public static final String[] S2_MSI_REFLECTANCE_BAND_NAMES = {
             "B1",
@@ -57,12 +56,14 @@ public class S2IdepixConstants {
 
     public static final String SUN_ZENITH_BAND_NAME = "sun_zenith";
     public static final String SUN_AZIMUTH_BAND_NAME = "sun_azimuth";
+    public static final String VIEW_ZENITH_BAND_NAME = "view_zenith_mean";
+    public static final String VIEW_AZIMUTH_BAND_NAME = "view_azimuth_mean";
 
     public static final String[] S2_MSI_ANNOTATION_BAND_NAMES = {
             SUN_ZENITH_BAND_NAME,
-            "view_zenith_mean",
+            VIEW_ZENITH_BAND_NAME,
             SUN_AZIMUTH_BAND_NAME,
-            "view_azimuth_mean",
+            VIEW_AZIMUTH_BAND_NAME
     };
 
     public static final float[] S2_MSI_WAVELENGTHS = {
