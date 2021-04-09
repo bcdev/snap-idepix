@@ -141,8 +141,8 @@ public class S2IdepixAlgorithm {
         }
 //        return (!isLand() && !isCloud() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&
 //                waterValue > WATER_THRESH);
-        return (!isCloudSure() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous()
-                && !isClearSnow() && !isBrightWhite() && !(waterValue > WATER_THRESH));
+        // JM 20170406:
+        return (!isCloudSure() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&  waterValue > WATER_THRESH);
     }
 
     public boolean isClearSnow() {
