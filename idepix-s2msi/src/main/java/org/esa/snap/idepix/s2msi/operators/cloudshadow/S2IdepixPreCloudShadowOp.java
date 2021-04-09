@@ -16,6 +16,7 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.BitSetter;
@@ -51,6 +52,12 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
+    @Parameter(notNull=true)
+    private float sunZenithMean;
+
+    @Parameter(notNull=true)
+    private float sunAzimuthMean;
+
     private final static double MAX_CLOUD_HEIGHT = 8000.;
     private final static int MAX_TILE_DIMENSION_IN_M = 84000;
 
@@ -62,10 +69,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     static int mincloudBase = 100;
     static int maxcloudTop = 10000;
     //for calculating a single cloud path
-    private float sunZenithMean;
-    private float sunAzimuthMean;
-    private float viewAzimuthMean;
-    private float viewZenithMean;
     private float minAltitude = 0;
 
     //map for the different tiles: meanReflectance per offset.
@@ -80,11 +83,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     static int searchBorderRadius;
     private static final String sourceBandNameClusterA = "B8A";
     private static final String sourceBandNameClusterB = "B3";
-    private static final String sourceSunZenithName = "sun_zenith";
-    private static final String sourceSunAzimuthName = "sun_azimuth";
-    private static final String sourceViewAzimuthName = "view_azimuth_mean";
-    private static final String sourceViewZenithName = "view_zenith_mean";
-    private static final String sourceAltitudeName = "elevation";
     private static final String sourceFlagName1 = "pixel_classif_flags";
     private final static String BAND_NAME_CLOUD_SHADOW = "FlagBand";
 
@@ -127,35 +125,13 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         sourceBandClusterA = s2ClassifProduct.getBand(sourceBandNameClusterA);
         sourceBandClusterB = s2ClassifProduct.getBand(sourceBandNameClusterB);
 
-        RasterDataNode sourceSunZenith = s2ClassifProduct.getBand(sourceSunZenithName);
-        RasterDataNode sourceSunAzimuth = s2ClassifProduct.getBand(sourceSunAzimuthName);
-        RasterDataNode sourceViewAzimuth = s2ClassifProduct.getBand(sourceViewAzimuthName);
-        RasterDataNode sourceViewZenith = s2ClassifProduct.getBand(sourceViewZenithName);
-
         final GeoPos centerGeoPos =
                 getCenterGeoPos(s2ClassifProduct.getSceneGeoCoding(), s2ClassifProduct.getSceneRasterWidth(),
                         s2ClassifProduct.getSceneRasterHeight());
         maxcloudTop = setCloudTopHeight(centerGeoPos.getLat());
 
         //create a single potential cloud path for the granule.
-        // sunZenithMean, sunAzimuthMean is the value at the central pixel.
         minAltitude = 0;
-        sunZenithMean = getRasterNodeValueAtCenter(sourceSunZenith, s2ClassifProduct.getSceneRasterWidth(),
-                s2ClassifProduct.getSceneRasterHeight());
-        sunAzimuthMean = getRasterNodeValueAtCenter(sourceSunAzimuth, s2ClassifProduct.getSceneRasterWidth(),
-                s2ClassifProduct.getSceneRasterHeight());
-        viewAzimuthMean = getRasterNodeValueAtCenter(sourceViewAzimuth, s2ClassifProduct.getSceneRasterWidth(),
-                s2ClassifProduct.getSceneRasterHeight());
-        viewZenithMean = getRasterNodeValueAtCenter(sourceViewZenith, targetProduct.getSceneRasterWidth(),
-                targetProduct.getSceneRasterHeight());
-
-        // todo: if the center pixel of the granule does not exist, find the center of the existing data!
-        // actually: sunZenith and sunAzimuth are given on the entire granule, even if the data is only partially available.
-        // view zenith and azimuth are missing, but the return value is 0 -> sunAzimuth is not corrected.
-        // this might not be the best choice for the data near the swath border, but in principal the calculation can still be done.
-
-        sunAzimuthMean = convertToApparentSunAzimuth();
-
         sourceBandFlag1 = s2ClassifProduct.getBand(sourceFlagName1);
 
         Band targetBandCloudShadow = targetProduct.addBand(BAND_NAME_CLOUD_SHADOW, ProductData.TYPE_INT32);
@@ -215,10 +191,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         return geoCoding.getGeoPos(centerPixelPos, null);
     }
 
-    private float getRasterNodeValueAtCenter(RasterDataNode var, int width, int height) {
-        return var.getSampleFloat((int) (0.5 * width), (int) (0.5 * height));
-    }
-
     private int setCloudTopHeight(double lat) {
         return (int) Math.ceil(0.5 * Math.pow(90. - Math.abs(lat), 2.) + (90. - Math.abs(lat)) * 25 + 5000);
     }
@@ -240,21 +212,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         int x1 = Math.min(productWidth, targetRectangle.x + targetRectangle.width + Math.max(0, Math.abs(relativeX)));
         int y1 = Math.min(productHeight, targetRectangle.y + targetRectangle.height + Math.max(0, Math.abs(relativeY)));
         return new Rectangle(x0, y0, x1 - x0, y1 - y0);
-    }
-
-    private float convertToApparentSunAzimuth() {
-        //here: cloud path is calculated for center pixel sunZenith and sunAzimuth.
-        // after correction of sun azimuth angle into apparent sun azimuth angle.
-        // Due to projection of the cloud at view_zenith>0 the position of the cloud becomes distorted.
-        // The true position still causes the shadow - and it cannot be determined without the cloud top height.
-        // So instead, the apparent sun azimuth angle is calculated and used to find the cloudShadowRelativePath.
-
-        double diff_phi = sunAzimuthMean - viewAzimuthMean;
-        if (diff_phi < 0) diff_phi = 180 + diff_phi;
-        if (diff_phi > 90) diff_phi = diff_phi - 90;
-        diff_phi = diff_phi * Math.tan(viewZenithMean * MathUtils.DTOR);
-        if (viewAzimuthMean > 180) diff_phi = -1. * diff_phi;
-        return (float) (sunAzimuthMean + diff_phi);
     }
 
     @Override

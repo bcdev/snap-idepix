@@ -120,8 +120,8 @@ class FindContinuousAreas {
                 }
             }
             //test in all four next neighbours, from top left to bottom right (reversed to the iterations before)
-            for (int j = 1; j < sourceHeight - 1; j++) {
-                for (int i = 1; i < sourceWidth - 1; i++) {
+            for (int j = 1; j < sourceHeight - 2; j++) {
+                for (int i = 1; i < sourceWidth - 2; i++) {
                     int index = j * (sourceWidth) + i;
                     if (isTarget(index, useFlagBand)) {
                         int lowerNeighbour = cloudIdArray[index + sourceWidth];
@@ -163,7 +163,17 @@ class FindContinuousAreas {
                     int rightNeighbour = cloudIdArray[index1 + 1];
                     int center = cloudIdArray[index1];
 
-                    if (j == 0) {
+                    if (sourceHeight == 1) {
+                        int thisMax = rightNeighbour;
+                        if (center > thisMax) thisMax = center;
+                        if (center < thisMax) {
+                            cloudIdArray[index1] = thisMax;
+                            count++;
+                        } else if (rightNeighbour > 0 && rightNeighbour < thisMax) {
+                            cloudIdArray[index1 + 1] = thisMax;
+                            count++;
+                        }
+                    } else if (j == 0 && sourceHeight > 1) {
                         int lowerNeighbour = cloudIdArray[index1 + sourceWidth];
 
                         int thisMax = lowerNeighbour;
@@ -180,7 +190,7 @@ class FindContinuousAreas {
                             cloudIdArray[index1 + sourceWidth] = thisMax;
                             count++;
                         }
-                    } else if (j == sourceHeight - 1) {
+                    } else if (j == sourceHeight - 1 && sourceHeight > 1) {
                         int upperNeighbour = cloudIdArray[index1 - sourceWidth];
 
                         int thisMax = upperNeighbour;
@@ -224,7 +234,17 @@ class FindContinuousAreas {
                 if (isTarget(index2, useFlagBand)) {
                     int leftNeighbour = cloudIdArray[index2 - 1];
                     int center = cloudIdArray[index2];
-                    if (j == 0) {
+                    if (sourceHeight == 1) {
+                        int thisMax = leftNeighbour;
+                        if (center > thisMax) thisMax = center;
+                        if (center < thisMax) {
+                            cloudIdArray[index2] = thisMax;
+                            count++;
+                        } else if (leftNeighbour > 0 && leftNeighbour < thisMax) {
+                            cloudIdArray[index2 - 1] = thisMax;
+                            count++;
+                        }
+                    } else if (j == 0) {
                         int lowerNeighbour = cloudIdArray[index2 + sourceWidth];
 
                         int thisMax = lowerNeighbour;
