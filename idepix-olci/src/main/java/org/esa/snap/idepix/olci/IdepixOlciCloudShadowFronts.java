@@ -78,7 +78,7 @@ class IdepixOlciCloudShadowFronts {
         boolean[][] isCloudShadow = new boolean[w][h];
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                if (isCloudFree(sourceFlagTile, x, y)) {
+                if (isCloudFree(sourceFlagTile, x, y) && isNotInvalid(sourceFlagTile, x, y)) {
                     isCloudShadow[x - x0][y - y0] = getCloudShadow(sourceFlagTile, targetTile, x, y);
                     if (isCloudShadow[x - x0][y - y0]) {
                         setCloudShadow(targetTile, x, y);
@@ -136,6 +136,10 @@ class IdepixOlciCloudShadowFronts {
 
     private boolean isCloudFree(Tile sourceFlagTile, int x, int y) {
         return !sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+    }
+
+    private boolean isNotInvalid(Tile sourceFlagTile, int x, int y){
+        return !sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
     }
 
     private boolean isSurroundedByCloud(Tile sourceFlagTile, int x, int y) {

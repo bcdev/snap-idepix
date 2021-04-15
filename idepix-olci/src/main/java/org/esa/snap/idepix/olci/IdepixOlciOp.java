@@ -160,7 +160,7 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
-        if (computeCloudBuffer || computeMountainShadow) {
+        if (computeCloudBuffer || computeMountainShadow || computeCloudShadow) {
             postProcess(olciIdepixProduct);
         }
 
@@ -227,10 +227,12 @@ public class IdepixOlciOp extends BasisOp {
         }
 
         if (computeCloudShadow) {
+            System.out.println("start ctp");
             ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
                                                                         o2CorrProduct,
                                                                         alternativeNNDirPath,
                                                                         outputCtp);
+            System.out.println("end ctp");
         }
 
     }
