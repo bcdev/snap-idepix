@@ -128,6 +128,9 @@ class CloudShadowFlaggerCombination {
         for (int index : cloud) {
             int[] x = revertIndexToXY(index, width);
 
+            if (bestOffset >= cloudPath.length) {
+                break;
+            }
             int x1 = x[0] + (int) cloudPath[bestOffset].getX();
             int y1 = x[1] + (int) cloudPath[bestOffset].getY();
 
