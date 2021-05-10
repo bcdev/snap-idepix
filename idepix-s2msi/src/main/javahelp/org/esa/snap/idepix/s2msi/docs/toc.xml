@@ -22,7 +22,7 @@
 
     <tocitem text="Sentinel Toolbox Application">
         <tocitem text="Optical">
-            <tocitem text="Pre-Processing">
+            <tocitem text="Preprocessing">
                 <tocitem text="Masking">
                     <tocitem text="IdePix (Sentinel-2 MSI)" target="snapIdepixS2MsiTool">
                         <tocitem text="Sentinel-2 MSI Processor Description" target="snapIdepixS2MsiProcessorDescription"/>

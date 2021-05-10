@@ -42,7 +42,7 @@ import java.util.Map;
         copyright = "(c) Brockmann Consult GmbH",
         version = "2.0",
         internal = true,
-        description = "Pre-processing for algorithm detecting cloud shadow...")
+        description = "Preprocessing for algorithm detecting cloud shadow...")
 
 public class S2IdepixPreCloudShadowOp extends Operator {
 
