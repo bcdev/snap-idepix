@@ -328,8 +328,12 @@ public class S2IdepixCloudShadowOp extends Operator {
         if (meanReflPerTile.keySet().size() == 0) {
             return new int[3];
         }
-        Integer someKey = meanReflPerTile.keySet().iterator().next();
-        double[][] scaledTotalReflectance = new double[3][meanReflPerTile.get(someKey)[0].length];
+        // we need to account for that not all mean values in meanReflPerTile are of the same length
+        int pathLength = 0;
+        for (double[][] meanRefls : meanReflPerTile.values()) {
+            pathLength = Math.max(pathLength, meanRefls[0].length);
+        }
+        double[][] scaledTotalReflectance = new double[3][pathLength];
         for (int j = 0; j < 3; j++) {
             /*Checking the meanReflPerTile:
                 - if it has no relative minimum other than the first or the last value, it is excluded.
