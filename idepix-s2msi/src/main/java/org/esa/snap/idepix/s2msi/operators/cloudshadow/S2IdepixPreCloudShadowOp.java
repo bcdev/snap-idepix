@@ -45,8 +45,11 @@ import java.util.Map;
 
 public class S2IdepixPreCloudShadowOp extends Operator {
 
-    @SourceProduct(description = "The classification product.")
+    @SourceProduct(description = "The classification product from which to take the classification band.")
     private Product s2ClassifProduct;
+
+    @SourceProduct(description = "The product from which to take other bands than the classification band.")
+    private Product s2BandsProduct;
 
     @TargetProduct
     private Product targetProduct;
@@ -119,33 +122,33 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        targetProduct = new Product(s2ClassifProduct.getName(), s2ClassifProduct.getProductType(),
-                s2ClassifProduct.getSceneRasterWidth(), s2ClassifProduct.getSceneRasterHeight());
+        targetProduct = new Product(s2BandsProduct.getName(), s2BandsProduct.getProductType(),
+                s2BandsProduct.getSceneRasterWidth(), s2BandsProduct.getSceneRasterHeight());
 
-        ProductUtils.copyGeoCoding(s2ClassifProduct, targetProduct);
+        ProductUtils.copyGeoCoding(s2BandsProduct, targetProduct);
 
-        sourceBandClusterA = s2ClassifProduct.getBand(sourceBandNameClusterA);
-        sourceBandClusterB = s2ClassifProduct.getBand(sourceBandNameClusterB);
+        sourceBandClusterA = s2BandsProduct.getBand(sourceBandNameClusterA);
+        sourceBandClusterB = s2BandsProduct.getBand(sourceBandNameClusterB);
 
-        RasterDataNode sourceSunZenith = s2ClassifProduct.getBand(sourceSunZenithName);
-        RasterDataNode sourceSunAzimuth = s2ClassifProduct.getBand(sourceSunAzimuthName);
-        RasterDataNode sourceViewAzimuth = s2ClassifProduct.getBand(sourceViewAzimuthName);
-        RasterDataNode sourceViewZenith = s2ClassifProduct.getBand(sourceViewZenithName);
+        RasterDataNode sourceSunZenith = s2BandsProduct.getBand(sourceSunZenithName);
+        RasterDataNode sourceSunAzimuth = s2BandsProduct.getBand(sourceSunAzimuthName);
+        RasterDataNode sourceViewAzimuth = s2BandsProduct.getBand(sourceViewAzimuthName);
+        RasterDataNode sourceViewZenith = s2BandsProduct.getBand(sourceViewZenithName);
 
         final GeoPos centerGeoPos =
-                getCenterGeoPos(s2ClassifProduct.getSceneGeoCoding(), s2ClassifProduct.getSceneRasterWidth(),
-                        s2ClassifProduct.getSceneRasterHeight());
+                getCenterGeoPos(s2BandsProduct.getSceneGeoCoding(), s2BandsProduct.getSceneRasterWidth(),
+                        s2BandsProduct.getSceneRasterHeight());
         maxcloudTop = setCloudTopHeight(centerGeoPos.getLat());
 
         //create a single potential cloud path for the granule.
         // sunZenithMean, sunAzimuthMean is the value at the central pixel.
         minAltitude = 0;
-        sunZenithMean = getRasterNodeValueAtCenter(sourceSunZenith, s2ClassifProduct.getSceneRasterWidth(),
-                s2ClassifProduct.getSceneRasterHeight());
-        sunAzimuthMean = getRasterNodeValueAtCenter(sourceSunAzimuth, s2ClassifProduct.getSceneRasterWidth(),
-                s2ClassifProduct.getSceneRasterHeight());
-        viewAzimuthMean = getRasterNodeValueAtCenter(sourceViewAzimuth, s2ClassifProduct.getSceneRasterWidth(),
-                s2ClassifProduct.getSceneRasterHeight());
+        sunZenithMean = getRasterNodeValueAtCenter(sourceSunZenith, s2BandsProduct.getSceneRasterWidth(),
+                s2BandsProduct.getSceneRasterHeight());
+        sunAzimuthMean = getRasterNodeValueAtCenter(sourceSunAzimuth, s2BandsProduct.getSceneRasterWidth(),
+                s2BandsProduct.getSceneRasterHeight());
+        viewAzimuthMean = getRasterNodeValueAtCenter(sourceViewAzimuth, s2BandsProduct.getSceneRasterWidth(),
+                s2BandsProduct.getSceneRasterHeight());
         viewZenithMean = getRasterNodeValueAtCenter(sourceViewZenith, targetProduct.getSceneRasterWidth(),
                 targetProduct.getSceneRasterHeight());
 

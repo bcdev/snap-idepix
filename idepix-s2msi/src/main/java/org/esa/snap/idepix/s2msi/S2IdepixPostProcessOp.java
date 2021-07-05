@@ -58,6 +58,17 @@ public class S2IdepixPostProcessOp extends Operator {
     @Parameter(defaultValue = "true", label = "Compute cloud shadow", description = "Compute cloud shadow")
     private boolean computeCloudShadow;
 
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
+    private boolean computeCloudBuffer;
+
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer also for cloud ambiguous pixels")
+    private boolean computeCloudBufferForCloudAmbiguous;
+
+    @Parameter(defaultValue = "2", interval = "[0,100]",
+            label = " Width of cloud buffer (# of pixels)",
+            description = " The width of the 'safety buffer' around a pixel identified as cloudy.")
+    private int cloudBufferWidth;
+
     @Parameter(description = "The mode by which clouds are detected. There are three options: Land/Water, Multiple Bands" +
             "or Single Band", valueSet = {"LandWater", "MultiBand", "SingleBand"}, defaultValue = "LandWater")
     private String mode;
@@ -115,6 +126,9 @@ public class S2IdepixPostProcessOp extends Operator {
             //      - add || computeMountainShadow to the condition above
             //      - consider the flag results in computeTile
             params.put("computeMountainShadow", false);
+            params.put("computeCloudBuffer", computeCloudBuffer);
+            params.put("cloudBufferWidth", cloudBufferWidth);
+            params.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
             params.put("mode", mode);
             params.put("cwThresh", cwThresh);
             params.put("gclThresh", gclThresh);

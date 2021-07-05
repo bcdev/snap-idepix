@@ -14,8 +14,6 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.internal.OperatorExecutor;
-import org.esa.snap.core.gpf.internal.OperatorImage;
-import org.esa.snap.core.gpf.internal.OperatorImageTileStack;
 import org.esa.snap.core.image.VectorDataMaskOpImage;
 import org.esa.snap.core.util.SystemUtils;
 import org.opengis.referencing.operation.MathTransform;
@@ -47,8 +45,11 @@ public class S2IdepixCloudShadowOp extends Operator {
     @SourceProduct(description = "The original input product")
     private Product l1cProduct;
 
-    @SourceProduct(description = "The classification product.")
+    @SourceProduct(description = "The classification product from which to take the classification band.")
     private Product s2ClassifProduct;
+
+    @SourceProduct(description = "The product from which to take other bands than the classification band.")
+    private Product s2BandsProduct;
 
     @TargetProduct
     private Product targetProduct;
@@ -59,6 +60,17 @@ public class S2IdepixCloudShadowOp extends Operator {
 
     @Parameter(description = "Whether to also compute mountain shadow", defaultValue = "true")
     private boolean computeMountainShadow;
+
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
+    private boolean computeCloudBuffer;
+
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer also for cloud ambiguous pixels")
+    private boolean computeCloudBufferForCloudAmbiguous;
+
+    @Parameter(defaultValue = "2", interval = "[0,100]",
+            label = " Width of cloud buffer (# of pixels)",
+            description = " The width of the 'safety buffer' around a pixel identified as cloudy.")
+    private int cloudBufferWidth;
 
     @Parameter(defaultValue = "0.01",
             label = " Threshold CW_THRESH",
@@ -102,10 +114,11 @@ public class S2IdepixCloudShadowOp extends Operator {
 
         int sourceResolution = determineSourceResolution(l1cProduct);
 
-        Product classificationProduct = getClassificationProduct(sourceResolution);
+        Product[] internalSourceProducts = getInternalSourceProducts(sourceResolution);
 
         HashMap<String, Product> preInput = new HashMap<>();
-        preInput.put("s2ClassifProduct", classificationProduct);
+        preInput.put("s2ClassifProduct", internalSourceProducts[0]);
+        preInput.put("s2BandsProduct", internalSourceProducts[1]);
         Map<String, Object> preParams = new HashMap<>();
 
         //todo: test resolution of granule. Resample necessary bands to 60m. calculate cloud shadow on 60m.
@@ -146,7 +159,8 @@ public class S2IdepixCloudShadowOp extends Operator {
 
 
         HashMap<String, Product> postInput = new HashMap<>();
-        postInput.put("s2ClassifProduct", classificationProduct);
+        postInput.put("s2ClassifProduct", internalSourceProducts[0]);
+        postInput.put("s2BandsProduct", internalSourceProducts[1]);
         //put in here the input products that are required by the post-processing operator
         Map<String, Object> postParams = new HashMap<>();
         postParams.put("computeMountainShadow", computeMountainShadow);
@@ -174,9 +188,9 @@ public class S2IdepixCloudShadowOp extends Operator {
         throw new OperatorException("Invalid product");
     }
 
-    private Product getClassificationProduct(int resolution) {
+    private Product[] getInternalSourceProducts(int resolution) {
         if (resolution == 60) {
-            return s2ClassifProduct;
+            return new Product[]{s2ClassifProduct, s2BandsProduct};
         }
 
         HashMap<String, Product> resamplingInput = new HashMap<>();
@@ -192,13 +206,16 @@ public class S2IdepixCloudShadowOp extends Operator {
         Map<String, Object> classificationParams = new HashMap<>();
         classificationParams.put("computeMountainShadow", false);
         classificationParams.put("computeCloudShadow", false);
-        classificationParams.put("computeCloudBuffer", false);
+        classificationParams.put("computeCloudBuffer", computeCloudBuffer);
+        classificationParams.put("cloudBufferWidth", cloudBufferWidth);
+        classificationParams.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
         classificationParams.put("cwThresh", cwThresh);
         classificationParams.put("gclThresh", gclThresh);
         classificationParams.put("clThresh", clThresh);
         classificationParams.put("demName", demName);
 
-        return GPF.createProduct("Idepix.S2", classificationParams, classificationInput);
+        Product resampledClassifProduct = GPF.createProduct("Idepix.S2", classificationParams, classificationInput);
+        return new Product[]{resampledClassifProduct, resampledClassifProduct};
     }
 
     private Product prepareTargetProduct(int resolution, Product postProcessedProduct) {

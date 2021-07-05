@@ -45,8 +45,11 @@ import java.util.List;
 
 public class S2IdepixPostCloudShadowOp extends Operator {
 
-    @SourceProduct(description = "The classification product.")
+    @SourceProduct(description = "The classification product from which to take the classification band.")
     private Product s2ClassifProduct;
+
+    @SourceProduct(description = "The product from which to take other bands than the classification band.")
+    private Product s2BandsProduct;
 
     @TargetProduct
     private Product targetProduct;
@@ -132,9 +135,9 @@ public class S2IdepixPostCloudShadowOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        targetProduct = new Product(s2ClassifProduct.getName(), s2ClassifProduct.getProductType(),
-                s2ClassifProduct.getSceneRasterWidth(), s2ClassifProduct.getSceneRasterHeight());
-        ProductUtils.copyGeoCoding(s2ClassifProduct, targetProduct);
+        targetProduct = new Product(s2BandsProduct.getName(), s2BandsProduct.getProductType(),
+                s2BandsProduct.getSceneRasterWidth(), s2BandsProduct.getSceneRasterHeight());
+        ProductUtils.copyGeoCoding(s2BandsProduct, targetProduct);
         targetBandCloudShadow = targetProduct.addBand(BAND_NAME_CLOUD_SHADOW, ProductData.TYPE_INT32);
         if (debug) {
             targetBandCloudID = targetProduct.addBand(BAND_NAME_CLOUD_ID, ProductData.TYPE_INT32);
@@ -145,14 +148,14 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         attachFlagCoding(targetBandCloudShadow);
         setupBitmasks(targetProduct);
 
-        sourceBandClusterA = s2ClassifProduct.getBand(sourceBandNameClusterA);
-        sourceBandClusterB = s2ClassifProduct.getBand(sourceBandNameClusterB);
+        sourceBandClusterA = s2BandsProduct.getBand(sourceBandNameClusterA);
+        sourceBandClusterB = s2BandsProduct.getBand(sourceBandNameClusterB);
 
-        RasterDataNode sourceSunZenith = s2ClassifProduct.getBand(sourceSunZenithName);
-        RasterDataNode sourceSunAzimuth = s2ClassifProduct.getBand(sourceSunAzimuthName);
-        sourceAltitude = s2ClassifProduct.getBand(sourceAltitudeName);
-        RasterDataNode sourceViewAzimuth = s2ClassifProduct.getBand(sourceViewAzimuthName);
-        RasterDataNode sourceViewZenith = s2ClassifProduct.getBand(sourceViewZenithName);
+        RasterDataNode sourceSunZenith = s2BandsProduct.getBand(sourceSunZenithName);
+        RasterDataNode sourceSunAzimuth = s2BandsProduct.getBand(sourceSunAzimuthName);
+        sourceAltitude = s2BandsProduct.getBand(sourceAltitudeName);
+        RasterDataNode sourceViewAzimuth = s2BandsProduct.getBand(sourceViewAzimuthName);
+        RasterDataNode sourceViewZenith = s2BandsProduct.getBand(sourceViewZenithName);
 
         final GeoPos centerGeoPos =
                 getCenterGeoPos(targetProduct.getSceneGeoCoding(), targetProduct.getSceneRasterWidth(),
