@@ -118,7 +118,8 @@ public class S2IdepixPostProcessOp extends Operator {
         if (computeCloudShadow) {
             HashMap<String, Product> input = new HashMap<>();
             input.put("l1cProduct", l1cProduct);
-            input.put("s2ClassifProduct", s2ClassifProduct);
+            input.put("s2ClassifProduct", s2CloudBufferProduct);
+            input.put("s2BandsProduct", s2ClassifProduct);
             Map<String, Object> params = new HashMap<>();
             // we have decided not to use the mountain shadow as implemented in
             // to include it again
