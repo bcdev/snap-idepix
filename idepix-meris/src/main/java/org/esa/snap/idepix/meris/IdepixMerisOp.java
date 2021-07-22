@@ -130,8 +130,6 @@ public class IdepixMerisOp extends BasisOp {
     private Map<String, Object> waterClassificationParameters;
     private Map<String, Object> landClassificationParameters;
 
-    private boolean inputIs4thReprocessing;
-
     @Override
     public void initialize() throws OperatorException {
         final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.MERIS);
@@ -139,8 +137,7 @@ public class IdepixMerisOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        inputIs4thReprocessing = IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType());
-        if (inputIs4thReprocessing) {
+        if (IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType())) {
             // adapt to 3rd reprocessing...
             Meris3rd4thReprocessingAdapter reprocessingAdapter = new Meris3rd4thReprocessingAdapter();
             inputProductToProcess = reprocessingAdapter.convertToLowerVersion(sourceProduct);
