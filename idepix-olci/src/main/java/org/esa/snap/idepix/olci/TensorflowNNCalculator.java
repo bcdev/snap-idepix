@@ -1,6 +1,7 @@
 package org.esa.snap.idepix.olci;
 
 import org.tensorflow.SavedModelBundle;
+import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.TensorFlow;
 
@@ -19,12 +20,11 @@ import java.io.IOException;
  */
 class TensorflowNNCalculator {
 
+    private final String modelDir;
+    private final String transformMethod;
+
     private String firstNodeName;
     private String lastNodeName;
-
-    private String transformMethod;
-
-    private String modelDir;
     private SavedModelBundle model;
 
     /**
@@ -196,10 +196,11 @@ class TensorflowNNCalculator {
         }
         float[][] inputData = new float[1][nnInput.length];
         inputData[0] = nnInput;
+        final Session.Runner runner = model.session().runner();
         try (
                 // Tensor class implements java.lang.Autocloseable
-            Tensor inputTensor = Tensor.create(inputData);
-            Tensor outputTensor = model.session().runner().feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
+                Tensor<?> inputTensor = Tensor.create(inputData);
+                Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
         ) {
             long[] ts = outputTensor.shape();
             int dimension = (int) ts[1];
