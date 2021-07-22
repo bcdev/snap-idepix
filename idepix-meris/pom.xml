@@ -25,7 +25,7 @@
     </parent>
 
     <artifactId>idepix-meris</artifactId>
-    <version>8.0.1-SNAPSHOT</version>
+    <version>8.0.1</version>
 
     <packaging>nbm</packaging>
     
@@ -33,7 +33,7 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from MERIS.</description>
 
     <properties>
-        <idepix.version>8.0.1-SNAPSHOT</idepix.version>
+        <idepix.version>8.0.1</idepix.version>
         <s3tbx.version>8.0.2</s3tbx.version>
     </properties>
 
