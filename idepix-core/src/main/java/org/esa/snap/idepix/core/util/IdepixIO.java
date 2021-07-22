@@ -134,6 +134,10 @@ public class IdepixIO {
         }
     }
 
+    public static boolean isMeris4thReprocessingL1bProduct(String productType) {
+        return productType.startsWith("ME_1");  // todo: discuss this criterion
+    }
+
     /// END of public ///
 
     static boolean isValidLandsat8Product(Product product) {
@@ -194,7 +198,11 @@ public class IdepixIO {
         // accept also ICOL L1N products...
         final boolean merisIcolTypePatternMatches = isValidMerisIcolL1NProduct(product);
         final boolean merisCCL1PTypePatternMatches = isValidMerisCCL1PProduct(product);
-        return merisL1TypePatternMatches || merisIcolTypePatternMatches || merisCCL1PTypePatternMatches;
+        // now accept also 4th reprocessing products (20210126):
+        final boolean meris4thReproTypePatternMatches = isValidMeris4thReprocessingL1bProduct(product);
+
+        return merisL1TypePatternMatches || merisIcolTypePatternMatches ||
+                merisCCL1PTypePatternMatches || meris4thReproTypePatternMatches;
     }
 
     private static boolean isValidOlciProduct(Product product) {
@@ -215,6 +223,10 @@ public class IdepixIO {
         } else {
             return false;
         }
+    }
+
+    private static boolean isValidMeris4thReprocessingL1bProduct(Product product) {
+        return isMeris4thReprocessingL1bProduct(product.getProductType()); // todo: discuss this criterion
     }
 
     private static boolean isValidMerisCCL1PProduct(Product product) {
