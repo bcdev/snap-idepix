@@ -40,32 +40,16 @@
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>idepix-core</artifactId>
+            <version>${idepix.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-jai</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>idepix-core</artifactId>
-            <version>8.0.1-SNAPSHOT</version>
-        </dependency>
-        <!--include this dependency to run SNAP Desktop in IDE.-->
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-main</artifactId>
-            <version>${snap.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-dem</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -77,9 +61,26 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>snap-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>snap-engine-utilities</artifactId>
             <version>${snap.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-dem</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <!--include this dependency to run SNAP Desktop in IDE.-->
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-main</artifactId>
+            <version>${snap.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.jblas</groupId>
             <artifactId>jblas</artifactId>

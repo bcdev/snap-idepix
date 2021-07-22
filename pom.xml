@@ -22,15 +22,14 @@
     <name>snap-idepix</name>
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-idepix</artifactId>
-    <version>8.0.0</version>
+    <version>8.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>SNAP IdePix Parent project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>8.0.0</snap.version>
-        <s3tbx.version>8.0.0</s3tbx.version>
+        <snap.version>8.0.3</snap.version>
         <netbeans.version>RELEASE82</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
     </properties>
@@ -86,6 +85,11 @@
             </dependency>
             <dependency>
                 <groupId>org.esa.snap</groupId>
+                <artifactId>snap-runtime</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.snap</groupId>
                 <artifactId>snap-collocation</artifactId>
                 <version>${snap.version}</version>
             </dependency>
@@ -108,16 +112,6 @@
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-watermask</artifactId>
                 <version>${snap.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.esa.s3tbx</groupId>
-                <artifactId>s3tbx-meris-l2auxdata</artifactId>
-                <version>${s3tbx.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.esa.s3tbx</groupId>
-                <artifactId>s3tbx-rad2refl</artifactId>
-                <version>${s3tbx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.netbeans.api</groupId>

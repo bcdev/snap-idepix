@@ -3,9 +3,10 @@ package org.esa.snap.idepix.core.util;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.dataio.envisat.EnvisatConstants;
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
+
+import java.util.regex.Pattern;
 
 /**
  * @author Olaf Danne
@@ -193,7 +194,7 @@ public class IdepixIO {
     }
 
     private static boolean isValidMerisProduct(Product product) {
-        final boolean merisL1TypePatternMatches = EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(product.getProductType()).matches();
+        final boolean merisL1TypePatternMatches = Pattern.compile("MER_..._1P").matcher(product.getProductType()).matches();
         // accept also ICOL L1N products...
         final boolean merisIcolTypePatternMatches = isValidMerisIcolL1NProduct(product);
         final boolean merisCCL1PTypePatternMatches = isValidMerisCCL1PProduct(product);
@@ -218,7 +219,7 @@ public class IdepixIO {
         if (icolProductType.endsWith("_1N")) {
             int index = icolProductType.indexOf("_1");
             final String merisProductType = icolProductType.substring(0, index) + "_1P";
-            return (EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(merisProductType).matches());
+            return (Pattern.compile("MER_..._1P").matcher(merisProductType).matches());
         } else {
             return false;
         }
