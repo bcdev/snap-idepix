@@ -79,7 +79,7 @@ class IdepixOlciCloudShadowFronts {
 
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                if (isCloudFree(sourceTile, x, y) && isNotInvalid(sourceFlagTile, x, y)) {
+                if (isCloudFree(sourceTile, x, y) && isNotInvalid(sourceTile, x, y)) {
                     if (isCloudShadow(sourceTile, targetTile, x, y)) {
                         setCloudShadow(targetTile, x, y);
                         cloudShadow[y - y0][x - x0] = true;
