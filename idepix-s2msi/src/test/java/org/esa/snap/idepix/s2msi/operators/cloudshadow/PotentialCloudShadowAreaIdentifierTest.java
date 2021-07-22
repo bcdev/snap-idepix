@@ -426,6 +426,9 @@ public class PotentialCloudShadowAreaIdentifierTest {
         int i = 0;
         for (int key : potentialShadowPositions.keySet()) {
             List<Integer> positions = potentialShadowPositions.get(key);
+            // here the test relays on the order of the entries in the map. This is not good.
+            // changing HashMaps to TreeMaps in PotentialCloudShadowAreaIdentifier:L33 leads already to such an error.
+            // Order of HashMaps can be different on other OS or with a different JDK.
             assertEquals(expectedPotentialShadowPositions[i].length, positions.size());
             for (int j = 0; j < positions.size(); j++) {
                 assertEquals(expectedPotentialShadowPositions[i][j], (int) positions.get(j));

@@ -26,7 +26,7 @@ import java.util.Map;
  * @author Olaf Danne
  */
 @OperatorMetadata(alias = "Idepix.S2",
-        category = "Optical/Pre-Processing",
+        category = "Optical/Preprocessing/Masking",
         version = "3.0",
         authors = "Tonio Fincke, Olaf Danne",
         copyright = "(c) 2019 by Brockmann Consult",

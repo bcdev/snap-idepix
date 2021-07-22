@@ -42,12 +42,11 @@ class TensorflowNNCalculator {
         } catch (LinkageError e) {
             throw new IllegalStateException("TensorFlow could not be initialised. " +
                                                     "Make sure that your CPU supports 64Bit and AVX instruction set " +
-                                                    "(Possible reason could be the usage of a VM).", e);
+                                                    "(Are you using a VM?) and that you have installed the Microsoft Visual C++ 2015 Redistributable when you are on windows.", e);
         }
 
         this.transformMethod = transformMethod;
         this.modelDir = modelDir;
-        System.out.println("modelDir = " + modelDir);
         try {
             loadModel();
         } catch (Exception e) {

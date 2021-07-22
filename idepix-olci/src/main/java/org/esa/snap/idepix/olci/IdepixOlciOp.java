@@ -35,7 +35,7 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Olci",
-        category = "Optical/Pre-Processing",
+        category = "Optical/Preprocessing/Masking",
         version = "3.0.2",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
@@ -160,7 +160,7 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
-        if (computeCloudBuffer || computeMountainShadow) {
+        if (computeCloudBuffer || computeMountainShadow || computeCloudShadow) {
             postProcess(olciIdepixProduct);
         }
 

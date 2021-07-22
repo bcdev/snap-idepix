@@ -34,7 +34,7 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Olci.Ctp",
-        category = "Optical/Pre-Processing",
+        category = "Optical/Preprocessing",
         version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
