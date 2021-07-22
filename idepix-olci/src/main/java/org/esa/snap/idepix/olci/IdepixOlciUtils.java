@@ -5,13 +5,12 @@ import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
-import org.esa.snap.core.util.GeoUtils;
-import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.ResourceInstaller;
-import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.*;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
@@ -26,9 +25,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Utility class for IdePix OLCI
@@ -59,7 +56,11 @@ class IdepixOlciUtils {
      * @return - the flag coding
      */
     static FlagCoding createOlciFlagCoding() {
-        return IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        flagCoding.addFlag("IDEPIX_MOUNTAIN_SHADOW", BitSetter.setFlag(0,
+                IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW),
+                IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT);
+        return flagCoding;
     }
 
     /**
@@ -68,7 +69,17 @@ class IdepixOlciUtils {
      * @param classifProduct - the pixel classification product
      */
     static void setupOlciClassifBitmask(Product classifProduct) {
-        IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
+        int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
+
+        int w = classifProduct.getSceneRasterWidth();
+        int h = classifProduct.getSceneRasterHeight();
+        Mask mask;
+        Random r = new Random(1234567);
+
+        mask = Mask.BandMathsType.create("IDEPIX_MOUNTAIN_SHADOW", IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_MOUNTAIN_SHADOW",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
+        classifProduct.getMaskGroup().add(index, mask);
     }
 
     static void addOlciRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
@@ -167,6 +178,32 @@ class IdepixOlciUtils {
         }
     }
 
+    static double getRefinedHeightFromCtp(double ctp, double slp, double[] temperatures) {
+        double height = 0.0;
+        final double[] prsLevels = IdepixOlciConstants.referencePressureLevels;
+
+        double t1;
+        double t2;
+        if (ctp >= prsLevels[prsLevels.length - 1]) {
+            for (int i = 0; i < prsLevels.length - 1; i++) {
+                if (ctp > prsLevels[0] || (ctp < prsLevels[i] && ctp > prsLevels[i + 1])) {
+                    t1 = temperatures[i];
+                    t2 = temperatures[i + 1];
+                    final double ts = (t2 - t1) / (prsLevels[i + 1] - prsLevels[i]) * (ctp - prsLevels[i]) + t1;
+                    height = getHeightFromCtp(ctp, slp, ts);
+                    break;
+                }
+            }
+        } else {
+            // CTP < 1 hPa? This should never happen...
+            t1 = temperatures[prsLevels.length - 2];
+            t2 = temperatures[prsLevels.length - 1];
+            final double ts = (t2 - t1) / (prsLevels[prsLevels.length - 2] - prsLevels[prsLevels.length - 1]) *
+                    (ctp - prsLevels[prsLevels.length - 1]) + t1;
+            height = getHeightFromCtp(ctp, slp, ts);
+        }
+        return height;
+    }
 
     private static Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
         final PathIterator pathIterator = path.getPathIterator(null);
@@ -194,31 +231,14 @@ class IdepixOlciUtils {
     }
 
 
-    static double getRefinedHeightFromCtp(double ctp, double slp, double[] temperatures) {
-        double height = 0.0;
-        final double[] prsLevels = IdepixOlciConstants.referencePressureLevels;
-
-        double t1;
-        double t2;
-        if (ctp >= prsLevels[prsLevels.length - 1]) {
-            for (int i = 0; i < prsLevels.length - 1; i++) {
-                if (ctp > prsLevels[0] || (ctp < prsLevels[i] && ctp > prsLevels[i + 1])) {
-                    t1 = temperatures[i];
-                    t2 = temperatures[i + 1];
-                    final double ts = (t2 - t1) / (prsLevels[i + 1] - prsLevels[i]) * (ctp - prsLevels[i]) + t1;
-                    height = getHeightFromCtp(ctp, slp, ts);
-                    break;
-                }
-            }
-        } else {
-            // CTP < 1 hPa? This should never happen...
-            t1 = temperatures[prsLevels.length - 2];
-            t2 = temperatures[prsLevels.length - 1];
-            final double ts = (t2 - t1) / (prsLevels[prsLevels.length - 2] - prsLevels[prsLevels.length - 1]) *
-                    (ctp - prsLevels[prsLevels.length - 1]) + t1;
-            height = getHeightFromCtp(ctp, slp, ts);
-        }
-        return height;
+    /**
+     * Returns month (1-12) from given start/stop time
+     *
+     * @param startStopTime - start/stop time given as {@link ProductData.UTC}
+     * @return month
+     */
+    static int getMonthFromStartStopTime(ProductData.UTC startStopTime) {
+        return startStopTime.getAsCalendar().get(Calendar.MONTH) + 1;
     }
 
     private static double getHeightFromCtp(double ctp, double p0, double ts) {

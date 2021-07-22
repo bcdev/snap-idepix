@@ -21,11 +21,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>8.0.0</version>
+        <version>8.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>idepix-core</artifactId>
-    <version>8.0.0</version>
+    <version>8.0.1-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
 
@@ -40,15 +40,15 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-jai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-envisat-reader</artifactId>
         </dependency>
         <dependency>
             <groupId>com.bc.jnn</groupId>

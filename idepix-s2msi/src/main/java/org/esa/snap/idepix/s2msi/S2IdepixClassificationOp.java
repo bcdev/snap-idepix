@@ -18,7 +18,6 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.dem.gpf.AddElevationOp;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.esa.snap.watermask.operator.WatermaskClassifier;
@@ -152,6 +151,9 @@ public class S2IdepixClassificationOp extends Operator {
     @SourceProduct(alias = "l1c", description = "The MSI L1C source product.")
     Product sourceProduct;
 
+    @SourceProduct(alias = "elevation", description = "The elevation product.")
+    Product elevationProduct;
+
 //    @SourceProduct(alias = "waterMask", optional = true)
 //    private Product waterMaskProduct;
 
@@ -186,7 +188,6 @@ public class S2IdepixClassificationOp extends Operator {
     Band tc4CirrusBand;
     Band ndwiBand;
 
-    private Product elevationProduct;
     private WatermaskClassifier watermaskClassifier;
 
 
@@ -218,16 +219,6 @@ public class S2IdepixClassificationOp extends Operator {
 
 //        readSchillerNeuralNets();
         createTargetProduct();
-
-        if (sourceProduct.containsBand(S2IdepixConstants.ELEVATION_BAND_NAME)) {
-            elevationProduct = sourceProduct;
-        } else {
-            AddElevationOp elevationOp = new AddElevationOp();
-            elevationOp.setParameterDefaultValues();
-            elevationOp.setParameter("demName", demName);
-            elevationOp.setSourceProduct(sourceProduct);
-            elevationProduct = elevationOp.getTargetProduct();
-        }
 
         extendTargetProduct();
     }
@@ -648,7 +639,7 @@ public class S2IdepixClassificationOp extends Operator {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_INVALID, s2Algorithm.isInvalid());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD, s2Algorithm.isCloud());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD_SURE, s2Algorithm.isCloud());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD_SURE, s2Algorithm.isCloudSure());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, s2Algorithm.isCloudAmbiguous());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CIRRUS_SURE, s2Algorithm.isCirrus());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CIRRUS_AMBIGUOUS, s2Algorithm.isCirrusAmbiguous());

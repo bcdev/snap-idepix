@@ -110,7 +110,7 @@ public class IdepixConstants {
     static final String IDEPIX_CLOUD_SURE_DESCR_TEXT = "Fully opaque clouds with full confidence of their detection";
     static final String IDEPIX_CLOUD_BUFFER_DESCR_TEXT =
             "A buffer of n pixels around a cloud. n is a user supplied parameter. Applied to pixels masked as 'cloud'";
-    static final String IDEPIX_CLOUD_SHADOW_DESCR_TEXT = "Pixels is affect by a cloud shadow";
+    static final String IDEPIX_CLOUD_SHADOW_DESCR_TEXT = "Pixel is affected by a cloud shadow";
     static final String IDEPIX_SNOW_ICE_DESCR_TEXT = "Clear snow/ice pixels";
     static final String IDEPIX_BRIGHT_DESCR_TEXT = "Bright pixels";
     static final String IDEPIX_WHITE_DESCR_TEXT = "White pixels";
