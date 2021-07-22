@@ -6,6 +6,7 @@ import org.esa.snap.core.util.math.MathUtils;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +30,9 @@ class PotentialCloudShadowAreaIdentifier {
                                                    float[] sourceAltitude, int[] flagArray, int[] cloudIDArray,
                                                    Point2D[] cloudPath) {
         double sunZenithCloudRad = (double) sourceSunZenith * MathUtils.DTOR;
-        final Map<Integer, List<Integer>> indexToPositions = new TreeMap<>();
-        final Map<Integer, List<Integer>> offsetAtPositions = new TreeMap<>();
+        // cannot switch to TreeMap here; Test PotentialCloudShadowAreaIdentifierTest needs the order of HashMaps.
+        final Map<Integer, List<Integer>> indexToPositions = new HashMap<>();
+        final Map<Integer, List<Integer>> offsetAtPositions = new HashMap<>();
 
         int i = 0;
         int sourceWidth = sourceRectangle.width;
