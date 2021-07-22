@@ -56,7 +56,7 @@ class CloudShadowFlaggerCombination {
             List<Integer> noduplicatesPositions = new ArrayList<>(new LinkedHashSet<>(positions));
 
             if (noduplicatesPositions.size() < positions.size()) {
-                int test[] = new int[flagArray.length];
+                int[] test = new int[flagArray.length];
                 for (int i = 0; i < positions.size(); i++) {
                     int off = offsetAtPos.get(i);
                     int ind = positions.get(i);
@@ -82,7 +82,7 @@ class CloudShadowFlaggerCombination {
             //caution! the cloud list has a different length!
             this.cloud = cloudList.get(key);
             this.cloudSize = cloud.size();
-            this.meanReflShift = setMeanRefl(cloud, bestOffset, sourceBands[1], cloudPath);
+            this.meanReflShift = computeMeanRefl(cloud, bestOffset, sourceBands[1], cloudPath);
 
 
             analyzerMode.initArrays(positions.size());
@@ -107,7 +107,7 @@ class CloudShadowFlaggerCombination {
          */
 
         if (bestOffset > 0) {
-            int test[] = new int[flagArray.length];
+            int[] test = new int[flagArray.length];
             for (int i = 0; i < flagArray.length; i++) {
                 if ((flagArray[i] & PreparationMaskBand.CLOUD_SHADOW_FLAG) == PreparationMaskBand.CLOUD_SHADOW_FLAG) {
                     test[i] = 1;
@@ -121,18 +121,25 @@ class CloudShadowFlaggerCombination {
 
     }
 
-    private double setMeanRefl(List<Integer> cloud, int bestOffset, float[] sourceBand, Point2D[] cloudPath) {
+    private double computeMeanRefl(List<Integer> cloud, int bestOffset, float[] sourceBand, Point2D[] cloudPath) {
         int N = 0;
         double refl = 0.;
 
+        boolean haveOffset = bestOffset < cloudPath.length;
+        int bestOffsetX = 0;
+        int bestOffsetY = 0;
+        if (haveOffset) {
+            bestOffsetX = (int) cloudPath[bestOffset].getX();
+            bestOffsetY = (int) cloudPath[bestOffset].getY();
+        }
         for (int index : cloud) {
             int[] x = revertIndexToXY(index, width);
-
-            if (bestOffset >= cloudPath.length) {
+            if (!haveOffset) {
                 break;
             }
-            int x1 = x[0] + (int) cloudPath[bestOffset].getX();
-            int y1 = x[1] + (int) cloudPath[bestOffset].getY();
+
+            int x1 = x[0] + bestOffsetX;
+            int y1 = x[1] + bestOffsetY;
 
             if (x1 >= width || y1 >= height || x1 < 0 || y1 < 0) {
                 break;
@@ -154,11 +161,13 @@ class CloudShadowFlaggerCombination {
     }
 
     private void switchOffShiftedCloudShadowFlag(List<Integer> cloud, int Offset, Point2D[] cloudPath) {
+        int cloudPathOffsetX = (int) cloudPath[Offset].getX();
+        int cloudPathOffsetY = (int) cloudPath[Offset].getY();
         for (int index : cloud) {
             int[] x = revertIndexToXY(index, width);
 
-            int x1 = x[0] + (int) cloudPath[Offset].getX();
-            int y1 = x[1] + (int) cloudPath[Offset].getY();
+            int x1 = x[0] + cloudPathOffsetX;
+            int y1 = x[1] + cloudPathOffsetY;
 
             if (x1 >= width || y1 >= height || x1 < 0 || y1 < 0) {
                 break;
@@ -172,20 +181,23 @@ class CloudShadowFlaggerCombination {
     }
 
     private void setShiftedCloudShadowFlag(List<Integer> cloud, int Offset, Point2D[] cloudPath) {
+        int cloudPathOffsetX = (int) cloudPath[Offset].getX();
+        int cloudPathOffsetY = (int) cloudPath[Offset].getY();
         for (int index : cloud) {
             int[] x = revertIndexToXY(index, width);
 
-            int x1 = x[0] + (int) cloudPath[Offset].getX();
-            int y1 = x[1] + (int) cloudPath[Offset].getY();
+            int x1 = x[0] + cloudPathOffsetX;
+            int y1 = x[1] + cloudPathOffsetY;
 
             if (x1 >= width || y1 >= height || x1 < 0 || y1 < 0) {
                 break;
             }
             int index1 = y1 * width + x1;
 
-            if (!((flagArray[index1] & PreparationMaskBand.SHIFTED_CLOUD_SHADOW_FLAG) == PreparationMaskBand.SHIFTED_CLOUD_SHADOW_FLAG) &&
-                    !((flagArray[index1] & PreparationMaskBand.CLOUD_FLAG) == PreparationMaskBand.CLOUD_FLAG) &&
-                    !((flagArray[index1] & PreparationMaskBand.INVALID_FLAG) == PreparationMaskBand.INVALID_FLAG)) {
+            int flag = flagArray[index1];
+            if (!((flag & PreparationMaskBand.SHIFTED_CLOUD_SHADOW_FLAG) == PreparationMaskBand.SHIFTED_CLOUD_SHADOW_FLAG) &&
+                    !((flag & PreparationMaskBand.CLOUD_FLAG) == PreparationMaskBand.CLOUD_FLAG) &&
+                    !((flag & PreparationMaskBand.INVALID_FLAG) == PreparationMaskBand.INVALID_FLAG)) {
                 flagArray[index1] += PreparationMaskBand.SHIFTED_CLOUD_SHADOW_FLAG;
             }
         }
@@ -213,9 +225,10 @@ class CloudShadowFlaggerCombination {
                 List<Integer> positions = clusteredShadowTileID.get(key);
 
                 for (int index1 : positions) {
-                    if (!((flagArray[index1] & PreparationMaskBand.CLOUD_SHADOW_COMB_FLAG) == PreparationMaskBand.CLOUD_SHADOW_COMB_FLAG) &&
-                            !((flagArray[index1] & PreparationMaskBand.CLOUD_FLAG) == PreparationMaskBand.CLOUD_FLAG) &&
-                            !((flagArray[index1] & PreparationMaskBand.INVALID_FLAG) == PreparationMaskBand.INVALID_FLAG)) {
+                    int flag = flagArray[index1];
+                    if (!((flag & PreparationMaskBand.CLOUD_SHADOW_COMB_FLAG) == PreparationMaskBand.CLOUD_SHADOW_COMB_FLAG) &&
+                            !((flag & PreparationMaskBand.CLOUD_FLAG) == PreparationMaskBand.CLOUD_FLAG) &&
+                            !((flag & PreparationMaskBand.INVALID_FLAG) == PreparationMaskBand.INVALID_FLAG)) {
                         flagArray[index1] += PreparationMaskBand.CLOUD_SHADOW_COMB_FLAG;
                     }
                 }
@@ -234,11 +247,13 @@ class CloudShadowFlaggerCombination {
             Offset = bestOffset;
         }
 
+        int cloudPathOffsetX = (int) cloudPath[Offset].getX();
+        int cloudPathOffsetY = (int) cloudPath[Offset].getY();
         for (int index : cloud) {
             int[] x = revertIndexToXY(index, width);
 
-            int x1 = x[0] + (int) cloudPath[Offset].getX();
-            int y1 = x[1] + (int) cloudPath[Offset].getY();
+            int x1 = x[0] + cloudPathOffsetX;
+            int y1 = x[1] + cloudPathOffsetY;
 
             if (x1 >= width || y1 >= height || x1 < 0 || y1 < 0) {
                 break;
@@ -258,16 +273,14 @@ class CloudShadowFlaggerCombination {
         List<Integer> coincideKey = new ArrayList<>();
         for (int key : ListShadowID.keySet()) {
             List<Integer> positions = ListShadowID.get(key);
-            int test[] = new int[flagArray.length];
-            for (int i = 0; i < positions.size(); i++) {
-                int ind = positions.get(i);
+            int[] test = new int[flagArray.length];
+            for (int ind : positions) {
                 if (ind < test.length) {
                     test[ind] += 1;
                 }
             }
 
-            for (int i = 0; i < indexShiftedCloud.size(); i++) {
-                int ind = indexShiftedCloud.get(i);
+            for (int ind : indexShiftedCloud) {
                 if (ind < test.length) {
                     if (test[ind] > 0) {
                         coincideKey.add(key);
@@ -606,7 +619,7 @@ class CloudShadowFlaggerCombination {
         if (bestOffset > 0 && shadowIndex.size() > 20 && cloudSize > 1) {
             //duplicates are removed!
             //initialize with shadow flags from clustering.
-            int test[] = new int[flagArray.length];
+            int[] test = new int[flagArray.length];
             for (Integer aShadowIndex : shadowIndex) {
                 test[aShadowIndex] = 1;
             }
@@ -621,7 +634,7 @@ class CloudShadowFlaggerCombination {
                 for (int i : listShadowID.keySet()) {
 
                     List<Integer> pos = listShadowID.get(i);
-                    double meanRefl = 0.;
+//                    double meanShadowRefl = 0.;
                     int meanOffset = 0;
                     int N = 0;
                     for (int j : pos) {
@@ -630,7 +643,7 @@ class CloudShadowFlaggerCombination {
                         int k = shadowIndex.indexOf(j);
                         if (k > 0) {
                             meanOffset += shadowOffset.get(k);
-                            meanRefl += shadowRefl.get(k);
+//                            meanShadowRefl += shadowRefl.get(k);
                             N += 1;
                         }
                     }
@@ -644,7 +657,7 @@ class CloudShadowFlaggerCombination {
                 double minRefl = 0.;
                 for (int i : meanOffsetClust.keySet()) {
 
-                    double meanRefl = setMeanRefl(cloud, meanOffsetClust.get(i), sourceBand, cloudPath);
+                    double meanRefl = computeMeanRefl(cloud, meanOffsetClust.get(i), sourceBand, cloudPath);
                     clusterTest.put(i, meanRefl);
 
                     if (minRefl == 0 || meanRefl < minRefl) minRefl = meanRefl;

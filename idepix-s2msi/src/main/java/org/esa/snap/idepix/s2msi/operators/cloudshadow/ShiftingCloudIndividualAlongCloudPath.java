@@ -123,6 +123,8 @@ public class ShiftingCloudIndividualAlongCloudPath {
         int sourceHeight = sourceRectangle.height;
 
 
+        int darkCloudPathX = (int) cloudPath[darkIndex].getX();
+        int darkCloudPathY = (int) cloudPath[darkIndex].getY();
         for (int index0 : cloud) {
 
             //start from a cloud pixel, otherwise stop.
@@ -132,8 +134,8 @@ public class ShiftingCloudIndividualAlongCloudPath {
 
             int[] x = revertIndexToXY(index0, sourceWidth);
 
-            int x1 = x[0] + (int) cloudPath[darkIndex].getX();
-            int y1 = x[1] + (int) cloudPath[darkIndex].getY();
+            int x1 = x[0] + darkCloudPathX;
+            int y1 = x[1] + darkCloudPathY;
             if (x1 >= sourceWidth || y1 >= sourceHeight || x1 < 0 || y1 < 0) {
                 //break; only necessary in the for-loop, which is no longer used.
                 return;
@@ -162,7 +164,6 @@ public class ShiftingCloudIndividualAlongCloudPath {
         }
 
         for (int i = end_path_i; i < end_path_i + 1; i++) {
-
 
             int x1 = x0 + (int) cloudPath[i].getX();
             int y1 = y0 + (int) cloudPath[i].getY();
