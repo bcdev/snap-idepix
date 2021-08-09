@@ -27,7 +27,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Idepix.S2",
         category = "Optical/Pre-Processing",
-        version = "3.0",
+        version = "8.0.2.3-ucd-beta",
         authors = "Tonio Fincke, Olaf Danne",
         copyright = "(c) 2019 by Brockmann Consult",
         description = "Pixel identification and classification for Sentinel-2 MSI.")
