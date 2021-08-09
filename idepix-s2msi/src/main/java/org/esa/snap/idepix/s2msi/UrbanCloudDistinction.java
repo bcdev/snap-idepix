@@ -118,6 +118,7 @@ public class UrbanCloudDistinction {
     public void correctCloudFlag(int x, int y, Tile classifFlagTile, Tile targetFlagTile) {
         // if IDEPIX_CIRRUS_SURE or IDEPIX_CIRRUS_AMIBGUOUS or IDEPIX_WATER then IDEPIX_CLOUD else if cloud_filter = 255 then IDEPIX_CLOUD else CDI<-0.5 and IDEPIX_CLOUD
         //Note: IDEPIX_CLOUD == flag.IDEPIX_CLOUD || flag.IDEPIX_CLOUD_AMBIGUOUS || flag.IDEPIX_CLOUD_SURE
+
         final boolean cirrusSureFlag = classifFlagTile.getSampleBit(x, y, IDEPIX_CIRRUS_SURE);
         final boolean cirrusAmbiguousFlag = classifFlagTile.getSampleBit(x, y, IDEPIX_CIRRUS_AMBIGUOUS);
         final boolean waterFlag = classifFlagTile.getSampleBit(x, y, IDEPIX_WATER);
@@ -126,9 +127,7 @@ public class UrbanCloudDistinction {
         final boolean cloudSureFlag = classifFlagTile.getSampleBit(x, y, IDEPIX_CLOUD_SURE);
         targetFlagTile.setSample(x, y, classifFlagTile.getSampleInt(x, y));
         float cdiValue = Float.NaN;
-        if (x == 826 && y == 880) {
-            System.out.println("bingo");
-        }
+
         final float cloudMean11 = filteredIdepixCloudFlag.getSampleFloat(x, y);
         if (cirrusSureFlag || cirrusAmbiguousFlag || waterFlag) {
             targetFlagTile.setSample(x, y, IDEPIX_CLOUD, cloudFlag);
@@ -213,7 +212,6 @@ public class UrbanCloudDistinction {
         final Kernel kernel = new Kernel(kernelSize, kernelSize, new double[kernelSize * kernelSize]);
         final GeneralFilterBand filterBand = new GeneralFilterBand("__mean11_" + band.getName(), band, GeneralFilterBand.OpType.MEAN, kernel, 1);
         s2ClassifProduct.addBand(filterBand);
-        //filterBand.setOwner(l1cProduct);
         return filterBand;
     }
 
@@ -238,7 +236,6 @@ public class UrbanCloudDistinction {
                                                      owner.getSceneRasterHeight(),
                                                      expression);
         owner.addBand(virtBand);
-        //virtBand.setOwner(owner);
         return virtBand;
     }
 
