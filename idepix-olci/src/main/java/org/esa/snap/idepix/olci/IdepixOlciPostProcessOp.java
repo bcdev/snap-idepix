@@ -109,14 +109,10 @@ public class IdepixOlciPostProcessOp extends Operator {
         }
 
         rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
-                l1bProduct.getSceneRasterHeight()),
-                cloudBufferWidth, cloudBufferWidth
-        );
+                l1bProduct.getSceneRasterHeight()), cloudBufferWidth, cloudBufferWidth);
 
         if (computeMountainShadow) {
-            ProductUtils.copyBand(latBand.getName(), l1bProduct, olciCloudProduct, true);
-            ProductUtils.copyBand(lonBand.getName(), l1bProduct, olciCloudProduct, true);
-            ProductUtils.copyBand(altBand.getName(), l1bProduct, olciCloudProduct, true);
+            ensureBandsAreCopied(l1bProduct, olciCloudProduct, latBand.getName(), lonBand.getName(), altBand.getName());
             final Product mountainShadowProduct = GPF.createProduct(
                     OperatorSpi.getOperatorAlias(IdepixOlciMountainShadowOp.class),
                     GPF.NO_PARAMS, olciCloudProduct);
@@ -144,6 +140,14 @@ public class IdepixOlciPostProcessOp extends Operator {
 
         ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, olciCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
+    }
+
+    private void ensureBandsAreCopied(Product source, Product target, String...bandNames) {
+        for (String bandName : bandNames) {
+            if(!target.containsBand(bandName)) {
+                ProductUtils.copyBand(bandName, source, target, true);
+            }
+        }
     }
 
     @Override

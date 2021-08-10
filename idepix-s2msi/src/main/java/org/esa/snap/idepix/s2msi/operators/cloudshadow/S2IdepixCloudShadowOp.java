@@ -132,7 +132,7 @@ public class S2IdepixCloudShadowOp extends Operator {
                 (S2IdepixPreCloudShadowOp) GPF.getDefaultInstance().createOperator(operatorAlias, preParams, preInput, null);
 
         //trigger computation of all tiles
-        logger.info("Executing Cloud Shadow Pre-Processing");
+        logger.info("Executing Cloud Shadow Preprocessing");
         if (tileCache instanceof SunTileCache) {
             ((SunTileCache) tileCache).enableDiagnostics();
             ((SunTileCache) tileCache).addObserver(observer);
@@ -142,7 +142,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         if (tileCache instanceof SunTileCache) {
             ((SunTileCache) tileCache).deleteObserver(observer);
         }
-        logger.info("Executed Cloud Shadow Pre-Processing");
+        logger.info("Executed Cloud Shadow Preprocessing");
 
         NCloudOverLand = cloudShadowPreProcessingOperator.getNCloudOverLandPerTile();
         NCloudOverWater = cloudShadowPreProcessingOperator.getNCloudOverWaterPerTile();

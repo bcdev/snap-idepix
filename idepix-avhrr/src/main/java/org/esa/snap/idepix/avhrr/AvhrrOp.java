@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "Idepix.Avhrr",
-        category = "Optical/Pre-Processing",
+        category = "Optical/Preprocessing/Masking",
         version = "3.0",
         authors = "Olaf Danne, Grit Kirches",
         copyright = "(c) 2016 by Brockmann Consult",

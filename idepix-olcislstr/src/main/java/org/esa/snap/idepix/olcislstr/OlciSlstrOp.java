@@ -25,7 +25,7 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Sentinel3.OlciSlstr",
-        category = "Optical/Pre-Processing",
+        category = "Optical/Preprocessing/Masking",
         version = "3.0",
         authors = "Olaf Danne",
         internal = true,

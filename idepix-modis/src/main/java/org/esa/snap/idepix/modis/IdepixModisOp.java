@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "Idepix.Modis",
-        category = "Optical/Pre-Processing",
+        category = "Optical/Preprocessing/Masking",
         version = "3.0",
         authors = "Olaf Danne, Marco Zuehlke",
 //        autoWriteDisabled = true,

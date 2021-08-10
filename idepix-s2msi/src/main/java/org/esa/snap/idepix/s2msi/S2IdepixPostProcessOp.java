@@ -167,9 +167,6 @@ public class S2IdepixPostProcessOp extends Operator {
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                     final boolean mountainShadow = mountainShadowFlagTile.getSampleInt(x, y) > 0;
                     targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW, mountainShadow);
-                    if (mountainShadow) {
-                        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLEAR_WATER, false);
-                    }
                 }
             }
         }
