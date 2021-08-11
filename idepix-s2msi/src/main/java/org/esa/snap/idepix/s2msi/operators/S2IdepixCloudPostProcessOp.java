@@ -97,9 +97,9 @@ public class S2IdepixCloudPostProcessOp extends Operator {
                 boolean isCloud;
                 if (targetRectangle.contains(x, y)) {
                     S2IdepixUtils.combineFlags(x, y, sourceFlagTile, targetTile);
-                    urbanCloudDistinction.correctCloudFlag(x,y, sourceFlagTile, targetTile);
+                    urbanCloudDistinction.correctCloudFlag(x, y, targetTile, targetTile);
                     isCloud = isCloudPixel(targetTile, y, x);
-                }else {
+                } else {
                     isCloud = isCloudPixel(sourceFlagTile, y, x);
                 }
 
