@@ -15,13 +15,15 @@ import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.idepix.s2msi.UrbanCloudDistinction;
 import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 
-import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.*;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLASSIF_FLAGS;
 import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_BUFFER;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_SURE;
 
 /**
- * Adds a cloud buffer to cloudy pixels.
+ * Adds a cloud buffer to cloudy pixels and does a cloud discrimination on urban areas.
  */
 @OperatorMetadata(alias = "Idepix.S2CloudPostProcess",
         version = "3.0",
@@ -33,9 +35,6 @@ public class S2IdepixCloudPostProcessOp extends Operator {
 
     @SourceProduct(alias = "classifiedProduct")
     private Product classifiedProduct;
-
-    @Parameter(defaultValue = "false", label = "Add cloud buffer")
-    private boolean computeCloudBuffer;
 
     @Parameter(defaultValue = "true", label = "Compute cloud buffer for cloud ambiguous pixels too.")
     private boolean computeCloudBufferForCloudAmbiguous;
@@ -65,6 +64,7 @@ public class S2IdepixCloudPostProcessOp extends Operator {
         ProductUtils.copyBand(IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
 
         urbanCloudDistinction = new UrbanCloudDistinction(classifiedProduct);
+        // todo: remove call to addDebugBandsToTargetProduct() when this is merged into master
         urbanCloudDistinction.addDebugBandsToTargetProduct();
 
         setTargetProduct(cloudBufferProduct);
