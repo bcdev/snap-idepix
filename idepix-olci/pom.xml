@@ -118,8 +118,8 @@
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-o2a-harmonisation</artifactId>
-            <version>${s3tbx.version}</version>
-    </dependency>
+            <version>8.0.0</version>
+        </dependency>
 
     <dependency>
         <groupId>org.esa.s3tbx</groupId>

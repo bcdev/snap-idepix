@@ -34,7 +34,7 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from MODIS.</description>
 
     <properties>
-        <idepix.version>7.0.2</idepix.version>
+        <idepix.version>7.0.3</idepix.version>
     </properties>
 
     <dependencies>
