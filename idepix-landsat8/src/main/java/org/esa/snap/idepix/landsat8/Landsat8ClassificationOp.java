@@ -362,7 +362,7 @@ public class Landsat8ClassificationOp extends Operator {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l8Algorithm.isInvalid());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, l8Algorithm.isCloud());
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, l8Algorithm.isCloud());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, l8Algorithm.isCloudSure());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, l8Algorithm.isCloudAmbiguous());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, l8Algorithm.isSnowIce());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, l8Algorithm.isBright());
