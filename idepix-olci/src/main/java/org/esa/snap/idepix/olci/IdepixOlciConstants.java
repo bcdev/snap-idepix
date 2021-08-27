@@ -25,6 +25,8 @@ public class IdepixOlciConstants {
     public static final String OLCI_LONGITUDE_BAND_NAME = "longitude";
     public static final String OLCI_SUN_ZENITH_BAND_NAME = "SZA";
     public static final String OLCI_SUN_AZIMUTH_BAND_NAME = "SAA";
+    public static final String OLCI_VIEW_ZENITH_BAND_NAME = "OZA";
+    public static final String OLCI_VIEW_AZIMUTH_BAND_NAME = "OAA";
 
     static final String OLCI_QUALITY_FLAGS_BAND_NAME = "quality_flags";
 

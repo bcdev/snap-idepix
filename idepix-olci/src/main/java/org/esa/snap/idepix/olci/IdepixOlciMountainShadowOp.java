@@ -1,5 +1,7 @@
-package org.esa.snap.idepix.olci.mountainshadow;
+package org.esa.snap.idepix.olci;
 
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
@@ -10,7 +12,6 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.pointop.*;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.olci.IdepixOlciConstants;
 
 /**
  * Computes mountain/hill shadow for a Sentinel-3 OLCI product using slope, aspect and orientation.
@@ -36,11 +37,14 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
 
     private final static int SZA_INDEX = 0;
     private final static int SAA_INDEX = 1;
-    private final static int SLOPE_INDEX = 2;
-    private final static int ASPECT_INDEX = 3;
-    private final static int ORIENTATION_INDEX = 4;
-    private final static int CLASSIF_INDEX = 5;
-    private final static int ELEVATION_INDEX = 6;
+    private final static int OZA_INDEX = 2;
+    private final static int OAA_INDEX = 3;
+    private final static int SLOPE_INDEX = 4;
+    private final static int ASPECT_INDEX = 5;
+    private final static int ORIENTATION_INDEX = 6;
+    private final static int CLASSIF_INDEX = 7;
+    private final static int ELEVATION_INDEX = 8;
+
 
     private final static int MOUNTAIN_SHADOW_FLAG_BAND_INDEX = 0;
 
@@ -74,6 +78,8 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
     protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurer) throws OperatorException {
         sampleConfigurer.defineSample(SZA_INDEX, IdepixOlciConstants.OLCI_SUN_ZENITH_BAND_NAME, sourceProduct);
         sampleConfigurer.defineSample(SAA_INDEX, IdepixOlciConstants.OLCI_SUN_AZIMUTH_BAND_NAME, sourceProduct);
+        sampleConfigurer.defineSample(OZA_INDEX, IdepixOlciConstants.OLCI_VIEW_ZENITH_BAND_NAME, sourceProduct);
+        sampleConfigurer.defineSample(OAA_INDEX, IdepixOlciConstants.OLCI_VIEW_AZIMUTH_BAND_NAME, sourceProduct);
         sampleConfigurer.defineSample(SLOPE_INDEX, IdepixOlciSlopeAspectOrientationOp.SLOPE_BAND_NAME, saoProduct);
         sampleConfigurer.defineSample(ASPECT_INDEX, IdepixOlciSlopeAspectOrientationOp.ASPECT_BAND_NAME, saoProduct);
         sampleConfigurer.defineSample(ORIENTATION_INDEX, IdepixOlciSlopeAspectOrientationOp.ORIENTATION_BAND_NAME, saoProduct);
@@ -94,8 +100,15 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
                 !Float.isNaN(aspect)) {
             final float sza = sourceSamples[SZA_INDEX].getFloat();
             final float saa = sourceSamples[SAA_INDEX].getFloat();
+            final float oza = sourceSamples[OZA_INDEX].getFloat();
+            final float oaa = sourceSamples[OAA_INDEX].getFloat();
             final float orientation = sourceSamples[ORIENTATION_INDEX].getFloat();
-            targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(isMountainShadow(sza, saa, slope, aspect, orientation));
+
+            final PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
+            final GeoPos geoPos = sourceProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
+            final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, geoPos.getLat());
+
+            targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(isMountainShadow(sza, (float) saaApparent, slope, aspect, orientation));
         }
     }
 

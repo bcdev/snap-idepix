@@ -1,4 +1,4 @@
-package org.esa.snap.idepix.olci.mountainshadow;
+package org.esa.snap.idepix.olci;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
@@ -8,6 +8,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.idepix.olci.IdepixOlciConstants;
+import org.esa.snap.idepix.olci.IdepixOlciSlopeAspectOrientationOp;
 import org.geotools.referencing.CRS;
 import org.junit.After;
 import org.junit.Before;

@@ -1,4 +1,4 @@
-package org.esa.snap.idepix.olci.mountainshadow;
+package org.esa.snap.idepix.olci;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
@@ -9,6 +9,8 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.olci.IdepixOlciConstants;
+import org.esa.snap.idepix.olci.IdepixOlciMountainShadowOp;
+import org.esa.snap.idepix.olci.IdepixOlciSlopeAspectOrientationOp;
 import org.geotools.referencing.CRS;
 import org.junit.After;
 import org.junit.Before;
@@ -80,6 +82,21 @@ public class IdepixOlciMountainShadowOp_IntegrationTest {
                 150.031f, 150.032f, 150.034f};
         saaBand.setDataElems(saaData);
         product.addBand(saaBand);
+
+        final Band ozaBand = new Band(IdepixOlciConstants.OLCI_VIEW_ZENITH_BAND_NAME, ProductData.TYPE_FLOAT32, width, height);
+        float[] ozaData = new float[]{
+                85.002f, 85.003f, 85.004f,
+                85.012f, 85.013f, 85.014f,
+                85.032f, 85.033f, 85.034f};
+        ozaBand.setDataElems(ozaData);
+        product.addBand(ozaBand);
+        final Band oaaBand = new Band(IdepixOlciConstants.OLCI_VIEW_AZIMUTH_BAND_NAME, ProductData.TYPE_FLOAT32, width, height);
+        float[] oaaData = new float[]{
+                150.002f, 150.003f, 150.004f,
+                150.012f, 150.013f, 150.014f,
+                150.032f, 150.033f, 150.034f};
+        oaaBand.setDataElems(oaaData);
+        product.addBand(oaaBand);
 
         final Band latitudeBand = new Band(IdepixOlciConstants.OLCI_LATITUDE_BAND_NAME, ProductData.TYPE_FLOAT32, width, height);
         float[] latitudeData = new float[]{
@@ -159,6 +176,21 @@ public class IdepixOlciMountainShadowOp_IntegrationTest {
                 150.032f, 150.033f, 150.034f};
         saaBand.setDataElems(saaData);
         product.addBand(saaBand);
+
+        final Band ozaBand = new Band(IdepixOlciConstants.OLCI_VIEW_ZENITH_BAND_NAME, ProductData.TYPE_FLOAT32, width, height);
+        float[] ozaData = new float[]{
+                85.002f, 85.003f, 85.004f,
+                85.012f, 85.013f, 85.014f,
+                85.032f, 85.033f, 85.034f};
+        ozaBand.setDataElems(ozaData);
+        product.addBand(ozaBand);
+        final Band oaaBand = new Band(IdepixOlciConstants.OLCI_VIEW_AZIMUTH_BAND_NAME, ProductData.TYPE_FLOAT32, width, height);
+        float[] oaaData = new float[]{
+                150.002f, 150.003f, 150.004f,
+                150.012f, 150.013f, 150.014f,
+                150.032f, 150.033f, 150.034f};
+        oaaBand.setDataElems(oaaData);
+        product.addBand(oaaBand);
 
         final Band elevationBand = new Band(IdepixOlciConstants.OLCI_ALTITUDE_BAND_NAME, ProductData.TYPE_FLOAT32, width, height);
         float[] elevationData = new float[]{
