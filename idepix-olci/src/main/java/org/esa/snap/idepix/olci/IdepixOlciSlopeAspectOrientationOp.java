@@ -1,4 +1,4 @@
-package org.esa.snap.idepix.olci.mountainshadow;
+package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.*;
@@ -10,7 +10,6 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
-import org.esa.snap.idepix.olci.IdepixOlciConstants;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtender;

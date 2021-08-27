@@ -15,7 +15,6 @@ import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.CloudBuffer;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
-import org.esa.snap.idepix.olci.mountainshadow.IdepixOlciMountainShadowOp;
 
 import java.awt.*;
 

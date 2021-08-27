@@ -1,5 +1,6 @@
-package org.esa.snap.idepix.olci.mountainshadow;
+package org.esa.snap.idepix.olci;
 
+import org.esa.snap.idepix.olci.IdepixOlciMountainShadowOp;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
