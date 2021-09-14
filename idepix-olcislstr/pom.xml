@@ -35,6 +35,7 @@
 
     <properties>
         <idepix.version>9.0.0-SNAPSHOT</idepix.version>
+        <s3tbx.version>9.0.0-SNAPSHOT</s3tbx.version>
     </properties>
 
     <dependencies>
@@ -62,6 +63,7 @@
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-rad2refl</artifactId>
+            <version>${s3tbx.version}</version>
         </dependency>
     </dependencies>
 
