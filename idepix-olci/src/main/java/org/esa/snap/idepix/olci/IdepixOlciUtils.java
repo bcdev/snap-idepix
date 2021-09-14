@@ -168,8 +168,9 @@ class IdepixOlciUtils {
                 2.0 * Math.tan(szaRad) * Math.tan(ozaRad) * Math.cos(deltaPhiRad));
 
         double delta = Math.acos(numerator / denominator);
-        if (lat < 0.0){
-            delta =-1.*delta;
+// Sun in the North (Southern hemisphere), change sign!
+        if (saa > 270. || saa < 90){
+            delta = -1.0 * delta;
         }
         if (oaa < 0.0) {
             return saa - delta * MathUtils.RTOD;

@@ -23,12 +23,12 @@ import java.util.Map;
  * https://www.e-education.psu.edu/geog480/node/490, or
  * https://desktop.arcgis.com/en/arcmap/10.3/tools/spatial-analyst-toolbox/how-hillshade-works.htm
  *
- * @author Tonio Fincke, Olaf Danne
+ * @author Tonio Fincke, Olaf Danne, Dagmar Mueller
  */
 @OperatorMetadata(alias = "Idepix.Olci.SlopeAspect",
         version = "2.0",
         internal = true,
-        authors = "Tonio Fincke, Olaf Danne",
+        authors = "Tonio Fincke, Olaf Danne, Dagmar Mueller",
         copyright = "(c) 2018-2021 by Brockmann Consult",
         description = "Computes Slope, Aspect and Orientation for a Sentinel-3 OLCI product. " +
                 "See theory e.g. at https://www.e-education.psu.edu/geog480/node/490, or " +
@@ -48,6 +48,9 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
     private Band latitudeBand;
     private Band longitudeBand;
     private Band elevationBand;
+    private TiePointGrid viewZenithTiePointGrid;
+    private TiePointGrid viewAzimuthTiePointGrid;
+    private TiePointGrid sunAzimuthTiePointGrid;
     private Band slopeBand;
     private Band aspectBand;
     private Band orientationBand;
@@ -89,6 +92,9 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
         }
         latitudeBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_LATITUDE_BAND_NAME);
         longitudeBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_LONGITUDE_BAND_NAME);
+        viewZenithTiePointGrid = sourceProduct.getTiePointGrid(IdepixOlciConstants.OLCI_VIEW_ZENITH_BAND_NAME);
+        viewAzimuthTiePointGrid = sourceProduct.getTiePointGrid(IdepixOlciConstants.OLCI_VIEW_AZIMUTH_BAND_NAME);
+        sunAzimuthTiePointGrid = sourceProduct.getTiePointGrid(IdepixOlciConstants.OLCI_SUN_AZIMUTH_BAND_NAME);
 
         Product targetProduct = createTargetProduct();
         setTargetProduct(targetProduct);
@@ -111,6 +117,9 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
         final Tile latitudeTile = getSourceTile(latitudeBand, sourceRectangle, borderExtender);
         final Tile longitudeTile = getSourceTile(longitudeBand, sourceRectangle, borderExtender);
         final Tile elevationTile = getSourceTile(elevationBand, sourceRectangle, borderExtender);
+        final Tile viewZenithAngleTile = getSourceTile(viewZenithTiePointGrid, sourceRectangle, borderExtender);
+        final Tile viewAzimuthAngleTile = getSourceTile(viewAzimuthTiePointGrid, sourceRectangle, borderExtender);
+        final Tile sunAzimuthAngleTile = getSourceTile(sunAzimuthTiePointGrid, sourceRectangle, borderExtender);
 
         final Tile slopeTile = targetTiles.get(slopeBand);
         final Tile aspectTile = targetTiles.get(aspectBand);
@@ -122,13 +131,17 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
                 orientationTile.setSample(x, y, Float.NaN);
                 final float[] elevationDataMacropixel = get3x3MacropixelData(elevationTile, y, x);
                 if (is3x3ElevationDataValid(elevationDataMacropixel)) {
-                    final float[] slopeAspect = computeSlopeAspect(elevationDataMacropixel, spatialResolution);
-                    slopeTile.setSample(x, y, slopeAspect[0]);
-                    aspectTile.setSample(x, y, slopeAspect[1]);
+                    final float vza = viewZenithAngleTile.getSampleFloat(x, y);
+                    final float vaa = viewAzimuthAngleTile.getSampleFloat(x, y);
+                    final float saa = sunAzimuthAngleTile.getSampleFloat(x, y);
                     final float[] latitudeDataMacropixel = get3x3MacropixelData(latitudeTile, y, x);
                     final float[] longitudeDataMacropixel = get3x3MacropixelData(longitudeTile, y, x);
                     final float orientation = computeOrientation(latitudeDataMacropixel, longitudeDataMacropixel);
                     orientationTile.setSample(x, y, orientation);
+                    final float[] slopeAspect = computeSlopeAspect(elevationDataMacropixel, orientation, vza, vaa, saa,
+                            spatialResolution);
+                    slopeTile.setSample(x, y, slopeAspect[0]);
+                    aspectTile.setSample(x, y, slopeAspect[1]);
                 }
             }
         }
@@ -166,13 +179,20 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
     }
 
     /* package local for testing */
-    static float[] computeSlopeAspect(float[] elev, double spatialResolution) {
-
-        float b = (elev[2] + 2 * elev[5] + elev[8] - elev[0] - 2 * elev[3] - elev[6]) / 8f;
-        float c = (elev[0] + 2 * elev[1] + elev[2] - elev[6] - 2 * elev[7] - elev[8]) / 8f;
-        float slope = (float) Math.atan(Math.sqrt(Math.pow(b / spatialResolution, 2) +
-                Math.pow(c / spatialResolution, 2)));
+    static float[] computeSlopeAspect(float[] elev, float orientation, float vza, float vaa, float saa, double spatialResolution) {
+        //DM: geometric correction of resolution necessary for observations not in nadir view.
+        // generates steeper slopes. Needs vza, vaa, angle between y-pixel axis and north direction (orientation).
+        //DM: orientation in rad!
+        float b = (elev[2] + 2 * elev[5] + elev[8] - elev[0] - 2 * elev[3] - elev[6]) / 8f; //direction x
+        float c = (elev[0] + 2 * elev[1] + elev[2] - elev[6] - 2 * elev[7] - elev[8]) / 8f; //direction y
+        double vaa_orientation = (360.0 - (vaa + orientation / MathUtils.DTOR)) * MathUtils.DTOR;
+        double spatialRes = spatialResolution / Math.cos(vza * MathUtils.DTOR);
+        float slope = (float) Math.atan(Math.sqrt(Math.pow(b / (spatialRes * Math.sin(vaa_orientation)), 2) +
+                Math.pow(c / (spatialRes * Math.cos(vaa_orientation)), 2)));
         float aspect = (float) Math.atan2(-b, -c);
+        if (saa > 270. || saa < 90){ //Sun from North (mostly southern hemisphere)
+            aspect -=Math.PI;
+        }
         if (aspect < 0.0f) {
             // map from [-180, 180] into [0, 360], see e.g. https://www.e-education.psu.edu/geog480/node/490
             aspect += 2.0 * Math.PI;
@@ -207,11 +227,16 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
      * @return float
      */
     static float computeOrientation(float lat1, float lat2, float lon1, float lon2) {
-        final float lat1Rad = lat1 * MathUtils.DTOR_F;
-        final float deltaLon = lon2 - lon1;
-
+//        final float lat1Rad = lat1 * MathUtils.DTOR_F;
+//        final float deltaLon = lon2 - lon1;
         // we use this formula, as in S2-MSI:
-        return (float) Math.atan2(-(lat2 - lat1), deltaLon * Math.cos(lat1Rad));
+//        return (float) Math.atan2(-(lat2 - lat1), deltaLon * Math.cos(lat1Rad));
+
+        // DM: formulas from theory, see above
+        double X = Math.cos(lat2*MathUtils.DTOR)*Math.sin((lon2-lon1)*MathUtils.DTOR);
+        double Y = Math.cos(lat1*MathUtils.DTOR)*Math.sin(lat2*MathUtils.DTOR) - Math.sin(lat1*MathUtils.DTOR)*X;
+        return (float) (Math.atan2(X, Y));
+
     }
 
     /**
