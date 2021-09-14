@@ -17,6 +17,8 @@ import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 //import org.esa.s3tbx.idepix.core.IdepixConstants;
 //import org.esa.s3tbx.idepix.core.operators.CloudBuffer;
@@ -49,6 +51,10 @@ public class IdepixOlciPostProcessOp extends Operator {
 
     @Parameter(defaultValue = "true", label = " Compute mountain shadow")
     private boolean computeMountainShadow;
+
+    @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
+            description = "Extent of mountain shadow detection")
+    private double mntShadowExtent;
 
     @Parameter(defaultValue = "false",
             label = " Compute cloud shadow",
@@ -112,9 +118,11 @@ public class IdepixOlciPostProcessOp extends Operator {
 
         if (computeMountainShadow) {
             ensureBandsAreCopied(l1bProduct, olciCloudProduct, latBand.getName(), lonBand.getName(), altBand.getName());
+            Map<String, Object> mntShadowParams = new HashMap<>();
+            mntShadowParams.put("mntShadowStrength", mntShadowExtent);
             final Product mountainShadowProduct = GPF.createProduct(
                     OperatorSpi.getOperatorAlias(IdepixOlciMountainShadowOp.class),
-                    GPF.NO_PARAMS, olciCloudProduct);
+                    mntShadowParams, olciCloudProduct);
             mountainShadowFlagBand = mountainShadowProduct.getBand(
                     IdepixOlciMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
         }
@@ -141,9 +149,9 @@ public class IdepixOlciPostProcessOp extends Operator {
         setTargetProduct(postProcessedCloudProduct);
     }
 
-    private void ensureBandsAreCopied(Product source, Product target, String...bandNames) {
+    private void ensureBandsAreCopied(Product source, Product target, String... bandNames) {
         for (String bandName : bandNames) {
-            if(!target.containsBand(bandName)) {
+            if (!target.containsBand(bandName)) {
                 ProductUtils.copyBand(bandName, source, target, true);
             }
         }

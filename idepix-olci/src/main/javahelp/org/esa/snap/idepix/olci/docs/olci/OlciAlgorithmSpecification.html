@@ -43,7 +43,7 @@
     <li>
         'cloud_buffer': For pixels identified as cloudy, a cloud buffer of specified width can be set by the user to finally obtain a more
         conservative cloud mask. This is done in a post-processing step after the cloud classification has been applied
-        on the full image. The cloud buffer algorithm works on pixel wondows of size (2N+1) x (2N+1) with N = cloud buffer
+        on the full image. The cloud buffer algorithm works on pixel windows of size (2N+1) x (2N+1) with N = cloud buffer
         width. Note that the cloud buffer is only applied on cloud-free pixels, i.e. cloudy pixels are not flagged as cloud
         buffer of cloudy neighbour pixels.
         The cloud buffer procedure is described in a bit more detail in the CCI Land Cover ATBD [1].
@@ -75,7 +75,7 @@ The latter is a fractional mask:
     </li>
 </ul>
 
-A cloud shadow flags is provided with the classification:
+Two shadow flags are provided with the classification:
 <ul>
     <li>
         'cloud_shadow': the cloud top height is estimated from the O2 absorption bands with a dedicated neural network.
@@ -86,6 +86,11 @@ A cloud shadow flags is provided with the classification:
         the algorithm carries on until the maximum length of the search path is reached, which is defined by a theoretical maximum
         cloud top height at current latitude. The cloud shadow algorithm is applied as part of the postprocessing of the
         classification.
+    </li>
+    <li>
+        'mountain_shadow': a hillshade algorithm [3] is implemented, which derives slopes from elevation data and uses a
+        geometric test with slope, aspect and illumination and satellite observation conditions against a threshold to
+        find pixel in the (core) shadow of mountainous terrain.
     </li>
 </ul>
 
@@ -125,12 +130,13 @@ A cloud shadow flags is provided with the classification:
         'LAND'
     </li>
     <li>
-        'MOUNTAIN_SHADOW' (currently nor provided)
+        'MOUNTAIN_SHADOW'
     </li>
 </ul>
 
 <h4>Known issues</h4>
 <p>
+    The mountain shadow algorithm can show an artefact at the nadir line, where viewing angles are not exact enough.
     The following pixel property is currently NOT provided for Sentinel-3 OLCI:
 <ul>
     <li>
@@ -142,13 +148,36 @@ A cloud shadow flags is provided with the classification:
 
 <p class="i1">
     <b>[1]</b>
-    CCI Land Cover ATBD. Algorithm Theoretical Basis Document: Pre-Processing Year 3.
-    Version 1.1, 21 August 2017.
+    CCI Land Cover - Algorithm Theoretical Basis Document: Pre-Processing<br>
+    Chapter 4.4.11 Cloud shadow and cloud edge detection<br>
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="http://www.esa-landcover-cci.org/?q=webfm_send/136">
+        <param name="text" value="<html>ESA Landcover CCI page - ATBD: Pre-Processing</html>">
+    </object>
+
     <br><br>
 
     <b>[2]</b>
     Farr, T. G., et al., The Shuttle Radar Topography Mission, Rev. Geophys., 45, RG2004,
-    doi:10.1029/2005RG000183. (2007)
+    doi:10.1029/2005RG000183. (2007)<br>
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="https://doi.org/10.1029/2005RG000183">
+        <param name="text" value="<html>The Shuttle Radar Topography Mission</html>">
+    </object>
+
+    <br><br>
+
+    <b>[3]</b>
+    Hillshade explained<br>
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="https://desktop.arcgis.com/en/arcmap/latest/tools/spatial-analyst-toolbox/how-hillshade-works.htm">
+        <param name="text" value="<html>'How Hillshade works' in the ArcGIS online documentation</html>">
+    </object><br>
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="https://www.e-education.psu.edu/geog480/node/490">
+        <param name="text" value="<html>E-Education Institute - Slope, Aspect, and Hillshade</html>">
+    </object>
+
     <br><br>
 
 </p>

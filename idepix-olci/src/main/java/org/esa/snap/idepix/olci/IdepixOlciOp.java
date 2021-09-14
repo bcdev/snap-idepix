@@ -36,7 +36,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Idepix.Olci",
         category = "Optical/Preprocessing/Masking",
-        version = "3.0.2",
+        version = "3.1.0",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
         description = "Pixel identification and classification for OLCI.")
@@ -81,6 +81,10 @@ public class IdepixOlciOp extends BasisOp {
 
     @Parameter(defaultValue = "true", label = " Compute mountain shadow")
     private boolean computeMountainShadow;
+
+    @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
+            description = "Extent of mountain shadow detection")
+    private double mntShadowExtent;
 
     @Parameter(defaultValue = "true",
             label = " Compute cloud shadow",
@@ -268,6 +272,7 @@ public class IdepixOlciOp extends BasisOp {
         params.put("cloudBufferWidth", cloudBufferWidth);
         params.put("computeCloudShadow", computeCloudShadow);
         params.put("computeMountainShadow", computeMountainShadow);
+        params.put("mntShadowStrength", mntShadowExtent);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciPostProcessOp.class),
                                                   params, input);

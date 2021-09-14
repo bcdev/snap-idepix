@@ -8,6 +8,7 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.pointop.*;
 import org.esa.snap.core.util.math.MathUtils;
@@ -26,14 +27,15 @@ import org.esa.snap.idepix.core.IdepixConstants;
         internal = true,
         authors = "Tonio Fincke, Olaf Danne",
         copyright = "(c) 2018-2021 by Brockmann Consult",
-        description = "Computes mountain/hill shadow for a Sentinel-3 OLCI product using slope, aspect and orientation.\n" +
-                " See theory e.g. at \n" +
-                " https://www.e-education.psu.edu/geog480/node/490, or\n" +
-                " https://desktop.arcgis.com/en/arcmap/10.3/tools/spatial-analyst-toolbox/how-hillshade-works.htm")
+        description = "Computes mountain/hill shadow for a Sentinel-3 OLCI product using slope, aspect and orientation.")
 public class IdepixOlciMountainShadowOp extends PixelOperator {
 
     @SourceProduct
     private Product sourceProduct;
+
+    @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
+            description = "Extent of mountain shadow detection")
+    private double mntShadowExtent;
 
     private final static int SZA_INDEX = 0;
     private final static int SAA_INDEX = 1;
@@ -47,8 +49,6 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
 
 
     private final static int MOUNTAIN_SHADOW_FLAG_BAND_INDEX = 0;
-
-    private final static double SHADOW_THRESHOLD = 0;
 
     public final static String MOUNTAIN_SHADOW_FLAG_BAND_NAME = "mountainShadowFlag";
 
@@ -108,14 +108,15 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
             final GeoPos geoPos = sourceProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
             final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, geoPos.getLat());
 
-            targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(isMountainShadow(sza, (float) saaApparent, slope, aspect, orientation));
+            targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(isMountainShadow(sza, (float) saaApparent,
+                    slope, aspect, orientation, mntShadowExtent));
         }
     }
 
     /* package local for testing */
-    static boolean isMountainShadow(float sza, float saa, float slope, float aspect, float orientation) {
+    static boolean isMountainShadow(float sza, float saa, float slope, float aspect, float orientation, double mntShadowExtent) {
         final double cosBeta = computeCosBeta(sza, saa, slope, aspect, orientation);
-        return cosBeta < SHADOW_THRESHOLD;
+        return cosBeta < (-1 * (1 - mntShadowExtent));
     }
 
     /* package local for testing */
