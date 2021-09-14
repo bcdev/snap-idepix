@@ -82,6 +82,10 @@ public class IdepixOlciOp extends BasisOp {
     @Parameter(defaultValue = "true", label = " Compute mountain shadow")
     private boolean computeMountainShadow;
 
+    @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
+            description = "Extent of mountain shadow detection")
+    private double mntShadowExtent;
+
     @Parameter(defaultValue = "true",
             label = " Compute cloud shadow",
             description = " Compute cloud shadow with the algorithm from 'Fronts' project")
@@ -268,6 +272,7 @@ public class IdepixOlciOp extends BasisOp {
         params.put("cloudBufferWidth", cloudBufferWidth);
         params.put("computeCloudShadow", computeCloudShadow);
         params.put("computeMountainShadow", computeMountainShadow);
+        params.put("mntShadowStrength", mntShadowExtent);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciPostProcessOp.class),
                                                   params, input);
