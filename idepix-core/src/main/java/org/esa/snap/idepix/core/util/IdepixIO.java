@@ -211,7 +211,8 @@ public class IdepixIO {
     }
 
     private static boolean isValidOlciSlstrSynergyProduct(Product product) {
-        return product.getName().contains("S3A_SY_1");  // todo: clarify
+        return (product.getName().contains("S3A_SY_1")||
+                product.getName().contains("S3B_SY_1"));  // todo: clarify
     }
 
     private static boolean isValidMerisIcolL1NProduct(Product product) {
