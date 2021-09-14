@@ -1,6 +1,5 @@
 package org.esa.snap.idepix.olci;
 
-import org.esa.snap.idepix.olci.IdepixOlciMountainShadowOp;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -24,27 +23,27 @@ public class IdepixOlciMountainShadowOpTest {
 
         // sun in zenith: certainly no shadow...
         float sza = 0.0f;
-        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation));
+        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation, 0.9));
 
         // low sun angle: no shadow...
         sza = 30.0f;
-        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation));
+        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation, 0.9));
 
         // the change at sza = 45deg...
         sza = 44.9f;
-        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation));
+        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation, 0.9));
         sza = 45.0f;
-        assertTrue(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation));
+        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation, 0.9));
         // get out of the shadow again with slight change in saa...
         saa = 179.0f;
-        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation));
+        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation, 0.9));
         saa = 181.0f;
-        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation));
+        assertFalse(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation, 0.9));
 
         // low sun angle: shadow...
         saa = 180.0f;
         sza = 60.0f;
-        assertTrue(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation));
+        assertTrue(IdepixOlciMountainShadowOp.isMountainShadow(sza, saa, slope, aspect, orientation, 0.9));
 
     }
 
