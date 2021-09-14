@@ -12,6 +12,9 @@ public class IdepixOlciMountainShadowOpTest {
 
     @Test
     public void testIsMountainShadow() {
+        //todo 20210910 DM: aspect is a function of SAA (sun from northern direction on Southern hemisphere!).
+        // Test for southern hemisphere.
+
         // simple illustrative test case: slope of 45 deg to the south, swath direction south-north (orientation = 0),
         // local noon (saa = 180):
         final float slope = (float) (Math.PI / 4.0);

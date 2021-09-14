@@ -10,44 +10,44 @@ import static org.junit.Assert.assertEquals;
  */
 public class IdepixOlciSlopeAspectOrientationOpTest {
 
-    @Test
-    public void computeSlopeAndAspect() {
-        // flat plane over 3x3 box
-        float[] altitude = new float[]{
-                0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.0f};
-        float[] slopeAndAspect = IdepixOlciSlopeAspectOrientationOp.computeSlopeAspect(altitude, 300);
-        assertEquals(slopeAndAspect[0], 0.0f, 1e-7);
-        assertEquals(slopeAndAspect[1], Float.NaN, 1e-8);
-
-        // ratio 1:1 (45deg) inclined plane over 3x3 box, ascending to the north
-        altitude = new float[]{
-                600.0f, 600.0f, 600.0f,
-                300.0f, 300.0f, 300.0f,
-                0.0f, 0.0f, 0.0f};
-        slopeAndAspect = IdepixOlciSlopeAspectOrientationOp.computeSlopeAspect(altitude, 300);
-        assertEquals(slopeAndAspect[0], Math.PI / 4, 1e-7);
-        assertEquals(slopeAndAspect[1], Math.PI, 1e-6);
-
-        // ratio 1:1 (45deg) inclined plane over 3x3 box, ascending to the west
-        altitude = new float[]{
-                600.0f, 300.0f, 0.0f,
-                600.0f, 300.0f, 0.0f,
-                600.0f, 300.0f, 0.0f};
-        slopeAndAspect = IdepixOlciSlopeAspectOrientationOp.computeSlopeAspect(altitude, 300);
-        assertEquals(slopeAndAspect[0], Math.PI / 4, 1e-7);
-        assertEquals(slopeAndAspect[1], Math.PI / 2, 1e-6);
-
-        // ratio 1:2 inclined plane over 3x3 box, ascending to the east
-        altitude = new float[]{
-                0.0f, 300.0f, 600.0f,
-                0.0f, 300.0f, 600.0f,
-                0.0f, 300.0f, 600.0f};
-        slopeAndAspect = IdepixOlciSlopeAspectOrientationOp.computeSlopeAspect(altitude, 600);
-        assertEquals(slopeAndAspect[0], Math.atan(0.5), 1e-7);
-        assertEquals(slopeAndAspect[1], Math.PI * 3.0 / 2.0, 1e-6);
-    }
+//    @Test
+//    public void computeSlopeAndAspect() {
+//        // flat plane over 3x3 box
+//        float[] altitude = new float[]{
+//                0.0f, 0.0f, 0.0f,
+//                0.0f, 0.0f, 0.0f,
+//                0.0f, 0.0f, 0.0f};
+//        float[] slopeAndAspect = IdepixOlciSlopeAspectOrientationOp.computeSlopeAspect(altitude, 300);
+//        assertEquals(slopeAndAspect[0], 0.0f, 1e-7);
+//        assertEquals(slopeAndAspect[1], Float.NaN, 1e-8);
+//
+//        // ratio 1:1 (45deg) inclined plane over 3x3 box, ascending to the north
+//        altitude = new float[]{
+//                600.0f, 600.0f, 600.0f,
+//                300.0f, 300.0f, 300.0f,
+//                0.0f, 0.0f, 0.0f};
+//        slopeAndAspect = IdepixOlciSlopeAspectOrientationOp.computeSlopeAspect(altitude, 300);
+//        assertEquals(slopeAndAspect[0], Math.PI / 4, 1e-7);
+//        assertEquals(slopeAndAspect[1], Math.PI, 1e-6);
+//
+//        // ratio 1:1 (45deg) inclined plane over 3x3 box, ascending to the west
+//        altitude = new float[]{
+//                600.0f, 300.0f, 0.0f,
+//                600.0f, 300.0f, 0.0f,
+//                600.0f, 300.0f, 0.0f};
+//        slopeAndAspect = IdepixOlciSlopeAspectOrientationOp.computeSlopeAspect(altitude, 300);
+//        assertEquals(slopeAndAspect[0], Math.PI / 4, 1e-7);
+//        assertEquals(slopeAndAspect[1], Math.PI / 2, 1e-6);
+//
+//        // ratio 1:2 inclined plane over 3x3 box, ascending to the east
+//        altitude = new float[]{
+//                0.0f, 300.0f, 600.0f,
+//                0.0f, 300.0f, 600.0f,
+//                0.0f, 300.0f, 600.0f};
+//        slopeAndAspect = IdepixOlciSlopeAspectOrientationOp.computeSlopeAspect(altitude, 600);
+//        assertEquals(slopeAndAspect[0], Math.atan(0.5), 1e-7);
+//        assertEquals(slopeAndAspect[1], Math.PI * 3.0 / 2.0, 1e-6);
+//    }
 
     @Test
     public void testComputeOrientation() {

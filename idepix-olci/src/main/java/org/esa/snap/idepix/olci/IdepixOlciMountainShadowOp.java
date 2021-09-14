@@ -26,10 +26,7 @@ import org.esa.snap.idepix.core.IdepixConstants;
         internal = true,
         authors = "Tonio Fincke, Olaf Danne",
         copyright = "(c) 2018-2021 by Brockmann Consult",
-        description = "Computes mountain/hill shadow for a Sentinel-3 OLCI product using slope, aspect and orientation.\n" +
-                " See theory e.g. at \n" +
-                " https://www.e-education.psu.edu/geog480/node/490, or\n" +
-                " https://desktop.arcgis.com/en/arcmap/10.3/tools/spatial-analyst-toolbox/how-hillshade-works.htm")
+        description = "Computes mountain/hill shadow for a Sentinel-3 OLCI product using slope, aspect and orientation.")
 public class IdepixOlciMountainShadowOp extends PixelOperator {
 
     @SourceProduct
@@ -47,7 +44,7 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
 
     private final static int MOUNTAIN_SHADOW_FLAG_BAND_INDEX = 0;
 
-    private final static double SHADOW_THRESHOLD = 0;
+    private final static double SHADOW_THRESHOLD = -0.1;
 
     public final static String MOUNTAIN_SHADOW_FLAG_BAND_NAME = "mountainShadowFlag";
 
@@ -107,7 +104,8 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
             final GeoPos geoPos = sourceProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
             final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, geoPos.getLat());
 
-            targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(isMountainShadow(sza, (float) saaApparent, slope, aspect, orientation));
+            targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(isMountainShadow(sza, (float) saaApparent,
+                    slope, aspect, orientation));
         }
     }
 
