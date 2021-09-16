@@ -90,7 +90,8 @@ Two shadow flags are provided with the classification:
     <li>
         'mountain_shadow': a hillshade algorithm [3] is implemented, which derives slopes from elevation data and uses a
         geometric test with slope, aspect and illumination and satellite observation conditions against a threshold to
-        find pixel in the (core) shadow of mountainous terrain.
+        find pixel in the (core) shadow of mountainous terrain. The threshold is set to 0.9 by default, and can be adjusted
+        by the user between 1 (larger terrain shadow extent) and 0 (no terrain shadow).
     </li>
 </ul>
 
