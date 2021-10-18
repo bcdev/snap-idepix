@@ -137,18 +137,20 @@ public class IdepixOlciOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        final Geometry productGeometry = IdepixOlciUtils.computeProductGeometry(sourceProduct);
-        if (productGeometry != null) {
-            final Polygon arcticPolygon =
-                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ARCTIC_POLYGON_COORDS);
-            final Polygon antarcticaPolygon =
-                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ANTARCTICA_POLYGON_COORDS);
-            considerCloudsOverSnow =
-                    productGeometry.intersects(arcticPolygon) || productGeometry.intersects(antarcticaPolygon);
-            arcticPolygon.contains(productGeometry);
-        } else {
-            throw new OperatorException("Product geometry is null - cannot proceed.");
-        }
+//        final Geometry productGeometry = IdepixOlciUtils.computeProductGeometry(sourceProduct);
+//        if (productGeometry != null) {
+//            final Polygon arcticPolygon =
+//                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ARCTIC_POLYGON_COORDS);
+//            final Polygon antarcticaPolygon =
+//                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ANTARCTICA_POLYGON_COORDS);
+//            considerCloudsOverSnow =
+//                    productGeometry.intersects(arcticPolygon) || productGeometry.intersects(antarcticaPolygon);
+//            arcticPolygon.contains(productGeometry);
+//        } else {
+//            throw new OperatorException("Product geometry is null - cannot proceed.");
+//        }
+        considerCloudsOverSnow = true;
+
 
         outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
         outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
