@@ -31,7 +31,10 @@
     radiance-to-reflectance conversion) in all 21 bands are used. <br> <br>
 
     As output, the neural net finally provides per pixel one of the properties 'cloud sure',
-    'cloud ambiguous', 'cloud' (which means sure OR ambiguous) ,  or 'snow/ice'.
+    'cloud ambiguous', 'cloud' (which means sure OR ambiguous) ,  or 'snow/ice'.<br>
+
+    Over land the 'snow/ice' flag is refined by spatial and spectral tests to provide a better separation between cloud
+    and snow.
 
 <h4>Additional properties</h4>
 <p>
@@ -44,6 +47,9 @@
         width. Note that the cloud buffer is only applied on cloud-free pixels, i.e. cloudy pixels are not flagged as cloud
         buffer of cloudy neighbour pixels.
         The cloud buffer procedure is described in a bit more detail in the CCI Land Cover ATBD [1].
+    </li>
+    <li>
+        'bright': the pixel is a bright pixel. The information is retained from the quality flags of the L1b product.
     </li>
     <li>
         'land': the pixel is located over land
@@ -69,6 +75,20 @@ The latter is a fractional mask:
     </li>
 </ul>
 
+A cloud shadow flag is provided with the classification:
+<ul>
+    <li>
+        'cloud_shadow': the cloud top height is estimated from the O2 absorption bands with a dedicated neural network.
+        Starting from each cloud free pixel, the pixels along the (projected) path towards the sun are checked. If they are
+        flagged as 'cloud' and the cloud top height exceeds the elevation of the search path above ground, this cloud is
+        likely to cast a shadow at the start point. The minimum elevation is fixed at 300m above ground. If a cloudy pixel is
+        found within the search path, the 'cloud_shadow' flag is raised at the start pixel and the search is aborted. Otherwise,
+        the algorithm carries on until the maximum length of the search path is reached, which is defined by a theoretical maximum
+        cloud top height at current latitude. The cloud shadow algorithm is applied as part of the postprocessing of the
+        classification.
+    </li>
+</ul>
+
 <h4>Final classification flags</h4>
 <p>
     In summary, from the algorithm steps outlined above, the following final classification flags are provided for
@@ -90,7 +110,13 @@ The latter is a fractional mask:
         'CLOUD_BUFFER'
     </li>
     <li>
+        'CLOUD_SHADOW'
+    </li>
+    <li>
         'SNOW_ICE'
+    </li>
+    <li>
+        'BRIGHT'
     </li>
     <li>
         'COASTLINE'
@@ -102,19 +128,10 @@ The latter is a fractional mask:
 
 <h4>Known issues</h4>
 <p>
-    The following pixel properties are currently NOT provided for MERIS:
+    The following pixel property is currently NOT provided for Sentinel-3 OLCI:
 <ul>
     <li>
-        'BRIGHT'
-    </li>
-    <li>
         'WHITE'
-    </li>
-    <li>
-        'CLOUD_SHADOW'
-    </li>
-    <li>
-        'MIXED_PIXEL'
     </li>
 </ul>
 

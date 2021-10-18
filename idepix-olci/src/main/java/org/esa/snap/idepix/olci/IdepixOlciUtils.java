@@ -157,7 +157,7 @@ class IdepixOlciUtils {
                 2.0 * Math.tan(szaRad) * Math.tan(ozaRad) * Math.cos(deltaPhiRad));
 
         double delta = Math.acos(numerator / denominator);
-        if (lat < 0.0){
+        if (lat < 0.0){ //correction needed!
             delta =-1.*delta;
         }
         if (oaa < 0.0) {
