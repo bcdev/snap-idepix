@@ -63,7 +63,7 @@ public class IdepixOlciClassificationOp extends Operator {
             description = " If applied, write Schiller NN value to the target product ")
     private boolean outputSchillerNNValue;
 
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
             description = "Check for sea/lake ice also outside Sea Ice Climatology area.",
             label = "Check for sea/lake ice also outside Sea Ice Climatology area"
     )
@@ -238,8 +238,7 @@ public class IdepixOlciClassificationOp extends Operator {
                                          surface13Tile, trans13Tile, y, x);
                     } else {
                         classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
-                                          cloudFlagTargetTile, nnTargetTile, y, x, isCoastlineFromAppliedMask,
-                                          surface13Tile, trans13Tile);
+                                          cloudFlagTargetTile, nnTargetTile, y, x, isCoastlineFromAppliedMask);
                     }
                 }
             }
@@ -255,8 +254,7 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private void classifyOverWater(Tile olciQualityFlagTile, Tile[] olciReflectanceTiles,
-                                   Tile cloudFlagTargetTile, Tile nnTargetTile, int y, int x, boolean isCoastline,
-                                   Tile surface13Tile, Tile trans13Tile) {
+                                   Tile cloudFlagTargetTile, Tile nnTargetTile, int y, int x, boolean isCoastline) {
 
         final GeoPos geoPos = IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y);
         // 'sea' ice can be also ice over inland water!
@@ -271,55 +269,20 @@ public class IdepixOlciClassificationOp extends Operator {
 
             final boolean isGlint = isGlintPixel(x, y, olciQualityFlagTile);
             // CB 20170406:
-            boolean cloudSure = olciReflectanceTiles[16].getSampleFloat(x, y) > THRESH_WATER_MINBRIGHT1 &&
+            final boolean cloudSure = olciReflectanceTiles[16].getSampleFloat(x, y) > THRESH_WATER_MINBRIGHT1 &&
                     nnInterpreter.isCloudSure(nnOutput1);
-            boolean cloudAmbiguous = olciReflectanceTiles[16].getSampleFloat(x, y) > THRESH_WATER_MINBRIGHT2 &&
+            final boolean cloudAmbiguous = olciReflectanceTiles[16].getSampleFloat(x, y) > THRESH_WATER_MINBRIGHT2 &&
                     nnInterpreter.isCloudAmbiguous(nnOutput1, false, isGlint);
-            boolean isCloud = cloudAmbiguous || cloudSure;
-            boolean isSnowIce = nnInterpreter.isSnowIce(nnOutput1);
-
-            if (checkForSeaIce) { //&& nnInterpreter.isSnowIce(nnOutput1)
-                final float olciReflectance21 = olciReflectanceTiles[20].getSampleFloat(x, y);
-                double surface13;
-                double trans13;
-                if (surface13Tile != null && trans13Tile != null) {
-//                    GeoPos geoPos = IdepixUtils.getGeoPos(sourceProduct.getSceneGeoCoding(), x, y);
-//                    final Coordinate coord = new Coordinate(geoPos.getLon(), geoPos.getLat());
-//                    final boolean isInsideGreenland =
-//                            IdepixOlciUtils.isCoordinateInsideGeometry(coord, arcticPolygon, gf);
-//                    final boolean isInsideAntarctica =
-//                            IdepixOlciUtils.isCoordinateInsideGeometry(coord, antarcticaPolygon, gf);
-//                    if (isInsideGreenland || isInsideAntarctica || true) {
-                    surface13 = surface13Tile.getSampleDouble(x, y);
-                    trans13 = trans13Tile.getSampleDouble(x, y);
-                    final boolean isCloudOverSnow =
-                            (olciReflectance21 > 0.5 && surface13 - trans13 < 0.01) || olciReflectance21 > 0.76f;
-                    if (isCloudOverSnow) {
-                        cloudSure = true;
-                        isCloud = true;
-                        isSnowIce = false;
-                    } else {
-                        if (isCloud) {
-                            // this overrules the NN which likely classified snow/ice as cloud
-                            isSnowIce = true;
-                            isCloud = false;
-                            cloudSure = false;
-                            cloudAmbiguous = false;
-                        }
-                    }
-                }
-
-//                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
-//                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
-//                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
-
-
-            }
 
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, cloudAmbiguous);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, cloudSure);
-            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, isCloud);
-            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, isSnowIce);
+            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, cloudAmbiguous || cloudSure);
+
+            if (checkForSeaIce && nnInterpreter.isSnowIce(nnOutput1)) {
+                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
+                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+            }
         }
         if (outputSchillerNNValue) {
             final double[] nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles);
@@ -372,7 +335,7 @@ public class IdepixOlciClassificationOp extends Operator {
                         IdepixOlciUtils.isCoordinateInsideGeometry(coord, arcticPolygon, gf);
                 final boolean isInsideAntarctica =
                         IdepixOlciUtils.isCoordinateInsideGeometry(coord, antarcticaPolygon, gf);
-                if (isInsideGreenland || isInsideAntarctica || true) { //for testing: set to TRUE!
+                if (isInsideGreenland || isInsideAntarctica) {
                     surface13 = surface13Tile.getSampleDouble(x, y);
                     trans13 = trans13Tile.getSampleDouble(x, y);
                     final boolean isCloudOverSnow =

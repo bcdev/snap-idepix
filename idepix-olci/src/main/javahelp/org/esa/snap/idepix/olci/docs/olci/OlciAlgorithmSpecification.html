@@ -31,10 +31,7 @@
     radiance-to-reflectance conversion) in all 21 bands are used. <br> <br>
 
     As output, the neural net finally provides per pixel one of the properties 'cloud sure',
-    'cloud ambiguous', 'cloud' (which means sure OR ambiguous) ,  or 'snow/ice'.<br>
-
-    Over land the 'snow/ice' flag is refined by spatial and spectral tests to provide a better separation between cloud
-    and snow.
+    'cloud ambiguous', 'cloud' (which means sure OR ambiguous) ,  or 'snow/ice'.
 
 <h4>Additional properties</h4>
 <p>
@@ -47,9 +44,6 @@
         width. Note that the cloud buffer is only applied on cloud-free pixels, i.e. cloudy pixels are not flagged as cloud
         buffer of cloudy neighbour pixels.
         The cloud buffer procedure is described in a bit more detail in the CCI Land Cover ATBD [1].
-    </li>
-    <li>
-        'bright': the pixel is a bright pixel. The information is retained from the quality flags of the L1b product.
     </li>
     <li>
         'land': the pixel is located over land
@@ -116,13 +110,7 @@ Two shadow flags are provided with the classification:
         'CLOUD_BUFFER'
     </li>
     <li>
-        'CLOUD_SHADOW'
-    </li>
-    <li>
         'SNOW_ICE'
-    </li>
-    <li>
-        'BRIGHT'
     </li>
     <li>
         'COASTLINE'
@@ -138,10 +126,19 @@ Two shadow flags are provided with the classification:
 <h4>Known issues</h4>
 <p>
     The mountain shadow algorithm can show an artefact at the nadir line, where viewing angles are not exact enough.
-    The following pixel property is currently NOT provided for Sentinel-3 OLCI:
+    The following pixel properties are currently NOT provided for MERIS:
 <ul>
     <li>
+        'BRIGHT'
+    </li>
+    <li>
         'WHITE'
+    </li>
+    <li>
+        'CLOUD_SHADOW'
+    </li>
+    <li>
+        'MIXED_PIXEL'
     </li>
 </ul>
 
