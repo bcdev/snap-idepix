@@ -1,6 +1,7 @@
 package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.apache.commons.math3.fitting.PolynomialFitter;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
@@ -245,4 +246,43 @@ class IdepixOlciUtils {
     private static double getHeightFromCtp(double ctp, double p0, double ts) {
         return -ts * (Math.pow(ctp / p0, 1. / 5.255) - 1) / 0.0065;
     }
+
+    static boolean isReducedResolution(Product sourceProduct) {
+//        return sourceProduct.getName().matches("S3.?_OL_1_.*RR_.*.SEN3");
+        // less strict to allow subsets:
+        return sourceProduct.getProductType().endsWith("RR");
+    }
+
+    static boolean isFullResolution(Product sourceProduct) {
+//        return sourceProduct.getName().matches("S3.?_OL_1_.*FR_.*.SEN3");
+        // less strict to allow subsets:
+        return sourceProduct.getProductType().endsWith("FR");
+    }
+
+    static float[] interpolateViewAngles(PolynomialFitter curveFitter1, PolynomialFitter curveFitter2,
+                                         float[] viewAngleOrig, int[] nx, int nxChange) {
+        float[] viewAngleInterpol = viewAngleOrig.clone();
+
+        curveFitter1.clearObservations();
+        for (int x = nx[0]; x < nx[1]; x++) {
+            curveFitter1.addObservedPoint(x * 1.0f, viewAngleOrig[x]);
+        }
+        final double[] fit1 = curveFitter1.fit(IdepixOlciConstants.POLYNOM_FIT_INITIAL);
+
+        curveFitter2.clearObservations();
+        for (int x = nx[2]; x < nx[3]; x++) {
+            curveFitter2.addObservedPoint(x * 1.0f, viewAngleOrig[x]);
+        }
+        final double[] fit2 = curveFitter2.fit(IdepixOlciConstants.POLYNOM_FIT_INITIAL);
+
+        for (int x = nx[1]; x < nxChange; x++) {
+            viewAngleInterpol[x] = (float) (fit1[0] + fit1[1] * x + fit1[2] * x * x);
+        }
+        for (int x = nxChange; x < nx[2]; x++) {
+            viewAngleInterpol[x] = (float) (fit2[0] + fit2[1] * x + fit2[2] * x * x);
+        }
+
+        return viewAngleInterpol;
+    }
+
 }
