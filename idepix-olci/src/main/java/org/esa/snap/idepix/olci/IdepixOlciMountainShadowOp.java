@@ -14,6 +14,8 @@ import org.esa.snap.core.gpf.pointop.*;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 
+import java.util.HashMap;
+
 /**
  * Computes mountain/hill shadow for a Sentinel-3 OLCI product using slope, aspect and orientation.
  * See theory e.g. at
@@ -30,8 +32,8 @@ import org.esa.snap.idepix.core.IdepixConstants;
         description = "Computes mountain/hill shadow for a Sentinel-3 OLCI product using slope, aspect and orientation.")
 public class IdepixOlciMountainShadowOp extends PixelOperator {
 
-    @SourceProduct
-    private Product sourceProduct;
+    @SourceProduct(alias = "l1b")
+    private Product l1bProduct;
 
     @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
             description = "Extent of mountain shadow detection")
@@ -44,8 +46,6 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
     private final static int SLOPE_INDEX = 4;
     private final static int ASPECT_INDEX = 5;
     private final static int ORIENTATION_INDEX = 6;
-    private final static int CLASSIF_INDEX = 7;
-    private final static int ELEVATION_INDEX = 8;
 
 
     private final static int MOUNTAIN_SHADOW_FLAG_BAND_INDEX = 0;
@@ -57,15 +57,10 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
     @Override
     protected void prepareInputs() throws OperatorException {
         super.prepareInputs();
-        sourceProduct = getSourceProduct();
-        if (sourceProduct.getBand(IdepixOlciSlopeAspectOrientationOp.SLOPE_BAND_NAME) == null ||
-                sourceProduct.getBand(IdepixOlciSlopeAspectOrientationOp.ASPECT_BAND_NAME) == null ||
-                sourceProduct.getBand(IdepixOlciSlopeAspectOrientationOp.ORIENTATION_BAND_NAME) == null) {
-            saoProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciSlopeAspectOrientationOp.class),
-                    GPF.NO_PARAMS, sourceProduct);
-        } else {
-            saoProduct = sourceProduct;
-        }
+        HashMap<String, Product> input = new HashMap<>();
+        input.put("l1b", l1bProduct);
+        saoProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciSlopeAspectOrientationOp.class),
+                GPF.NO_PARAMS, input);
     }
 
     @Override
@@ -76,15 +71,16 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
 
     @Override
     protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurer) throws OperatorException {
-        sampleConfigurer.defineSample(SZA_INDEX, IdepixOlciConstants.OLCI_SUN_ZENITH_BAND_NAME, sourceProduct);
-        sampleConfigurer.defineSample(SAA_INDEX, IdepixOlciConstants.OLCI_SUN_AZIMUTH_BAND_NAME, sourceProduct);
-        sampleConfigurer.defineSample(OZA_INDEX, IdepixOlciConstants.OLCI_VIEW_ZENITH_BAND_NAME, sourceProduct);
-        sampleConfigurer.defineSample(OAA_INDEX, IdepixOlciConstants.OLCI_VIEW_AZIMUTH_BAND_NAME, sourceProduct);
+        sampleConfigurer.defineSample(SZA_INDEX, IdepixOlciConstants.OLCI_SUN_ZENITH_BAND_NAME, l1bProduct);
+        sampleConfigurer.defineSample(SAA_INDEX, IdepixOlciConstants.OLCI_SUN_AZIMUTH_BAND_NAME, l1bProduct);
+        sampleConfigurer.defineSample(OZA_INDEX, IdepixOlciConstants.OLCI_VIEW_ZENITH_INTERPOLATED_BAND_NAME,
+                saoProduct);
+        sampleConfigurer.defineSample(OAA_INDEX, IdepixOlciConstants.OLCI_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME,
+                saoProduct);
         sampleConfigurer.defineSample(SLOPE_INDEX, IdepixOlciSlopeAspectOrientationOp.SLOPE_BAND_NAME, saoProduct);
         sampleConfigurer.defineSample(ASPECT_INDEX, IdepixOlciSlopeAspectOrientationOp.ASPECT_BAND_NAME, saoProduct);
-        sampleConfigurer.defineSample(ORIENTATION_INDEX, IdepixOlciSlopeAspectOrientationOp.ORIENTATION_BAND_NAME, saoProduct);
-        sampleConfigurer.defineSample(CLASSIF_INDEX, IdepixConstants.CLASSIF_BAND_NAME, sourceProduct);
-        sampleConfigurer.defineSample(ELEVATION_INDEX, IdepixOlciConstants.OLCI_ALTITUDE_BAND_NAME, sourceProduct);
+        sampleConfigurer.defineSample(ORIENTATION_INDEX, IdepixOlciSlopeAspectOrientationOp.ORIENTATION_BAND_NAME,
+                saoProduct);
     }
 
     @Override
@@ -105,7 +101,7 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
             final float orientation = sourceSamples[ORIENTATION_INDEX].getFloat();
 
             final PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
-            final GeoPos geoPos = sourceProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
+            final GeoPos geoPos = l1bProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
             final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, geoPos.getLat());
 
             targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(isMountainShadow(sza, (float) saaApparent,

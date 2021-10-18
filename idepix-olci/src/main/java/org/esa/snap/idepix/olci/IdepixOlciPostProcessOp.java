@@ -20,11 +20,6 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
-//import org.esa.s3tbx.idepix.core.IdepixConstants;
-//import org.esa.s3tbx.idepix.core.operators.CloudBuffer;
-//import org.esa.s3tbx.idepix.core.util.IdepixIO;
-//import org.esa.s3tbx.idepix.core.util.IdepixUtils;
-
 /**
  * Operator used to consolidate IdePix classification flag for OLCI:
  * - cloud buffer
@@ -120,9 +115,11 @@ public class IdepixOlciPostProcessOp extends Operator {
             ensureBandsAreCopied(l1bProduct, olciCloudProduct, latBand.getName(), lonBand.getName(), altBand.getName());
             Map<String, Object> mntShadowParams = new HashMap<>();
             mntShadowParams.put("mntShadowStrength", mntShadowExtent);
+
+            HashMap<String, Product> input = new HashMap<>();
+            input.put("l1b", l1bProduct);
             final Product mountainShadowProduct = GPF.createProduct(
-                    OperatorSpi.getOperatorAlias(IdepixOlciMountainShadowOp.class),
-                    mntShadowParams, olciCloudProduct);
+                    OperatorSpi.getOperatorAlias(IdepixOlciMountainShadowOp.class), mntShadowParams, input);
             mountainShadowFlagBand = mountainShadowProduct.getBand(
                     IdepixOlciMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
         }
