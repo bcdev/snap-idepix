@@ -35,8 +35,8 @@ import java.util.Map;
                 "https://desktop.arcgis.com/en/arcmap/10.3/tools/spatial-analyst-toolbox/how-hillshade-works.htm")
 public class IdepixOlciSlopeAspectOrientationOp extends Operator {
 
-    @SourceProduct
-    private Product sourceProduct;
+    @SourceProduct(alias = "l1b")
+    private Product l1bProduct;
 
     private final static float EARTH_MIN_ELEVATION = -428.0f;  // at shoreline of Dead Sea
     private final static float EARTH_MAX_ELEVATION = 8848.0f;  // Mt. Everest
@@ -48,9 +48,11 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
     private Band latitudeBand;
     private Band longitudeBand;
     private Band elevationBand;
+    private Band viewZenithBand;
+    private Band viewAzimuthBand;
+    private TiePointGrid sunAzimuthTiePointGrid;
     private TiePointGrid viewZenithTiePointGrid;
     private TiePointGrid viewAzimuthTiePointGrid;
-    private TiePointGrid sunAzimuthTiePointGrid;
     private Band slopeBand;
     private Band aspectBand;
     private Band orientationBand;
@@ -70,9 +72,8 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        sourceProduct = getSourceProduct();
-        ensureSingleRasterSize(sourceProduct);
-        GeoCoding sourceGeoCoding = sourceProduct.getSceneGeoCoding();
+        ensureSingleRasterSize(l1bProduct);
+        GeoCoding sourceGeoCoding = l1bProduct.getSceneGeoCoding();
         if (sourceGeoCoding == null) {
             throw new OperatorException("Source product has no geo-coding");
         }
@@ -81,22 +82,38 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
             if (i2m instanceof AffineTransform) {
                 spatialResolution = ((AffineTransform) i2m).getScaleX();
             } else {
-                spatialResolution = computeSpatialResolution(sourceProduct, sourceGeoCoding);
+                spatialResolution = computeSpatialResolution(l1bProduct, sourceGeoCoding);
             }
         } else {
-            spatialResolution = computeSpatialResolution(sourceProduct, sourceGeoCoding);
+            spatialResolution = computeSpatialResolution(l1bProduct, sourceGeoCoding);
         }
-        elevationBand = sourceProduct.getBand(ELEVATION_BAND_NAME);
+        elevationBand = l1bProduct.getBand(ELEVATION_BAND_NAME);
         if (elevationBand == null) {
             throw new OperatorException("Elevation band required to compute slope or aspect");
         }
-        latitudeBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_LATITUDE_BAND_NAME);
-        longitudeBand = sourceProduct.getBand(IdepixOlciConstants.OLCI_LONGITUDE_BAND_NAME);
-        viewZenithTiePointGrid = sourceProduct.getTiePointGrid(IdepixOlciConstants.OLCI_VIEW_ZENITH_BAND_NAME);
-        viewAzimuthTiePointGrid = sourceProduct.getTiePointGrid(IdepixOlciConstants.OLCI_VIEW_AZIMUTH_BAND_NAME);
-        sunAzimuthTiePointGrid = sourceProduct.getTiePointGrid(IdepixOlciConstants.OLCI_SUN_AZIMUTH_BAND_NAME);
+        latitudeBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_LATITUDE_BAND_NAME);
+        longitudeBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_LONGITUDE_BAND_NAME);
 
         Product targetProduct = createTargetProduct();
+        if (IdepixOlciUtils.isFullResolution(l1bProduct) || IdepixOlciUtils.isReducedResolution(l1bProduct)) {
+            IdepixOlciViewAngleInterpolationOp viewAngleInterpolationOp = new IdepixOlciViewAngleInterpolationOp();
+            viewAngleInterpolationOp.setParameterDefaultValues();
+            viewAngleInterpolationOp.setSourceProduct(l1bProduct);
+            Product viewAngleInterpolationProduct = viewAngleInterpolationOp.getTargetProduct();
+
+            viewZenithBand = viewAngleInterpolationProduct.getBand(IdepixOlciConstants.OLCI_VIEW_ZENITH_INTERPOLATED_BAND_NAME);
+            viewAzimuthBand = viewAngleInterpolationProduct.getBand(IdepixOlciConstants.OLCI_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME);
+            ProductUtils.copyBand(IdepixOlciConstants.OLCI_VIEW_ZENITH_INTERPOLATED_BAND_NAME,
+                    viewAngleInterpolationProduct, targetProduct, true);
+            ProductUtils.copyBand(IdepixOlciConstants.OLCI_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME,
+                    viewAngleInterpolationProduct, targetProduct, true);
+        } else {
+            viewZenithTiePointGrid = l1bProduct.getTiePointGrid(IdepixOlciConstants.OLCI_VIEW_ZENITH_BAND_NAME);
+            viewAzimuthTiePointGrid = l1bProduct.getTiePointGrid(IdepixOlciConstants.OLCI_VIEW_AZIMUTH_BAND_NAME);
+        }
+
+        sunAzimuthTiePointGrid = l1bProduct.getTiePointGrid(IdepixOlciConstants.OLCI_SUN_AZIMUTH_BAND_NAME);
+
         setTargetProduct(targetProduct);
     }
 
@@ -117,8 +134,15 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
         final Tile latitudeTile = getSourceTile(latitudeBand, sourceRectangle, borderExtender);
         final Tile longitudeTile = getSourceTile(longitudeBand, sourceRectangle, borderExtender);
         final Tile elevationTile = getSourceTile(elevationBand, sourceRectangle, borderExtender);
-        final Tile viewZenithAngleTile = getSourceTile(viewZenithTiePointGrid, sourceRectangle, borderExtender);
-        final Tile viewAzimuthAngleTile = getSourceTile(viewAzimuthTiePointGrid, sourceRectangle, borderExtender);
+        Tile viewZenithAngleTile;
+        Tile viewAzimuthAngleTile;
+        if (IdepixOlciUtils.isFullResolution(l1bProduct) || IdepixOlciUtils.isReducedResolution(l1bProduct)) {
+            viewZenithAngleTile = getSourceTile(viewZenithBand, sourceRectangle, borderExtender);
+            viewAzimuthAngleTile = getSourceTile(viewAzimuthBand, sourceRectangle, borderExtender);
+        } else {
+            viewZenithAngleTile = getSourceTile(viewZenithTiePointGrid, sourceRectangle, borderExtender);
+            viewAzimuthAngleTile = getSourceTile(viewAzimuthTiePointGrid, sourceRectangle, borderExtender);
+        }
         final Tile sunAzimuthAngleTile = getSourceTile(sunAzimuthTiePointGrid, sourceRectangle, borderExtender);
 
         final Tile slopeTile = targetTiles.get(slopeBand);
@@ -190,8 +214,8 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
         float slope = (float) Math.atan(Math.sqrt(Math.pow(b / (spatialRes * Math.sin(vaa_orientation)), 2) +
                 Math.pow(c / (spatialRes * Math.cos(vaa_orientation)), 2)));
         float aspect = (float) Math.atan2(-b, -c);
-        if (saa > 270. || saa < 90){ //Sun from North (mostly southern hemisphere)
-            aspect -=Math.PI;
+        if (saa > 270. || saa < 90) { //Sun from North (mostly southern hemisphere)
+            aspect -= Math.PI;
         }
         if (aspect < 0.0f) {
             // map from [-180, 180] into [0, 360], see e.g. https://www.e-education.psu.edu/geog480/node/490
@@ -223,7 +247,6 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
      * @param lat2 - second latitude
      * @param lon1 - first longitude
      * @param lon2 - second longitude
-     *
      * @return float
      */
     static float computeOrientation(float lat1, float lat2, float lon1, float lon2) {
@@ -233,8 +256,8 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
 //        return (float) Math.atan2(-(lat2 - lat1), deltaLon * Math.cos(lat1Rad));
 
         // DM: formulas from theory, see above
-        double X = Math.cos(lat2*MathUtils.DTOR)*Math.sin((lon2-lon1)*MathUtils.DTOR);
-        double Y = Math.cos(lat1*MathUtils.DTOR)*Math.sin(lat2*MathUtils.DTOR) - Math.sin(lat1*MathUtils.DTOR)*X;
+        double X = Math.cos(lat2 * MathUtils.DTOR) * Math.sin((lon2 - lon1) * MathUtils.DTOR);
+        double Y = Math.cos(lat1 * MathUtils.DTOR) * Math.sin(lat2 * MathUtils.DTOR) - Math.sin(lat1 * MathUtils.DTOR) * X;
         return (float) (Math.atan2(X, Y));
 
     }
@@ -243,13 +266,13 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
      * Computes product spatial resolution from great circle distances at the product edges.
      * To be used as fallback if we have no CRS geocoding.
      *
-     * @param sourceProduct   - the source product
+     * @param l1bProduct      - the source product
      * @param sourceGeoCoding - the source scene geocoding
      * @return spatial resolution in metres
      */
-    static double computeSpatialResolution(Product sourceProduct, GeoCoding sourceGeoCoding) {
-        final double width = sourceProduct.getSceneRasterWidth();
-        final double height = sourceProduct.getSceneRasterHeight();
+    static double computeSpatialResolution(Product l1bProduct, GeoCoding sourceGeoCoding) {
+        final double width = l1bProduct.getSceneRasterWidth();
+        final double height = l1bProduct.getSceneRasterHeight();
 
         final GeoPos leftPos = sourceGeoCoding.getGeoPos(new PixelPos(0, height / 2), null);
         final GeoPos rightPos = sourceGeoCoding.getGeoPos(new PixelPos(width - 1, height / 2), null);
@@ -297,12 +320,12 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
     }
 
     private Product createTargetProduct() {
-        final int sceneWidth = sourceProduct.getSceneRasterWidth();
-        final int sceneHeight = sourceProduct.getSceneRasterHeight();
+        final int sceneWidth = l1bProduct.getSceneRasterWidth();
+        final int sceneHeight = l1bProduct.getSceneRasterHeight();
         Product targetProduct = new Product(TARGET_PRODUCT_NAME, TARGET_PRODUCT_TYPE, sceneWidth, sceneHeight);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+        ProductUtils.copyGeoCoding(l1bProduct, targetProduct);
+        targetProduct.setStartTime(l1bProduct.getStartTime());
+        targetProduct.setEndTime(l1bProduct.getEndTime());
 
         slopeBand = createBand(targetProduct, SLOPE_BAND_NAME, SLOPE_BAND_DESCRIPTION, SLOPE_BAND_UNIT);
         aspectBand = createBand(targetProduct, ASPECT_BAND_NAME, ASPECT_BAND_DESCRIPTION, ASPECT_BAND_UNIT);

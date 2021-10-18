@@ -16,6 +16,7 @@
 
 package org.esa.snap.idepix.olci;
 
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -250,4 +251,21 @@ public class IdepixOlciUtilsTest {
         assertEquals(4, IdepixOlciUtils.getMonthFromStartStopTime(startStopTime));
     }
 
+    @Test
+    public void testIsReducedResolution() {
+        Product testProduct = new Product("S3B_OL_1_EFR____blabla.SEN3", "test_FR", 1, 1);
+        assertFalse(IdepixOlciUtils.isReducedResolution(testProduct));
+
+        testProduct = new Product("S3B_OL_1_ERR____blabla.SEN3", "test_RR", 1, 1);
+        assertTrue(IdepixOlciUtils.isReducedResolution(testProduct));
+    }
+
+    @Test
+    public void testIsFullResolution() {
+        Product testProduct = new Product("S3B_OL_1_EFR____blabla.SEN3", "test_FR", 1, 1);
+        assertTrue(IdepixOlciUtils.isFullResolution(testProduct));
+
+        testProduct = new Product("S3B_OL_1_ERR____blabla.SEN3", "test_RR", 1, 1);
+        assertFalse(IdepixOlciUtils.isFullResolution(testProduct));
+    }
 }
