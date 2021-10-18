@@ -21,11 +21,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>8.0.0</version>
+        <version>8.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>idepix-meris</artifactId>
-    <version>8.0.0</version>
+    <version>8.0.1</version>
 
     <packaging>nbm</packaging>
     
@@ -33,10 +33,17 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from MERIS.</description>
 
     <properties>
-        <idepix.version>8.0.0</idepix.version>
+        <idepix.version>8.0.1</idepix.version>
+        <s3tbx.version>8.0.2</s3tbx.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>idepix-core</artifactId>
+            <version>${idepix.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
@@ -48,14 +55,6 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-jai</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-binding</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -81,35 +80,27 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-watermask</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>idepix-core</artifactId>
-            <version>${idepix.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-		
+
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-rad2refl</artifactId>
+            <version>${s3tbx.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-meris-sdr</artifactId>
-            <version>${snap.version}</version>
+            <version>${s3tbx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-meris-l2auxdata</artifactId>
-            <version>${snap.version}</version>
+            <version>${s3tbx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-meris-ops</artifactId>
-            <version>${snap.version}</version>
+            <version>${s3tbx.version}</version>
         </dependency>
 
         <dependency>
@@ -123,6 +114,10 @@
             <artifactId>guava</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

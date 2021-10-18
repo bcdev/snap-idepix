@@ -4,9 +4,10 @@ AutoUpdate-Essential-Module: false
 OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Display-Category: SNAP Supported Plugins
 OpenIDE-Module-Long-Description: <p>Providing classification of pixels (cloud, cloud shadow, mountain shadow, snow, ice, land, water)
- on Sentinel-2 MSI data.</p><p><b>Vendor:</b> Brockmann Consult Gmb
- H</p><p><b>Contact address:</b> Chrysanderstr. 1, 21029 Hamburg (
- Germany)</p><p><b>Copyright:</b> (C) 2017 by Brockmann Consult GmbH</
- p><p><b>Vendor:</b> Brockmann Consult GmbH</p><p><b>License:</b> http
- ://www.gnu.org/licenses/gpl.html</p>
+ on Sentinel-2 MSI data.</p>
+ <p><b>Vendor:</b> Brockmann Consult GmbH</p>
+ <p><b>Contact address:</b> Chrysanderstr. 1, 21029 Hamburg (Germany)</p>
+ <p><b>Copyright:</b> (C) 2017 by Brockmann Consult GmbH</p>
+ <p><b>License:</b> http://www.gnu.org/licenses/gpl.html</p>
+ <p><b>Code Repository:</b> https://github.com/bcdev/snap-idepix</p>
 OpenIDE-Module-Layer: layer.xml

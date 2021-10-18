@@ -8,9 +8,7 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
-
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.BasisOp;
@@ -38,7 +36,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Idepix.Olci",
         category = "Optical/Pre-Processing",
-        version = "3.0.2",
+        version = "3.0.3",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
         description = "Pixel identification and classification for OLCI.")
@@ -48,9 +46,6 @@ public class IdepixOlciOp extends BasisOp {
             label = "OLCI L1b product",
             description = "The OLCI L1b source product.")
     private Product sourceProduct;
-
-    @TargetProduct(description = "The target product.")
-    private Product targetProduct;
 
     private boolean outputRadiance;
     private boolean outputRad2Refl;
@@ -83,6 +78,13 @@ public class IdepixOlciOp extends BasisOp {
             label = " Write NN value to the target product",
             description = " If applied, write NN value to the target product ")
     private boolean outputSchillerNNValue;
+
+    @Parameter(defaultValue = "true", label = " Compute mountain shadow")
+    private boolean computeMountainShadow;
+
+    @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
+            description = "Extent of mountain shadow detection")
+    private double mntShadowExtent;
 
     @Parameter(defaultValue = "true",
             label = " Compute cloud shadow",
@@ -164,17 +166,18 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
-        if (computeCloudBuffer) {
+        if (computeCloudBuffer || computeMountainShadow) {
             postProcess(olciIdepixProduct);
         }
 
-        targetProduct = createTargetProduct(olciIdepixProduct);
+        Product targetProduct = createTargetProduct(olciIdepixProduct);
         targetProduct.setAutoGrouping(olciIdepixProduct.getAutoGrouping());
 
         if (postProcessingProduct != null) {
             Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
             cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
         }
+        setTargetProduct(targetProduct);
     }
 
     private Product createTargetProduct(Product idepixProduct) {
@@ -270,7 +273,8 @@ public class IdepixOlciOp extends BasisOp {
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
         params.put("computeCloudShadow", computeCloudShadow);
-//        params.put("computeCloudShadow", false);
+        params.put("computeMountainShadow", computeMountainShadow);
+        params.put("mntShadowStrength", mntShadowExtent);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciPostProcessOp.class),
                                                   params, input);

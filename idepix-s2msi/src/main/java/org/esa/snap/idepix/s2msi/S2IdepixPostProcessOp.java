@@ -103,7 +103,12 @@ public class S2IdepixPostProcessOp extends Operator {
             input.put("l1cProduct", l1cProduct);
             input.put("s2ClassifProduct", s2ClassifProduct);
             Map<String, Object> params = new HashMap<>();
-            params.put("computeMountainShadow", computeMountainShadow);
+            // we have decided not to use the mountain shadow as implemented in
+            // to include it again
+            //      - set the value to computeMountainShadow, change
+            //      - add || computeMountainShadow to the condition above
+            //      - consider the flag results in computeTile
+            params.put("computeMountainShadow", false);
             params.put("mode", mode);
             params.put("cwThresh", cwThresh);
             params.put("gclThresh", gclThresh);
@@ -168,7 +173,6 @@ public class S2IdepixPostProcessOp extends Operator {
         if (computeCloudShadow) {
             final Tile flagTile = getSourceTile(cloudShadowFlagBand, targetRectangle);
             int clusteredCloudShadowFlag = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_CLOUD_SHADOW); //clustering algorithm
-            int mountainShadowFlag = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_MOUNTAIN_SHADOW);
             int cloudBufferFlag = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_CLOUD_BUFFER);
             int potentialShadowFlag = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_POTENTIAL_CLOUD_SHADOW);
             int recommendedCloudShadow = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_RECOMMENDED_CLOUD_SHADOW);
@@ -187,10 +191,6 @@ public class S2IdepixPostProcessOp extends Operator {
                     }
                     if ((flagValue & clusteredCloudShadowFlag) == clusteredCloudShadowFlag) {
                         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLUSTERED_CLOUD_SHADOW, true);
-                    }
-
-                    if (computeMountainShadow && (flagValue & mountainShadowFlag) == mountainShadowFlag) {
-                        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW, true);
                     }
                 }
             }

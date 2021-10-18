@@ -5,10 +5,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.gpf.Operator;
-import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.core.gpf.OperatorSpi;
-import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.*;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
@@ -20,6 +17,8 @@ import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 //import org.esa.s3tbx.idepix.core.IdepixConstants;
 //import org.esa.s3tbx.idepix.core.operators.CloudBuffer;
@@ -50,6 +49,13 @@ public class IdepixOlciPostProcessOp extends Operator {
             label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
+    @Parameter(defaultValue = "true", label = " Compute mountain shadow")
+    private boolean computeMountainShadow;
+
+    @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
+            description = "Extent of mountain shadow detection")
+    private double mntShadowExtent;
+
     @Parameter(defaultValue = "false",
             label = " Compute cloud shadow",
             description = " Compute cloud shadow with latest 'fronts' algorithm. Requires CTP.")
@@ -74,6 +80,7 @@ public class IdepixOlciPostProcessOp extends Operator {
     private TiePointGrid slpTPG;
     private TiePointGrid[] temperatureProfileTPGs;
     private Band altBand;
+    private Band mountainShadowFlagBand;
 
     private GeoCoding geoCoding;
 
@@ -95,7 +102,10 @@ public class IdepixOlciPostProcessOp extends Operator {
         ozaTPG = l1bProduct.getTiePointGrid("OZA");
         oaaTPG = l1bProduct.getTiePointGrid("OAA");
         slpTPG = l1bProduct.getTiePointGrid("sea_level_pressure");
-        altBand = l1bProduct.getBand("altitude");
+
+        final Band latBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_LATITUDE_BAND_NAME);
+        final Band lonBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_LONGITUDE_BAND_NAME);
+        altBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_ALTITUDE_BAND_NAME);
 
         temperatureProfileTPGs = new TiePointGrid[IdepixOlciConstants.referencePressureLevels.length];
         for (int i = 0; i < IdepixOlciConstants.referencePressureLevels.length; i++) {
@@ -104,9 +114,19 @@ public class IdepixOlciPostProcessOp extends Operator {
         }
 
         rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
-                l1bProduct.getSceneRasterHeight()),
-                cloudBufferWidth, cloudBufferWidth
-        );
+                l1bProduct.getSceneRasterHeight()), cloudBufferWidth, cloudBufferWidth);
+
+        if (computeMountainShadow) {
+            ensureBandsAreCopied(l1bProduct, olciCloudProduct, latBand.getName(), lonBand.getName(), altBand.getName());
+            Map<String, Object> mntShadowParams = new HashMap<>();
+            mntShadowParams.put("mntShadowStrength", mntShadowExtent);
+            final Product mountainShadowProduct = GPF.createProduct(
+                    OperatorSpi.getOperatorAlias(IdepixOlciMountainShadowOp.class),
+                    mntShadowParams, olciCloudProduct);
+            mountainShadowFlagBand = mountainShadowProduct.getBand(
+                    IdepixOlciMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
+        }
+
         if (computeCloudShadow && ctpProduct != null) {
             ctpBand = ctpProduct.getBand("ctp");
             int extendedWidth;
@@ -127,6 +147,14 @@ public class IdepixOlciPostProcessOp extends Operator {
 
         ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, olciCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
+    }
+
+    private void ensureBandsAreCopied(Product source, Product target, String... bandNames) {
+        for (String bandName : bandNames) {
+            if (!target.containsBand(bandName)) {
+                ProductUtils.copyBand(bandName, source, target, true);
+            }
+        }
     }
 
     @Override
@@ -184,6 +212,17 @@ public class IdepixOlciPostProcessOp extends Operator {
                     temperatureProfileTPGTiles,
                     altTile);
             cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
+        }
+
+        if (computeMountainShadow) {
+            final Tile mountainShadowFlagTile = getSourceTile(mountainShadowFlagBand, targetRectangle);
+            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+                checkForCancellation();
+                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                    final boolean mountainShadow = mountainShadowFlagTile.getSampleInt(x, y) > 0;
+                    targetTile.setSample(x, y, IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW, mountainShadow);
+                }
+            }
         }
     }
 

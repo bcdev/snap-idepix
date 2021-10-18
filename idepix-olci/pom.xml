@@ -22,11 +22,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>8.0.0</version>
+        <version>8.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>idepix-olci</artifactId>
-    <version>8.0.0</version>
+    <version>8.0.1-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
     
@@ -34,34 +34,28 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from OLCI.</description>
 
     <properties>
-        <idepix.version>8.0.0</idepix.version>
+        <idepix.version>8.0.1-SNAPSHOT</idepix.version>
+        <s3tbx.version>8.0.2</s3tbx.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>idepix-core</artifactId>
+            <version>${idepix.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-binding</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-jai</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-metadata</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-glayer</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -85,6 +79,10 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>snap-watermask</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>snap-csv-dataio</artifactId>
             <version>${snap.version}</version>
         </dependency>
@@ -93,32 +91,16 @@
             <artifactId>snap-raster</artifactId>
             <version>${snap.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-watermask</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>idepix-core</artifactId>
-            <version>${idepix.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-rad2refl</artifactId>
             <version>${s3tbx.version}</version>
         </dependency>
-        
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-o2a-harmonisation</artifactId>
             <version>${s3tbx.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
         </dependency>
 
         <dependency>
@@ -149,6 +131,11 @@
             <groupId>com.github.haifengl</groupId>
             <artifactId>smile-core</artifactId>
             <version>1.5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
 
         <!--<dependency>-->
