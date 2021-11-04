@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>idepix-s2msi</artifactId>
-    <version>8.0.2.3-ucd-beta</version>
+    <version>8.0.2.4-ucd-beta</version>
 
     <packaging>nbm</packaging>
     

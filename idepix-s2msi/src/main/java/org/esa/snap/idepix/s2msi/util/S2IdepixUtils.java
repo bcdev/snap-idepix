@@ -289,15 +289,6 @@ public class S2IdepixUtils {
         return -coss * cosv - sins * sinv * cosphi;
     }
 
-    public static void removeReflectancesForCloudShadow(Product product) {
-        for (String reflectanceBandName : S2_MSI_CLOUD_SHADOW_REFLECTANCE_BAND_NAMES) {
-            if (product.getBandGroup().contains(reflectanceBandName)) {
-                final Band b = product.getBand(reflectanceBandName);
-                product.removeBand(b);
-            }
-        }
-    }
-
     private static Color getRandomColour(Random random) {
         int rColor = random.nextInt(256);
         int gColor = random.nextInt(256);

@@ -17,6 +17,7 @@
 
 package org.esa.snap.idepix.s2msi;
 
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeneralFilterBand;
 import org.esa.snap.core.datamodel.Kernel;
@@ -24,9 +25,11 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
 
 import java.awt.Color;
+import java.io.IOException;
 
 import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CIRRUS_AMBIGUOUS;
 import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CIRRUS_SURE;
@@ -98,12 +101,21 @@ public class UrbanCloudDistinction {
     /**
      * Creates a new instance of the Urban-Cloud-Distinction algorithm
      *
-     * @param s2ClassifProduct the already classified product and where the the IDEPIX_CLOUD flag shall be refined
+     * @param s2ClassifProduct the already classified product and where the IDEPIX_CLOUD flag shall be refined
      */
     public UrbanCloudDistinction(Product s2ClassifProduct) {
         this.s2ClassifProduct = s2ClassifProduct;
-        filteredIdepixCloudFlag = createFilteredIdepixCloudFlag();
-        cdiBand = createCdiBand();
+        final Product ucdHelperProduct = createUcdHelperProduct(s2ClassifProduct);
+        filteredIdepixCloudFlag = createFilteredIdepixCloudFlag(ucdHelperProduct);
+        cdiBand = createCdiBand(ucdHelperProduct);
+    }
+
+    private Product createUcdHelperProduct(Product s2ClassifProduct) {
+        try {
+            return s2ClassifProduct.createSubset(new ProductSubsetDef(), "ucd_helper", "");
+        } catch (IOException e) {
+            throw new OperatorException("Cannot create helper product for urban cloud distinction." ,e);
+        }
     }
 
     /**
@@ -172,29 +184,31 @@ public class UrbanCloudDistinction {
      * bands that are observed with different view angles.
      *
      * @return the CDI band
+     * @param ucdHelperProduct
      */
-    private Band createCdiBand() {
-        Band ratio7_8A = getRatio7_8A(s2ClassifProduct);
-        Band ratio8_8A = getRatio8_8A(s2ClassifProduct);
+    private Band createCdiBand(Product ucdHelperProduct) {
+        Band ratio7_8A = getRatio7_8A(ucdHelperProduct);
+        Band ratio8_8A = getRatio8_8A(ucdHelperProduct);
         Band stdDev7_ratio7_8A = computeStdDev7(ratio7_8A);
         Band stdDev7_ratio8_8A = computeStdDev7(ratio8_8A);
         final String expression = String.format("(pow(%1$s, 2) - pow(%2$s, 2)) / (pow(%1$s, 2) + pow(%2$s, 2))",
                                                 stdDev7_ratio7_8A.getName(), stdDev7_ratio8_8A.getName());
-        return createVirtualBand("__cdi", expression, s2ClassifProduct);
+        return createVirtualBand("__cdi", expression, ucdHelperProduct);
     }
 
     /**
      * Filters the given cloud flag mask by a 11x11 mean filter
      *
      * @return the filtered cloud flag
+     * @param ucdHelperProduct
      */
-    private Band createFilteredIdepixCloudFlag() {
-        final Mask cloudMask = Mask.BandMathsType.create(IDEPIX_CLOUD_NAME, IDEPIX_CLOUD_DESCR_TEXT,
-                                                         s2ClassifProduct.getSceneRasterWidth(), s2ClassifProduct.getSceneRasterHeight(),
+    private Band createFilteredIdepixCloudFlag(Product ucdHelperProduct) {
+        final Mask cloudMask = Mask.BandMathsType.create("tmp_cloud_mask", IDEPIX_CLOUD_DESCR_TEXT,
+                                                         ucdHelperProduct.getSceneRasterWidth(), ucdHelperProduct.getSceneRasterHeight(),
                                                          String.format("%1$s.%2$s || %1$s.%3$s || %1$s.%4$s", IDEPIX_CLASSIF_FLAGS,
                                                                        IDEPIX_CLOUD_NAME, IDEPIX_CLOUD_SURE_NAME, IDEPIX_CLOUD_AMBIGUOUS_NAME),
                                                          new Color(178, 178, 0), 0.5f);
-        cloudMask.setOwner(s2ClassifProduct);
+        cloudMask.setOwner(ucdHelperProduct);
 
         return computeMean11(cloudMask);
     }
@@ -203,7 +217,7 @@ public class UrbanCloudDistinction {
         final int kernelSize = 7;
         final Kernel kernel = new Kernel(kernelSize, kernelSize, new double[kernelSize * kernelSize]);
         final GeneralFilterBand filterBand = new GeneralFilterBand("__stddev7_" + band.getName(), band, GeneralFilterBand.OpType.STDDEV, kernel, 1);
-        s2ClassifProduct.addBand(filterBand);
+        band.getProduct().addBand(filterBand);
         return filterBand;
     }
 
@@ -211,16 +225,16 @@ public class UrbanCloudDistinction {
         final int kernelSize = 11;
         final Kernel kernel = new Kernel(kernelSize, kernelSize, new double[kernelSize * kernelSize]);
         final GeneralFilterBand filterBand = new GeneralFilterBand("__mean11_" + band.getName(), band, GeneralFilterBand.OpType.MEAN, kernel, 1);
-        s2ClassifProduct.addBand(filterBand);
+        band.getProduct().addBand(filterBand);
         return filterBand;
     }
 
-    private Band getRatio8_8A(Product s2ClassifProduct) {
-        return createRatioBand(s2ClassifProduct.getBand("B8"), s2ClassifProduct.getBand("B8A"), s2ClassifProduct);
+    private Band getRatio8_8A(Product product) {
+        return createRatioBand(product.getBand("B8"), product.getBand("B8A"), product);
     }
 
-    private Band getRatio7_8A(Product s2ClassifProduct) {
-        return createRatioBand(s2ClassifProduct.getBand("B7"), s2ClassifProduct.getBand("B8A"), s2ClassifProduct);
+    private Band getRatio7_8A(Product product) {
+        return createRatioBand(product.getBand("B7"), product.getBand("B8A"), product);
     }
 
     private static Band createRatioBand(Band numerator, Band denominator, Product owner) {

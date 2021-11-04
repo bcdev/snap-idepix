@@ -64,8 +64,6 @@ public class S2IdepixCloudPostProcessOp extends Operator {
         ProductUtils.copyBand(IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
 
         urbanCloudDistinction = new UrbanCloudDistinction(classifiedProduct);
-        // todo: remove call to addDebugBandsToTargetProduct() when this is merged into master
-        urbanCloudDistinction.addDebugBandsToTargetProduct();
 
         setTargetProduct(cloudBufferProduct);
     }

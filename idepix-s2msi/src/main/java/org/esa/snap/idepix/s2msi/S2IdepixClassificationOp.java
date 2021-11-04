@@ -47,7 +47,6 @@ public class S2IdepixClassificationOp extends Operator {
     public static final double DELTA_RHO_TOA_442_THRESHOLD = 0.03;
     public static final double RHO_TOA_442_THRESHOLD = 0.03;
 
-
     private static final float WATER_MASK_SOUTH_BOUND = -58.0f;
 //    private static final String VALID_PIXEL_EXPRESSION = "detector_footprint_B1 " +
 //            "and detector_footprint_B2 " +
@@ -75,16 +74,6 @@ public class S2IdepixClassificationOp extends Operator {
             "and B9.raw > 0 " +
             "and B11.raw > 0 " +
             "and B12.raw > 0";
-
-
-    @Parameter(defaultValue = "true",
-            label = " Write TOA reflectances to the target product",
-            description = " Write TOA reflectances to the target product")
-    private boolean copyToaReflectances;
-
-    @Parameter(defaultValue = "false",
-            label = " Compute cloud shadow")
-    private boolean computeCloudShadow = false;
 
     @Parameter(defaultValue = "false",
             label = " Write feature values to the target product",
@@ -358,15 +347,15 @@ public class S2IdepixClassificationOp extends Operator {
     }
 
     public void extendTargetProduct() throws OperatorException {
-        if (copyToaReflectances) {
-            copyReflectances();
-        } else if (computeCloudShadow) {
-            copyReflectancesForCloudShadow();
+        for (String bandName : S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES) {
+            if (!targetProduct.containsBand(bandName)) {
+                final Band band = ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
+                band.setUnit("dl");
+            }
         }
 
         for (String s2MsiAnnotationBandName : S2IdepixConstants.S2_MSI_ANNOTATION_BAND_NAMES) {
-            Band b = ProductUtils.copyBand(s2MsiAnnotationBandName, sourceProduct, targetProduct, true);
-            b.setUnit("dl");
+            ProductUtils.copyBand(s2MsiAnnotationBandName, sourceProduct, targetProduct, true);
         }
 
         Band b = ProductUtils.copyBand(S2IdepixConstants.ELEVATION_BAND_NAME, elevationProduct, targetProduct, true);
@@ -384,28 +373,6 @@ public class S2IdepixClassificationOp extends Operator {
 
         if (copyNNValue) {
             targetProduct.addBand("nn_value", ProductData.TYPE_FLOAT32);
-        }
-    }
-
-    private void copyReflectances() {
-        for (int i = 0; i < S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES.length; i++) {
-            if (!targetProduct.containsBand(S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES[i])) {
-                final Band b = ProductUtils.copyBand(S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES[i], sourceProduct,
-                                                     targetProduct, true);
-                b.setUnit("dl");
-            }
-
-        }
-    }
-
-    private void copyReflectancesForCloudShadow() {
-        for (int i = 0; i < S2IdepixConstants.S2_MSI_CLOUD_SHADOW_REFLECTANCE_BAND_NAMES.length; i++) {
-            if (!targetProduct.containsBand(S2IdepixConstants.S2_MSI_CLOUD_SHADOW_REFLECTANCE_BAND_NAMES[i])) {
-                final Band b = ProductUtils.copyBand(S2IdepixConstants.S2_MSI_CLOUD_SHADOW_REFLECTANCE_BAND_NAMES[i],
-                                                     sourceProduct,
-                                                     targetProduct, true);
-                b.setUnit("dl");
-            }
         }
     }
 
