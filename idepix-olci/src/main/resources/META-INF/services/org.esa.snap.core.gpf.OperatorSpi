@@ -1,6 +1,7 @@
 org.esa.snap.idepix.olci.IdepixOlciOp$Spi
 org.esa.snap.idepix.olci.IdepixOlciClassificationOp$Spi
-org.esa.snap.idepix.olci.mountainshadow.IdepixOlciMountainShadowOp$Spi
-org.esa.snap.idepix.olci.mountainshadow.IdepixOlciSlopeAspectOrientationOp$Spi
+org.esa.snap.idepix.olci.IdepixOlciMountainShadowOp$Spi
+org.esa.snap.idepix.olci.IdepixOlciSlopeAspectOrientationOp$Spi
+org.esa.snap.idepix.olci.IdepixOlciViewAngleInterpolationOp$Spi
 org.esa.snap.idepix.olci.IdepixOlciPostProcessOp$Spi
 org.esa.snap.idepix.olci.CtpOp$Spi

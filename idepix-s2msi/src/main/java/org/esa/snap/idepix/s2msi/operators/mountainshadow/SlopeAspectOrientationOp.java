@@ -1,13 +1,7 @@
 package org.esa.snap.idepix.s2msi.operators.mountainshadow;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.idepix.s2msi.operators.cloudshadow.CloudShadowUtils;
-import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -16,10 +10,12 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.idepix.s2msi.operators.cloudshadow.CloudShadowUtils;
+import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtender;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.Map;
 
@@ -44,6 +40,9 @@ public class SlopeAspectOrientationOp extends Operator {
     private double spatialResolution;
 
     private Band elevationBand;
+//    private Band saaBand;
+//    private Band vzaBand;
+//    private Band vaaBand;
     private Band slopeBand;
     private Band aspectBand;
     private Band orientationBand;
@@ -83,6 +82,9 @@ public class SlopeAspectOrientationOp extends Operator {
         if (elevationBand == null) {
             throw new OperatorException("Elevation band required to compute slope or aspect");
         }
+//        saaBand = sourceProduct.getBand(S2IdepixConstants.SUN_AZIMUTH_BAND_NAME);
+//        vaaBand = sourceProduct.getBand(S2IdepixConstants.VIEW_AZIMUTH_BAND_NAME);
+//        vzaBand = sourceProduct.getBand(S2IdepixConstants.VIEW_ZENITH_BAND_NAME);
         targetProduct = createTargetProduct();
         slopeBand = createBand(SLOPE_BAND_NAME, SLOPE_BAND_DESCRIPTION, SLOPE_BAND_UNIT);
         aspectBand = createBand(ASPECT_BAND_NAME, ASPECT_BAND_DESCRIPTION, ASPECT_BAND_UNIT);
@@ -114,6 +116,14 @@ public class SlopeAspectOrientationOp extends Operator {
                                                                           (int) sourceRectangle.getHeight(),
                                                                           sourceLatitudes,
                                                                           sourceLongitudes);
+        // possible additional params for computeSlopeAndAspect
+//        final Tile saaTile = getSourceTile(saaBand, sourceRectangle, borderExtender);
+//        float[] saaData = saaTile.getDataBufferFloat();
+//        final Tile vaaTile = getSourceTile(vaaBand, sourceRectangle, borderExtender);
+//        float[] vaaData = vaaTile.getDataBufferFloat();
+//        final Tile vzaTile = getSourceTile(vzaBand, sourceRectangle, borderExtender);
+//        float[] vzaData = vzaTile.getDataBufferFloat();
+
         int sourceIndex = sourceRectangle.width;
         final Tile slopeTile = targetTiles.get(slopeBand);
         final Tile aspectTile = targetTiles.get(aspectBand);
@@ -121,9 +131,13 @@ public class SlopeAspectOrientationOp extends Operator {
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             sourceIndex++;
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                final float orientation = computeOrientation(sourceLatitudes, sourceLongitudes, sourceIndex);
                 final float[] slopeAndAspect = computeSlopeAndAspect(elevationData, sourceIndex,
                                                                      spatialResolution, sourceRectangle.width);
-                final float orientation = computeOrientation(sourceLatitudes, sourceLongitudes, sourceIndex);
+                // possible additional params for computeSlopeAndAspect
+//                                                                     saaData[sourceIndex], vaaData[sourceIndex],
+//                                                                     vzaData[sourceIndex], orientation);
+
                 slopeTile.setSample(x, y, slopeAndAspect[0]);
                 aspectTile.setSample(x, y, slopeAndAspect[1]);
                 orientationTile.setSample(x, y, orientation);
@@ -147,6 +161,25 @@ public class SlopeAspectOrientationOp extends Operator {
             float elevA9 = elevationData[sourceIndex + sourceWidth + 1];
             float b = (elevA3 + 2 * elevA6 + elevA9 - elevA1 - 2 * elevA4 - elevA7) / 8f;
             float c = (elevA1 + 2 * elevA2 + elevA3 - elevA7 - 2 * elevA8 - elevA9) / 8f;
+
+            // added by DM for future use. Should actually be correct.
+            // For OLCI it works, but not for S2.
+//            double vaa_orientation = (360.0 - (vaa + orientation / MathUtils.DTOR)) * MathUtils.DTOR;
+//            double spatialRes = spatialResolution / Math.cos(vza * MathUtils.DTOR);
+//            float slope = (float) Math.atan(Math.sqrt(Math.pow(b / (spatialRes * Math.sin(vaa_orientation)), 2) +
+//                    Math.pow(c / (spatialRes * Math.cos(vaa_orientation)), 2)));
+//            float aspect = (float) Math.atan2(-b, -c);
+//            if (saa > 270. || saa < 90.){ //Sun from North (mostly southern hemisphere)
+//                aspect -=Math.PI;
+//            }
+//            if (aspect < 0.0f) {
+//                // map from [-180, 180] into [0, 360], see e.g. https://www.e-education.psu.edu/geog480/node/490
+//                aspect += 2.0 * Math.PI;
+//            }
+//            if (slope <= 0.0) {
+//                aspect = Float.NaN;
+//            }
+
             float slope = (float) Math.atan(Math.sqrt(Math.pow(b / spatialResolution, 2) +
                     Math.pow(c / spatialResolution, 2)));
             float aspect = (float) Math.atan2(-b, -c);
