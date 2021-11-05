@@ -8,7 +8,6 @@ import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
@@ -20,17 +19,22 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
-import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.BitSetter;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtenderConstant;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Tonio Fincke, Dagmar Müller
@@ -157,9 +161,7 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         RasterDataNode sourceViewAzimuth = s2BandsProduct.getBand(sourceViewAzimuthName);
         RasterDataNode sourceViewZenith = s2BandsProduct.getBand(sourceViewZenithName);
 
-        final GeoPos centerGeoPos =
-                getCenterGeoPos(targetProduct.getSceneGeoCoding(), targetProduct.getSceneRasterWidth(),
-                        targetProduct.getSceneRasterHeight());
+        final GeoPos centerGeoPos = S2IdepixUtils.getCenterGeoPos(targetProduct);
         maxcloudTop = setCloudTopHeigh(centerGeoPos.getLat());
 
         //create a single potential cloud path for the granule.
@@ -193,13 +195,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             default:
                 throw new OperatorException("Invalid analysis mode. Must be LandWater, MultiBand or SingleBand.");
         }
-    }
-
-    //aus S2tbxReprojectionOp kopiert:
-    private GeoPos getCenterGeoPos(GeoCoding geoCoding, int width, int height) {
-        final PixelPos centerPixelPos = new PixelPos(0.5 * width + 0.5,
-                0.5 * height + 0.5);
-        return geoCoding.getGeoPos(centerPixelPos, null);
     }
 
     private float getRasterNodeValueAtCenter(RasterDataNode var, int width, int height) {
@@ -349,11 +344,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
-        Dimension tileSize = targetProduct.getPreferredTileSize();
-        int tileX = (int) (targetRectangle.getX() / tileSize.getWidth());
-        int tileY = (int) (targetRectangle.getY() / tileSize.getHeight());
-        int numXTiles = targetProduct.getSceneRasterWidth() / (int) tileSize.getWidth();
-        final int tileid = (tileY * numXTiles) + tileX;
         final float[] targetAltitude = getSamples(sourceAltitude, targetRectangle);
         final List<Float> altitudes = Arrays.asList(ArrayUtils.toObject(targetAltitude));
         final Point2D[] cloudShadowRelativePath = CloudShadowUtils.getRelativePath(
@@ -407,19 +397,17 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         Map<Integer, List<Integer>> cloudList =
                 cloudIdentifier.computeAreaID(sourceWidth, sourceHeight, cloudIDArray, true);
 
-        //todo assessment of the order of processing steps
-        getLogger().fine("tile" + tileid + " " + cloudList.size());
         if (cloudList.size() > 0) {
             /*
             /   Clustering can be separated: potential cloud shadow over water, and over land.
             /   potentialShadowPositions: Collection of List of integers, which hold the index of potential cloud shadow pixels for each cloudID.
             /   offsetAtPotentialShadowPositions: Collection of List of integers, holding the step along the cloud shadow path in the potential cloud shadow. Useful to determine distances of clusters.
             */
-            final Map[] results = PotentialCloudShadowAreaIdentifier.identifyPotentialCloudShadowsPLUS(
+            final IdentifiedPcs identifiedPcs = PotentialCloudShadowAreaIdentifier.identifyPotentialCloudShadowsPLUS(
                     sourceRectangle, targetRectangle, sunZenithMean, sunAzimuthMean, sourceLatitudes, sourceLongitudes,
                     altitude, flagArray, cloudIDArray, cloudShadowRelativePath);
-            final Map<Integer, List<Integer>> potentialShadowPositions = results[0];
-            final Map<Integer, List<Integer>> offsetAtPotentialShadow = results[1];
+            final Map<Integer, List<Integer>> potentialShadowPositions = identifiedPcs.indexToPositions;
+            final Map<Integer, List<Integer>> offsetAtPotentialShadow = identifiedPcs.offsetAtPositions;
 
             getLogger().fine("potential shadow is ready");
             // shifting by offset, but looking into water, land and all pixel.
@@ -454,7 +442,7 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             Tile targetTileShadowID = targetTiles.get(targetBandShadowID);
             Tile targetTileCloudTest = targetTiles.get(targetBandCloudTest);
             final int[] tileIDArray = new int[sourceLength];
-            Arrays.fill(tileIDArray, tileid);
+            Arrays.fill(tileIDArray, S2IdepixUtils.calculateTileId(targetRectangle, targetProduct));
             fillTile(cloudIDArray, targetRectangle, sourceRectangle, targetTileCloudID);
             fillTile(tileIDArray, targetRectangle, sourceRectangle, targetTileTileID);
             fillTile(shadowIDArray, targetRectangle, sourceRectangle, targetTileShadowID);

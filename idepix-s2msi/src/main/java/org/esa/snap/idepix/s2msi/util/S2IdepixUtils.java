@@ -3,7 +3,10 @@ package org.esa.snap.idepix.s2msi.util;
 
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.OperatorException;
@@ -14,6 +17,8 @@ import org.esa.snap.core.util.math.MathUtils;
 
 import javax.swing.JOptionPane;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.Random;
 
 import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.*;
@@ -340,4 +345,17 @@ public class S2IdepixUtils {
         }
     }
 
+    public static int calculateTileId(Rectangle targetRectangle, Product targetProduct) {
+        Dimension tileSize = targetProduct.getPreferredTileSize();
+        int tileX = (int) (targetRectangle.getX() / tileSize.getWidth());
+        int tileY = (int) (targetRectangle.getY() / tileSize.getHeight());
+        int numXTiles = targetProduct.getSceneRasterWidth() / (int) tileSize.getWidth();
+        return (tileY * numXTiles) + tileX;
+    }
+
+    public static GeoPos getCenterGeoPos(Product product) {
+        final PixelPos centerPixelPos = new PixelPos(0.5 * product.getSceneRasterWidth() + 0.5,
+                                                     0.5 * product.getSceneRasterHeight() + 0.5);
+        return product.getSceneGeoCoding().getGeoPos(centerPixelPos, null);
+    }
 }

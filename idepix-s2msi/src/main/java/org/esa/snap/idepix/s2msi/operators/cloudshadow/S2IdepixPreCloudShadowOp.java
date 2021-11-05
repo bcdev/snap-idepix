@@ -7,7 +7,6 @@ import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
@@ -21,11 +20,11 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtenderConstant;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -55,7 +54,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     private Product targetProduct;
 
     private final static double MAX_CLOUD_HEIGHT = 8000.;
-    private final static int MAX_TILE_DIMENSION_IN_M = 84000;
 
     private Band sourceBandClusterA;
     private Band sourceBandClusterB;
@@ -72,10 +70,10 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     private float minAltitude = 0;
 
     //map for the different tiles: meanReflectance per offset.
-    private Map<Integer, double[][]> meanReflPerTile = new HashMap<>();
-    private Map<Integer, Integer> NCloudOverLand = new HashMap<>();
-    private Map<Integer, Integer> NCloudOverWater = new HashMap<>();
-    private Map<Integer, Integer> NValidPixelTile = new HashMap<>();
+    private final Map<Integer, double[][]> meanReflPerTile = new HashMap<>();
+    private final Map<Integer, Integer> NCloudOverLand = new HashMap<>();
+    private final Map<Integer, Integer> NCloudOverWater = new HashMap<>();
+    private final Map<Integer, Integer> NValidPixelTile = new HashMap<>();
 
     static double spatialResolution;  //[m]
     static int clusterCountDefine = 4;
@@ -87,7 +85,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     private static final String sourceSunAzimuthName = "sun_azimuth";
     private static final String sourceViewAzimuthName = "view_azimuth_mean";
     private static final String sourceViewZenithName = "view_zenith_mean";
-    private static final String sourceAltitudeName = "elevation";
     private static final String sourceFlagName1 = "pixel_classif_flags";
     private final static String BAND_NAME_CLOUD_SHADOW = "FlagBand";
 
@@ -101,6 +98,7 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     private static final String F_POTENTIAL_CLOUD_SHADOW_DESCR_TEXT = "Potential cloud shadow pixels";
     private static final String F_SHIFTED_CLOUD_SHADOW_DESCR_TEXT = "Shifted cloud mask as shadow pixels";
     private static final String F_CLOUD_SHADOW_COMB_DESCR_TEXT = "cloud mask (combination)";
+    // todo: why is the cloud buffer description not used?
     private static final String F_CLOUD_BUFFER_DESCR_TEXT = "Cloud buffer";
     private static final String F_SHIFTED_CLOUD_SHADOW_GAPS_DESCR_TEXT = "shifted cloud mask in cloud gap";
     private static final String F_RECOMMENDED_CLOUD_SHADOW_DESCR_TEXT = "combination of shifted cloud mask in cloud gap + cloud-shadow_comb, or if bestOffset=0: clustered";
@@ -136,8 +134,7 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         RasterDataNode sourceViewZenith = s2BandsProduct.getBand(sourceViewZenithName);
 
         final GeoPos centerGeoPos =
-                getCenterGeoPos(s2BandsProduct.getSceneGeoCoding(), s2BandsProduct.getSceneRasterWidth(),
-                        s2BandsProduct.getSceneRasterHeight());
+                S2IdepixUtils.getCenterGeoPos(s2BandsProduct);
         maxcloudTop = setCloudTopHeight(centerGeoPos.getLat());
 
         //create a single potential cloud path for the granule.
@@ -179,28 +176,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         throw new OperatorException("Invalid product");
     }
 
-    int determineSourceTileSize(int rasterSize, int tileSize, int borderExtension1, int borderExtension2) {
-        int maxTileDimension = (int)(MAX_TILE_DIMENSION_IN_M / spatialResolution);
-        int maxTileSize = Math.min(maxTileDimension - borderExtension1 - borderExtension2, 2 * tileSize);
-        final int minNumTiles = (int) Math.floor(rasterSize / maxTileSize * 1.);
-        int bestTileSize = Integer.MIN_VALUE;
-        int smallestDiff = Integer.MAX_VALUE;
-        for (int i = minNumTiles; i >= 1; i++) {
-            if (rasterSize % i == 0) {
-                final int candidateDiff = Math.abs(tileSize - rasterSize / i);
-                if (candidateDiff > smallestDiff) {
-                    break;
-                }
-                bestTileSize = rasterSize / i;
-                smallestDiff = Math.abs(tileSize - bestTileSize);
-            }
-        }
-        if (smallestDiff < Integer.MAX_VALUE) {
-            return bestTileSize;
-        }
-        return maxTileSize;
-    }
-
     double determineSearchBorderRadius(double spatialResolution, double maxSunZenith) {
         final double maxCloudDistance = MAX_CLOUD_HEIGHT / Math.tan(Math.toRadians(90. - maxSunZenith));
         return maxCloudDistance / spatialResolution;
@@ -209,13 +184,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     private float[] getSamples(RasterDataNode rasterDataNode, Rectangle rectangle) {
         Tile tile = getSourceTile(rasterDataNode, rectangle, new BorderExtenderConstant(new double[]{Double.NaN}));
         return tile.getSamplesFloat();
-    }
-
-    // copied from S2TBXReprojectionOp
-    private GeoPos getCenterGeoPos(GeoCoding geoCoding, int width, int height) {
-        final PixelPos centerPixelPos = new PixelPos(0.5 * width + 0.5,
-                0.5 * height + 0.5);
-        return geoCoding.getGeoPos(centerPixelPos, null);
     }
 
     private float getRasterNodeValueAtCenter(RasterDataNode var, int width, int height) {
@@ -273,11 +241,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         int sourceLength = sourceRectangle.width * sourceRectangle.height;
 
         final int[] flagArray = new int[sourceLength];
-        Dimension tileSize = targetProduct.getPreferredTileSize();
-        int tileX = (int) (targetRectangle.getX() / tileSize.getWidth());
-        int tileY = (int) (targetRectangle.getY() / tileSize.getHeight());
-        int numXTiles = targetProduct.getSceneRasterWidth() / (int) tileSize.getWidth();
-        final int tileid = (tileY * numXTiles) + tileX;
 
         final float[][] clusterData = {getSamples(sourceBandClusterA, sourceRectangle),
                 getSamples(sourceBandClusterB, sourceRectangle)};
@@ -300,10 +263,11 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         final CloudBulkShifter cloudBulkShifter = new CloudBulkShifter();
         cloudBulkShifter.shiftCloudBulkAlongCloudPathType(sourceRectangle, targetRectangle, sunAzimuthMean,
                 clusterData, flagArray, cloudShadowRelativePath);
-        meanReflPerTile.put(tileid, cloudBulkShifter.getMeanReflectanceAlongPath());
-        NCloudOverLand.put(tileid, cloudBulkShifter.getNCloudOverLand());
-        NCloudOverWater.put(tileid, cloudBulkShifter.getNCloudOverWater());
-        NValidPixelTile.put(tileid, cloudBulkShifter.getNValidPixel());
+        int tileId = S2IdepixUtils.calculateTileId(targetRectangle, targetProduct);
+        meanReflPerTile.put(tileId, cloudBulkShifter.getMeanReflectanceAlongPath());
+        NCloudOverLand.put(tileId, cloudBulkShifter.getNCloudOverLand());
+        NCloudOverWater.put(tileId, cloudBulkShifter.getNCloudOverWater());
+        NValidPixelTile.put(tileId, cloudBulkShifter.getNValidPixel());
 
     }
 
@@ -326,7 +290,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     private void attachFlagCoding(Band targetBandCloudShadow) {
         FlagCoding cloudCoding = new FlagCoding("cloudCoding");
         cloudCoding.addFlag("water", BitSetter.setFlag(0, F_WATER), F_WATER_DESCR_TEXT);
-        ;
         cloudCoding.addFlag("land", BitSetter.setFlag(0, F_LAND), F_LAND_DESCR_TEXT);
         cloudCoding.addFlag("cloud", BitSetter.setFlag(0, F_CLOUD), F_CLOUD_DESCR_TEXT);
         cloudCoding.addFlag("pot_haze", BitSetter.setFlag(0, F_HAZE), F_HAZE_DESCR_TEXT);

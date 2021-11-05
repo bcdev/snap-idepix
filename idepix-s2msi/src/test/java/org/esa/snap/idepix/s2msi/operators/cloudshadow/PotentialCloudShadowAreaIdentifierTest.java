@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
+import static org.esa.snap.idepix.s2msi.operators.cloudshadow.PotentialCloudShadowAreaIdentifier.identifyPotentialCloudShadowsPLUS;
 
 /**
  * @author Tonio Fincke
@@ -380,8 +381,8 @@ public class PotentialCloudShadowAreaIdentifierTest {
         final List<Float> altitudes = Arrays.asList(ArrayUtils.toObject(elevation));
         float minAltitude = Collections.min(altitudes);
         return CloudShadowUtils.getRelativePath(minAltitude, sunZenithMean * MathUtils.DTOR, sunAzimuthMean * MathUtils.DTOR,
-                S2IdepixPreCloudShadowOp.maxcloudTop, sourceRectangle, targetRectangle, 20, 20,
-                S2IdepixPreCloudShadowOp.spatialResolution, true, false);
+                                                S2IdepixPreCloudShadowOp.maxcloudTop, sourceRectangle, targetRectangle, 20, 20,
+                                                S2IdepixPreCloudShadowOp.spatialResolution, true, false);
     }
 
     private void testPotentialCloudShadowArea(float saa, Rectangle sourceRectangle, Rectangle targetRectangle,
@@ -414,11 +415,11 @@ public class PotentialCloudShadowAreaIdentifierTest {
         float sunAzimuthMean = sunAzimuth[center_index];
         Point2D[] cloudPath = getCloudPath(saa, sourceRectangle, targetRectangle);
 
-        final Map[] potentialShadowPositionsMap =
-                PotentialCloudShadowAreaIdentifier.identifyPotentialCloudShadowsPLUS(sourceRectangle, targetRectangle,
-                        sunZenithMean, sunAzimuthMean, latitude, longitude, elevation, flagArray, cloudIdArea, cloudPath);
+        final IdentifiedPcs identifiedPcs = identifyPotentialCloudShadowsPLUS(sourceRectangle, targetRectangle,
+                                                                              sunZenithMean, sunAzimuthMean, latitude, longitude,
+                                                                              elevation, flagArray, cloudIdArea, cloudPath);
 
-        final Map<Integer, List<Integer>> potentialShadowPositions = potentialShadowPositionsMap[0];
+        final Map<Integer, List<Integer>> potentialShadowPositions = identifiedPcs.indexToPositions;
 
         assertEquals(expectedPotentialShadowPositions.length, potentialShadowPositions.size());
 

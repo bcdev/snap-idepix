@@ -82,9 +82,6 @@ public class S2IdepixClassificationOp extends Operator {
             description = " Threshold CL_THRESH")
     private double clThresh;
 
-    @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
-    private String demName = "SRTM 3Sec";
-
     @SourceProduct(alias = "l1c", description = "The MSI L1C source product.")
     Product sourceProduct;
 

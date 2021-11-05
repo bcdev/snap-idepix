@@ -35,6 +35,9 @@ import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.S2_MSI_REFLECTANC
         description = "Pixel identification and classification for Sentinel-2 MSI.")
 public class S2IdepixOp extends Operator {
 
+    private static final double CW_THRESH = 0.01;
+    private static final double GCL_THRESH = -0.11;
+    private static final double CL_THRESH = 0.01;
 
     @Parameter(defaultValue = "true",
             label = " Write TOA reflectances to the target product",
@@ -45,44 +48,6 @@ public class S2IdepixOp extends Operator {
             label = " Write feature values to the target product",
             description = " Write all feature values to the target product")
     private boolean copyFeatureValues;
-
-    // NN stuff is deactivated unless we have a better net
-
-    //    @Parameter(defaultValue = "1.95",
-//            label = " NN cloud ambiguous lower boundary",
-//            description = " NN cloud ambiguous lower boundary")
-//    private double nnCloudAmbiguousLowerBoundaryValue;
-    private double nnCloudAmbiguousLowerBoundaryValue = 1.95;
-
-    //    @Parameter(defaultValue = "3.45",
-//            label = " NN cloud ambiguous/sure separation value",
-//            description = " NN cloud ambiguous cloud ambiguous/sure separation value")
-//    private double nnCloudAmbiguousSureSeparationValue;
-    private double nnCloudAmbiguousSureSeparationValue = 3.45;
-
-    //    @Parameter(defaultValue = "4.3",
-//            label = " NN cloud sure/snow separation value",
-//            description = " NN cloud ambiguous cloud sure/snow separation value")
-//    private double nnCloudSureSnowSeparationValue;
-    private double nnCloudSureSnowSeparationValue = 4.3;
-
-    //    @Parameter(defaultValue = "false",
-//            label = " Apply NN for pixel classification purely (not combined with feature value approach)",
-//            description = " Apply NN for pixelclassification purely (not combined with feature value  approach)")
-//    private boolean applyNNPure;
-    private boolean applyNNPure = false;
-
-    //    @Parameter(defaultValue = "false",
-//            label = " Ignore NN and only use feature value approach for pixel classification (if set, overrides previous option)",
-//            description = " Ignore NN and only use feature value approach for pixel classification (if set, overrides previous option)")
-//    private boolean ignoreNN;
-    boolean ignoreNN = true;       // currently bad results. Wait for better S2 NN.
-
-    //    @Parameter(defaultValue = "true",
-//            label = " Write NN output value to the target product",
-//            description = " Write NN output value to the target product")
-//    private boolean copyNNValue = true;
-    private boolean copyNNValue = false;
 
     @Parameter(defaultValue = "true", label = " Compute mountain shadow")
     private boolean computeMountainShadow;
@@ -100,25 +65,6 @@ public class S2IdepixOp extends Operator {
             label = " Width of cloud buffer (# of pixels)",
             description = " The width of the 'safety buffer' around a pixel identified as cloudy.")
     private int cloudBufferWidth;
-
-    // temporarily disabled the following threshold options. TODO: clarify their meaning! They aren't explained anywhere.
-//    @Parameter(defaultValue = "0.01",
-//            label = " Threshold CW_THRESH",
-//            description = " Threshold CW_THRESH")
-//    private double cwThresh;
-    private double cwThresh = 0.01;
-
-    //    @Parameter(defaultValue = "-0.11",
-//            label = " Threshold GCL_THRESH",
-//            description = " Threshold GCL_THRESH")
-//    private double gclThresh;
-    private double gclThresh = -0.11;
-
-    //    @Parameter(defaultValue = "0.01",
-//            label = " Threshold CL_THRESH",
-//            description = " Threshold CL_THRESH")
-//    private double clThresh;
-    private double clThresh = 0.01;
 
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
@@ -176,32 +122,22 @@ public class S2IdepixOp extends Operator {
 
         // new bit masks:
         S2IdepixUtils.setupIdepixCloudscreeningBitmasks(targetProduct);
-
-        setTargetProduct(targetProduct);
     }
 
     private static void removeReflectances(Product product) {
         for (String reflectanceBandName : S2_MSI_REFLECTANCE_BAND_NAMES) {
             if (product.containsBand(reflectanceBandName)) {
-                final Band b = product.getBand(reflectanceBandName);
                 product.removeBand(product.getBand(reflectanceBandName));
             }
         }
     }
 
     private Product createS2ClassificationProduct(Map<String, Product> inputProducts) {
-        Map<String, Object> classificationParameter = new HashMap<>(20);
+        Map<String, Object> classificationParameter = new HashMap<>(10);
         classificationParameter.put("copyFeatureValues", copyFeatureValues);
-        classificationParameter.put("applyNNPure", applyNNPure);
-        classificationParameter.put("ignoreNN", ignoreNN);
-        classificationParameter.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
-        classificationParameter.put("nnCloudAmbiguousSureSeparationValue", nnCloudAmbiguousSureSeparationValue);
-        classificationParameter.put("nnCloudSureSnowSeparationValue", nnCloudSureSnowSeparationValue);
-        classificationParameter.put("cloudBufferWidth", cloudBufferWidth);
-        classificationParameter.put("cwThresh", cwThresh);
-        classificationParameter.put("gclThresh", gclThresh);
-        classificationParameter.put("clThresh", clThresh);
-        classificationParameter.put("demName", demName);
+        classificationParameter.put("cwThresh", CW_THRESH);
+        classificationParameter.put("gclThresh", GCL_THRESH);
+        classificationParameter.put("clThresh", CL_THRESH);
 
         return GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixClassificationOp.class),
                                  classificationParameter, inputProducts);
