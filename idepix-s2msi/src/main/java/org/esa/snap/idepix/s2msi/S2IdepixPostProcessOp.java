@@ -91,7 +91,6 @@ public class S2IdepixPostProcessOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
-    private Band s2ClassifFlagBand;
     private Band cloudBufferFlagBand;
     private Band mountainShadowFlagBand;
     private Band cloudShadowFlagBand;
@@ -102,7 +101,6 @@ public class S2IdepixPostProcessOp extends Operator {
         Product postProcessedCloudProduct = createTargetProduct(s2ClassifProduct.getName(),
                                                                 s2ClassifProduct.getProductType());
 
-        s2ClassifFlagBand = s2ClassifProduct.getBand(IDEPIX_CLASSIF_FLAGS);
         if (s2CloudBufferProduct != null) {
             cloudBufferFlagBand = s2CloudBufferProduct.getBand(IDEPIX_CLASSIF_FLAGS);
         }
@@ -161,27 +159,21 @@ public class S2IdepixPostProcessOp extends Operator {
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Rectangle targetRectangle = targetTile.getRectangle();
 
-//        final Tile classifFlagTile = getSourceTile(s2ClassifFlagBand, targetRectangle);
-        Tile cloudBufferFlagTile = null;
         if (s2CloudBufferProduct != null) {
-            cloudBufferFlagTile = getSourceTile(cloudBufferFlagBand, targetRectangle);
-        }
-
-        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
-            checkForCancellation();
-            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-
-                if (targetRectangle.contains(x, y)) {
-                    boolean isInvalid = targetTile.getSampleBit(x, y, IDEPIX_INVALID);
-                    if (!isInvalid) {
-//                        combineFlags(x, y, classifFlagTile, targetTile);
-                        if (s2CloudBufferProduct != null) {
+            Tile cloudBufferFlagTile = getSourceTile(cloudBufferFlagBand, targetRectangle);
+            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+                checkForCancellation();
+                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                    if (targetRectangle.contains(x, y)) {
+                        boolean isInvalid = targetTile.getSampleBit(x, y, IDEPIX_INVALID);
+                        if (!isInvalid) {
                             combineFlags(x, y, cloudBufferFlagTile, targetTile);
                         }
                     }
                 }
             }
         }
+
         if (computeMountainShadow) {
             final Tile mountainShadowFlagTile = getSourceTile(mountainShadowFlagBand, targetRectangle);
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
