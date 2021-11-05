@@ -29,7 +29,7 @@ import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.S2_MSI_REFLECTANC
  */
 @OperatorMetadata(alias = "Idepix.S2",
         category = "Optical/Pre-Processing",
-        version = "8.0.2.4-ucd-beta",
+        version = "8.0.3",
         authors = "Tonio Fincke, Olaf Danne",
         copyright = "(c) 2019 by Brockmann Consult",
         description = "Pixel identification and classification for Sentinel-2 MSI.")
