@@ -4,8 +4,6 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.jai.util.SunTileCache;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.StxFactory;
@@ -31,6 +29,7 @@ import javax.media.jai.TileCache;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ import java.util.logging.Logger;
         description = "Algorithm detecting cloud shadow...")
 public class S2IdepixCloudShadowOp extends Operator {
 
-    private static Logger logger = SystemUtils.LOG;
+    private static final Logger LOGGER = SystemUtils.LOG;
 
     @SourceProduct(description = "The original input product")
     private Product l1cProduct;
@@ -101,7 +100,6 @@ public class S2IdepixCloudShadowOp extends Operator {
     private Map<Integer, double[][]> meanReflPerTile = new HashMap<>();
     private Map<Integer, Integer> NCloudOverLand = new HashMap<>();
     private Map<Integer, Integer> NCloudOverWater = new HashMap<>();
-    private Map<Integer, Integer> NValidPixelTile = new HashMap<>();
 
     @Override
     public void initialize() throws OperatorException {
@@ -146,7 +144,7 @@ public class S2IdepixCloudShadowOp extends Operator {
                 (S2IdepixPreCloudShadowOp) GPF.getDefaultInstance().createOperator(operatorAlias, preParams, preInput, null);
 
         //trigger computation of all tiles
-        logger.info("Executing Cloud Shadow Preprocessing");
+        LOGGER.info("Executing Cloud Shadow Preprocessing");
         if (tileCache instanceof SunTileCache) {
             ((SunTileCache) tileCache).enableDiagnostics();
             ((SunTileCache) tileCache).addObserver(observer);
@@ -156,21 +154,20 @@ public class S2IdepixCloudShadowOp extends Operator {
         if (tileCache instanceof SunTileCache) {
             ((SunTileCache) tileCache).deleteObserver(observer);
         }
-        logger.info("Executed Cloud Shadow Preprocessing");
+        LOGGER.info("Executed Cloud Shadow Preprocessing");
 
         NCloudOverLand = cloudShadowPreProcessingOperator.getNCloudOverLandPerTile();
         NCloudOverWater = cloudShadowPreProcessingOperator.getNCloudOverWaterPerTile();
         meanReflPerTile = cloudShadowPreProcessingOperator.getMeanReflPerTile();
-        NValidPixelTile = cloudShadowPreProcessingOperator.getNValidPixelTile();
         //writingMeanReflAlongPath(); // for development of minimum analysis.
 
         int[] bestOffsets = findOverallMinimumReflectance();
 
         int bestOffset = chooseBestOffset(bestOffsets);
-        logger.fine("bestOffset all " + bestOffsets[0]);
-        logger.fine("bestOffset land " + bestOffsets[1]);
-        logger.fine("bestOffset water " + bestOffsets[2]);
-        logger.fine("chosen Offset " + bestOffset);
+        LOGGER.fine("bestOffset all " + bestOffsets[0]);
+        LOGGER.fine("bestOffset land " + bestOffsets[1]);
+        LOGGER.fine("bestOffset water " + bestOffsets[2]);
+        LOGGER.fine("chosen Offset " + bestOffset);
 
 
         HashMap<String, Product> postInput = new HashMap<>();
@@ -234,34 +231,6 @@ public class S2IdepixCloudShadowOp extends Operator {
             }
         }
         throw new OperatorException("Invalid product");
-    }
-
-    public static double determineResolution(Product product) {
-        int width = product.getSceneRasterWidth();
-        int height = product.getSceneRasterHeight();
-        GeoPos geoPos1 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, 0), null);
-        GeoPos geoPos2 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, height - 1), null);
-        double deltaLatInMeters = (geoPos1.lat - geoPos2.lat) / (height-1) / 180.0 * 6367500 * Math.PI;
-        double deltaLonInMeters = (geoPos1.lon - geoPos2.lon) / (height-1) / 180.0 * 6367500 * Math.PI * Math.cos((geoPos1.lat + geoPos2.lat) / 2 / 180 * Math.PI);
-        double resolution = (int) Math.round(Math.sqrt(deltaLatInMeters * deltaLatInMeters + deltaLonInMeters * deltaLonInMeters));
-        SystemUtils.LOG.info("Determined resolution as " + resolution + " m");
-        return resolution;
-    }
-
-    public static void getPixels(GeoCoding sceneGeoCoding,
-                                 final int x1, final int y1, final int w, final int h,
-                                 final float[] latPixels, final float[] lonPixels) {
-        PixelPos pixelPos = new PixelPos();
-        GeoPos geoPos = new GeoPos();
-        int i = 0;
-        for (int y = y1; y < y1 + h; ++y) {
-            for (int x = x1; x < x1 + w; ++x) {
-                pixelPos.setLocation(x + 0.5f, y + 0.5f);
-                sceneGeoCoding.getGeoPos(pixelPos, geoPos);
-                lonPixels[i] = (float) geoPos.lon;
-                latPixels[i++] = (float) geoPos.lat;
-            }
-        }
     }
 
     private Product[] getInternalSourceProducts(int resolution) {
@@ -353,9 +322,7 @@ public class S2IdepixCloudShadowOp extends Operator {
                 if (relativeMinimum.indexOf(0) > meanValues[j].length / 2.) exclude = true;
                 if (relativeMinimum.size() == 0) exclude = true;
                 if (exclude) {
-                    for (int i = 0; i < meanValues[j].length; i++) {
-                        meanValues[j][i] = Double.NaN;
-                    }
+                    Arrays.fill(meanValues[j], Double.NaN);
                 }
             }
             //Finding the minimum in brightness in the scaled mean function.
@@ -400,9 +367,9 @@ public class S2IdepixCloudShadowOp extends Operator {
             i++;
         }
         if (lx == 0) {
-            logger.fine("indecesRelativMaxInArray x.length=" + lx);
+            LOGGER.fine("indecesRelativMaxInArray x.length=" + lx);
         } else if (lx == 1) {
-            logger.fine("indecesRelativMaxInArray x.length=" + lx);
+            LOGGER.fine("indecesRelativMaxInArray x.length=" + lx);
             ID.add(0);
         } else if (valid) {
             double fac = -1.;
