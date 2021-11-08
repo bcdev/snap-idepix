@@ -141,6 +141,9 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         setupBitmasks(targetProduct);
 
         spatialResolution = determineSourceResolution();
+
+        int cacheSize = Integer.parseInt(System.getProperty("snap.idepix.s2msi.tilecache2", "600"));
+        targetProduct = S2IdepixUtils.computeTileCacheProduct(targetProduct, cacheSize);
     }
 
     private double determineSourceResolution() throws OperatorException {

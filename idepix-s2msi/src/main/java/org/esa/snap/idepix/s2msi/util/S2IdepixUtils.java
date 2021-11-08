@@ -11,6 +11,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.internal.TileCacheOp;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
@@ -25,7 +26,6 @@ import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.*;
 
 /**
  * @author Olaf Danne
- * @version $Revision: $ $Date:  $
  */
 public class S2IdepixUtils {
 
@@ -46,7 +46,6 @@ public class S2IdepixUtils {
         return isInputValid(inputProduct) && isInputConsistent(inputProduct, algorithm);
     }
 
-
     public static boolean isInputValid(Product inputProduct) {
         if (!isValidSentinel2(inputProduct)) {
             logErrorMessage("Input sensor must be Sentinel-2 MSI!");
@@ -61,6 +60,17 @@ public class S2IdepixUtils {
             }
         }
         return true;
+    }
+
+    public static Product computeTileCacheProduct(Product inputProduct, int cacheSize) {
+        if (Boolean.getBoolean("snap.gpf.disableTileCache")) {
+            TileCacheOp tileCacheOp = new TileCacheOp();
+            tileCacheOp.setSourceProduct("source", inputProduct);
+            tileCacheOp.setParameterDefaultValues();
+            tileCacheOp.setParameter("cacheSize", cacheSize);
+            inputProduct = tileCacheOp.getTargetProduct();
+        }
+        return inputProduct;
     }
 
     public static void logErrorMessage(String msg) {
