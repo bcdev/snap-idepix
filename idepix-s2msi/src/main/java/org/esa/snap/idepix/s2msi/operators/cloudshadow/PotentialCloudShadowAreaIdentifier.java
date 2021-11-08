@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -19,24 +18,20 @@ import java.util.logging.Logger;
  */
 class PotentialCloudShadowAreaIdentifier {
 
-    private static Logger logger = SystemUtils.LOG;
+    private static final Logger LOGGER = SystemUtils.LOG;
 
     private static final double MAXCLOUD_TOP = S2IdepixPreCloudShadowOp.maxcloudTop;
     private static final double MINCLOUD_BASE = S2IdepixPreCloudShadowOp.mincloudBase;
 
-    static Map[] identifyPotentialCloudShadowsPLUS(Rectangle sourceRectangle, Rectangle targetRectangle,
-                                                   float sourceSunZenith, float sourceSunAzimuth,
-                                                   float[] sourceLatitude, float[] sourceLongitude,
-                                                   float[] sourceAltitude, int[] flagArray, int[] cloudIDArray,
-                                                   Point2D[] cloudPath) {
+    static IdentifiedPcs identifyPotentialCloudShadowsPLUS(Rectangle sourceRectangle, Rectangle targetRectangle,
+                                                           float sourceSunZenith, float sourceSunAzimuth,
+                                                           float[] sourceLatitude, float[] sourceLongitude,
+                                                           float[] sourceAltitude, int[] flagArray, int[] cloudIDArray,
+                                                           Point2D[] cloudPath) {
         double sunZenithCloudRad = (double) sourceSunZenith * MathUtils.DTOR;
         // cannot switch to TreeMap here; Test PotentialCloudShadowAreaIdentifierTest needs the order of HashMaps.
         final Map<Integer, List<Integer>> indexToPositions = new HashMap<>();
         final Map<Integer, List<Integer>> offsetAtPositions = new HashMap<>();
-
-        int i = 0;
-        int sourceWidth = sourceRectangle.width;
-        int sourceHeight = sourceRectangle.height;
 
         int xOffset = 0;
         int yOffset = 0;
@@ -52,15 +47,14 @@ class PotentialCloudShadowAreaIdentifier {
             //start at lower left (not necessary, direction of search is appointed in identifyPotentialCloudShadow)
             yOffset = targetRectangle.y - sourceRectangle.y;
         }
-        if (cloudPath.length < 3) {
-            logger.fine("identifyPotentialCloudShadowPLUS: cloudPath.length=" + cloudPath.length);
-        } else {
-            for (i = xOffset; i < sourceWidth; i++) {
-                for (int j = yOffset; j < sourceHeight; j++) {
-                    identifyPotentialCloudShadowPLUS(i, j, sourceHeight, sourceWidth, cloudPath, sourceLongitude,
-                            sourceLatitude, sourceAltitude, flagArray, sunZenithCloudRad,
-                            cloudIDArray, indexToPositions, offsetAtPositions);
-                }
+
+        int sourceWidth = sourceRectangle.width;
+        int sourceHeight = sourceRectangle.height;
+        for (int i = xOffset; i < sourceWidth; i++) {
+            for (int j = yOffset; j < sourceHeight; j++) {
+                identifyPotentialCloudShadowPLUS(i, j, sourceHeight, sourceWidth, cloudPath, sourceLongitude,
+                        sourceLatitude, sourceAltitude, flagArray, sunZenithCloudRad,
+                        cloudIDArray, indexToPositions, offsetAtPositions);
             }
         }
 
@@ -90,9 +84,9 @@ class PotentialCloudShadowAreaIdentifier {
             List<Integer> positions = indexToPositions.get(key);
             List<Integer> offsetAtPos = offsetAtPositions.get(key);
 
-            List<Integer> noduplicatesPositions = new ArrayList<>(new LinkedHashSet<>(positions));
+            List<Integer> noDuplicatesPositions = new ArrayList<>(new LinkedHashSet<>(positions));
 
-            if (noduplicatesPositions.size() < positions.size()) {
+            if (noDuplicatesPositions.size() < positions.size()) {
                 int[] test = new int[flagArray.length];
                 for (int k = 0; k < positions.size(); k++) {
                     int off = offsetAtPos.get(k);
@@ -102,24 +96,21 @@ class PotentialCloudShadowAreaIdentifier {
                             test[ind] = off;
                         }
                     } else
-                        logger.fine("Index: " + ind + " outside range");
+                        LOGGER.fine("Index: " + ind + " outside range");
                 }
 
-                List<Integer> noduplicatesOffsets = new ArrayList<>();
-                for (int k : noduplicatesPositions) {
-                    noduplicatesOffsets.add(test[k]);
+                List<Integer> noDuplicatesOffsets = new ArrayList<>();
+                for (int k : noDuplicatesPositions) {
+                    noDuplicatesOffsets.add(test[k]);
                 }
 
                 positions.clear();
-                positions.addAll(noduplicatesPositions);
+                positions.addAll(noDuplicatesPositions);
                 offsetAtPos.clear();
-                offsetAtPos.addAll(noduplicatesOffsets);
+                offsetAtPos.addAll(noDuplicatesOffsets);
             }
         }
-        final Map[] output = new Map[2];
-        output[0] = indexToPositions;
-        output[1] = offsetAtPositions;
-        return output;
+        return new IdentifiedPcs(indexToPositions, offsetAtPositions);
     }
 
     private static void identifyPotentialCloudShadowPLUS(int x0, int y0, int height, int width, Point2D[] cloudPath,
@@ -130,6 +121,11 @@ class PotentialCloudShadowAreaIdentifier {
         int index0 = y0 * width + x0;
         //start from a cloud pixel, otherwise stop.
         if (!((flagArray[index0] & PreparationMaskBand.CLOUD_FLAG) == PreparationMaskBand.CLOUD_FLAG)) {
+            return;
+        }
+
+        if (cloudPath.length < 3) {
+            LOGGER.warning("identifyPotentialCloudShadowPLUS: cloudPath.length=" + cloudPath.length);
             return;
         }
 
@@ -197,4 +193,5 @@ class PotentialCloudShadowAreaIdentifier {
             offsetAtPositions.remove(cloudIDArray[index0]);
         }
     }
+
 }

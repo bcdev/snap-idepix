@@ -4,8 +4,6 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.jai.util.SunTileCache;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.StxFactory;
@@ -18,8 +16,6 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.internal.OperatorExecutor;
-import org.esa.snap.core.gpf.internal.OperatorImage;
-import org.esa.snap.core.gpf.internal.OperatorImageTileStack;
 import org.esa.snap.core.image.VectorDataMaskOpImage;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
@@ -33,6 +29,7 @@ import javax.media.jai.TileCache;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,13 +45,16 @@ import java.util.logging.Logger;
         description = "Algorithm detecting cloud shadow...")
 public class S2IdepixCloudShadowOp extends Operator {
 
-    private static Logger logger = SystemUtils.LOG;
+    private static final Logger LOGGER = SystemUtils.LOG;
 
     @SourceProduct(description = "The original input product")
     private Product l1cProduct;
 
-    @SourceProduct(description = "The classification product.")
+    @SourceProduct(description = "The classification product from which to take the classification band.")
     private Product s2ClassifProduct;
+
+    @SourceProduct(description = "The product from which to take other bands than the classification band.")
+    private Product s2BandsProduct;
 
     @TargetProduct
     private Product targetProduct;
@@ -65,6 +65,17 @@ public class S2IdepixCloudShadowOp extends Operator {
 
     @Parameter(description = "Whether to also compute mountain shadow", defaultValue = "true")
     private boolean computeMountainShadow;
+
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
+    private boolean computeCloudBuffer;
+
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer also for cloud ambiguous pixels")
+    private boolean computeCloudBufferForCloudAmbiguous;
+
+    @Parameter(defaultValue = "2", interval = "[0,100]",
+            label = " Width of cloud buffer (# of pixels)",
+            description = " The width of the 'safety buffer' around a pixel identified as cloudy.")
+    private int cloudBufferWidth;
 
     @Parameter(defaultValue = "0.01",
             label = " Threshold CW_THRESH",
@@ -89,7 +100,6 @@ public class S2IdepixCloudShadowOp extends Operator {
     private Map<Integer, double[][]> meanReflPerTile = new HashMap<>();
     private Map<Integer, Integer> NCloudOverLand = new HashMap<>();
     private Map<Integer, Integer> NCloudOverWater = new HashMap<>();
-    private Map<Integer, Integer> NValidPixelTile = new HashMap<>();
 
     @Override
     public void initialize() throws OperatorException {
@@ -108,8 +118,9 @@ public class S2IdepixCloudShadowOp extends Operator {
 
         int sourceResolution = determineSourceResolution(l1cProduct);
 
-        Product classificationProduct = getClassificationProduct(sourceResolution);
+        Product[] internalSourceProducts = getInternalSourceProducts(sourceResolution);
 
+        Product classificationProduct = internalSourceProducts[0];
         float sunZenithMean = getGeometryMean(classificationProduct, S2IdepixConstants.SUN_ZENITH_BAND_NAME);
         float sunAzimuthMean = getGeometryMean(classificationProduct, S2IdepixConstants.SUN_AZIMUTH_BAND_NAME);
         float viewZenithMean = getGeometryMean(classificationProduct, S2IdepixConstants.VIEW_ZENITH_BAND_NAME);
@@ -118,6 +129,7 @@ public class S2IdepixCloudShadowOp extends Operator {
 
         HashMap<String, Product> preInput = new HashMap<>();
         preInput.put("s2ClassifProduct", classificationProduct);
+        preInput.put("s2BandsProduct", internalSourceProducts[1]);
         Map<String, Object> preParams = new HashMap<>();
         preParams.put("sunZenithMean", sunZenithMean);
         preParams.put("sunAzimuthMean", sunAzimuthMean);
@@ -132,7 +144,7 @@ public class S2IdepixCloudShadowOp extends Operator {
                 (S2IdepixPreCloudShadowOp) GPF.getDefaultInstance().createOperator(operatorAlias, preParams, preInput, null);
 
         //trigger computation of all tiles
-        logger.info("Executing Cloud Shadow Preprocessing");
+        LOGGER.info("Executing Cloud Shadow Preprocessing");
         if (tileCache instanceof SunTileCache) {
             ((SunTileCache) tileCache).enableDiagnostics();
             ((SunTileCache) tileCache).addObserver(observer);
@@ -142,25 +154,25 @@ public class S2IdepixCloudShadowOp extends Operator {
         if (tileCache instanceof SunTileCache) {
             ((SunTileCache) tileCache).deleteObserver(observer);
         }
-        logger.info("Executed Cloud Shadow Preprocessing");
+        LOGGER.info("Executed Cloud Shadow Preprocessing");
 
         NCloudOverLand = cloudShadowPreProcessingOperator.getNCloudOverLandPerTile();
         NCloudOverWater = cloudShadowPreProcessingOperator.getNCloudOverWaterPerTile();
         meanReflPerTile = cloudShadowPreProcessingOperator.getMeanReflPerTile();
-        NValidPixelTile = cloudShadowPreProcessingOperator.getNValidPixelTile();
         //writingMeanReflAlongPath(); // for development of minimum analysis.
 
         int[] bestOffsets = findOverallMinimumReflectance();
 
         int bestOffset = chooseBestOffset(bestOffsets);
-        logger.fine("bestOffset all " + bestOffsets[0]);
-        logger.fine("bestOffset land " + bestOffsets[1]);
-        logger.fine("bestOffset water " + bestOffsets[2]);
-        logger.fine("chosen Offset " + bestOffset);
+        LOGGER.fine("bestOffset all " + bestOffsets[0]);
+        LOGGER.fine("bestOffset land " + bestOffsets[1]);
+        LOGGER.fine("bestOffset water " + bestOffsets[2]);
+        LOGGER.fine("chosen Offset " + bestOffset);
 
 
         HashMap<String, Product> postInput = new HashMap<>();
         postInput.put("s2ClassifProduct", classificationProduct);
+        postInput.put("s2BandsProduct", internalSourceProducts[1]);
         //put in here the input products that are required by the post-processing operator
         Map<String, Object> postParams = new HashMap<>();
         postParams.put("computeMountainShadow", computeMountainShadow);
@@ -221,37 +233,9 @@ public class S2IdepixCloudShadowOp extends Operator {
         throw new OperatorException("Invalid product");
     }
 
-    public static double determineResolution(Product product) {
-        int width = product.getSceneRasterWidth();
-        int height = product.getSceneRasterHeight();
-        GeoPos geoPos1 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, 0), null);
-        GeoPos geoPos2 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, height - 1), null);
-        double deltaLatInMeters = (geoPos1.lat - geoPos2.lat) / (height-1) / 180.0 * 6367500 * Math.PI;
-        double deltaLonInMeters = (geoPos1.lon - geoPos2.lon) / (height-1) / 180.0 * 6367500 * Math.PI * Math.cos((geoPos1.lat + geoPos2.lat) / 2 / 180 * Math.PI);
-        double resolution = (int) Math.round(Math.sqrt(deltaLatInMeters * deltaLatInMeters + deltaLonInMeters * deltaLonInMeters));
-        SystemUtils.LOG.info("Determined resolution as " + resolution + " m");
-        return resolution;
-    }
-
-    public static void getPixels(GeoCoding sceneGeoCoding,
-                                 final int x1, final int y1, final int w, final int h,
-                                 final float[] latPixels, final float[] lonPixels) {
-        PixelPos pixelPos = new PixelPos();
-        GeoPos geoPos = new GeoPos();
-        int i = 0;
-        for (int y = y1; y < y1 + h; ++y) {
-            for (int x = x1; x < x1 + w; ++x) {
-                pixelPos.setLocation(x + 0.5f, y + 0.5f);
-                sceneGeoCoding.getGeoPos(pixelPos, geoPos);
-                lonPixels[i] = (float) geoPos.lon;
-                latPixels[i++] = (float) geoPos.lat;
-            }
-        }
-    }
-
-    private Product getClassificationProduct(int resolution) {
+    private Product[] getInternalSourceProducts(int resolution) {
         if (resolution == 60) {
-            return s2ClassifProduct;
+            return new Product[]{s2ClassifProduct, s2BandsProduct};
         }
 
         HashMap<String, Product> resamplingInput = new HashMap<>();
@@ -267,13 +251,16 @@ public class S2IdepixCloudShadowOp extends Operator {
         Map<String, Object> classificationParams = new HashMap<>();
         classificationParams.put("computeMountainShadow", false);
         classificationParams.put("computeCloudShadow", false);
-        classificationParams.put("computeCloudBuffer", false);
+        classificationParams.put("computeCloudBuffer", computeCloudBuffer);
+        classificationParams.put("cloudBufferWidth", cloudBufferWidth);
+        classificationParams.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
         classificationParams.put("cwThresh", cwThresh);
         classificationParams.put("gclThresh", gclThresh);
         classificationParams.put("clThresh", clThresh);
         classificationParams.put("demName", demName);
 
-        return GPF.createProduct("Idepix.S2", classificationParams, classificationInput);
+        Product resampledClassifProduct = GPF.createProduct("Idepix.S2", classificationParams, classificationInput);
+        return new Product[]{resampledClassifProduct, resampledClassifProduct};
     }
 
     private Product prepareTargetProduct(int resolution, Product postProcessedProduct) {
@@ -335,9 +322,7 @@ public class S2IdepixCloudShadowOp extends Operator {
                 if (relativeMinimum.indexOf(0) > meanValues[j].length / 2.) exclude = true;
                 if (relativeMinimum.size() == 0) exclude = true;
                 if (exclude) {
-                    for (int i = 0; i < meanValues[j].length; i++) {
-                        meanValues[j][i] = Double.NaN;
-                    }
+                    Arrays.fill(meanValues[j], Double.NaN);
                 }
             }
             //Finding the minimum in brightness in the scaled mean function.
@@ -382,9 +367,9 @@ public class S2IdepixCloudShadowOp extends Operator {
             i++;
         }
         if (lx == 0) {
-            logger.fine("indecesRelativMaxInArray x.length=" + lx);
+            LOGGER.fine("indecesRelativMaxInArray x.length=" + lx);
         } else if (lx == 1) {
-            logger.fine("indecesRelativMaxInArray x.length=" + lx);
+            LOGGER.fine("indecesRelativMaxInArray x.length=" + lx);
             ID.add(0);
         } else if (valid) {
             double fac = -1.;

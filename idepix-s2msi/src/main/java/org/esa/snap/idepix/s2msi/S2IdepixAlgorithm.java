@@ -17,16 +17,10 @@ public class S2IdepixAlgorithm {
 
     static final float BRIGHTWHITE_THRESH = 1.5f;
     static final float NDSI_THRESH = 0.6f;
-    //    static final float CLOUD_THRESH = 1.65f;   // changed back, 20160503 todo: further check how this works
-//    static final float CLOUD_THRESH = 2.0f;  // OD, 20160422
-    static final float CLOUD_THRESH = 1.8f;  // JM, 20160517
-    static final float BRIGHT_THRESH = 0.25f;  // changed back, 20160503 todo: further check how this works
-    //    static final float BRIGHT_THRESH = 0.8f;  // OD, 20160422
+    static final float BRIGHT_THRESH = 0.25f;
     static final float BRIGHT_FOR_WHITE_THRESH = 0.8f;
     static final float WHITE_THRESH = 0.9f;
     static final float NDVI_THRESH = 0.5f;
-
-    static final float NDWI_THRESH = 0.25f;  // what's this?
 
     static final float B3B11_THRESH = 1.0f;
 
@@ -35,14 +29,9 @@ public class S2IdepixAlgorithm {
     static final float TCW_NDWI_THRESH = 0.4f;
     static final float ELEVATION_THRESH = 2000.0f;
 
-//    static final float CW_THRESH = 0.01f;
-//    static final float GCL_THRESH = -0.11f;
-//    static final float CL_THRESH = 0.01f;
-
     private float[] refl;
     private double brr442Thresh;
     private double elevation;
-    private double[] nnOutput;
     private boolean isLand;
 
     private double cwThresh;
@@ -50,8 +39,6 @@ public class S2IdepixAlgorithm {
     private double clThresh;
     private boolean isInvalid;
 
-    //////////////////////////////////////
-    //We need latitude from the product. Represented here as "lat"
     static final float TC1_THRESH = 0.36f;
 
     private double lat;
@@ -69,43 +56,29 @@ public class S2IdepixAlgorithm {
     }
 
     public boolean isCloudSure() {
-        // JM, 20160524:
         final boolean gcw = tc4CirrusValue() < GCW_THRESH;
         final boolean tcw = tc4Value() < TCW_TC_THRESH && ndwiValue() < TCW_NDWI_THRESH;
-//        final boolean cw = refl[10] > cwThresh && elevation < ELEVATION_THRESH;
-//        final boolean acw = isB3B11Water() && (gcw || tcw || cw);
-        final boolean acw = isB3B11Water() && (gcw || tcw); // JM 20160713
-//        final boolean gcl = tc4CirrusValue() < gclThresh;
-        // JM 20160713:
+        final boolean acw = isB3B11Water() && (gcw || tcw);
         final boolean gcl = !isB3B11Water() && tc4CirrusValue()  < gclThresh && visbrightValue() > VISBRIGHT_THRESH;
-//        final boolean cl = refl[10] > clThresh && elevation < ELEVATION_THRESH;
-//        final boolean acl = !isB3B11Water() && (gcl || cl);
-
-//        return !isInvalid() && !isClearSnow() && (acw || acl);
-        return !isInvalid() && !isClearSnow() && (acw || gcl);    // JM 20160713
+        return !isInvalid() && !isClearSnow() && (acw || gcl);
 
     }
 
-    // Add an ambiguous haze test isCloudAmbiguous()  (JM 20160713)
     public boolean isCloudAmbiguous() {
         final boolean tcl = !isB3B11Water() && tc4CirrusValue()  < TCL_TRESH && visbrightValue() > VISBRIGHT_THRESH;
         return !isInvalid() && !isClearSnow() && !isCloudSure() && (tcl);
     }
 
-    // Add a cirrus test(JM 20160713)
     public boolean isCirrus() {
         final boolean cw = refl[10] > cwThresh && elevation < ELEVATION_THRESH;
         final boolean cl = refl[10] > clThresh && elevation < ELEVATION_THRESH;
 
-//        return !isInvalid() && !isClearSnow() && !isCloud() && !isCloudAmbiguous() && (cw || cl);
-        return !isInvalid() && !isClearSnow() && (cw || cl);  // suggestion OD
+        return !isInvalid() && !isClearSnow() && (cw || cl);
     }
 
-    // Add an ambiguous cirrus test   (JM 20160713)
     public boolean isCirrusAmbiguous() {
         final boolean cla = refl[10] > CLA_THRESH && elevation < ELEVATION_THRESH;
-//        return !isInvalid() && !isClearSnow() && !isCloud() && !isCloudAmbiguous() && !isCirrus() && (cla);
-        return !isInvalid() && !isClearSnow() && (cla); // suggestion OD
+        return !isInvalid() && !isClearSnow() && (cla);
     }
 
     public boolean isClearLand() {
@@ -121,9 +94,6 @@ public class S2IdepixAlgorithm {
         } else {
             return false; // this means: if we have no information about land, we return isClearLand = false
         }
-//        return (isLand() && !isCloud() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&
-//                landValue > LAND_THRESH);
-        // JM 20170406:
         return (!isCloudSure() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&  landValue > LAND_THRESH);
     }
 
@@ -139,19 +109,11 @@ public class S2IdepixAlgorithm {
         } else {
             return false; // this means: if we have no information about water, we return isClearWater = false
         }
-//        return (!isLand() && !isCloud() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&
-//                waterValue > WATER_THRESH);
         return (!isCloudSure() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous()
                 && !isClearSnow() && !isBrightWhite() && waterValue > WATER_THRESH);
     }
 
     public boolean isClearSnow() {
-//        return (!isInvalid() && isLand() && isBrightWhite() && ndsiValue() > getNdsiThreshold());
-//        return  !isInvalid() && isLand() &&
-//                ndsiValue() > getNdsiThreshold() &&
-//                !(isB3B11Water() && (tc1Value() < getTc1Threshold()));  // JM, 20160526
-
-        // JM 20160713:
         return (!isInvalid() && !(lat < 30 && lat > -30) &&
                 ndsiValue() > getNdsiThreshold() &&
                 !(isB3B11Water() && (tc1Value() < getTc1Threshold()))) ||
@@ -161,17 +123,11 @@ public class S2IdepixAlgorithm {
                         !(isB3B11Water() && (tc1Value() < getTc1Threshold())));
     }
 
-    public boolean isSeaIce() {
-        return false;
-    }
-
     public boolean isLand() {
-//        return aPrioriLandValue() > LAND_THRESH;
         return isLand;
     }
 
     public boolean isWater() {
-//        return !isInvalid() && aPrioriWaterValue() > WATER_THRESH;  // todo: check again when we use SRTM water mask
         return !isInvalid() && !isLand();
     }
 
@@ -187,10 +143,6 @@ public class S2IdepixAlgorithm {
         return ndviValue() > getNdviThreshold();
     }
 
-    public boolean isHigh() {
-        return false;
-    }
-
     public boolean isB3B11Water() {
         return b3b11Value() > B3B11_THRESH;
     }
@@ -199,12 +151,10 @@ public class S2IdepixAlgorithm {
         return isInvalid;
     }
 
-    // feature values
     public float b3b11Value() {
         return (refl[2] / refl[11]);
     }
 
-    // new value, JM 20160713
     public float visbrightValue() {
         return (refl[1] + refl[2] + refl[3]) / 3;
     }
@@ -237,8 +187,6 @@ public class S2IdepixAlgorithm {
                                                           S2IdepixConstants.S2_MSI_WAVELENGTHS[6]);
 
         final double flatness = 1.0f - Math.abs(1000.0 * (slope0 + slope1 + slope2) / 3.0);
-        // todo: check if it should be like this:
-//        final double flatness = 1.0f - Math.abs((slope0 + slope1 + slope2) / (3.0*1000.0));
         return (float) Math.max(0.0f, flatness);
     }
 
@@ -277,7 +225,6 @@ public class S2IdepixAlgorithm {
     public float aPrioriWaterValue() {
         return radiometricWaterValue();
     }
-
 
     // SETTERS
     public void setRhoToa442Thresh(double brr442Thresh) {
@@ -333,18 +280,12 @@ public class S2IdepixAlgorithm {
         return WHITE_THRESH;
     }
 
-    public double[] getNnOutput() {
-        return nnOutput;
-    }
-
     public float temperatureValue() {
         return UNCERTAINTY_VALUE;
     }
 
     public float radiometricLandValue() {
-//        if (refl[5] >= refl[3]) {        // todo: what is refl620, refl620thresh ?
-        // JM 20170406:
-        if (refl[7] >= refl[3]) {        // todo: what is refl620, refl620thresh ?
+        if (refl[7] >= refl[3]) {
             return 1.0f;
         } else {
             return UNCERTAINTY_VALUE;
@@ -352,9 +293,7 @@ public class S2IdepixAlgorithm {
     }
 
     public float radiometricWaterValue() {
-//        if (refl[5] < refl[3]) {        // todo: what is refl620, refl620thresh ?
-        // JM 20170406:
-        if (refl[7] < refl[3]) {        // todo: what is refl620, refl620thresh ?
+        if (refl[7] < refl[3]) {
             return 1.0f;
         } else {
             return UNCERTAINTY_VALUE;
