@@ -122,6 +122,10 @@ public class S2IdepixClassificationOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
+
+        validateInputBandsExist(S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES);
+        validateInputBandsExist(S2IdepixConstants.S2_MSI_ANNOTATION_BAND_NAMES);
+
         setBands();
 
         validPixelMask = Mask.BandMathsType.create("__valid_pixel_mask", null,
@@ -144,6 +148,14 @@ public class S2IdepixClassificationOp extends Operator {
 
         createTargetProduct();
         extendTargetProduct();
+    }
+
+    private void validateInputBandsExist(String[] bandNames) {
+        for (String bandName : bandNames) {
+            if (!sourceProduct.containsBand(bandName)) {
+                throw new OperatorException("Band " + bandName + " not found in source product");
+            }
+        }
     }
 
     @Override
