@@ -109,6 +109,9 @@ public class S2IdepixOp extends Operator {
 
         Product s2ClassifProduct = createS2ClassificationProduct(inputProducts);
 
+        int cacheSize = Integer.parseInt(System.getProperty("snap.idepix.s2msi.tilecache", "1600"));
+        s2ClassifProduct = S2IdepixUtils.computeTileCacheProduct(s2ClassifProduct, cacheSize);
+
         // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
         Product postProcessingProduct = computePostProcessProduct(sourceProduct, s2ClassifProduct);
 
