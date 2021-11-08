@@ -3,7 +3,10 @@ package org.esa.snap.idepix.s2msi.util;
 
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.OperatorException;
@@ -12,9 +15,13 @@ import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JOptionPane;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.Random;
+
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.*;
 
 /**
  * @author Olaf Danne
@@ -22,36 +29,10 @@ import java.util.Random;
  */
 public class S2IdepixUtils {
 
-    public static final String IDEPIX_INVALID_DESCR_TEXT = "Invalid pixels";
-    public static final String IDEPIX_CLOUD_DESCR_TEXT = "Pixels which are either cloud_sure or cloud_ambiguous";
-    public static final String IDEPIX_CLOUD_AMBIGUOUS_DESCR_TEXT = "Semi transparent clouds, or clouds where the detection level is uncertain";
-    public static final String IDEPIX_CLOUD_SURE_DESCR_TEXT = "Fully opaque clouds with full confidence of their detection";
-    public static final String IDEPIX_CLOUD_BUFFER_DESCR_TEXT = "A buffer of n pixels around a cloud. n is a user supplied parameter. Applied to pixels masked as 'cloud'";
-    public static final String IDEPIX_CLOUD_SHADOW_DESCR_TEXT = "Pixel is affected by a cloud shadow (combination of shifted cloud mask in cloud gaps and dark clusters coinciding with a corrected shifted cloud mask)";
-    public static final String IDEPIX_SNOW_ICE_DESCR_TEXT = "Clear snow/ice pixels";
-    public static final String IDEPIX_BRIGHT_DESCR_TEXT = "Bright pixels";
-    public static final String IDEPIX_WHITE_DESCR_TEXT = "White pixels";
-    public static final String IDEPIX_COASTLINE_DESCR_TEXT = "Pixels at a coastline";
-    public static final String IDEPIX_LAND_DESCR_TEXT = "Land pixels";
-
-    public static final String IDEPIX_CIRRUS_SURE_DESCR_TEXT = "Cirrus clouds with full confidence of their detection";
-    public static final String IDEPIX_CIRRUS_AMBIGUOUS_DESCR_TEXT = "Cirrus clouds, or clouds where the detection level is uncertain";
-    public static final String IDEPIX_CLEAR_LAND_DESCR_TEXT = "Clear land pixels";
-    public static final String IDEPIX_CLEAR_WATER_DESCR_TEXT = "Clear water pixels";
-    public static final String IDEPIX_WATER_DESCR_TEXT = "Water pixels";
-    public static final String IDEPIX_BRIGHTWHITE_DESCR_TEXT = "'Brightwhite' pixels";
-    public static final String IDEPIX_VEG_RISK_DESCR_TEXT = "Pixels with vegetation risk";
-    public static final String IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT = "Pixel is affected by mountain shadow";
-    public static final String IDEPIX_POTENTIAL_SHADOW_DESCR_TEXT = "Potentially a cloud shadow pixel";
-    public static final String IDEPIX_CLUSTERED_CLOUD_SHADOW_DESCR_TEXT= "Cloud shadow identified by clustering algorithm";
-
-    private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("idepix");
-
-    public static final String IDEPIX_CLASSIF_FLAGS = "pixel_classif_flags";
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger("idepix");
 
     private S2IdepixUtils() {
     }
-
 
     public static Product cloneProduct(Product sourceProduct, boolean copySourceBands) {
         return cloneProduct(sourceProduct, sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight(), copySourceBands);
@@ -74,7 +55,7 @@ public class S2IdepixUtils {
     }
 
     public static boolean isValidSentinel2(Product sourceProduct) {
-        for (String bandName : S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES) {
+        for (String bandName : S2_MSI_REFLECTANCE_BAND_NAMES) {
             if (!sourceProduct.containsBand(bandName)) {
                 return false;
             }
@@ -121,31 +102,32 @@ public class S2IdepixUtils {
 
     public static FlagCoding createIdepixFlagCoding(String flagIdentifier) {
         FlagCoding flagCoding = new FlagCoding(flagIdentifier);
-        flagCoding.addFlag("IDEPIX_INVALID", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_INVALID), IDEPIX_INVALID_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CLOUD", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CLOUD), IDEPIX_CLOUD_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CLOUD_AMBIGUOUS", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS), IDEPIX_CLOUD_AMBIGUOUS_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CLOUD_SURE", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CLOUD_SURE), IDEPIX_CLOUD_SURE_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CLOUD_BUFFER", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CLOUD_BUFFER), IDEPIX_CLOUD_BUFFER_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CLOUD_SHADOW", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CLOUD_SHADOW), IDEPIX_CLOUD_SHADOW_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_SNOW_ICE", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_SNOW_ICE), IDEPIX_SNOW_ICE_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_BRIGHT", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_BRIGHT), IDEPIX_BRIGHT_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_WHITE", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_WHITE), IDEPIX_WHITE_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_COASTLINE", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_COASTLINE), IDEPIX_COASTLINE_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_LAND", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_LAND), IDEPIX_LAND_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_INVALID_NAME, BitSetter.setFlag(0, IDEPIX_INVALID), IDEPIX_INVALID_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_CLOUD_NAME, BitSetter.setFlag(0, IDEPIX_CLOUD), IDEPIX_CLOUD_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_CLOUD_AMBIGUOUS_NAME, BitSetter.setFlag(0, IDEPIX_CLOUD_AMBIGUOUS), IDEPIX_CLOUD_AMBIGUOUS_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_CLOUD_SURE_NAME, BitSetter.setFlag(0, IDEPIX_CLOUD_SURE), IDEPIX_CLOUD_SURE_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_CLOUD_BUFFER_NAME, BitSetter.setFlag(0, IDEPIX_CLOUD_BUFFER), IDEPIX_CLOUD_BUFFER_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_CLOUD_SHADOW_NAME, BitSetter.setFlag(0, IDEPIX_CLOUD_SHADOW), IDEPIX_CLOUD_SHADOW_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_SNOW_ICE_NAME, BitSetter.setFlag(0, IDEPIX_SNOW_ICE), IDEPIX_SNOW_ICE_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_BRIGHT_NAME, BitSetter.setFlag(0, IDEPIX_BRIGHT), IDEPIX_BRIGHT_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_WHITE_NAME, BitSetter.setFlag(0, IDEPIX_WHITE), IDEPIX_WHITE_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_COASTLINE__NAME, BitSetter.setFlag(0, IDEPIX_COASTLINE), IDEPIX_COASTLINE_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_LAND_NAME, BitSetter.setFlag(0, IDEPIX_LAND), IDEPIX_LAND_DESCR_TEXT);
 
-        flagCoding.addFlag("IDEPIX_CIRRUS_SURE", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CIRRUS_SURE), IDEPIX_CIRRUS_SURE_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CIRRUS_AMBIGUOUS", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CIRRUS_AMBIGUOUS), IDEPIX_CIRRUS_AMBIGUOUS_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CLEAR_LAND", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CLEAR_LAND), IDEPIX_CLEAR_LAND_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CLEAR_WATER", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CLEAR_WATER), IDEPIX_CLEAR_WATER_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_WATER", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_WATER), IDEPIX_WATER_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_BRIGHTWHITE", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_BRIGHTWHITE), IDEPIX_BRIGHTWHITE_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_VEG_RISK", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_VEG_RISK), IDEPIX_VEG_RISK_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_MOUNTAIN_SHADOW", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW), IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_POTENTIAL_SHADOW", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_POTENTIAL_SHADOW), IDEPIX_POTENTIAL_SHADOW_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CLUSTERED_CLOUD_SHADOW", BitSetter.setFlag(0, S2IdepixConstants.IDEPIX_CLUSTERED_CLOUD_SHADOW), IDEPIX_CLUSTERED_CLOUD_SHADOW_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_CIRRUS_SURE_NAME, BitSetter.setFlag(0, IDEPIX_CIRRUS_SURE), IDEPIX_CIRRUS_SURE_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_CIRRUS_AMBIGUOUS_NAME, BitSetter.setFlag(0, IDEPIX_CIRRUS_AMBIGUOUS), IDEPIX_CIRRUS_AMBIGUOUS_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_CLEAR_LAND_NAME, BitSetter.setFlag(0, IDEPIX_CLEAR_LAND), IDEPIX_CLEAR_LAND_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_CLEAR_WATER_NAME, BitSetter.setFlag(0, IDEPIX_CLEAR_WATER), IDEPIX_CLEAR_WATER_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_WATER_NAME, BitSetter.setFlag(0, IDEPIX_WATER), IDEPIX_WATER_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_BRIGHTWHITE_NAME, BitSetter.setFlag(0, IDEPIX_BRIGHTWHITE), IDEPIX_BRIGHTWHITE_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_VEG_RISK_NAME, BitSetter.setFlag(0, IDEPIX_VEG_RISK), IDEPIX_VEG_RISK_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_MOUNTAIN_SHADOW_NAME, BitSetter.setFlag(0, IDEPIX_MOUNTAIN_SHADOW), IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_POTENTIAL_SHADOW_NAME, BitSetter.setFlag(0, IDEPIX_POTENTIAL_SHADOW), IDEPIX_POTENTIAL_SHADOW_DESCR_TEXT);
+        flagCoding.addFlag(IDEPIX_CLUSTERED_CLOUD_SHADOW_NAME, BitSetter.setFlag(0, IDEPIX_CLUSTERED_CLOUD_SHADOW), IDEPIX_CLUSTERED_CLOUD_SHADOW_DESCR_TEXT);
         return flagCoding;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static int setupIdepixCloudscreeningBitmasks(Product gaCloudProduct) {
 
         int index = 0;
@@ -154,111 +136,111 @@ public class S2IdepixUtils {
         Mask mask;
         Random r = new Random(1234567);
 
-        mask = Mask.BandMathsType.create("IDEPIX_INVALID",
+        mask = Mask.BandMathsType.create(IDEPIX_INVALID_NAME,
                                          IDEPIX_INVALID_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_INVALID",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_INVALID_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_CLOUD",
+        mask = Mask.BandMathsType.create(IDEPIX_CLOUD_NAME,
                                          IDEPIX_CLOUD_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CLOUD",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CLOUD_NAME),
                                          new Color(178, 178, 0), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_AMBIGUOUS",
+        mask = Mask.BandMathsType.create(IDEPIX_CLOUD_AMBIGUOUS_NAME,
                                          IDEPIX_CLOUD_AMBIGUOUS_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CLOUD_AMBIGUOUS",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CLOUD_AMBIGUOUS_NAME),
                                          new Color(255, 219, 156), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_SURE",
+        mask = Mask.BandMathsType.create(IDEPIX_CLOUD_SURE_NAME,
                                          IDEPIX_CLOUD_SURE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CLOUD_SURE",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CLOUD_SURE_NAME),
                                          new Color(224, 224, 30), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_BUFFER",
+        mask = Mask.BandMathsType.create(IDEPIX_CLOUD_BUFFER_NAME,
                                          IDEPIX_CLOUD_BUFFER_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CLOUD_BUFFER",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CLOUD_BUFFER_NAME),
                                          Color.red, 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_SHADOW",
+        mask = Mask.BandMathsType.create(IDEPIX_CLOUD_SHADOW_NAME,
                                          IDEPIX_CLOUD_SHADOW_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CLOUD_SHADOW",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CLOUD_SHADOW_NAME),
                                          Color.cyan, 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_SNOW_ICE",
+        mask = Mask.BandMathsType.create(IDEPIX_SNOW_ICE_NAME,
                                          IDEPIX_SNOW_ICE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_SNOW_ICE",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_SNOW_ICE_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_BRIGHT",
+        mask = Mask.BandMathsType.create(IDEPIX_BRIGHT_NAME,
                                          IDEPIX_BRIGHT_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_BRIGHT",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_BRIGHT_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_WHITE",
+        mask = Mask.BandMathsType.create(IDEPIX_WHITE_NAME,
                                          IDEPIX_WHITE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_WHITE",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_WHITE_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_COASTLINE",
+        mask = Mask.BandMathsType.create(IDEPIX_COASTLINE__NAME,
                                          IDEPIX_COASTLINE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_COASTLINE",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_COASTLINE__NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_LAND",
+        mask = Mask.BandMathsType.create(IDEPIX_LAND_NAME,
                                          IDEPIX_CLEAR_LAND_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_LAND",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_LAND_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("IDEPIX_CIRRUS_SURE",
+        mask = Mask.BandMathsType.create(IDEPIX_CIRRUS_SURE_NAME,
                                          IDEPIX_CIRRUS_SURE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CIRRUS_SURE",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CIRRUS_SURE_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_CIRRUS_AMBIGUOUS",
+        mask = Mask.BandMathsType.create(IDEPIX_CIRRUS_AMBIGUOUS_NAME,
                                          IDEPIX_CIRRUS_AMBIGUOUS_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CIRRUS_AMBIGUOUS",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CIRRUS_AMBIGUOUS_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_CLEAR_LAND",
+        mask = Mask.BandMathsType.create(IDEPIX_CLEAR_LAND_NAME,
                                          IDEPIX_CLEAR_LAND_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CLEAR_LAND",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CLEAR_LAND_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_CLEAR_WATER",
+        mask = Mask.BandMathsType.create(IDEPIX_CLEAR_WATER_NAME,
                                          IDEPIX_CLEAR_WATER_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CLEAR_WATER",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CLEAR_WATER_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_WATER",
+        mask = Mask.BandMathsType.create(IDEPIX_WATER_NAME,
                                          IDEPIX_WATER_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_WATER",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_WATER_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_BRIGHTWHITE",
+        mask = Mask.BandMathsType.create(IDEPIX_BRIGHTWHITE_NAME,
                                          IDEPIX_BRIGHTWHITE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_BRIGHTWHITE",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_BRIGHTWHITE_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_VEG_RISK",
+        mask = Mask.BandMathsType.create(IDEPIX_VEG_RISK_NAME,
                                          IDEPIX_VEG_RISK_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_VEG_RISK",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_VEG_RISK_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_MOUNTAIN_SHADOW",
+        mask = Mask.BandMathsType.create(IDEPIX_MOUNTAIN_SHADOW_NAME,
                                          IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_MOUNTAIN_SHADOW",
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_MOUNTAIN_SHADOW_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_POTENTIAL_SHADOW",
-                IDEPIX_POTENTIAL_SHADOW_DESCR_TEXT, w, h,
-                "pixel_classif_flags.IDEPIX_POTENTIAL_SHADOW",
-                new Color(255, 200, 0), 0.5f);
+        mask = Mask.BandMathsType.create(IDEPIX_POTENTIAL_SHADOW_NAME,
+                                         IDEPIX_POTENTIAL_SHADOW_DESCR_TEXT, w, h,
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_POTENTIAL_SHADOW_NAME),
+                                         new Color(255, 200, 0), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("IDEPIX_CLUSTERED_CLOUD_SHADOW",
-                IDEPIX_CLUSTERED_CLOUD_SHADOW_DESCR_TEXT, w, h,
-                "pixel_classif_flags.IDEPIX_CLUSTERED_CLOUD_SHADOW",
-                Color.red, 0.5f);
+        mask = Mask.BandMathsType.create(IDEPIX_CLUSTERED_CLOUD_SHADOW_NAME,
+                                         IDEPIX_CLUSTERED_CLOUD_SHADOW_DESCR_TEXT, w, h,
+                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CLUSTERED_CLOUD_SHADOW_NAME),
+                                         Color.red, 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
 
         return index;
@@ -286,9 +268,9 @@ public class S2IdepixUtils {
     }
 
     public static void consolidateCloudAndBuffer(Tile targetTile, int x, int y) {
-        if (targetTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_CLOUD_SURE) ||
-                targetTile.getSampleBit(x, y, S2IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS)) {
-            targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD_BUFFER, false);
+        if (targetTile.getSampleBit(x, y, IDEPIX_CLOUD_SURE) ||
+                targetTile.getSampleBit(x, y, IDEPIX_CLOUD_AMBIGUOUS)) {
+            targetTile.setSample(x, y, IDEPIX_CLOUD_BUFFER, false);
         }
     }
 
@@ -310,15 +292,6 @@ public class S2IdepixUtils {
 
         // cos of scattering angle
         return -coss * cosv - sins * sinv * cosphi;
-    }
-
-    public static void removeReflectancesForCloudShadow(Product product) {
-        for (String reflectanceBandName : S2IdepixConstants.S2_MSI_CLOUD_SHADOW_REFLECTANCE_BAND_NAMES) {
-            if (product.getBandGroup().contains(reflectanceBandName)) {
-                final Band b = product.getBand(reflectanceBandName);
-                product.removeBand(b);
-            }
-        }
     }
 
     private static Color getRandomColour(Random random) {
@@ -372,4 +345,17 @@ public class S2IdepixUtils {
         }
     }
 
+    public static int calculateTileId(Rectangle targetRectangle, Product targetProduct) {
+        Dimension tileSize = targetProduct.getPreferredTileSize();
+        int tileX = (int) (targetRectangle.getX() / tileSize.getWidth());
+        int tileY = (int) (targetRectangle.getY() / tileSize.getHeight());
+        int numXTiles = targetProduct.getSceneRasterWidth() / (int) tileSize.getWidth();
+        return (tileY * numXTiles) + tileX;
+    }
+
+    public static GeoPos getCenterGeoPos(Product product) {
+        final PixelPos centerPixelPos = new PixelPos(0.5 * product.getSceneRasterWidth() + 0.5,
+                                                     0.5 * product.getSceneRasterHeight() + 0.5);
+        return product.getSceneGeoCoding().getGeoPos(centerPixelPos, null);
+    }
 }

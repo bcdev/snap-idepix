@@ -24,7 +24,7 @@ class MountainShadowFlagger {
             sunZenithIntermediate =
                     (double) sourceSunZenith * (2. * Math.pow(((90. - (double) sourceSunZenith) / 90), 3) + 1.);
         } else {
-            sunZenithIntermediate = (double) sourceSunZenith;
+            sunZenithIntermediate = sourceSunZenith;
         }
         double sunZenithRad = Math.min(89.0, sunZenithIntermediate) * MathUtils.DTOR;
         if (relativePath.length < 2) {

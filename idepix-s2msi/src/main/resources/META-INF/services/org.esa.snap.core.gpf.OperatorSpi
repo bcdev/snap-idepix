@@ -1,7 +1,7 @@
 org.esa.snap.idepix.s2msi.S2IdepixOp$Spi
 org.esa.snap.idepix.s2msi.S2IdepixPostProcessOp$Spi
 org.esa.snap.idepix.s2msi.S2IdepixClassificationOp$Spi
-org.esa.snap.idepix.s2msi.operators.S2IdepixCloudBufferOp$Spi
+org.esa.snap.idepix.s2msi.operators.S2IdepixCloudPostProcessOp$Spi
 org.esa.snap.idepix.s2msi.operators.mountainshadow.SlopeAspectOrientationOp$Spi
 org.esa.snap.idepix.s2msi.operators.mountainshadow.S2IdepixMountainShadowOp$Spi
 org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixCloudShadowOp$Spi
