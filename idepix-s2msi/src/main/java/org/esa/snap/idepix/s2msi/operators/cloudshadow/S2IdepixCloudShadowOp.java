@@ -4,11 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.jai.util.SunTileCache;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.StxFactory;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -18,12 +14,8 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.internal.OperatorExecutor;
-import org.esa.snap.core.gpf.internal.OperatorImage;
-import org.esa.snap.core.gpf.internal.OperatorImageTileStack;
 import org.esa.snap.core.image.VectorDataMaskOpImage;
 import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.math.MathUtils;
-import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.CachedTile;
@@ -53,8 +45,11 @@ public class S2IdepixCloudShadowOp extends Operator {
     @SourceProduct(description = "The original input product")
     private Product l1cProduct;
 
-    @SourceProduct(description = "The classification product.")
+    @SourceProduct(description = "The classification product from which to take the classification band.")
     private Product s2ClassifProduct;
+
+    @SourceProduct(description = "The product from which to take other bands than the classification band.")
+    private Product s2BandsProduct;
 
     @TargetProduct
     private Product targetProduct;
@@ -65,6 +60,17 @@ public class S2IdepixCloudShadowOp extends Operator {
 
     @Parameter(description = "Whether to also compute mountain shadow", defaultValue = "true")
     private boolean computeMountainShadow;
+
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
+    private boolean computeCloudBuffer;
+
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer also for cloud ambiguous pixels")
+    private boolean computeCloudBufferForCloudAmbiguous;
+
+    @Parameter(defaultValue = "2", interval = "[0,100]",
+            label = " Width of cloud buffer (# of pixels)",
+            description = " The width of the 'safety buffer' around a pixel identified as cloudy.")
+    private int cloudBufferWidth;
 
     @Parameter(defaultValue = "0.01",
             label = " Threshold CW_THRESH",
@@ -84,9 +90,6 @@ public class S2IdepixCloudShadowOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
-    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
-    private boolean classifyInvalid;
-
     public final static String BAND_NAME_CLOUD_SHADOW = "FlagBand";
 
     private Map<Integer, double[][]> meanReflPerTile = new HashMap<>();
@@ -96,35 +99,27 @@ public class S2IdepixCloudShadowOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-//        final TileCache tileCache = JAI.getDefaultInstance().getTileCache();
-//        final Observer observer = (o, arg) -> {
-//            if (arg instanceof CachedTile && ((CachedTile) arg).getAction() == 0) {
-//                CachedTile tile = (CachedTile) arg;
-//                RenderedImage owner = tile.getOwner();
-//                if (owner instanceof VectorDataMaskOpImage || owner instanceof PointOpImage) {
-//                    int tileX = Math.round((float) tile.getTile().getMinX() / (float) owner.getTileWidth());
-//                    int tileY = Math.round((float) tile.getTile().getMinY() / (float) owner.getTileHeight());
-//                    tileCache.remove(owner, tileX, tileY);
-//                }
-//            }
-//        };
+        final TileCache tileCache = JAI.getDefaultInstance().getTileCache();
+        final Observer observer = (o, arg) -> {
+            if (arg instanceof CachedTile && ((CachedTile) arg).getAction() == 0) {
+                CachedTile tile = (CachedTile) arg;
+                RenderedImage owner = tile.getOwner();
+                if (owner instanceof VectorDataMaskOpImage || owner instanceof PointOpImage) {
+                    int tileX = Math.round((float) tile.getTile().getMinX() / (float) owner.getTileWidth());
+                    int tileY = Math.round((float) tile.getTile().getMinY() / (float) owner.getTileHeight());
+                    tileCache.remove(owner, tileX, tileY);
+                }
+            }
+        };
 
         int sourceResolution = determineSourceResolution(l1cProduct);
 
-        Product classificationProduct = getClassificationProduct(sourceResolution);
-
-        float sunZenithMean = getGeometryMean(classificationProduct, S2IdepixConstants.SUN_ZENITH_BAND_NAME);
-        float sunAzimuthMean = getGeometryMean(classificationProduct, S2IdepixConstants.SUN_AZIMUTH_BAND_NAME);
-        float viewZenithMean = getGeometryMean(classificationProduct, S2IdepixConstants.VIEW_ZENITH_BAND_NAME);
-        float viewAzimuthMean = getGeometryMean(classificationProduct, S2IdepixConstants.VIEW_AZIMUTH_BAND_NAME);
-        sunAzimuthMean = convertToApparentSunAzimuth(sunAzimuthMean, viewZenithMean, viewAzimuthMean);
+        Product[] internalSourceProducts = getInternalSourceProducts(sourceResolution);
 
         HashMap<String, Product> preInput = new HashMap<>();
-        preInput.put("s2ClassifProduct", classificationProduct);
+        preInput.put("s2ClassifProduct", internalSourceProducts[0]);
+        preInput.put("s2BandsProduct", internalSourceProducts[1]);
         Map<String, Object> preParams = new HashMap<>();
-        preParams.put("classifyInvalid", classifyInvalid);
-        preParams.put("sunZenithMean", sunZenithMean);
-        preParams.put("sunAzimuthMean", sunAzimuthMean);
 
         //todo: test resolution of granule. Resample necessary bands to 60m. calculate cloud shadow on 60m.
         //todo: let mountain shadow benefit from higher resolution in DEM. Adjust sun zenith according to smoothing.
@@ -137,15 +132,15 @@ public class S2IdepixCloudShadowOp extends Operator {
 
         //trigger computation of all tiles
         logger.info("Executing Cloud Shadow Pre-Processing");
-//        if (tileCache instanceof SunTileCache) {
-//            ((SunTileCache) tileCache).enableDiagnostics();
-//            ((SunTileCache) tileCache).addObserver(observer);
-//        }
+        if (tileCache instanceof SunTileCache) {
+            ((SunTileCache) tileCache).enableDiagnostics();
+            ((SunTileCache) tileCache).addObserver(observer);
+        }
         final OperatorExecutor operatorExecutor = OperatorExecutor.create(cloudShadowPreProcessingOperator);
         operatorExecutor.execute(ProgressMonitor.NULL);
-//        if (tileCache instanceof SunTileCache) {
-//            ((SunTileCache) tileCache).deleteObserver(observer);
-//        }
+        if (tileCache instanceof SunTileCache) {
+            ((SunTileCache) tileCache).deleteObserver(observer);
+        }
         logger.info("Executed Cloud Shadow Pre-Processing");
 
         NCloudOverLand = cloudShadowPreProcessingOperator.getNCloudOverLandPerTile();
@@ -164,15 +159,13 @@ public class S2IdepixCloudShadowOp extends Operator {
 
 
         HashMap<String, Product> postInput = new HashMap<>();
-        postInput.put("s2ClassifProduct", classificationProduct);
+        postInput.put("s2ClassifProduct", internalSourceProducts[0]);
+        postInput.put("s2BandsProduct", internalSourceProducts[1]);
         //put in here the input products that are required by the post-processing operator
         Map<String, Object> postParams = new HashMap<>();
         postParams.put("computeMountainShadow", computeMountainShadow);
         postParams.put("bestOffset", bestOffset);
         postParams.put("mode", mode);
-        postParams.put("classifyInvalid", classifyInvalid);
-        postParams.put("sunZenithMean", sunZenithMean);
-        postParams.put("sunAzimuthMean", sunAzimuthMean);
         //put in here any parameters that might be requested by the post-processing operator
 
         //
@@ -184,37 +177,6 @@ public class S2IdepixCloudShadowOp extends Operator {
         setTargetProduct(prepareTargetProduct(sourceResolution, postProduct));
     }
 
-    private float getGeometryMean(Product classificationProduct, String rdnName) {
-        // the author of these lines is aware that at no point the mean is computed,
-        // for historic reasons we will stick to the name, though
-        RasterDataNode node = classificationProduct.getRasterDataNode(rdnName);
-        float mean = getRasterNodeValueAtCenter(node, classificationProduct.getSceneRasterWidth(),
-                classificationProduct.getSceneRasterHeight());
-        if (Float.isNaN(mean)) {
-            mean = (float) new StxFactory().create(node, ProgressMonitor.NULL).getMedian();
-        }
-        return mean;
-    }
-
-    private float getRasterNodeValueAtCenter(RasterDataNode var, int width, int height) {
-        return var.getSampleFloat((int) (0.5 * width), (int) (0.5 * height));
-    }
-
-    private float convertToApparentSunAzimuth(float sunAzimuthMean, float viewZenithMean, float viewAzimuthMean) {
-        // here: cloud path is calculated for center pixel sunZenith and sunAzimuth.
-        // after correction of sun azimuth angle into apparent sun azimuth angle.
-        // Due to projection of the cloud at view_zenith>0 the position of the cloud becomes distorted.
-        // The true position still causes the shadow - and it cannot be determined without the cloud top height.
-        // So instead, the apparent sun azimuth angle is calculated and used to find the cloudShadowRelativePath.
-
-        double diff_phi = sunAzimuthMean - viewAzimuthMean;
-        if (diff_phi < 0) diff_phi = 180 + diff_phi;
-        if (diff_phi > 90) diff_phi = diff_phi - 90;
-        diff_phi = diff_phi * Math.tan(viewZenithMean * MathUtils.DTOR);
-        if (viewAzimuthMean > 180) diff_phi = -1. * diff_phi;
-        return (float) (sunAzimuthMean + diff_phi);
-    }
-
     private int determineSourceResolution(Product product) throws OperatorException {
         final GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
         if (sceneGeoCoding instanceof CrsGeoCoding) {
@@ -222,43 +184,13 @@ public class S2IdepixCloudShadowOp extends Operator {
             if (imageToMapTransform instanceof AffineTransform) {
                 return (int) ((AffineTransform) imageToMapTransform).getScaleX();
             }
-        } else {
-            return (int) S2IdepixCloudShadowOp.determineResolution(product);
         }
         throw new OperatorException("Invalid product");
     }
 
-    public static double determineResolution(Product product) {
-        int width = product.getSceneRasterWidth();
-        int height = product.getSceneRasterHeight();
-        GeoPos geoPos1 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, 0), null);
-        GeoPos geoPos2 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, height - 1), null);
-        double deltaLatInMeters = (geoPos1.lat - geoPos2.lat) / (height-1) / 180.0 * 6367500 * Math.PI;
-        double deltaLonInMeters = (geoPos1.lon - geoPos2.lon) / (height-1) / 180.0 * 6367500 * Math.PI * Math.cos((geoPos1.lat + geoPos2.lat) / 2 / 180 * Math.PI);
-        double resolution = (int) Math.round(Math.sqrt(deltaLatInMeters * deltaLatInMeters + deltaLonInMeters * deltaLonInMeters));
-        SystemUtils.LOG.info("Determined resolution as " + resolution + " m");
-        return resolution;
-    }
-
-    public static void getPixels(GeoCoding sceneGeoCoding,
-                                 final int x1, final int y1, final int w, final int h,
-                                 final float[] latPixels, final float[] lonPixels) {
-        PixelPos pixelPos = new PixelPos();
-        GeoPos geoPos = new GeoPos();
-        int i = 0;
-        for (int y = y1; y < y1 + h; ++y) {
-            for (int x = x1; x < x1 + w; ++x) {
-                pixelPos.setLocation(x + 0.5f, y + 0.5f);
-                sceneGeoCoding.getGeoPos(pixelPos, geoPos);
-                lonPixels[i] = (float) geoPos.lon;
-                latPixels[i++] = (float) geoPos.lat;
-            }
-        }
-    }
-
-    private Product getClassificationProduct(int resolution) {
+    private Product[] getInternalSourceProducts(int resolution) {
         if (resolution == 60) {
-            return s2ClassifProduct;
+            return new Product[]{s2ClassifProduct, s2BandsProduct};
         }
 
         HashMap<String, Product> resamplingInput = new HashMap<>();
@@ -267,7 +199,6 @@ public class S2IdepixCloudShadowOp extends Operator {
         resamplingParams.put("upsampling", "Nearest");
         resamplingParams.put("downsampling", "First");
         resamplingParams.put("targetResolution", 60);
-        resamplingParams.put("resampleOnPyramidLevels", "false");
         Product resampledProduct = GPF.createProduct("Resample", resamplingParams, resamplingInput);
 
         HashMap<String, Product> classificationInput = new HashMap<>();
@@ -275,13 +206,16 @@ public class S2IdepixCloudShadowOp extends Operator {
         Map<String, Object> classificationParams = new HashMap<>();
         classificationParams.put("computeMountainShadow", false);
         classificationParams.put("computeCloudShadow", false);
-        classificationParams.put("computeCloudBuffer", false);
+        classificationParams.put("computeCloudBuffer", computeCloudBuffer);
+        classificationParams.put("cloudBufferWidth", cloudBufferWidth);
+        classificationParams.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
         classificationParams.put("cwThresh", cwThresh);
         classificationParams.put("gclThresh", gclThresh);
         classificationParams.put("clThresh", clThresh);
         classificationParams.put("demName", demName);
 
-        return GPF.createProduct("Idepix.S2", classificationParams, classificationInput);
+        Product resampledClassifProduct = GPF.createProduct("Idepix.S2", classificationParams, classificationInput);
+        return new Product[]{resampledClassifProduct, resampledClassifProduct};
     }
 
     private Product prepareTargetProduct(int resolution, Product postProcessedProduct) {
@@ -324,16 +258,7 @@ public class S2IdepixCloudShadowOp extends Operator {
     }
 
     private int[] findOverallMinimumReflectance() {
-        // catch cases of tiles completely invalid are skipped
-        if (meanReflPerTile.keySet().size() == 0) {
-            return new int[3];
-        }
-        // we need to account for that not all mean values in meanReflPerTile are of the same length
-        int pathLength = 0;
-        for (double[][] meanRefls : meanReflPerTile.values()) {
-            pathLength = Math.max(pathLength, meanRefls[0].length);
-        }
-        double[][] scaledTotalReflectance = new double[3][pathLength];
+        double[][] scaledTotalReflectance = new double[3][meanReflPerTile.get(0)[0].length];
         for (int j = 0; j < 3; j++) {
             /*Checking the meanReflPerTile:
                 - if it has no relative minimum other than the first or the last value, it is excluded.
@@ -399,9 +324,9 @@ public class S2IdepixCloudShadowOp extends Operator {
             i++;
         }
         if (lx == 0) {
-            logger.fine("indecesRelativMaxInArray x.length=" + lx);
+            logger.warning("indecesRelativMaxInArray x.length=" + lx);
         } else if (lx == 1) {
-            logger.fine("indecesRelativMaxInArray x.length=" + lx);
+            logger.warning("indecesRelativMaxInArray x.length=" + lx);
             ID.add(0);
         } else if (valid) {
             double fac = -1.;

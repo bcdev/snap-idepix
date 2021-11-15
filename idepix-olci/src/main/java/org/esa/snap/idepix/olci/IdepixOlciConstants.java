@@ -25,6 +25,12 @@ public class IdepixOlciConstants {
     public static final String OLCI_LONGITUDE_BAND_NAME = "longitude";
     public static final String OLCI_SUN_ZENITH_BAND_NAME = "SZA";
     public static final String OLCI_SUN_AZIMUTH_BAND_NAME = "SAA";
+    public static final String OLCI_VIEW_ZENITH_BAND_NAME = "OZA";
+    public static final String OLCI_VIEW_ZENITH_INTERPOLATED_BAND_NAME = "OZA_interp";
+    public static final String OLCI_VIEW_AZIMUTH_BAND_NAME = "OAA";
+    public static final String OLCI_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME = "OAA_interp";
+
+    public static final double[] POLYNOM_FIT_INITIAL = new double[]{0., 0., 0.};
 
     static final String OLCI_QUALITY_FLAGS_BAND_NAME = "quality_flags";
 
@@ -92,4 +98,14 @@ public class IdepixOlciConstants {
             {0.0, 89.99},
             {-179.17503822036088, 89.99}
     };
+
+    // view angle interpolation at discontinuities:
+    static final int OLCI_FR_FULL_PRODUCT_WIDTH = 4865;
+    static final int OLCI_RR_FULL_PRODUCT_WIDTH = 1217;
+    static final int OLCI_FR_DEFAULT_NX_CHANGE = 3616;
+    static final int OLCI_RR_DEFAULT_NX_CHANGE = 904;
+    static final int[] OLCI_DEFAULT_FR_NX_VZA = new int[]{3500, 3580, 3649, 3729};
+    static final int[] OLCI_DEFAULT_RR_NX_VZA = new int[]{875, 895, 912, 932};
+    static final int[] OLCI_DEFAULT_FR_NX_VAA = new int[]{2000, 3400, 3900, OLCI_FR_FULL_PRODUCT_WIDTH};
+    static final int[] OLCI_DEFAULT_RR_NX_VAA = new int[]{500, 850, 975, OLCI_RR_FULL_PRODUCT_WIDTH};
 }

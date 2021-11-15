@@ -8,7 +8,6 @@ import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
@@ -23,12 +22,11 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
-import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtenderConstant;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -51,8 +49,11 @@ import java.util.Map;
 
 public class S2IdepixPostCloudShadowOp extends Operator {
 
-    @SourceProduct(description = "The classification product.")
+    @SourceProduct(description = "The classification product from which to take the classification band.")
     private Product s2ClassifProduct;
+
+    @SourceProduct(description = "The product from which to take other bands than the classification band.")
+    private Product s2BandsProduct;
 
     @TargetProduct
     private Product targetProduct;
@@ -66,15 +67,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
     @Parameter(description = "Offset along cloud path to minimum reflectance (over all tiles)", defaultValue = "0")
     private int bestOffset;
-
-    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
-    private boolean classifyInvalid;
-
-    @Parameter(notNull=true)
-    private float sunZenithMean;
-
-    @Parameter(notNull=true)
-    private float sunAzimuthMean;
 
     private Band sourceBandClusterA;
     private Band sourceBandClusterB;
@@ -93,12 +85,21 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
     private static int maxcloudTop = 10000;
     //for calculating a single cloud path
+    private float sunZenithMean;
+    private float sunAzimuthMean;
+    private float viewAzimuthMean;
+    private float viewZenithMean;
     private float minAltitude = 0;
 
     private static double spatialResolution;  //[m]
     static int clusterCountDefine = 4;
     private static final String sourceBandNameClusterA = "B8A";
     private static final String sourceBandNameClusterB = "B3";
+    private static final String sourceSunZenithName = "sun_zenith";
+    private static final String sourceSunAzimuthName = "sun_azimuth";
+    private static final String sourceViewAzimuthName = "view_azimuth_mean";
+    private static final String sourceViewZenithName = "view_zenith_mean";
+    private static final String sourceAltitudeName = "elevation";
     private static final String sourceFlagName1 = "pixel_classif_flags";
     private final static String BAND_NAME_CLOUD_SHADOW = "FlagBand";
     private final static String BAND_NAME_CLOUD_ID = "cloud_ids";
@@ -138,9 +139,9 @@ public class S2IdepixPostCloudShadowOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        targetProduct = new Product(s2ClassifProduct.getName(), s2ClassifProduct.getProductType(),
-                s2ClassifProduct.getSceneRasterWidth(), s2ClassifProduct.getSceneRasterHeight());
-        ProductUtils.copyGeoCoding(s2ClassifProduct, targetProduct);
+        targetProduct = new Product(s2BandsProduct.getName(), s2BandsProduct.getProductType(),
+                s2BandsProduct.getSceneRasterWidth(), s2BandsProduct.getSceneRasterHeight());
+        ProductUtils.copyGeoCoding(s2BandsProduct, targetProduct);
         targetBandCloudShadow = targetProduct.addBand(BAND_NAME_CLOUD_SHADOW, ProductData.TYPE_INT32);
         if (debug) {
             targetBandCloudID = targetProduct.addBand(BAND_NAME_CLOUD_ID, ProductData.TYPE_INT32);
@@ -151,19 +152,32 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         attachFlagCoding(targetBandCloudShadow);
         setupBitmasks(targetProduct);
 
-        sourceBandClusterA = s2ClassifProduct.getBand(sourceBandNameClusterA);
-        sourceBandClusterB = s2ClassifProduct.getBand(sourceBandNameClusterB);
+        sourceBandClusterA = s2BandsProduct.getBand(sourceBandNameClusterA);
+        sourceBandClusterB = s2BandsProduct.getBand(sourceBandNameClusterB);
 
-        sourceAltitude = s2ClassifProduct.getBand(S2IdepixConstants.ELEVATION_BAND_NAME);
+        RasterDataNode sourceSunZenith = s2BandsProduct.getBand(sourceSunZenithName);
+        RasterDataNode sourceSunAzimuth = s2BandsProduct.getBand(sourceSunAzimuthName);
+        sourceAltitude = s2BandsProduct.getBand(sourceAltitudeName);
+        RasterDataNode sourceViewAzimuth = s2BandsProduct.getBand(sourceViewAzimuthName);
+        RasterDataNode sourceViewZenith = s2BandsProduct.getBand(sourceViewZenithName);
 
-        final GeoPos centerGeoPos =
-                getCenterGeoPos(targetProduct.getSceneGeoCoding(), targetProduct.getSceneRasterWidth(),
-                        targetProduct.getSceneRasterHeight());
+        final GeoPos centerGeoPos = S2IdepixUtils.getCenterGeoPos(targetProduct);
         maxcloudTop = setCloudTopHeigh(centerGeoPos.getLat());
 
         //create a single potential cloud path for the granule.
         // sunZenithMean, sunAzimuthMean is the value at the central pixel.
         minAltitude = 0;
+        sunZenithMean = getRasterNodeValueAtCenter(sourceSunZenith, targetProduct.getSceneRasterWidth(),
+                targetProduct.getSceneRasterHeight());
+        sunAzimuthMean = getRasterNodeValueAtCenter(sourceSunAzimuth, targetProduct.getSceneRasterWidth(),
+                targetProduct.getSceneRasterHeight());
+        viewAzimuthMean = getRasterNodeValueAtCenter(sourceViewAzimuth, targetProduct.getSceneRasterWidth(),
+                targetProduct.getSceneRasterHeight());
+        viewZenithMean = getRasterNodeValueAtCenter(sourceViewZenith, targetProduct.getSceneRasterWidth(),
+                targetProduct.getSceneRasterHeight());
+
+
+        sunAzimuthMean = convertToApparentSunAzimuth();
 
         sourceBandFlag1 = s2ClassifProduct.getBand(sourceFlagName1);
 
@@ -183,11 +197,8 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         }
     }
 
-    //aus S2tbxReprojectionOp kopiert:
-    private GeoPos getCenterGeoPos(GeoCoding geoCoding, int width, int height) {
-        final PixelPos centerPixelPos = new PixelPos(0.5 * width + 0.5,
-                0.5 * height + 0.5);
-        return geoCoding.getGeoPos(centerPixelPos, null);
+    private float getRasterNodeValueAtCenter(RasterDataNode var, int width, int height) {
+        return var.getSampleFloat((int) (0.5 * width), (int) (0.5 * height));
     }
 
     private int setCloudTopHeigh(double lat) {
@@ -292,8 +303,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             if (imageToMapTransform instanceof AffineTransform) {
                 return ((AffineTransform) imageToMapTransform).getScaleX();
             }
-        } else {
-            return S2IdepixCloudShadowOp.determineResolution(getSourceProduct());
         }
         throw new OperatorException("Invalid product: ");
     }
@@ -319,13 +328,22 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         return new Rectangle(x0, y0, x1 - x0, y1 - y0);
     }
 
+    private float convertToApparentSunAzimuth() {
+        //here: cloud path is calculated for center pixel sunZenith and sunAzimuth.
+        // after correction of sun azimuth angle into apparent sun azimuth angle.
+        // Due to projection of the cloud at view_zenith>0 the position of the cloud becomes distorted.
+        // The true position still causes the shadow - and it cannot be determined without the cloud top height.
+        // So instead, the apparent sun azimuth angle is calculated and used to find the cloudShadowRelativePath.
+        double diff_phi = sunAzimuthMean - viewAzimuthMean;
+        if (diff_phi < 0) diff_phi = 180 + diff_phi;
+        if (diff_phi > 90) diff_phi = diff_phi - 90;
+        diff_phi = diff_phi * Math.tan(viewZenithMean * MathUtils.DTOR);
+        if (viewAzimuthMean > 180) diff_phi = -1. * diff_phi;
+        return (float) (sunAzimuthMean + diff_phi);
+    }
+
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
-        Dimension tileSize = targetProduct.getPreferredTileSize();
-        int tileX = (int) (targetRectangle.getX() / tileSize.getWidth());
-        int tileY = (int) (targetRectangle.getY() / tileSize.getHeight());
-        int numXTiles = targetProduct.getSceneRasterWidth() / (int) tileSize.getWidth();
-        final int tileid = (tileY * numXTiles) + tileX;
         final float[] targetAltitude = getSamples(sourceAltitude, targetRectangle);
         final List<Float> altitudes = Arrays.asList(ArrayUtils.toObject(targetAltitude));
         final Point2D[] cloudShadowRelativePath = CloudShadowUtils.getRelativePath(
@@ -333,12 +351,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
                 targetRectangle, targetRectangle, getSourceProduct().getSceneRasterHeight(),
                 getSourceProduct().getSceneRasterWidth(), spatialResolution, true, false);
         final Rectangle sourceRectangle = getSourceRectangle(targetRectangle, cloudShadowRelativePath);
-
-        Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle,
-                new BorderExtenderConstant(new double[]{Double.NaN}));
-        if (!classifyInvalid && isCompletelyInvalid(sourceTileFlag1)) {
-            return;
-        }
         int sourceWidth = sourceRectangle.width;
         int sourceHeight = sourceRectangle.height;
         int sourceLength = sourceRectangle.width * sourceRectangle.height;
@@ -357,25 +369,15 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
         float[] sourceLatitudes = new float[sourceLength];
         float[] sourceLongitudes = new float[sourceLength];
-        if (getSourceProduct().getSceneGeoCoding() instanceof CrsGeoCoding) {
-            ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).
-                    getPixels((int) sourceRectangle.getMinX(),
-                              (int) sourceRectangle.getMinY(),
-                              (int) sourceRectangle.getWidth(),
-                              (int) sourceRectangle.getHeight(),
-                              sourceLatitudes,
-                              sourceLongitudes);
-        } else {
-            S2IdepixCloudShadowOp.
-                    getPixels(getSourceProduct().getSceneGeoCoding(),
-                              (int) sourceRectangle.getMinX(),
-                              (int) sourceRectangle.getMinY(),
-                              (int) sourceRectangle.getWidth(),
-                              (int) sourceRectangle.getHeight(),
-                              sourceLatitudes,
-                              sourceLongitudes);
-        }
+        ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).getPixels((int) sourceRectangle.getMinX(),
+                (int) sourceRectangle.getMinY(),
+                (int) sourceRectangle.getWidth(),
+                (int) sourceRectangle.getHeight(),
+                sourceLatitudes,
+                sourceLongitudes);
 
+        Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle,
+                new BorderExtenderConstant(new double[]{Double.NaN}));
         FlagDetector flagDetector = new FlagDetector(sourceTileFlag1, sourceRectangle);
 
         PreparationMaskBand.prepareMaskBand(targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight(),
@@ -395,24 +397,22 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         Map<Integer, List<Integer>> cloudList =
                 cloudIdentifier.computeAreaID(sourceWidth, sourceHeight, cloudIDArray, true);
 
-        //todo assessment of the order of processing steps
-        getLogger().fine("tile" + tileid + " " + cloudList.size());
         if (cloudList.size() > 0) {
             /*
             /   Clustering can be separated: potential cloud shadow over water, and over land.
             /   potentialShadowPositions: Collection of List of integers, which hold the index of potential cloud shadow pixels for each cloudID.
             /   offsetAtPotentialShadowPositions: Collection of List of integers, holding the step along the cloud shadow path in the potential cloud shadow. Useful to determine distances of clusters.
             */
-            final Map[] results = PotentialCloudShadowAreaIdentifier.identifyPotentialCloudShadowsPLUS(
+            final IdentifiedPcs identifiedPcs = PotentialCloudShadowAreaIdentifier.identifyPotentialCloudShadowsPLUS(
                     sourceRectangle, targetRectangle, sunZenithMean, sunAzimuthMean, sourceLatitudes, sourceLongitudes,
                     altitude, flagArray, cloudIDArray, cloudShadowRelativePath);
-            final Map<Integer, List<Integer>> potentialShadowPositions = results[0];
-            final Map<Integer, List<Integer>> offsetAtPotentialShadow = results[1];
+            final Map<Integer, List<Integer>> potentialShadowPositions = identifiedPcs.indexToPositions;
+            final Map<Integer, List<Integer>> offsetAtPotentialShadow = identifiedPcs.offsetAtPositions;
 
             getLogger().fine("potential shadow is ready");
             // shifting by offset, but looking into water, land and all pixel.
             // best offset is determined before (either from water, land, or all pixels).
-            if (bestOffset > 0 && bestOffset < cloudShadowRelativePath.length) {
+            if (bestOffset > 0) {
                 CloudBulkShifter.setTileShiftedCloudBulk(sourceRectangle, targetRectangle,
                         sunAzimuthMean, flagArray, cloudShadowRelativePath, bestOffset);
                 //offset: 0: all, 1: over land, 2: over water.
@@ -442,23 +442,12 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             Tile targetTileShadowID = targetTiles.get(targetBandShadowID);
             Tile targetTileCloudTest = targetTiles.get(targetBandCloudTest);
             final int[] tileIDArray = new int[sourceLength];
-            Arrays.fill(tileIDArray, tileid);
+            Arrays.fill(tileIDArray, S2IdepixUtils.calculateTileId(targetRectangle, targetProduct));
             fillTile(cloudIDArray, targetRectangle, sourceRectangle, targetTileCloudID);
             fillTile(tileIDArray, targetRectangle, sourceRectangle, targetTileTileID);
             fillTile(shadowIDArray, targetRectangle, sourceRectangle, targetTileShadowID);
             fillTile(cloudTestArray, targetRectangle, sourceRectangle, targetTileCloudTest);
         }
-    }
-
-    static boolean isCompletelyInvalid(Tile sourceTileFlag1) {
-        int invalid_byte = (int) Math.pow(2, S2IdepixConstants.IDEPIX_INVALID);
-        int[] classifData = sourceTileFlag1.getSamplesInt();
-        for (int i=0; i<classifData.length; ++i) {
-            if ((classifData[i] & invalid_byte) == 0) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static class MountainShadowMaxFloatComparator implements Comparator<Float> {
