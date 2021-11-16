@@ -14,6 +14,7 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.internal.TileCacheOp;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
 import javax.swing.JOptionPane;
@@ -71,6 +72,35 @@ public class S2IdepixUtils {
             inputProduct = tileCacheOp.getTargetProduct();
         }
         return inputProduct;
+    }
+
+
+    public static double determineResolution(Product product) {
+        int width = product.getSceneRasterWidth();
+        int height = product.getSceneRasterHeight();
+        GeoPos geoPos1 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, 0), null);
+        GeoPos geoPos2 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, height - 1), null);
+        double deltaLatInMeters = (geoPos1.lat - geoPos2.lat) / (height-1) / 180.0 * 6367500 * Math.PI;
+        double deltaLonInMeters = (geoPos1.lon - geoPos2.lon) / (height-1) / 180.0 * 6367500 * Math.PI * Math.cos((geoPos1.lat + geoPos2.lat) / 2 / 180 * Math.PI);
+        double resolution = (int) Math.round(Math.sqrt(deltaLatInMeters * deltaLatInMeters + deltaLonInMeters * deltaLonInMeters));
+        SystemUtils.LOG.info("Determined resolution as " + resolution + " m");
+        return resolution;
+    }
+
+    public static void getPixels(GeoCoding sceneGeoCoding,
+                                 final int x1, final int y1, final int w, final int h,
+                                 final float[] latPixels, final float[] lonPixels) {
+        PixelPos pixelPos = new PixelPos();
+        GeoPos geoPos = new GeoPos();
+        int i = 0;
+        for (int y = y1; y < y1 + h; ++y) {
+            for (int x = x1; x < x1 + w; ++x) {
+                pixelPos.setLocation(x + 0.5f, y + 0.5f);
+                sceneGeoCoding.getGeoPos(pixelPos, geoPos);
+                lonPixels[i] = (float) geoPos.lon;
+                latPixels[i++] = (float) geoPos.lat;
+            }
+        }
     }
 
     public static void logErrorMessage(String msg) {

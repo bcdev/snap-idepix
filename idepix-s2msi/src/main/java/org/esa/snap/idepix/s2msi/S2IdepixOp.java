@@ -29,7 +29,7 @@ import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.S2_MSI_REFLECTANC
  */
 @OperatorMetadata(alias = "Idepix.S2",
         category = "Optical/Pre-Processing",
-        version = "8.0.3",
+        version = "8.0.3cv",
         authors = "Tonio Fincke, Olaf Danne",
         copyright = "(c) 2019 by Brockmann Consult",
         description = "Pixel identification and classification for Sentinel-2 MSI.")
@@ -148,18 +148,20 @@ public class S2IdepixOp extends Operator {
 
     private Product computePostProcessProduct(Product l1cProduct, Product classificationProduct) {
 
-        // todo: Shouldn't this be actually within the if clause?
-        HashMap<String, Product> input = new HashMap<>();
-        input.put("l1c", l1cProduct);
-        input.put("s2Cloud", classificationProduct);
-        input.put("classifiedProduct", classificationProduct);
-        Map<String, Object> paramsBuffer = new HashMap<>();
-        paramsBuffer.put("cloudBufferWidth", cloudBufferWidth);
-        paramsBuffer.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
-        Product cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
-                                                       paramsBuffer, input);
-
-        Product postProduct = cloudBufferProduct;
+        // todo: Shouldn't this be actually within the if clause? - in 8.x.calvalus it was, so done here now ...
+        Product postProduct  = classificationProduct;
+        Product cloudBufferProduct = null;
+        if (computeCloudBuffer) {
+            HashMap<String, Product> input = new HashMap<>();
+            input.put("l1c", l1cProduct);
+            input.put("s2Cloud", classificationProduct);
+            input.put("classifiedProduct", classificationProduct);
+            Map<String, Object> paramsBuffer = new HashMap<>();
+            paramsBuffer.put("cloudBufferWidth", cloudBufferWidth);
+            paramsBuffer.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
+            postProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
+                                            paramsBuffer, input);
+        }
 
         if (computeCloudShadow || computeMountainShadow || computeCloudBuffer) {
             HashMap<String, Product> inputShadow = new HashMap<>();

@@ -91,6 +91,9 @@ public class S2IdepixClassificationOp extends Operator {
     @TargetProduct(description = "The target product.")
     Product targetProduct;
 
+    // hidden parameter, may be set to true for mosaics with larger invalid areas
+    private boolean skipInvalidTiles;
+
     private Band[] s2MsiReflBands;
     Band classifFlagBand;
 
@@ -122,6 +125,7 @@ public class S2IdepixClassificationOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
+        skipInvalidTiles = Boolean.getBoolean("snap.idepix.s2msi.skipInvalidTiles");
 
         validateInputBandsExist(S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES);
         validateInputBandsExist(S2IdepixConstants.S2_MSI_ANNOTATION_BAND_NAMES);
@@ -185,6 +189,13 @@ public class S2IdepixClassificationOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
+
+                    // avoid application of algo for invalid inputs
+                    // TODO check whether land/water flag shall be set for invalid pixels as well
+                    if (skipInvalidTiles && ! validPixelTile.getSampleBoolean(x, y)) {
+                        cloudFlagTargetTile.setSample(x, y, S2IdepixConstants.IDEPIX_INVALID, true);
+                        continue;
+                    }
 
                     // set up pixel properties for given instruments...
                     S2IdepixAlgorithm s2MsiAlgorithm = createS2MsiAlgorithm(s2ReflectanceTiles,

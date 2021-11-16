@@ -4,6 +4,8 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.jai.util.SunTileCache;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
@@ -16,6 +18,7 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.internal.OperatorExecutor;
 import org.esa.snap.core.image.VectorDataMaskOpImage;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.CachedTile;
@@ -99,18 +102,18 @@ public class S2IdepixCloudShadowOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        final TileCache tileCache = JAI.getDefaultInstance().getTileCache();
-        final Observer observer = (o, arg) -> {
-            if (arg instanceof CachedTile && ((CachedTile) arg).getAction() == 0) {
-                CachedTile tile = (CachedTile) arg;
-                RenderedImage owner = tile.getOwner();
-                if (owner instanceof VectorDataMaskOpImage || owner instanceof PointOpImage) {
-                    int tileX = Math.round((float) tile.getTile().getMinX() / (float) owner.getTileWidth());
-                    int tileY = Math.round((float) tile.getTile().getMinY() / (float) owner.getTileHeight());
-                    tileCache.remove(owner, tileX, tileY);
-                }
-            }
-        };
+//        final TileCache tileCache = JAI.getDefaultInstance().getTileCache();
+//        final Observer observer = (o, arg) -> {
+//            if (arg instanceof CachedTile && ((CachedTile) arg).getAction() == 0) {
+//                CachedTile tile = (CachedTile) arg;
+//                RenderedImage owner = tile.getOwner();
+//                if (owner instanceof VectorDataMaskOpImage || owner instanceof PointOpImage) {
+//                    int tileX = Math.round((float) tile.getTile().getMinX() / (float) owner.getTileWidth());
+//                    int tileY = Math.round((float) tile.getTile().getMinY() / (float) owner.getTileHeight());
+//                    tileCache.remove(owner, tileX, tileY);
+//                }
+//            }
+//        };
 
         int sourceResolution = determineSourceResolution(l1cProduct);
 
@@ -132,15 +135,15 @@ public class S2IdepixCloudShadowOp extends Operator {
 
         //trigger computation of all tiles
         logger.info("Executing Cloud Shadow Pre-Processing");
-        if (tileCache instanceof SunTileCache) {
-            ((SunTileCache) tileCache).enableDiagnostics();
-            ((SunTileCache) tileCache).addObserver(observer);
-        }
+//        if (tileCache instanceof SunTileCache) {
+//            ((SunTileCache) tileCache).enableDiagnostics();
+//            ((SunTileCache) tileCache).addObserver(observer);
+//        }
         final OperatorExecutor operatorExecutor = OperatorExecutor.create(cloudShadowPreProcessingOperator);
         operatorExecutor.execute(ProgressMonitor.NULL);
-        if (tileCache instanceof SunTileCache) {
-            ((SunTileCache) tileCache).deleteObserver(observer);
-        }
+//        if (tileCache instanceof SunTileCache) {
+//            ((SunTileCache) tileCache).deleteObserver(observer);
+//        }
         logger.info("Executed Cloud Shadow Pre-Processing");
 
         NCloudOverLand = cloudShadowPreProcessingOperator.getNCloudOverLandPerTile();
@@ -184,6 +187,8 @@ public class S2IdepixCloudShadowOp extends Operator {
             if (imageToMapTransform instanceof AffineTransform) {
                 return (int) ((AffineTransform) imageToMapTransform).getScaleX();
             }
+        } else {
+            return (int) S2IdepixUtils.determineResolution(product);
         }
         throw new OperatorException("Invalid product");
     }
@@ -199,6 +204,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         resamplingParams.put("upsampling", "Nearest");
         resamplingParams.put("downsampling", "First");
         resamplingParams.put("targetResolution", 60);
+        resamplingParams.put("resampleOnPyramidLevels", "false");
         Product resampledProduct = GPF.createProduct("Resample", resamplingParams, resamplingInput);
 
         HashMap<String, Product> classificationInput = new HashMap<>();
@@ -258,7 +264,16 @@ public class S2IdepixCloudShadowOp extends Operator {
     }
 
     private int[] findOverallMinimumReflectance() {
-        double[][] scaledTotalReflectance = new double[3][meanReflPerTile.get(0)[0].length];
+        // catch cases of tiles completely invalid are skipped
+        if (meanReflPerTile.keySet().size() == 0) {
+            return new int[3];
+        }
+        // we need to account for that not all mean values in meanReflPerTile are of the same length
+        int pathLength = 0;
+        for (double[][] meanRefls : meanReflPerTile.values()) {
+            pathLength = Math.max(pathLength, meanRefls[0].length);
+        }
+        double[][] scaledTotalReflectance = new double[3][pathLength];
         for (int j = 0; j < 3; j++) {
             /*Checking the meanReflPerTile:
                 - if it has no relative minimum other than the first or the last value, it is excluded.
@@ -324,9 +339,9 @@ public class S2IdepixCloudShadowOp extends Operator {
             i++;
         }
         if (lx == 0) {
-            logger.warning("indecesRelativMaxInArray x.length=" + lx);
+            logger.fine("indecesRelativMaxInArray x.length=" + lx);
         } else if (lx == 1) {
-            logger.warning("indecesRelativMaxInArray x.length=" + lx);
+            logger.fine("indecesRelativMaxInArray x.length=" + lx);
             ID.add(0);
         } else if (valid) {
             double fac = -1.;
