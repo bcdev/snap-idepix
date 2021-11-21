@@ -148,26 +148,22 @@ public class S2IdepixOp extends Operator {
 
     private Product computePostProcessProduct(Product l1cProduct, Product classificationProduct) {
 
-        // todo: Shouldn't this be actually within the if clause? - in 8.x.calvalus it was, so done here now ...
-        Product postProduct  = classificationProduct;
-        Product cloudBufferProduct = null;
-        if (computeCloudBuffer) {
-            HashMap<String, Product> input = new HashMap<>();
-            input.put("l1c", l1cProduct);
-            input.put("s2Cloud", classificationProduct);
-            input.put("classifiedProduct", classificationProduct);
-            Map<String, Object> paramsBuffer = new HashMap<>();
-            paramsBuffer.put("cloudBufferWidth", cloudBufferWidth);
-            paramsBuffer.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
-            postProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
-                                            paramsBuffer, input);
-        }
+        // todo: Shouldn't this be actually within the if clause?
+        HashMap<String, Product> input = new HashMap<>();
+        input.put("l1c", l1cProduct);
+        input.put("s2Cloud", classificationProduct);
+        input.put("classifiedProduct", classificationProduct);
+        Map<String, Object> paramsBuffer = new HashMap<>();
+        paramsBuffer.put("cloudBufferWidth", cloudBufferWidth);
+        paramsBuffer.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
+        Product postProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
+                                                paramsBuffer, input);
 
         if (computeCloudShadow || computeMountainShadow || computeCloudBuffer) {
             HashMap<String, Product> inputShadow = new HashMap<>();
             inputShadow.put("l1c", l1cProduct);
             inputShadow.put("s2Classif", classificationProduct);
-            inputShadow.put("s2CloudBuffer", cloudBufferProduct);
+            inputShadow.put("s2CloudBuffer", postProduct);
             Map<String, Object> params = new HashMap<>();
             params.put("computeMountainShadow", computeMountainShadow);
             params.put("computeCloudShadow", computeCloudShadow);
