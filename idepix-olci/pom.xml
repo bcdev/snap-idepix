@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>idepix-olci</artifactId>
-    <version>8.0.1-SNAPSHOT</version>
+    <version>8.0.1</version>
 
     <packaging>nbm</packaging>
     
@@ -34,7 +34,7 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from OLCI.</description>
 
     <properties>
-        <idepix.version>8.0.1-SNAPSHOT</idepix.version>
+        <idepix-core.version>8.0.1</idepix-core.version>
         <s3tbx.version>8.0.2</s3tbx.version>
     </properties>
 
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
-            <version>${idepix.version}</version>
+            <version>${idepix-core.version}</version>
         </dependency>
 
         <dependency>
