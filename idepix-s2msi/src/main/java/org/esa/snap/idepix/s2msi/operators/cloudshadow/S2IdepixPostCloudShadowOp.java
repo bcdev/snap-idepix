@@ -153,7 +153,7 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         sourceBandClusterA = s2BandsProduct.getBand(sourceBandNameClusterA);
         sourceBandClusterB = s2BandsProduct.getBand(sourceBandNameClusterB);
 
-        sourceAltitude = s2ClassifProduct.getBand(S2IdepixConstants.ELEVATION_BAND_NAME);
+        sourceAltitude = s2BandsProduct.getBand(S2IdepixConstants.ELEVATION_BAND_NAME);
 
         final GeoPos centerGeoPos = S2IdepixUtils.getCenterGeoPos(targetProduct);
         maxcloudTop = setCloudTopHeigh(centerGeoPos.getLat());

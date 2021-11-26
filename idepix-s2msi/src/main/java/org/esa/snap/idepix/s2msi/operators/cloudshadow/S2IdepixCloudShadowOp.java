@@ -121,15 +121,16 @@ public class S2IdepixCloudShadowOp extends Operator {
         Product[] internalSourceProducts = getInternalSourceProducts(sourceResolution);
 
         Product classificationProduct = internalSourceProducts[0];
-        float sunZenithMean = getGeometryMean(classificationProduct, S2IdepixConstants.SUN_ZENITH_BAND_NAME);
-        float sunAzimuthMean = getGeometryMean(classificationProduct, S2IdepixConstants.SUN_AZIMUTH_BAND_NAME);
-        float viewZenithMean = getGeometryMean(classificationProduct, S2IdepixConstants.VIEW_ZENITH_BAND_NAME);
-        float viewAzimuthMean = getGeometryMean(classificationProduct, S2IdepixConstants.VIEW_AZIMUTH_BAND_NAME);
+        final Product s2BandsProduct = internalSourceProducts[1];
+        float sunZenithMean = getGeometryMean(s2BandsProduct, S2IdepixConstants.SUN_ZENITH_BAND_NAME);
+        float sunAzimuthMean = getGeometryMean(s2BandsProduct, S2IdepixConstants.SUN_AZIMUTH_BAND_NAME);
+        float viewZenithMean = getGeometryMean(s2BandsProduct, S2IdepixConstants.VIEW_ZENITH_BAND_NAME);
+        float viewAzimuthMean = getGeometryMean(s2BandsProduct, S2IdepixConstants.VIEW_AZIMUTH_BAND_NAME);
         sunAzimuthMean = convertToApparentSunAzimuth(sunAzimuthMean, viewZenithMean, viewAzimuthMean);
 
         HashMap<String, Product> preInput = new HashMap<>();
         preInput.put("s2ClassifProduct", classificationProduct);
-        preInput.put("s2BandsProduct", internalSourceProducts[1]);
+        preInput.put("s2BandsProduct", s2BandsProduct);
         Map<String, Object> preParams = new HashMap<>();
         preParams.put("sunZenithMean", sunZenithMean);
         preParams.put("sunAzimuthMean", sunAzimuthMean);
@@ -172,7 +173,7 @@ public class S2IdepixCloudShadowOp extends Operator {
 
         HashMap<String, Product> postInput = new HashMap<>();
         postInput.put("s2ClassifProduct", classificationProduct);
-        postInput.put("s2BandsProduct", internalSourceProducts[1]);
+        postInput.put("s2BandsProduct", s2BandsProduct);
         //put in here the input products that are required by the post-processing operator
         Map<String, Object> postParams = new HashMap<>();
         postParams.put("computeMountainShadow", computeMountainShadow);
