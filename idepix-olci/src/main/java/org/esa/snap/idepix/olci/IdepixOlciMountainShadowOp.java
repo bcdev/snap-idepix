@@ -12,7 +12,6 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.pointop.*;
 import org.esa.snap.core.util.math.MathUtils;
-import org.esa.snap.idepix.core.IdepixConstants;
 
 import java.util.HashMap;
 
@@ -74,9 +73,9 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
         sampleConfigurer.defineSample(SZA_INDEX, IdepixOlciConstants.OLCI_SUN_ZENITH_BAND_NAME, l1bProduct);
         sampleConfigurer.defineSample(SAA_INDEX, IdepixOlciConstants.OLCI_SUN_AZIMUTH_BAND_NAME, l1bProduct);
         sampleConfigurer.defineSample(OZA_INDEX, IdepixOlciConstants.OLCI_VIEW_ZENITH_INTERPOLATED_BAND_NAME,
-                saoProduct);
+                                      saoProduct);
         sampleConfigurer.defineSample(OAA_INDEX, IdepixOlciConstants.OLCI_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME,
-                saoProduct);
+                                      saoProduct);
         sampleConfigurer.defineSample(SLOPE_INDEX, IdepixOlciSlopeAspectOrientationOp.SLOPE_BAND_NAME, saoProduct);
         sampleConfigurer.defineSample(ASPECT_INDEX, IdepixOlciSlopeAspectOrientationOp.ASPECT_BAND_NAME, saoProduct);
         sampleConfigurer.defineSample(ORIENTATION_INDEX, IdepixOlciSlopeAspectOrientationOp.ORIENTATION_BAND_NAME,

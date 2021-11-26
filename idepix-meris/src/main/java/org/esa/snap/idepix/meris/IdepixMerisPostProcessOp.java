@@ -49,8 +49,8 @@ public class IdepixMerisPostProcessOp extends Operator {
     private Product l1bProduct;
     @SourceProduct(alias = "merisCloud")
     private Product merisCloudProduct;
-    //    @SourceProduct(alias = "ctp", optional = true)
-    @SourceProduct(alias = "ctp")
+    @SourceProduct(alias = "ctp", optional = true)
+//    @SourceProduct(alias = "ctp")
     private Product ctpProduct;
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
@@ -80,7 +80,9 @@ public class IdepixMerisPostProcessOp extends Operator {
         szaTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
         saaTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME);
         altTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_DEM_ALTITUDE_DS_NAME);
-        ctpBand = ctpProduct.getBand("cloud_top_press");
+        if (ctpProduct != null) {
+            ctpBand = ctpProduct.getBand("cloud_top_press");
+        }
 
         int extendedWidth;
         int extendedHeight;
@@ -110,7 +112,10 @@ public class IdepixMerisPostProcessOp extends Operator {
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
         Tile szaTile = getSourceTile(szaTPG, srcRectangle);
         Tile saaTile = getSourceTile(saaTPG, srcRectangle);
-        Tile ctpTile = getSourceTile(ctpBand, srcRectangle);
+        Tile ctpTile = null;
+        if (ctpBand != null) {
+            ctpTile = getSourceTile(ctpBand, srcRectangle);
+        }
 
         Tile altTile = getSourceTile(altTPG, targetRectangle);
         final Tile waterFractionTile = getSourceTile(waterFractionBand, srcRectangle);

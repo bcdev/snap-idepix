@@ -8,6 +8,7 @@ import java.awt.Rectangle;
  */
 class PreparationMaskBand {
 
+    // todo: Why + 0.1 to calculate the flag value?
     static final int INVALID_FLAG = (int) (Math.pow(2, S2IdepixPreCloudShadowOp.F_INVALID) + 0.1);
     static final int MOUNTAIN_SHADOW_FLAG = (int) (Math.pow(2, S2IdepixPreCloudShadowOp.F_MOUNTAIN_SHADOW) + 0.1);
     static final int CLOUD_SHADOW_FLAG = (int) (Math.pow(2, S2IdepixPreCloudShadowOp.F_CLOUD_SHADOW) + 0.1);

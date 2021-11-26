@@ -93,6 +93,7 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
         }
         latitudeBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_LATITUDE_BAND_NAME);
         longitudeBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_LONGITUDE_BAND_NAME);
+
         Product targetProduct = createTargetProduct();
         if (IdepixOlciUtils.isFullResolution(l1bProduct) || IdepixOlciUtils.isReducedResolution(l1bProduct)) {
             IdepixOlciViewAngleInterpolationOp viewAngleInterpolationOp = new IdepixOlciViewAngleInterpolationOp();

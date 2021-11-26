@@ -35,20 +35,6 @@ public class S2IdepixPreCloudShadowOpTest {
     }
 
     @Test
-    public void testDetermineSourceTileSize() {
-        assertEquals(610, cloudShadowOp.determineSourceTileSize(10980, 610, 0, 0));
-        assertEquals(122, cloudShadowOp.determineSourceTileSize(10980, 122, 0, 0));
-        assertEquals(61, cloudShadowOp.determineSourceTileSize(10980, 61, 0, 0));
-        assertEquals(61, cloudShadowOp.determineSourceTileSize(10980, 61, 61, 0));
-        assertEquals(61, cloudShadowOp.determineSourceTileSize(10980, 61, 0, 61));
-        assertEquals(610, cloudShadowOp.determineSourceTileSize(10980, 610, 375, 376));
-
-        assertEquals(610, cloudShadowOp.determineSourceTileSize(1830, 610, 0, 0));
-        assertEquals(183, cloudShadowOp.determineSourceTileSize(1830, 610, 610, 610));
-        assertEquals(915, cloudShadowOp.determineSourceTileSize(1830, 915, 0, 0));
-    }
-
-    @Test
     public void testGetSourceRectangle_normalTargetRectangle_5_5() {
         cloudShadowOp.setSourceProduct(new Product("dummy", "dummy", 30, 30));
         Rectangle targetRecangle = new Rectangle(10, 10, 10, 10);
