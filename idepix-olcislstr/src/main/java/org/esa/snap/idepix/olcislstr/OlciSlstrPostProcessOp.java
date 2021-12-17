@@ -63,7 +63,7 @@ public class OlciSlstrPostProcessOp extends Operator {
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Rectangle targetRectangle = targetTile.getRectangle();
         final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
-        final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, targetRectangle);
+        final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();

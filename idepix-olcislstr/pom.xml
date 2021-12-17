@@ -30,7 +30,8 @@
     <packaging>nbm</packaging>
 
     <name>IdePix Olci/Slstr</name>
-    <description>Classification of pixels (cloud, snow, ice, land, water) originating from OLCI/SLSTR Synergy products.
+    <description>
+        Classification of pixels (cloud, snow, ice, land, water) originating from OLCI/SLSTR Synergy products.
     </description>
 
     <properties>
@@ -44,6 +45,7 @@
             <artifactId>idepix-core</artifactId>
             <version>${idepix.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
@@ -54,17 +56,99 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-jai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-runtime</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
+            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf</artifactId>
+            <version>${snap.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-envisat-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-watermask</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-csv-dataio</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-raster</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-rad2refl</artifactId>
             <version>${s3tbx.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-olci-o2aharmonisation</artifactId>
+            <version>${s3tbx.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow</artifactId>
+            <version>1.15.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.haifengl</groupId>
+            <artifactId>smile-core</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+
+        <!--<dependency>-->
+        <!--<groupId>org.tensorflow</groupId>-->
+        <!--<artifactId>proto</artifactId>-->
+        <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+        <!--<version>1.9.0-rc1</version>-->
+        <!--</dependency>-->
+
+        <!--<dependency>-->
+        <!--<groupId>com.google.protobuf</groupId>-->
+        <!--<artifactId>protobuf-java</artifactId>-->
+        <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+        <!--<version>3.5.1</version>-->
+        <!--&lt;!&ndash;<version>2.6.1</version>&ndash;&gt;-->
+        <!--</dependency>-->
+
     </dependencies>
 
     <build>
@@ -73,8 +157,8 @@
                 <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
+
         </plugins>
     </build>
-
 
 </project>

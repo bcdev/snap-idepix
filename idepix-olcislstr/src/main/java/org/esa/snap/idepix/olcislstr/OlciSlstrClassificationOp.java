@@ -62,7 +62,8 @@ public class OlciSlstrClassificationOp extends Operator {
 
     private Band landWaterBand;
 
-    public static final String OLCISLSTR_ALL_NET_NAME = "11x9x6x4x3x2_57.8.net";
+//    public static final String OLCISLSTR_ALL_NET_NAME = "11x9x6x4x3x2_57.8.net";
+    public static final String OLCISLSTR_ALL_NET_NAME = "11x10x4x3x2_207.9.net";
 
     private static final double THRESH_LAND_MINBRIGHT1 = 0.3;
     private static final double THRESH_LAND_MINBRIGHT2 = 0.25;  // test OD 20170411
@@ -188,11 +189,15 @@ public class OlciSlstrClassificationOp extends Operator {
                     if (reflectancesValid) {
                         SchillerNeuralNetWrapper nnWrapper = olciSlstrAllNeuralNet.get();
                         double[] inputVector = nnWrapper.getInputVector();
-                        for (int i = 0; i < inputVector.length - 6; i++) {
+//                        for (int i = 0; i < inputVector.length - 6; i++) {
+//                            inputVector[i] = Math.sqrt(olciReflectance[i]);
+//                        }
+//                        for (int i = inputVector.length - slstrReflectance.length; i < inputVector.length; i++) {
+//                            inputVector[i] = Math.sqrt(slstrReflectance[i - olciReflectance.length]);
+//                        }
+                        // use OLCI net instead of OLCI/SLSTR net:
+                        for (int i = 0; i < inputVector.length; i++) {
                             inputVector[i] = Math.sqrt(olciReflectance[i]);
-                        }
-                        for (int i = inputVector.length - slstrReflectance.length; i < inputVector.length; i++) {
-                            inputVector[i] = Math.sqrt(slstrReflectance[i - olciReflectance.length]);
                         }
 
                         final double nnOutput = nnWrapper.getNeuralNet().calc(inputVector)[0];
