@@ -1,12 +1,12 @@
 package org.esa.snap.idepix.olcislstr;
 
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.util.Guardian;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.util.ProductUtils;
@@ -71,4 +71,49 @@ class OlciSlstrUtils {
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
     }
 
+    /**
+     * Copies SLSTR cloud flag bands from source to target product.
+     *
+     * @param sourceProduct - the SYN source product
+     * @param targetProduct - the target product
+     */
+    public static void copySlstrCloudFlagBands(Product sourceProduct, Product targetProduct) {
+        Guardian.assertNotNull("source", sourceProduct);
+        Guardian.assertNotNull("target", targetProduct);
+        if (sourceProduct.getFlagCodingGroup().getNodeCount() > 0) {
+
+            // loop over bands and check if they have a flags coding attached
+            for (int i = 0; i < sourceProduct.getNumBands(); i++) {
+                Band sourceBand = sourceProduct.getBandAt(i);
+                String bandName = sourceBand.getName();
+                // Use prefix 'cloud_' as identifier for SLSTR cloud flag band and copy only those.
+                if (bandName.startsWith("cloud_") && sourceBand.isFlagBand() && targetProduct.getBand(bandName) == null) {
+                    ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
+                }
+            }
+
+            // first the bands have to be copied and then the masks
+            // other wise the referenced bands, e.g. flag band, is not contained in the target product
+            // and the mask is not copied
+            copySlstrCloudMasks(sourceProduct, targetProduct);
+//            ProductUtils.copyOverlayMasks(sourceProduct, targetProduct);
+        }
+    }
+
+    private static void copySlstrCloudMasks(Product sourceProduct, Product targetProduct) {
+        ProductNodeGroup<Mask> sourceMaskGroup = sourceProduct.getMaskGroup();
+
+        for(int i = 0; i < sourceMaskGroup.getNodeCount(); ++i) {
+            Mask mask = sourceMaskGroup.get(i);
+            System.out.println("mask: " + mask.getName());
+            final boolean isSlstrCloudMask = mask.getName().startsWith("cloud_");
+            if (isSlstrCloudMask) {
+                System.out.println("true");
+            }
+            if (isSlstrCloudMask && !targetProduct.getMaskGroup().contains(mask.getName()) && mask.getImageType().canTransferMask(mask, targetProduct)) {
+                mask.getImageType().transferMask(mask, targetProduct);
+            }
+        }
+
+    }
 }

@@ -92,6 +92,10 @@ public class OlciSlstrOp extends BasisOp {
             defaultValue = "")
     private String[] slstrReflBandsToCopy;
 
+    @Parameter(defaultValue = "false",
+            label = " Copy cloud-related SLSTR flag bands to the target product",
+            description = " If applied, cloud-related SLSTR flag bands and masks are copied to the target product ")
+    private boolean copySlstrCloudFlagBands;
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product",
@@ -136,6 +140,10 @@ public class OlciSlstrOp extends BasisOp {
 
         olciSlstrIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
         olciSlstrIdepixProduct.setAutoGrouping("Oa*_radiance:Oa*_reflectance:S*_radiance:S*_reflectance");
+
+        if (copySlstrCloudFlagBands) {
+            OlciSlstrUtils.copySlstrCloudFlagBands(sourceProduct, olciSlstrIdepixProduct);
+        }
 
         if (computeCloudBuffer) {
             postProcess(olciSlstrIdepixProduct);
