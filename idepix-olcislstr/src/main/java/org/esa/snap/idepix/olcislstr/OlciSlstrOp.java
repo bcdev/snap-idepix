@@ -110,10 +110,17 @@ public class OlciSlstrOp extends BasisOp {
             label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
+    @Parameter(defaultValue = "true",
+            label = " Compute cloud shadow",
+            description = " Compute cloud shadow with the algorithm from 'Fronts' project")
+    private boolean computeCloudShadow;
+
+
     private Product postProcessingProduct;
 
     private Product olciRad2reflProduct;
     private Product slstrRad2reflProduct;
+    private Product ctpProduct;
     private Product waterMaskProduct;
 
     private Map<String, Product> classificationInputProducts;
@@ -145,7 +152,7 @@ public class OlciSlstrOp extends BasisOp {
             OlciSlstrUtils.copySlstrCloudFlagBands(sourceProduct, olciSlstrIdepixProduct);
         }
 
-        if (computeCloudBuffer) {
+        if (computeCloudBuffer || computeCloudShadow) {
             postProcess(olciSlstrIdepixProduct);
         }
 
@@ -207,6 +214,10 @@ public class OlciSlstrOp extends BasisOp {
         waterMaskParameters.put("subSamplingFactorX", IdepixConstants.OVERSAMPLING_FACTOR_X);
         waterMaskParameters.put("subSamplingFactorY", IdepixConstants.OVERSAMPLING_FACTOR_Y);
         waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
+
+        if (computeCloudShadow) {
+            ctpProduct = OlciSlstrUtils.computeCloudTopPressureProduct(sourceProduct);
+        }
     }
 
     private void setClassificationParameters() {
@@ -231,10 +242,14 @@ public class OlciSlstrOp extends BasisOp {
 
     private void postProcess(Product olciIdepixProduct) {
         HashMap<String, Product> input = new HashMap<>();
+        input.put("l1b", sourceProduct);
+        input.put("ctp", ctpProduct);
         input.put("olciSlstrCloud", olciIdepixProduct);
 
         Map<String, Object> params = new HashMap<>();
+        params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
+        params.put("computeCloudShadow", computeCloudShadow);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciSlstrPostProcessOp.class),
                                                   params, input);
