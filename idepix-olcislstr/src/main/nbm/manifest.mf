@@ -10,3 +10,4 @@ OpenIDE-Module-Long-Description: <p>Classification of pixels (cloud, snow, ice, 
  p><p><b>Vendor:</b> Brockmann Consult GmbH</p><p><b>License:</b> http
  ://www.gnu.org/licenses/gpl.html</p>
 OpenIDE-Module-Layer: layer.xml
+
