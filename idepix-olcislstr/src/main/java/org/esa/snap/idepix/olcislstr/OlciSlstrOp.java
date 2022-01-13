@@ -42,9 +42,7 @@ public class OlciSlstrOp extends BasisOp {
     private Product targetProduct;
 
     private boolean outputOlciRadiance;
-    private boolean outputOlciRad2Refl;
     private boolean outputSlstrRadiance;
-    private boolean outputSlstrRad2Refl;
 
     @Parameter(description = "The list of OLCI radiance bands to write to target product.",
             label = "Select OLCI TOA radiances to write to the target product",
@@ -58,18 +56,6 @@ public class OlciSlstrOp extends BasisOp {
             defaultValue = "")
     private String[] olciRadianceBandsToCopy;
 
-    @Parameter(description = "The list of OLCI reflectance bands to write to target product.",
-            label = "Select OLCI TOA reflectances to write to the target product",
-            valueSet = {
-                    "Oa01_reflectance", "Oa02_reflectance", "Oa03_reflectance", "Oa04_reflectance", "Oa05_reflectance",
-                    "Oa06_reflectance", "Oa07_reflectance", "Oa08_reflectance", "Oa09_reflectance", "Oa10_reflectance",
-                    "Oa11_reflectance", "Oa12_reflectance", "Oa13_reflectance", "Oa14_reflectance", "Oa15_reflectance",
-                    "Oa16_reflectance", "Oa17_reflectance", "Oa18_reflectance", "Oa19_reflectance", "Oa20_reflectance",
-                    "Oa21_reflectance"
-            },
-            defaultValue = "")
-    private String[] olciReflBandsToCopy;
-
     @Parameter(description = "The list of SLSTR radiance bands to write to target product.",
             label = "Select SLSTR TOA radiances to write to the target product",
             valueSet = {
@@ -80,22 +66,6 @@ public class OlciSlstrOp extends BasisOp {
             },
             defaultValue = "")
     private String[] slstrRadianceBandsToCopy;
-
-    @Parameter(description = "The list of SLSTR reflectance bands to write to target product.",
-            label = "Select SLSTR TOA reflectances to write to the target product",
-            valueSet = {
-                    "S1_reflectance_an", "S2_reflectance_an", "S3_reflectance_an",
-                    "S4_reflectance_an", "S5_reflectance_an", "S6_reflectance_an",
-                    "S4_reflectance_bn", "S5_reflectance_bn", "S6_reflectance_bn",
-                    "S4_reflectance_cn", "S5_reflectance_cn", "S6_reflectance_cn"
-            },
-            defaultValue = "")
-    private String[] slstrReflBandsToCopy;
-
-    @Parameter(defaultValue = "false",
-            label = " Copy cloud-related SLSTR flag bands to the target product",
-            description = " If applied, cloud-related SLSTR flag bands and masks are copied to the target product ")
-    private boolean copySlstrCloudFlagBands;
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product",
@@ -119,7 +89,6 @@ public class OlciSlstrOp extends BasisOp {
     private Product postProcessingProduct;
 
     private Product olciRad2reflProduct;
-    private Product slstrRad2reflProduct;
     private Product ctpProduct;
     private Product waterMaskProduct;
 
@@ -135,10 +104,8 @@ public class OlciSlstrOp extends BasisOp {
         }
 
         outputOlciRadiance = olciRadianceBandsToCopy != null && olciRadianceBandsToCopy.length > 0;
-        outputOlciRad2Refl = olciReflBandsToCopy != null && olciReflBandsToCopy.length > 0;
 
         outputSlstrRadiance = slstrRadianceBandsToCopy != null && slstrRadianceBandsToCopy.length > 0;
-        outputSlstrRad2Refl = slstrReflBandsToCopy != null && slstrReflBandsToCopy.length > 0;
 
         preProcess();
 
@@ -148,9 +115,7 @@ public class OlciSlstrOp extends BasisOp {
         olciSlstrIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
         olciSlstrIdepixProduct.setAutoGrouping("Oa*_radiance:Oa*_reflectance:S*_radiance:S*_reflectance");
 
-        if (copySlstrCloudFlagBands) {
-            OlciSlstrUtils.copySlstrCloudFlagBands(sourceProduct, olciSlstrIdepixProduct);
-        }
+        OlciSlstrUtils.copySlstrCloudFlagBands(sourceProduct, olciSlstrIdepixProduct);
 
         if (computeCloudBuffer || computeCloudShadow) {
             postProcess(olciSlstrIdepixProduct);
@@ -186,16 +151,8 @@ public class OlciSlstrOp extends BasisOp {
             IdepixIO.addRadianceBands(sourceProduct, targetProduct, olciRadianceBandsToCopy);
         }
 
-        if (outputOlciRad2Refl) {
-            OlciSlstrUtils.addOlciRadiance2ReflectanceBands(olciRad2reflProduct, targetProduct, olciReflBandsToCopy);
-        }
-
         if (outputSlstrRadiance) {
             IdepixIO.addRadianceBands(sourceProduct, targetProduct, slstrRadianceBandsToCopy);
-        }
-
-        if (outputSlstrRad2Refl) {
-            OlciSlstrUtils.addSlstrRadiance2ReflectanceBands(slstrRad2reflProduct, targetProduct, slstrReflBandsToCopy);
         }
 
         if (outputSchillerNNValue) {
@@ -207,7 +164,6 @@ public class OlciSlstrOp extends BasisOp {
 
     private void preProcess() {
         olciRad2reflProduct = OlciSlstrUtils.computeRadiance2ReflectanceProduct(sourceProduct, Sensor.OLCI);
-        slstrRad2reflProduct = OlciSlstrUtils.computeRadiance2ReflectanceProduct(sourceProduct, Sensor.SLSTR_500m);
 
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
         waterMaskParameters.put("resolution", IdepixConstants.LAND_WATER_MASK_RESOLUTION);
@@ -230,7 +186,6 @@ public class OlciSlstrOp extends BasisOp {
         classificationInputProducts = new HashMap<>();
         classificationInputProducts.put("l1b", sourceProduct);
         classificationInputProducts.put("reflOlci", olciRad2reflProduct);
-        classificationInputProducts.put("reflSlstr", slstrRad2reflProduct);
         classificationInputProducts.put("waterMask", waterMaskProduct);
     }
 
