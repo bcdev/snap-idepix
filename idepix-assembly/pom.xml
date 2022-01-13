@@ -18,12 +18,18 @@
 
     <dependencies>
         <!-- mp: Shall not be released yet -->
-        <!--                                <dependency>-->
-        <!--                                    <groupId>org.esa.snap</groupId>-->
-        <!--                                    <artifactId>idepix-avhrr</artifactId>-->
-        <!--                                    <version>9.0.0-SNAPSHOT</version>-->
-        <!--                                    <type>nbm</type>-->
-        <!--                                </dependency>-->
+        <!-- <dependency>-->
+        <!--     <groupId>org.esa.snap</groupId>-->
+        <!--     <artifactId>idepix-avhrr</artifactId>-->
+        <!--     <version>9.0.0-SNAPSHOT</version>-->
+        <!--     <type>nbm</type>-->
+        <!-- </dependency>-->
+        <!-- <dependency>-->
+        <!--     <groupId>org.esa.snap</groupId>-->
+        <!--     <artifactId>idepix-aatsr</artifactId>-->
+        <!--     <version>9.0.0-SNAPSHOT</version>-->
+        <!--     <type>nbm</type>-->
+        <!-- </dependency>-->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
@@ -55,12 +61,12 @@
             <type>nbm</type>
         </dependency>
         <!-- mp: Shall not be released yet -->
-        <!--                                <dependency>-->
-        <!--                                    <groupId>org.esa.snap</groupId>-->
-        <!--                                    <artifactId>idepix-olcislstr</artifactId>-->
-        <!--                                    <version>9.0.0-SNAPSHOT</version>-->
-        <!--                                    <type>nbm</type>-->
-        <!--                                </dependency>-->
+        <!-- <dependency>-->
+        <!--     <groupId>org.esa.snap</groupId>-->
+        <!--     <artifactId>idepix-olcislstr</artifactId>-->
+        <!--     <version>9.0.0-SNAPSHOT</version>-->
+        <!--     <type>nbm</type>-->
+        <!-- </dependency>-->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-probav</artifactId>
@@ -124,12 +130,18 @@
                         <configuration>
                             <artifactItems>
                                 <!-- mp: Shall not be released yet -->
-                                <!--                                <artifactItem>-->
-                                <!--                                    <groupId>org.esa.snap</groupId>-->
-                                <!--                                    <artifactId>idepix-avhrr</artifactId>-->
-                                <!--                                    <version>9.0.0-SNAPSHOT</version>-->
-                                <!--                                    <type>nbm</type>-->
-                                <!--                                </artifactItem>-->
+                                <!-- <artifactItem>-->
+                                <!--     <groupId>org.esa.snap</groupId>-->
+                                <!--     <artifactId>idepix-avhrr</artifactId>-->
+                                <!--     <version>9.0.0-SNAPSHOT</version>-->
+                                <!--     <type>nbm</type>-->
+                                <!-- </artifactItem>-->
+                                <!-- <artifactItem>-->
+                                <!--     <groupId>org.esa.snap</groupId>-->
+                                <!--     <artifactId>idepix-aatsr</artifactId>-->
+                                <!--     <version>9.0.0-SNAPSHOT</version>-->
+                                <!--     <type>nbm</type>-->
+                                <!-- </artifactItem>-->
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-core</artifactId>
@@ -161,12 +173,12 @@
                                     <type>nbm</type>
                                 </artifactItem>
                                 <!-- mp: Shall not be released yet -->
-                                <!--                                <artifactItem>-->
-                                <!--                                    <groupId>org.esa.snap</groupId>-->
-                                <!--                                    <artifactId>idepix-olcislstr</artifactId>-->
-                                <!--                                    <version>9.0.0-SNAPSHOT</version>-->
-                                <!--                                    <type>nbm</type>-->
-                                <!--                                </artifactItem>-->
+                                <!-- <artifactItem>-->
+                                <!--     <groupId>org.esa.snap</groupId>-->
+                                <!--     <artifactId>idepix-olcislstr</artifactId>-->
+                                <!--     <version>9.0.0-SNAPSHOT</version>-->
+                                <!--     <type>nbm</type>-->
+                                <!-- </artifactItem>-->
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-probav</artifactId>
