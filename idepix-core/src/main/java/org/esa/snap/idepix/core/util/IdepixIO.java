@@ -176,6 +176,9 @@ public class IdepixIO {
                 b.getName().startsWith("brr") || b.getName().startsWith("rho_toa");
     }
 
+    // TODO (mp:2022-01-13) - This should be specifcally implemented in the modules.
+    //  For example AVHRR and AATSR are not valid inputs. Because we have disabled it.
+    //  Also in addition it is strange if the OLCI IdePix states that L8 and Proba-V are valid.
     private static boolean isInputValid(Product inputProduct) {
         if (!isValidAvhrrProduct(inputProduct) &&
                 !isValidLandsat8Product(inputProduct) &&

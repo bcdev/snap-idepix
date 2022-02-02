@@ -45,9 +45,6 @@ public class OlciSlstrClassificationOp extends Operator {
     @SourceProduct(alias = "reflOlci")
     private Product olciRad2reflProduct;
 
-    @SourceProduct(alias = "reflSlstr")
-    private Product slstrRad2reflProduct;
-
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
@@ -58,11 +55,9 @@ public class OlciSlstrClassificationOp extends Operator {
     Band cloudFlagBand;
 
     private Band[] olciReflBands;
-    private Band[] slstrReflBands;
 
     private Band landWaterBand;
 
-//    public static final String OLCISLSTR_ALL_NET_NAME = "11x9x6x4x3x2_57.8.net";
     public static final String OLCISLSTR_ALL_NET_NAME = "11x10x4x3x2_207.9.net";
 
     private static final double THRESH_LAND_MINBRIGHT1 = 0.3;
@@ -94,16 +89,6 @@ public class OlciSlstrClassificationOp extends Operator {
             olciReflBands[i] = olciRad2reflProduct.getBand(reflBandname + "_reflectance");
         }
 
-        // e.g. S4_reflectance_an
-        //make sure that these are all *_an bands, as the NN uses only these
-        slstrReflBands = new Band[OlciSlstrConstants.SLSTR_REFL_AN_BAND_NAMES.length];
-        for (int i = 0; i < OlciSlstrConstants.SLSTR_REFL_AN_BAND_NAMES.length; i++) {
-            final int suffixStart = OlciSlstrConstants.SLSTR_REFL_AN_BAND_NAMES[i].indexOf("_");
-            final String reflBandname = OlciSlstrConstants.SLSTR_REFL_AN_BAND_NAMES[i].substring(0, suffixStart);
-            final int length = OlciSlstrConstants.SLSTR_REFL_AN_BAND_NAMES[i].length();
-            slstrReflBands[i] = slstrRad2reflProduct.getBand(reflBandname + "_reflectance_an");
-        }
-
         landWaterBand = waterMaskProduct.getBand("land_water_fraction");
     }
 
@@ -124,7 +109,7 @@ public class OlciSlstrClassificationOp extends Operator {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+//        ProductUtils.copyMetadata(sourceProduct, targetProduct);
 
         if (outputSchillerNNValue) {
             final Band nnValueBand = targetProduct.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
@@ -141,16 +126,13 @@ public class OlciSlstrClassificationOp extends Operator {
         final Band olciQualityFlagBand = sourceProduct.getBand(OlciSlstrConstants.OLCI_QUALITY_FLAGS_BAND_NAME);
         final Tile olciQualityFlagTile = getSourceTile(olciQualityFlagBand, rectangle);
 
+        final Band slstrCloudAnFlagBand = sourceProduct.getBand(OlciSlstrConstants.SLSTR_CLOUD_AN_FLAG_BAND_NAME);
+        final Tile slstrCloudAnFlagTile = getSourceTile(slstrCloudAnFlagBand, rectangle);
+
         Tile[] olciReflectanceTiles = new Tile[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
         float[] olciReflectance = new float[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
         for (int i = 0; i < Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
             olciReflectanceTiles[i] = getSourceTile(olciReflBands[i], rectangle);
-        }
-
-        Tile[] slstrReflectanceTiles = new Tile[OlciSlstrConstants.SLSTR_REFL_AN_BAND_NAMES.length];
-        float[] slstrReflectance = new float[OlciSlstrConstants.SLSTR_REFL_AN_BAND_NAMES.length];
-        for (int i = 0; i < OlciSlstrConstants.SLSTR_REFL_AN_BAND_NAMES.length; i++) {
-            slstrReflectanceTiles[i] = getSourceTile(slstrReflBands[i], rectangle);
         }
 
         final Band cloudFlagTargetBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
@@ -177,24 +159,18 @@ public class OlciSlstrClassificationOp extends Operator {
                         olciReflectance[i] = olciReflectanceTiles[i].getSampleFloat(x, y);
                     }
 
-                    for (int i = 0; i < OlciSlstrConstants.SLSTR_REFL_AN_BAND_NAMES.length; i++) {
-                        slstrReflectance[i] = slstrReflectanceTiles[i].getSampleFloat(x, y);
-                    }
-
                     final boolean l1Invalid = olciQualityFlagTile.getSampleBit(x, y, OlciSlstrConstants.L1_F_INVALID);
                     boolean reflectancesValid = IdepixIO.areAllReflectancesValid(olciReflectance);
-                    reflectancesValid &= IdepixIO.areAllReflectancesValid(slstrReflectance);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l1Invalid || !reflectancesValid);
+
+                    final boolean isSlstrCloudAn137Thresh =
+                            slstrCloudAnFlagTile.getSampleBit(x, y, OlciSlstrConstants.CLOUD_AN_F_137_THRESH);
+                    final boolean isSlstrCloudAnGrossCloud =
+                            slstrCloudAnFlagTile.getSampleBit(x, y, OlciSlstrConstants.CLOUD_AN_F_GROSS_CLOUD);
 
                     if (reflectancesValid) {
                         SchillerNeuralNetWrapper nnWrapper = olciSlstrAllNeuralNet.get();
                         double[] inputVector = nnWrapper.getInputVector();
-//                        for (int i = 0; i < inputVector.length - 6; i++) {
-//                            inputVector[i] = Math.sqrt(olciReflectance[i]);
-//                        }
-//                        for (int i = inputVector.length - slstrReflectance.length; i < inputVector.length; i++) {
-//                            inputVector[i] = Math.sqrt(slstrReflectance[i - olciReflectance.length]);
-//                        }
                         // use OLCI net instead of OLCI/SLSTR net:
                         for (int i = 0; i < inputVector.length; i++) {
                             inputVector[i] = Math.sqrt(olciReflectance[i]);
@@ -216,7 +192,11 @@ public class OlciSlstrClassificationOp extends Operator {
 
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, cloudAmbiguous);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, cloudSure);
+                            // request RQ, GK, 20220111:
+                            final boolean isSynCloud = cloudAmbiguous || cloudSure || isSlstrCloudAn137Thresh ||
+                                    isSlstrCloudAnGrossCloud;
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, cloudAmbiguous || cloudSure);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, isSynCloud);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, nnInterpreter.isSnowIce(nnOutput));
                         }
 
