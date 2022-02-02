@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>8.0.1-SNAPSHOT</version>
+        <version>8.0.1</version>
     </parent>
 
     <artifactId>idepix-landsat8</artifactId>
@@ -34,7 +34,7 @@
     </description>
 
     <properties>
-        <idepix.version>8.0.1-SNAPSHOT</idepix.version>
+        <idepix.version>8.0.1</idepix.version>
     </properties>
 
     <dependencies>
