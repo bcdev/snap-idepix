@@ -58,7 +58,6 @@ public class OlciSlstrClassificationOp extends Operator {
 
     private Band landWaterBand;
 
-//    public static final String OLCISLSTR_ALL_NET_NAME = "11x9x6x4x3x2_57.8.net";
     public static final String OLCISLSTR_ALL_NET_NAME = "11x10x4x3x2_207.9.net";
 
     private static final double THRESH_LAND_MINBRIGHT1 = 0.3;
@@ -110,7 +109,7 @@ public class OlciSlstrClassificationOp extends Operator {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+//        ProductUtils.copyMetadata(sourceProduct, targetProduct);
 
         if (outputSchillerNNValue) {
             final Band nnValueBand = targetProduct.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);

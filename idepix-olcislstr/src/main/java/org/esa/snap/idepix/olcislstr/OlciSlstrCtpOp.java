@@ -4,8 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
@@ -23,8 +22,6 @@ import org.esa.snap.idepix.core.util.IdepixIO;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -48,7 +45,6 @@ public class OlciSlstrCtpOp extends BasisOp {
 
     @SourceProduct(alias = "o2CorrProduct",
             label = "OLCI O2 Correction product",
-            optional = true,
             description = "OLCI O2 Correction product.")
     private Product o2CorrProduct;
 
@@ -64,10 +60,10 @@ public class OlciSlstrCtpOp extends BasisOp {
 
     static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x30x30x30x10x2xO1";
 
-    private TiePointGrid szaBand;
-    private TiePointGrid ozaBand;
-    private TiePointGrid saaBand;
-    private TiePointGrid oaaBand;
+    private RasterDataNode szaBand;
+    private RasterDataNode ozaBand;
+    private RasterDataNode saaBand;
+    private RasterDataNode oaaBand;
 
     private Band rad12Band;
     private Band solarFlux12Band;
@@ -116,12 +112,11 @@ public class OlciSlstrCtpOp extends BasisOp {
     public void doExecute(ProgressMonitor pm) throws OperatorException {
         try {
             pm.beginTask("Executing CTP processing...", 0);
-            preProcess();
 
-            szaBand = sourceProduct.getTiePointGrid("SZA");
-            ozaBand = sourceProduct.getTiePointGrid("OZA");
-            saaBand = sourceProduct.getTiePointGrid("SAA");
-            oaaBand = sourceProduct.getTiePointGrid("OAA");
+            szaBand = sourceProduct.getRasterDataNode("SZA");
+            ozaBand = sourceProduct.getRasterDataNode("OZA");
+            saaBand = sourceProduct.getRasterDataNode("SAA");
+            oaaBand = sourceProduct.getRasterDataNode("OAA");
 
             rad12Band = sourceProduct.getBand("Oa12_radiance");
             solarFlux12Band = sourceProduct.getBand("solar_flux_band_12");
@@ -197,25 +192,12 @@ public class OlciSlstrCtpOp extends BasisOp {
 
     }
 
-    private void preProcess() {
-        if (o2CorrProduct == null) {
-            Map<String, Product> o2corrSourceProducts = new HashMap<>();
-            Map<String, Object> o2corrParms = new HashMap<>();
-            o2corrParms.put("processOnlyBand13", false);
-            o2corrParms.put("writeHarmonisedRadiances", false);
-            o2corrSourceProducts.put("l1bProduct", sourceProduct);
-            final String o2CorrOpName = "OlciO2aHarmonisation";
-            o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
-        }
-    }
-
     private Product createTargetProduct() {
         Product targetProduct = new Product(sourceProduct.getName(),
                                             sourceProduct.getProductType(),
                                             sourceProduct.getSceneRasterWidth(),
                                             sourceProduct.getSceneRasterHeight());
 
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);

@@ -185,9 +185,10 @@ class OlciSlstrUtils {
     }
 
     // todo: RENOVATION: code duplication from OLCI module, move to core
-    static Product computeCloudTopPressureProduct(Product sourceProduct) {
+    static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct) {
         Map<String, Product> ctpSourceProducts = new HashMap<>();
         ctpSourceProducts.put("sourceProduct", sourceProduct);
+        ctpSourceProducts.put("o2CorrProduct", o2CorrProduct);
         Map<String, Object> params = new HashMap<>(2);
         params.put("outputCtp", false);
         return GPF.createProduct(OperatorSpi.getOperatorAlias(OlciSlstrCtpOp.class), params, ctpSourceProducts);

@@ -90,6 +90,7 @@ public class OlciSlstrOp extends BasisOp {
 
     private Product olciRad2reflProduct;
     private Product ctpProduct;
+    private Product o2CorrProduct;
     private Product waterMaskProduct;
 
     private Map<String, Product> classificationInputProducts;
@@ -136,7 +137,7 @@ public class OlciSlstrOp extends BasisOp {
                                             idepixProduct.getSceneRasterWidth(),
                                             idepixProduct.getSceneRasterHeight());
 
-        ProductUtils.copyMetadata(idepixProduct, targetProduct);
+//        ProductUtils.copyMetadata(idepixProduct, targetProduct);
         ProductUtils.copyGeoCoding(idepixProduct, targetProduct);
         ProductUtils.copyFlagCodings(idepixProduct, targetProduct);
         ProductUtils.copyFlagBands(idepixProduct, targetProduct, true);
@@ -172,7 +173,15 @@ public class OlciSlstrOp extends BasisOp {
         waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
 
         if (computeCloudShadow) {
-            ctpProduct = OlciSlstrUtils.computeCloudTopPressureProduct(sourceProduct);
+            Map<String, Product> o2corrSourceProducts = new HashMap<>();
+            o2corrSourceProducts.put("l1bProduct", sourceProduct);
+            final String o2CorrOpName = "OlciO2aHarmonisation";
+            Map<String, Object> o2corrParms = new HashMap<>();
+            o2corrParms.put("writeHarmonisedRadiances", false);
+            o2corrParms.put("processOnlyBand13", false);
+            o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
+
+            ctpProduct = OlciSlstrUtils.computeCloudTopPressureProduct(sourceProduct, o2CorrProduct);
         }
     }
 

@@ -1,10 +1,7 @@
 package org.esa.snap.idepix.olcislstr;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -59,12 +56,12 @@ public class OlciSlstrPostProcessOp extends Operator {
     private Band origCloudFlagBand;
 
     private Band ctpBand;
-    private TiePointGrid szaTPG;
-    private TiePointGrid saaTPG;
-    private TiePointGrid ozaTPG;
-    private TiePointGrid oaaTPG;
-    private TiePointGrid slpTPG;
-    private TiePointGrid[] temperatureProfileTPGs;
+    private RasterDataNode szaTPG;
+    private RasterDataNode saaTPG;
+    private RasterDataNode ozaTPG;
+    private RasterDataNode oaaTPG;
+    private RasterDataNode slpTPG;
+    private RasterDataNode[] temperatureProfileTPGs;
     private Band altBand;
 
     private GeoCoding geoCoding;
@@ -82,18 +79,18 @@ public class OlciSlstrPostProcessOp extends Operator {
 
         origCloudFlagBand = olciSlstrCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
 
-        szaTPG = l1bProduct.getTiePointGrid("SZA");
-        saaTPG = l1bProduct.getTiePointGrid("SAA");
-        ozaTPG = l1bProduct.getTiePointGrid("OZA");
-        oaaTPG = l1bProduct.getTiePointGrid("OAA");
-        slpTPG = l1bProduct.getTiePointGrid("sea_level_pressure");
+        szaTPG = l1bProduct.getRasterDataNode("SZA");
+        saaTPG = l1bProduct.getRasterDataNode("SAA");
+        ozaTPG = l1bProduct.getRasterDataNode("OZA");
+        oaaTPG = l1bProduct.getRasterDataNode("OAA");
+        slpTPG = l1bProduct.getRasterDataNode("sea_level_pressure");
 
         altBand = l1bProduct.getBand(OlciSlstrConstants.OLCI_ALTITUDE_BAND_NAME);
 
-        temperatureProfileTPGs = new TiePointGrid[OlciSlstrConstants.referencePressureLevels.length];
+        temperatureProfileTPGs = new RasterDataNode[OlciSlstrConstants.referencePressureLevels.length];
         for (int i = 0; i < OlciSlstrConstants.referencePressureLevels.length; i++) {
             temperatureProfileTPGs[i] =
-                    l1bProduct.getTiePointGrid("atmospheric_temperature_profile_pressure_level_" + (i + 1));
+                    l1bProduct.getRasterDataNode("atmospheric_temperature_profile_pressure_level_" + (i + 1));
         }
 
 
