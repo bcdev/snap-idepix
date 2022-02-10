@@ -12,13 +12,13 @@ It will probably only be used within this project.
 ### The Algorithm Prototype
 The prototype has been implemented by D. Müller.
 The code is located at [aatsr_cloud_shadow_dev.py]( 
-https://github.com/bcdev/geoinfopy/blob/d8fc400b6aa11e145e0f4524191337babfec626a/sandbox/dagmar/QA4EO/aatsr_cloud_shadow_dev.py) on GitHub 
+https://github.com/bcdev/geoinfopy/blob/master/sandbox/dagmar/QA4EO/aatsr_cloud_shadow_dev.py) on GitHub 
 and in this project at *resource/aatsr_cloud_shadow_dev.py*.
 
 A TN for the prototype is located at: 
 *fs1\projects\ongoing\QA4EO\WorkingArea\CloudShadow_AATSR\Technical Note_cloudshadow_draft_v0.1.docx*
 
 ### Test Data
-Data for testing can be found at *H:\related\QA4EO\AATSR4th Cloud Shadow*
+Data for testing can be found at *EOData\related\QA4EO\AATSR4th Cloud Shadow*
 More 4th reprocessing data is currently not yet availabe, but 
 can be obtained from Darren Ghent (partner in this project) or from Pauline Cocevar.
