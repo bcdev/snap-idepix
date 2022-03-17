@@ -1,4 +1,18 @@
-**Changes in Idepix Olci v7.0.3 (not released, as of date 18.03.2020)**
+The changelog will not be maintaned aynmore.
+For the track of changes please referr to the releas not on GitHub.
+https://github.com/bcdev/snap-idepix/releases
+
+**Changes in Idepix Olci v9.0.0**
+* Performance improvements (#3)
+* Adapt Idepix OLCI to updated OLCI O2A Harmonisation (#13)
+* Update Tensorflow library to latest version (#14)
+* Duplicated cloud shadow near scene edge in OLCI data (#26)
+* OLCI mountain shadow around nadir view creates artefact (#52)
+
+**Changes in Idepix Olci v8.0.1**
+* made hillshade algorithm available (issue #28)
+
+**Changes in Idepix Olci v8.0.0**
 * Snow/ice flag was not correct over fresh inland water
 
 **Changes in Idepix Olci v7.0.2**
