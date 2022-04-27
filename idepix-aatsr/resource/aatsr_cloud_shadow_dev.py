@@ -13,9 +13,10 @@ from snappy import Product
 from snappy import ProductData
 from snappy import ProductIO
 from snappy import jpy
-from snappy import PixelPos
+from snappy import PixelPos #org.esa.snap.core.datamodel.PixelPos
 
 GeoPos = jpy.get_type('org.esa.snap.core.datamodel.GeoPos')
+PixelPos = jpy.get_type('org.esa.snap.core.datamodel.PixelPos')
 GPF = jpy.get_type('org.esa.snap.core.gpf.GPF')
 File = jpy.get_type('java.io.File')
 ProgressMonitor = jpy.get_type('com.bc.ceres.core.ProgressMonitor')

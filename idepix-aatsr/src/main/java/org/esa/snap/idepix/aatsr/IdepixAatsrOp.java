@@ -43,7 +43,7 @@ import java.util.Map;
 @OperatorMetadata(alias = "Idepix.Aatsr",
         category = "Optical/Preprocessing/Masking",
         version = "1.0",
-        authors = "",
+        authors = "Dagmar Mueller, Marco Peters",
         copyright = "(c) 2022 by Brockmann Consult",
         description = "Pixel identification and classification for AATSR.")
 public class IdepixAatsrOp extends BasisOp {
