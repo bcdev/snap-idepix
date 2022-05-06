@@ -15,29 +15,19 @@
  */
 package org.esa.snap.idepix.aatsr;
 
-import org.esa.s3tbx.dataio.s3.meris.reprocessing.Meris3rd4thReprocessingAdapter;
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
-import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
-import org.esa.snap.core.util.ProductUtils;
-
-import org.esa.snap.idepix.core.AlgorithmSelector;
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.operators.BasisOp;
-import org.esa.snap.idepix.core.operators.CloudBufferOp;
-import org.esa.snap.idepix.core.util.IdepixIO;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * The IdePix pixel classification operator for AATSR products.
+ * The IdePix pixel classification operator for AATSR products (4th repro).
  *
  */
 @OperatorMetadata(alias = "Idepix.Aatsr",
@@ -45,8 +35,8 @@ import java.util.Map;
         version = "1.0",
         authors = "Dagmar Mueller, Marco Peters",
         copyright = "(c) 2022 by Brockmann Consult",
-        description = "Pixel identification and classification for AATSR.")
-public class IdepixAatsrOp extends BasisOp {
+        description = "Pixel identification and classification for AATSR 4th repro data.")
+public class IdepixAatsrOp extends Operator {
 
     @SourceProduct(label = "AATSR L1b product",
             description = "The AATSR L1b source product.")
@@ -59,15 +49,37 @@ public class IdepixAatsrOp extends BasisOp {
 
     @Override
     public void initialize() throws OperatorException {
-        validate(sourceProduct);
+        validate(sourceProduct); // 1.1)
+        // 1.2) validateParameters(); // if any
 
+        // 2) create TargetProduct
+        // 2.1) copy source bands (todo - which source bands to include?)
+        // 2.2) create flag band compatible with other Idepix processors but only
+        // 2.3) the cloud shadow flag and the used cloud flag are used?
+        // 2.4) setup cloud shadow mask and the cloud mask
     }
 
     private void validate(Product sourceProduct) throws OperatorException{
-
+        // validate source product
     }
 
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        super.doExecute(pm);
+        // 1) create north-corrected orientation on a sub-sampled (100) grid then scale back
+        // to original size using bicubic interpolation
+        // 2) create cloudMaskImage and landMaskImage
+        // 3) create startSearchMask using cloudMaskImage, landMaskImage and search radius
+    }
 
+    @Override
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        super.computeTile(targetBand, targetTile, pm);
+        // 1) compute flag data
+        // 1.1) compute illuPathSteps, illuPathHeight, threshHeight
+        // 1.2) compute cloud shadow
+        // 2) set flags cloud_shadow and cloud
+    }
 
     /**
      * The Service Provider Interface (SPI) for the operator.
