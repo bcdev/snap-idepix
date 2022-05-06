@@ -16,7 +16,7 @@ https://github.com/bcdev/geoinfopy/blob/master/sandbox/dagmar/QA4EO/aatsr_cloud_
 and in this project at *resource/aatsr_cloud_shadow_dev.py*.
 
 A TN for the prototype is located at: 
-*fs1\projects\ongoing\QA4EO\WorkingArea\CloudShadow_AATSR\Technical Note_cloudshadow_draft_v0.1.docx*
+*fs1\projects\ongoing\QA4EO\WorkingArea\CloudShadow_AATSR\Technical Note_cloudshadow_draft_v0.2.docx*
 
 ### Test Data
 Data for testing can be found at *EOData\related\QA4EO\AATSR4th Cloud Shadow*
