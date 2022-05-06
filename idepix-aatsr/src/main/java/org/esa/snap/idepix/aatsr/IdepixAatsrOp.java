@@ -25,6 +25,7 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.util.ProductUtils;
 
 /**
  * The IdePix pixel classification operator for AATSR products (4th repro).
@@ -53,14 +54,11 @@ public class IdepixAatsrOp extends Operator {
         // 1.2) validateParameters(); // if any
 
         // 2) create TargetProduct
+        targetProduct = createCompatibleProduct(sourceProduct, sourceProduct.getName() + "_idepix");
         // 2.1) copy source bands (todo - which source bands to include?)
         // 2.2) create flag band compatible with other Idepix processors but only
         // 2.3) the cloud shadow flag and the used cloud flag are used?
         // 2.4) setup cloud shadow mask and the cloud mask
-    }
-
-    private void validate(Product sourceProduct) throws OperatorException{
-        // validate source product
     }
 
     @Override
@@ -76,9 +74,29 @@ public class IdepixAatsrOp extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         super.computeTile(targetBand, targetTile, pm);
         // 1) compute flag data
+        //    use max distance from 2000-blocks for getting source data
         // 1.1) compute illuPathSteps, illuPathHeight, threshHeight
         // 1.2) compute cloud shadow
         // 2) set flags cloud_shadow and cloud
+    }
+
+
+    private Product createCompatibleProduct(Product sourceProduct, String name) {
+        int sceneWidth = sourceProduct.getSceneRasterWidth();
+        int sceneHeight = sourceProduct.getSceneRasterHeight();
+        Product targetProduct = new Product(name, "AATSR_IDEPIX", sceneWidth, sceneHeight);
+        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
+        return targetProduct;
+    }
+
+    void validate(Product sourceProduct) throws OperatorException{
+        // todo - test for the used data.
+        if(!"ENV_AT_1_RBT".equals(sourceProduct.getProductType())) {
+            throw new OperatorException("An AATSR product from the 4th reprocessing is needed as input");
+        }
     }
 
     /**
