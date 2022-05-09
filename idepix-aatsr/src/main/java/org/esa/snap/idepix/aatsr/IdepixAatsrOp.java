@@ -56,7 +56,8 @@ public class IdepixAatsrOp extends Operator {
         // 2) create TargetProduct
         targetProduct = createCompatibleProduct(sourceProduct, sourceProduct.getName() + "_idepix");
         // 2.1) copy source bands (todo - which source bands to include?)
-        // 2.2) create flag band compatible with other Idepix processors but only
+        // 2.2) create flag band compatible with other IdePix processors but only
+
         // 2.3) the cloud shadow flag and the used cloud flag are used?
         // 2.4) setup cloud shadow mask and the cloud mask
     }
