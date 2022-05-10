@@ -28,7 +28,8 @@
     The IdePix classification algorithm for Sentinel-3 OLCI is based on a neural network approach. A common neural net
     is used for both land and water pixels.
     As input for the neural net, the square roots of the OLCI TOA reflectances (obtained from an internal
-    radiance-to-reflectance conversion) in all 21 bands are used. <br> <br>
+    radiance-to-reflectance conversion) in all 21 bands are used.  It is described in detail in the ATBD [1].
+    <br> <br>
 
     As output, the neural net finally provides per pixel one of the properties 'cloud sure',
     'cloud ambiguous', 'cloud' (which means sure OR ambiguous) ,  or 'snow/ice'.<br>
@@ -46,7 +47,7 @@
         on the full image. The cloud buffer algorithm works on pixel windows of size (2N+1) x (2N+1) with N = cloud buffer
         width. Note that the cloud buffer is only applied on cloud-free pixels, i.e. cloudy pixels are not flagged as cloud
         buffer of cloudy neighbour pixels.
-        The cloud buffer procedure is described in a bit more detail in the CCI Land Cover ATBD [1].
+        The cloud buffer procedure is described in a bit more detail in the CCI Land Cover ATBD [2].
     </li>
     <li>
         'bright': the pixel is a bright pixel. The information is retained from the quality flags of the L1b product.
@@ -61,7 +62,7 @@
 
 By default, the 'land' and 'coastline' pixels are identified from the land flag included in the
 quality flags which come with the L1b product. Optionally, the SRTM (Shuttle Radar Topography Mission) land/water
-mask[2] can be applied instead.
+mask [3] can be applied instead.
 The latter is a fractional mask:
 <ul>
     <li>
@@ -88,7 +89,7 @@ Two shadow flags are provided with the classification:
         classification.
     </li>
     <li>
-        'mountain_shadow': a hillshade algorithm [3] is implemented, which derives slopes from elevation data and uses a
+        'mountain_shadow': a hillshade algorithm [4] is implemented, which derives slopes from elevation data and uses a
         geometric test with slope, aspect and illumination and satellite observation conditions against a threshold to
         find pixel in the (core) shadow of mountainous terrain. The threshold is set to 0.9 by default, and can be adjusted
         by the user between 1 (larger terrain shadow extent) and 0 (no terrain shadow).
@@ -158,7 +159,7 @@ Two shadow flags are provided with the classification:
 
     <br><br>
 
-    <b>[1]</b>
+    <b>[2]</b>
     CCI Land Cover - Algorithm Theoretical Basis Document: Pre-Processing<br>
     Chapter 4.4.11 Cloud shadow and cloud edge detection<br>
     <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
@@ -169,7 +170,7 @@ Two shadow flags are provided with the classification:
 
     <br><br>
 
-    <b>[2]</b>
+    <b>[3]</b>
     Farr, T. G., et al., The Shuttle Radar Topography Mission, Rev. Geophys., 45, RG2004,
     doi:10.1029/2005RG000183. (2007)<br>
     <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
@@ -180,7 +181,7 @@ Two shadow flags are provided with the classification:
 
     <br><br>
 
-    <b>[3]</b>
+    <b>[4]</b>
     Hillshade explained<br>
     <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
         <param name="content" value="https://desktop.arcgis.com/en/arcmap/latest/tools/spatial-analyst-toolbox/how-hillshade-works.htm">
