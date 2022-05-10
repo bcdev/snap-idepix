@@ -17,7 +17,11 @@ package org.esa.snap.idepix.aatsr;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -25,7 +29,19 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.math.Range;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.IdepixFlagCoding;
+
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
+import java.util.Arrays;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 
 /**
  * The IdePix pixel classification operator for AATSR products (4th repro).
@@ -55,20 +71,44 @@ public class IdepixAatsrOp extends Operator {
 
         // 2) create TargetProduct
         targetProduct = createCompatibleProduct(sourceProduct, sourceProduct.getName() + "_idepix");
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
         // 2.1) copy source bands (todo - which source bands to include?)
         // 2.2) create flag band compatible with other IdePix processors but only
+        final Band cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
+        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
+        cloudFlagBand.setSampleCoding(flagCoding);
+        IdepixFlagCoding.setupDefaultClassifBitmask(targetProduct);
 
-        // 2.3) the cloud shadow flag and the used cloud flag are used?
-        // 2.4) setup cloud shadow mask and the cloud mask
     }
 
     @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
-        super.doExecute(pm);
-        // 1) create north-corrected orientation on a sub-sampled (100) grid then scale back
-        // to original size using bicubic interpolation
-        // 2) create cloudMaskImage and landMaskImage
-        // 3) create startSearchMask using cloudMaskImage, landMaskImage and search radius
+        pm.beginTask("Preparing cloud shadow detection.", 3);
+        try {
+            final int sceneWidth = sourceProduct.getSceneRasterWidth();
+            final int sceneHeight = sourceProduct.getSceneRasterHeight();
+
+            // 1) detect day time area where cloud shadow can occur
+            final RasterDataNode sza = sourceProduct.getRasterDataNode("solar_zenith_tn");
+            final Mask dayMask = sourceProduct.getMaskGroup().get("confidence_in_day");
+            // test sun elevation and find first and last row with SZA<85°, daylight zone
+            // day flag is necessary because there can be an area with SZA<85° but it is not marked as DAY.
+            final Mask szaDayTest = Mask.BandMathsType.create("SZA_DAY_TEST", "", sceneWidth, sceneHeight,
+                                                                "solar_zenith_tn < 85 && confidence_in_day",
+                                                                Color.yellow, 0.5f);
+            szaDayTest.setOwner(getSourceProduct());
+            final Range dayRange = detectMaskedPixelRangeInColumn(szaDayTest, sceneWidth);
+
+            // 2) create north-corrected orientation on a sub-sampled (100) grid then scale back
+            // to original size using bicubic interpolation
+            pm.worked(1);
+            // 3) create cloudMaskImage and landMaskImage
+            pm.worked(1);
+            // 4) create startSearchMask using cloudMaskImage, landMaskImage and search radius
+            pm.worked(1);
+        } finally {
+            pm.done();
+        }
     }
 
     @Override
@@ -91,6 +131,32 @@ public class IdepixAatsrOp extends Operator {
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
         return targetProduct;
+    }
+
+    static Range detectMaskedPixelRangeInColumn(Mask mask, int column) {
+        final int rasterHeight = mask.getRasterHeight();
+        final Raster data = mask.getSourceImage().getData(new Rectangle(column, 0, 1, rasterHeight));
+        // masks have byte data type
+        final byte[] dataBufferArray = (byte[]) ImageUtils.createDataBufferArray(data.getTransferType(), rasterHeight);
+        data.getDataElements(column, 0, 1, rasterHeight, dataBufferArray);
+        final Range range = new Range(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
+        // todo - can be further optimised and parallelized
+        for (int i = 0; i < dataBufferArray.length; i++) {
+            if(Double.isInfinite(range.getMin()) ){
+                if (dataBufferArray[i] == -1) {
+                    range.setMin(i);
+                }
+            }
+        }
+        for (int i = dataBufferArray.length - 1; i >= 0; i--) {
+            if(!Double.isInfinite(range.getMin()) && Double.isInfinite(range.getMax()) ){
+                if (dataBufferArray[i] == -1) {
+                    range.setMax(i);
+                }
+            }
+        }
+        return range;
     }
 
     void validate(Product sourceProduct) throws OperatorException{

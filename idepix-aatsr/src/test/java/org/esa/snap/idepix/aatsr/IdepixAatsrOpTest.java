@@ -16,13 +16,17 @@
 
 package org.esa.snap.idepix.aatsr;
 
+import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.snap.core.util.DummyProductBuilder;
+import org.esa.snap.core.util.math.Range;
 import org.junit.Test;
+
+import java.awt.Color;
 
 import static org.junit.Assert.*;
 
@@ -73,6 +77,35 @@ public class IdepixAatsrOpTest {
 
         aatsr.setProductType("differentType");
         idepixAatsrOp.validate(aatsr);
+
+    }
+
+    @Test
+    public void detectFirstLastMaskedPixel() {
+        final Product aatsr = createDummyAatsrSource();
+        // Col 0 = 25-30
+        // Col 560 = 10-12
+        // Col 1300 = 300-400
+        final Mask testMask = Mask.BandMathsType.create("TEST_MASK", "", aatsr.getSceneRasterWidth(), aatsr.getSceneRasterHeight(),
+                                                          "(X==0.5 && Y>=25.5 && Y<=30.5) ||" +
+                                                                  "(X==560.5 && Y>=10.5 && Y<=12.5) ||" +
+                                                                  "(X==1300.5 && Y>=300.5 && Y<=400.5)",
+                                                          Color.yellow, 0.5f);
+
+
+        aatsr.addMask(testMask);
+        Range range;
+        range = IdepixAatsrOp.detectMaskedPixelRangeInColumn(testMask, 0);
+        assertEquals(25, range.getMin(), 1.0e-6);
+        assertEquals(30, range.getMax(), 1.0e-6);
+
+        range = IdepixAatsrOp.detectMaskedPixelRangeInColumn(testMask, 560);
+        assertEquals(10, range.getMin(), 1.0e-6);
+        assertEquals(12, range.getMax(), 1.0e-6);
+
+        range = IdepixAatsrOp.detectMaskedPixelRangeInColumn(testMask, 1300);
+        assertEquals(300, range.getMin(), 1.0e-6);
+        assertEquals(400, range.getMax(), 1.0e-6);
 
     }
 
