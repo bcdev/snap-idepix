@@ -16,12 +16,15 @@
 package org.esa.snap.idepix.aatsr;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.glevel.MultiLevelImage;
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -35,13 +38,14 @@ import org.esa.snap.core.util.math.Range;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 
+import javax.media.jai.Interpolation;
+import javax.media.jai.OpImage;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.ScaleDescriptor;
 import java.awt.Color;
 import java.awt.Rectangle;
-import java.awt.image.DataBuffer;
+import java.awt.RenderingHints;
 import java.awt.image.Raster;
-import java.util.Arrays;
-import java.util.Spliterators;
-import java.util.stream.StreamSupport;
 
 /**
  * The IdePix pixel classification operator for AATSR products (4th repro).
@@ -101,6 +105,19 @@ public class IdepixAatsrOp extends Operator {
 
             // 2) create north-corrected orientation on a sub-sampled (100) grid then scale back
             // to original size using bicubic interpolation
+            final TiePointGrid tpLats = sourceProduct.getTiePointGrid("latitude_tx");
+            final TiePointGrid tpLons = sourceProduct.getTiePointGrid("longitude_tx");
+            final Interpolation nearest = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+            final Interpolation bicubic = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
+            final float downScaleFactor = 1 / 100F;
+            final RenderedOp lowResLats = ScaleDescriptor.create(tpLats.getSourceImage(), downScaleFactor, downScaleFactor, 0.0F, 0.0F, nearest, (RenderingHints) null);
+            final RenderedOp lowResLons = ScaleDescriptor.create(tpLons.getSourceImage(), downScaleFactor, downScaleFactor, 0.0F, 0.0F, nearest, (RenderingHints) null);
+            final OpImage lowResOrientation = new OrientationOpImage(lowResLats, lowResLons);
+            final float upScaleWidthFactor = sceneWidth / (float) lowResOrientation.getWidth(); // todo use orientation image here instead of lowResLats
+            final float upScaleHeightFactor = sceneHeight / (float) lowResOrientation.getHeight();
+            final RenderedOp orientationImage = ScaleDescriptor.create(lowResOrientation, upScaleWidthFactor, upScaleHeightFactor, 0.0F, 0.0F, bicubic, (RenderingHints) null);
+
+
             pm.worked(1);
             // 3) create cloudMaskImage and landMaskImage
             pm.worked(1);
