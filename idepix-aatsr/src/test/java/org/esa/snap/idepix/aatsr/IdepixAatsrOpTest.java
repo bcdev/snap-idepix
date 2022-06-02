@@ -27,6 +27,8 @@ import org.esa.snap.core.util.math.Range;
 import org.junit.Test;
 
 import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -87,10 +89,10 @@ public class IdepixAatsrOpTest {
         // Col 560 = 10-12
         // Col 1300 = 300-400
         final Mask testMask = Mask.BandMathsType.create("TEST_MASK", "", aatsr.getSceneRasterWidth(), aatsr.getSceneRasterHeight(),
-                                                          "(X==0.5 && Y>=25.5 && Y<=30.5) ||" +
-                                                                  "(X==560.5 && Y>=10.5 && Y<=12.5) ||" +
-                                                                  "(X==1300.5 && Y>=300.5 && Y<=400.5)",
-                                                          Color.yellow, 0.5f);
+                                                        "(X==0.5 && Y>=25.5 && Y<=30.5) ||" +
+                                                                "(X==560.5 && Y>=10.5 && Y<=12.5) ||" +
+                                                                "(X==1300.5 && Y>=300.5 && Y<=400.5)",
+                                                        Color.yellow, 0.5f);
 
 
         aatsr.addMask(testMask);
@@ -107,6 +109,27 @@ public class IdepixAatsrOpTest {
         assertEquals(300, range.getMin(), 1.0e-6);
         assertEquals(400, range.getMax(), 1.0e-6);
 
+    }
+
+    @Test
+    public void sliceRectangle() {
+        final List<Rectangle> rectangles =
+                IdepixAatsrOp.sliceRect(new Rectangle(0, 0, 512, 43138), 2000);
+
+        assertEquals(22, rectangles.size());
+        assertEquals(new Rectangle(0, 6000, 512, 2000), rectangles.get(3));
+        assertEquals(new Rectangle(0, 42000, 512, 1138), rectangles.get(21));
+    }
+
+    @Test
+    public void createDistanceArray() {
+        final int[] distanceArray = IdepixAatsrOp.createDistanceArray(25, 1000);
+        assertEquals(51, distanceArray.length);
+        assertEquals(-25000, distanceArray[0]);
+        assertEquals(-24000, distanceArray[1]);
+        assertEquals(-23000, distanceArray[2]);
+        assertEquals(24000, distanceArray[distanceArray.length - 2]);
+        assertEquals(25000, distanceArray[distanceArray.length - 1]);
     }
 
     private Product createDummyAatsrSource() {
