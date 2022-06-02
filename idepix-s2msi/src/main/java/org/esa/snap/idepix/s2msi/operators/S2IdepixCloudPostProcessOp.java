@@ -12,6 +12,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
+import org.esa.snap.idepix.s2msi.CoastalCloudDistinction;
 import org.esa.snap.idepix.s2msi.UrbanCloudDistinction;
 import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
@@ -46,6 +47,7 @@ public class S2IdepixCloudPostProcessOp extends Operator {
     private Band origClassifFlagBand;
 
     private RectangleExtender rectCalculator;
+    private CoastalCloudDistinction coastalCloudDistinction;
     private UrbanCloudDistinction urbanCloudDistinction;
 
 
@@ -63,6 +65,7 @@ public class S2IdepixCloudPostProcessOp extends Operator {
         origClassifFlagBand = classifiedProduct.getBand(IDEPIX_CLASSIF_FLAGS);
         ProductUtils.copyBand(IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
 
+        coastalCloudDistinction = new CoastalCloudDistinction(classifiedProduct);
         urbanCloudDistinction = new UrbanCloudDistinction(classifiedProduct);
 
         setTargetProduct(cloudBufferProduct);
@@ -95,6 +98,7 @@ public class S2IdepixCloudPostProcessOp extends Operator {
                 boolean isCloud;
                 if (targetRectangle.contains(x, y)) {
                     S2IdepixUtils.combineFlags(x, y, sourceFlagTile, targetTile);
+                    coastalCloudDistinction.correctCloudFlag(x, y, targetTile, targetTile);
                     urbanCloudDistinction.correctCloudFlag(x, y, targetTile, targetTile);
                     isCloud = isCloudPixel(targetTile, y, x);
                 } else {
