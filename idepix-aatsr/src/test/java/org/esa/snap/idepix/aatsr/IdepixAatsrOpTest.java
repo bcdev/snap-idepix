@@ -96,29 +96,40 @@ public class IdepixAatsrOpTest {
 
 
         aatsr.addMask(testMask);
-        Range range;
+        int[] range;
         range = IdepixAatsrOp.detectMaskedPixelRangeInColumn(testMask, 0);
-        assertEquals(25, range.getMin(), 1.0e-6);
-        assertEquals(30, range.getMax(), 1.0e-6);
+        assertEquals(25, range[0], 1.0e-6);
+        assertEquals(30, range[1], 1.0e-6);
 
         range = IdepixAatsrOp.detectMaskedPixelRangeInColumn(testMask, 560);
-        assertEquals(10, range.getMin(), 1.0e-6);
-        assertEquals(12, range.getMax(), 1.0e-6);
+        assertEquals(10, range[0], 1.0e-6);
+        assertEquals(12, range[1], 1.0e-6);
 
         range = IdepixAatsrOp.detectMaskedPixelRangeInColumn(testMask, 1300);
-        assertEquals(300, range.getMin(), 1.0e-6);
-        assertEquals(400, range.getMax(), 1.0e-6);
+        assertEquals(300, range[0], 1.0e-6);
+        assertEquals(400, range[1], 1.0e-6);
 
     }
 
     @Test
-    public void sliceRectangle() {
+    public void sliceRectangle_atZero() {
         final List<Rectangle> rectangles =
                 IdepixAatsrOp.sliceRect(new Rectangle(0, 0, 512, 43138), 2000);
 
         assertEquals(22, rectangles.size());
         assertEquals(new Rectangle(0, 6000, 512, 2000), rectangles.get(3));
         assertEquals(new Rectangle(0, 42000, 512, 1138), rectangles.get(21));
+    }
+
+    @Test
+    public void sliceRectangle_withYOffset() {
+        final List<Rectangle> rectangles =
+                IdepixAatsrOp.sliceRect(new Rectangle(0, 12356, 512, 20222), 2000);
+
+        assertEquals(11, rectangles.size());
+        assertEquals(new Rectangle(0, 12356, 512, 2000), rectangles.get(0));
+        assertEquals(new Rectangle(0, 18356, 512, 2000), rectangles.get(3));
+        assertEquals(new Rectangle(0, 32356, 512, 222), rectangles.get(10));
     }
 
     @Test

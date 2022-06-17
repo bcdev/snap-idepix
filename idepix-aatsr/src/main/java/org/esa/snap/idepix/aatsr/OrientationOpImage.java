@@ -42,8 +42,8 @@ public class OrientationOpImage extends OpImage {
     protected void computeRect(PlanarImage[] planarImages, WritableRaster writableRaster, Rectangle destRect) {
         PlanarImage lats = planarImages[0];
         PlanarImage lons = planarImages[1];
-        int x0 = destRect.x - writableRaster.getMinX();
-        int y0 = destRect.y - writableRaster.getMinY();
+        int x0 = destRect.x;
+        int y0 = destRect.y;
         final int x1 = x0 + writableRaster.getWidth()-1;
         final int y1 = y0 + writableRaster.getHeight()-1;
         final Raster latsData = lats.getData(destRect);

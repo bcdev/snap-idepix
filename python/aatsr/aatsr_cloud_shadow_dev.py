@@ -446,6 +446,8 @@ def cloud_shadow_processor_AASTR(cloudflagType = 'new'):
         eline = height
     sline = int(sline)
     eline = int(eline)
+    print('startLine: ', sline)
+    print('endLine: ', eline)
     # eline = np.max(np.arange(0, height, 1)[SZATest])
     sza = sza[sline:eline,:]
     subset = (int(sline), int(eline-1), 0, width-1)
@@ -576,7 +578,7 @@ def cloud_shadow_processor_AASTR(cloudflagType = 'new'):
     for i, up in enumerate(upperLimits[1:]):
         #setup kernel
         radius = cth * np.tan(np.median(sza[upperLimits[i]:up,:])*np.pi/180.)
-        print(i, radius)
+        print('kernel-radius', i, radius, 'at ', upperLimits[i])
         kernel = setup_round_kernel(radius=radius, spacing=(1000.,1000.)) #todo: use an elongated shape in direction of illumination!
         # kNy, kNx = kernel.shape
         # convolveMatrixSubset = cloudMask[upperLimits[i]:up,:]
@@ -595,6 +597,11 @@ def cloud_shadow_processor_AASTR(cloudflagType = 'new'):
 
     startSearchMask = np.logical_and(startSearchMask >0.001, startSearchMask < 0.998)
     startSearchMask = np.logical_and(startSearchMask, landConvolveMask > 0.001)
+    # from PIL import Image
+    # print('Shape of startSearchMask', startSearchMask.shape)
+    # startSearchImage = Image.fromarray(startSearchMask)
+    # startSearchImage.save('startSearchMask-python.png')
+    
     print(np.sum(startSearchMask), np.sum(cloudMask))
     print(np.sum(np.logical_and(startSearchMask, cloudMask==1)))
 
