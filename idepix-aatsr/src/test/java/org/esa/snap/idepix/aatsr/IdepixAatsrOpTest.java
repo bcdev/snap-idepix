@@ -18,6 +18,7 @@ package org.esa.snap.idepix.aatsr;
 
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -62,9 +63,9 @@ public class IdepixAatsrOpTest {
     @Test
     public void validate_ValidSourceProduct() {
         final Product aatsr = createDummyAatsrSource();
-        final IdepixAatsrOp idepixAatsrOp = new IdepixAatsrOp();
 
         try {
+            final IdepixAatsrOp idepixAatsrOp = new IdepixAatsrOp();
             idepixAatsrOp.validate(aatsr);
         } catch (Throwable t) {
             fail("No exception expected here! Source should be valid.");
@@ -73,13 +74,20 @@ public class IdepixAatsrOpTest {
     }
 
     @Test(expected = OperatorException.class)
-    public void validate_InvalidSourceProduct() {
+    public void validate_InvalidSourceProduct_WrongType() {
         final Product aatsr = createDummyAatsrSource();
-        final IdepixAatsrOp idepixAatsrOp = new IdepixAatsrOp();
-
         aatsr.setProductType("differentType");
-        idepixAatsrOp.validate(aatsr);
 
+        final IdepixAatsrOp idepixAatsrOp = new IdepixAatsrOp();
+        idepixAatsrOp.validate(aatsr);
+    }
+    @Test(expected = OperatorException.class)
+    public void validate_InvalidSourceProduct_MissingBand() {
+        final Product aatsr = createDummyAatsrSource();
+        aatsr.removeBand(aatsr.getBand("cloud_in"));
+
+        final IdepixAatsrOp idepixAatsrOp = new IdepixAatsrOp();
+        idepixAatsrOp.validate(aatsr);
     }
 
     @Test
@@ -149,6 +157,15 @@ public class IdepixAatsrOpTest {
         pb.gc(DummyProductBuilder.GC.PER_PIXEL);
         final Product product = pb.create();
         product.setProductType("ENV_AT_1_RBT");
+        product.addBand("solar_zenith_tn", ProductData.TYPE_FLOAT32);
+        product.addBand("solar_azimuth_tn", ProductData.TYPE_FLOAT32);
+        product.addBand("sat_zenith_tn", ProductData.TYPE_FLOAT32);
+        product.addBand("confidence_in", ProductData.TYPE_FLOAT32);
+        product.addBand("elevation_in", ProductData.TYPE_FLOAT32);
+        product.addBand("cloud_in", ProductData.TYPE_FLOAT32);
+        product.addBand("latitude_tx", ProductData.TYPE_FLOAT32);
+        product.addBand("longitude_tx", ProductData.TYPE_FLOAT32);
+        product.addBand("x_tx", ProductData.TYPE_FLOAT32);
         return product;
     }
 

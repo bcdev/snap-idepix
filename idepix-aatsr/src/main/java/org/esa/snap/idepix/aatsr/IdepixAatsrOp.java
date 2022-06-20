@@ -17,8 +17,10 @@ package org.esa.snap.idepix.aatsr;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -113,12 +115,20 @@ public class IdepixAatsrOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        validate(sourceProduct); // 1.1)
-        // 1.2) validateParameters(); // if any
+        // 1)
+        validate(sourceProduct);
 
         // 2) create TargetProduct
         final String targetProductName = sourceProduct.getName() + "_idepix";
         targetProduct = createCompatibleProduct(sourceProduct, targetProductName);
+
+        // init ComponentGeoCoding is necessary for SNAP8.x, can be removed for SNAP9
+        final GeoCoding sceneGeoCoding = sourceProduct.getSceneGeoCoding();
+        if (sceneGeoCoding instanceof ComponentGeoCoding) {
+            ComponentGeoCoding compGC = (ComponentGeoCoding) sceneGeoCoding;
+            compGC.initialize();
+        }
+
         if (copySourceBands) {
             ProductUtils.copyProductNodes(sourceProduct, targetProduct);
             for (Band band : sourceProduct.getBands()) {
@@ -139,12 +149,11 @@ public class IdepixAatsrOp extends Operator {
         targetProduct.getFlagCodingGroup().add(flagCoding);
         idepixFlagBand.setSampleCoding(flagCoding);
         IdepixFlagCoding.setupDefaultClassifBitmask(targetProduct);
-
     }
 
     @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
-        pm.beginTask("Preparing cloud shadow detection.", 10);
+        pm.beginTask("Executing cloud shadow detection...", 10);
         try {
             final int sceneWidth = sourceProduct.getSceneRasterWidth();
             final int sceneHeight = sourceProduct.getSceneRasterHeight();
@@ -205,7 +214,8 @@ public class IdepixAatsrOp extends Operator {
             pm.worked(1);
 
             doShadowDetectionPerSlice(cloudMask, landMask, slices, new SubProgressMonitor(pm, 9));
-
+            // force creation of source image to prevent creation of new image by GPF
+            idepixFlagBand.getSourceImage();
         } catch (IOException e) {
             throw new OperatorException("Could not read source data", e);
         } finally {
@@ -216,6 +226,7 @@ public class IdepixAatsrOp extends Operator {
     private void doShadowDetectionPerSlice(Mask cloudMask, Mask landMask, List<Rectangle> slices, ProgressMonitor pm) {
         final int shadowValue = BitSetter.setFlag(0, IdepixConstants.IDEPIX_CLOUD_SHADOW);
         idepixFlagBand.setRasterData(idepixFlagBand.createCompatibleRasterData());
+
         final ExecutorService executorService = Executors.newFixedThreadPool((int) (Runtime.getRuntime().availableProcessors() * 0.8)); // Use 80% use cores; is this good?
 
         final ArrayList<Callable<Object>> tasks = new ArrayList<>();
@@ -288,7 +299,7 @@ public class IdepixAatsrOp extends Operator {
                 futures.add(executorService.submit(task));
             }
 
-            pm.beginTask("Detecting clouds...", futures.size());
+            pm.beginTask("Detecting clouds shadows...", futures.size());
             try {
                 executorService.shutdown();
                 int stillRunning = futures.size();
@@ -313,6 +324,18 @@ public class IdepixAatsrOp extends Operator {
 
     }
 
+    @Override
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        // We need to place the data into the targetTile even though it is already in the raster.
+        // Otherwise, the data is not written to the product by GPF.
+//        final int[] samplesInt = getSourceTile(idepixFlagBand, targetTile.getRectangle()).getSamplesInt();
+        final Rectangle rect = targetTile.getRectangle();
+        final int[] pixels = new int[rect.width * rect.height];
+        final int[] samplesInt = idepixFlagBand.getPixels(rect.x, rect.y, rect.width, rect.height, pixels);
+        targetTile.setSamples(samplesInt);
+    }
+
+    @SuppressWarnings("SameParameterValue")
     private PathAndHeightInfo calcPathAndTheoreticalHeight(double sza, double saa, double oza, double xtx, double orientation, int spatialRes, int maxObjectAltitude, double minSurfaceAltitude) {
         sza = correctSzaForOzaInfluence(sza, saa, oza, xtx, orientation);
 
@@ -390,6 +413,7 @@ public class IdepixAatsrOp extends Operator {
         return new PathAndHeightInfo(stepIndex, theoretHeight, threshHeight);
     }
 
+    @SuppressWarnings("SameParameterValue")
     double[] arange(double startValue, double endValue, double step) {
         final int numValues = (int) (Math.ceil((endValue - startValue) / step));
         return IntStream.rangeClosed(0, numValues).mapToDouble(x -> x * step + startValue).toArray();
@@ -397,25 +421,30 @@ public class IdepixAatsrOp extends Operator {
 
     private double correctSzaForOzaInfluence(double sza, double saa, double oza, double xtx, double orientation) {
         if (saa - orientation < 180) {
-            if (xtx < 0) {
-                sza = Math.atan(Math.tan(sza * Math.PI / 180) - Math.tan(oza * Math.PI / 180)) * 180 / Math.PI;
-            } else {
-                sza = Math.atan(Math.tan(sza * Math.PI / 180) + Math.tan(oza * Math.PI / 180)) * 180 / Math.PI;
-            }
+            sza = xtx < 0 ? correctSzaNegative(sza, oza) : correctSzaPositive(sza, oza);
         } else {
-            if (xtx < 0) {
-                sza = Math.atan(Math.tan(sza * Math.PI / 180) + Math.tan(oza * Math.PI / 180)) * 180 / Math.PI;
-            } else {
-                sza = Math.atan(Math.tan(sza * Math.PI / 180) - Math.tan(oza * Math.PI / 180)) * 180 / Math.PI;
-            }
+            sza = xtx < 0 ? correctSzaPositive(sza, oza) : correctSzaNegative(sza, oza);
         }
         return sza;
     }
 
+    private double correctSzaPositive(double sza, double oza) {
+        return Math.atan(Math.tan(sza * Math.PI / 180) + Math.tan(oza * Math.PI / 180)) * 180 / Math.PI;
+    }
+
+    private double correctSzaNegative(double sza, double oza) {
+        return Math.atan(Math.tan(sza * Math.PI / 180) - Math.tan(oza * Math.PI / 180)) * 180 / Math.PI;
+    }
+
     void validate(Product sourceProduct) throws OperatorException {
-        // todo - test for the used data.
         if (!"ENV_AT_1_RBT".equals(sourceProduct.getProductType())) {
             throw new OperatorException("An AATSR product from the 4th reprocessing is needed as input");
+        }
+        String[] usedRasterNames = {"solar_zenith_tn", "solar_azimuth_tn", "sat_zenith_tn", "latitude_tx", "longitude_tx", "x_tx", "elevation_in", "confidence_in", "cloud_in"};
+        for (String usedRasterName : usedRasterNames) {
+            if(!sourceProduct.containsRasterDataNode(usedRasterName)) {
+                throw new OperatorException(String.format("Missing raster '%s' in source product", usedRasterName));
+            }
         }
     }
 
@@ -432,7 +461,7 @@ public class IdepixAatsrOp extends Operator {
         // test sun elevation and find first and last row with SZA<85°, daylight zone
         // day flag is necessary because there can be an area with SZA<85° but it is not marked as DAY.
         final Mask szaMask = Mask.BandMathsType.create("__SZA_DAY_Mask", "", sceneWidth, sceneHeight,
-                                                       "solar_zenith_tn * (confidence_in_day ? 1 : NaN) < 85",
+                                                       "solar_zenith_tn * (confidence_in.day ? 1 : NaN) < 85",
                                                        Color.yellow, 0.5f);
         szaMask.setOwner(scene);
         final int[] szaRange0 = detectMaskedPixelRangeInColumn(szaMask, 0);
@@ -535,7 +564,8 @@ public class IdepixAatsrOp extends Operator {
         }
     }
 
-    private void convolveSlice(RenderedImage sourceImage, Rectangle slice, KernelJAI jaiKernel, List<RenderedImage> convolvedSlices, String debugId) throws IOException {
+    @SuppressWarnings("unused")
+    private void convolveSlice(RenderedImage sourceImage, Rectangle slice, KernelJAI jaiKernel, List<RenderedImage> convolvedSlices, String debugId) {
         final RenderedOp curCloudSlice = CropDescriptor.create(sourceImage, (float) slice.x, (float) slice.y, (float) slice.width, (float) slice.height, null);
         final RenderedImage convCloudImage = createConvolvedImage(curCloudSlice, jaiKernel);
         convolvedSlices.add(convCloudImage);

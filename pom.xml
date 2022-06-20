@@ -22,14 +22,14 @@
     <name>SNAP IdePix</name>
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-idepix</artifactId>
-    <version>9.0.0-SNAPSHOT</version>
+    <version>8.0.1</version>
     <packaging>pom</packaging>
 
     <description>SNAP IdePix Parent project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>9.0.0-SNAPSHOT</snap.version>
+        <snap.version>8.0.9</snap.version>
         <netbeans.version>RELEASE82</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
     </properties>
@@ -39,17 +39,17 @@
         <module>idepix-core</module>
         <module>idepix-aatsr</module>
         <!--<module>idepix-avhrr</module>-->
-        <module>idepix-landsat8</module>
-        <module>idepix-meris</module>
-        <module>idepix-modis</module>
-        <module>idepix-olci</module>
-        <module>idepix-olcislstr</module>
-        <module>idepix-probav</module>
-        <module>idepix-s2msi</module>
-        <module>idepix-seawifs</module>
-        <module>idepix-spotvgt</module>
-        <module>idepix-viirs</module>
-        <module>idepix-assembly</module>
+<!--        <module>idepix-landsat8</module>-->
+<!--        <module>idepix-meris</module>-->
+<!--        <module>idepix-modis</module>-->
+<!--        <module>idepix-olci</module>-->
+<!--        <module>idepix-olcislstr</module>-->
+<!--        <module>idepix-probav</module>-->
+<!--        <module>idepix-s2msi</module>-->
+<!--        <module>idepix-seawifs</module>-->
+<!--        <module>idepix-spotvgt</module>-->
+<!--        <module>idepix-viirs</module>-->
+<!--        <module>idepix-assembly</module>-->
     </modules>
 
     <dependencyManagement>
