@@ -41,7 +41,7 @@ public class RunOpMain {
         Instant start = Instant.now();
 
         final HashMap<String, Object> parameters = new HashMap<>();
-        parameters.put("copySourceBands", true);
+        parameters.put("copySourceBands", false);
         final Product shadowProduct = GPF.createProduct("Idepix.Aatsr", parameters, aatsr);
         ProductIO.writeProduct(shadowProduct, "H:\\related\\QA4EO\\AATSR4th Cloud Shadow\\" + aatsr.getName() + "_shadow.dim", "BEAM-DIMAP");
         Instant stop = Instant.now();

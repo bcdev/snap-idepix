@@ -282,7 +282,7 @@ public class IdepixAatsrOp extends Operator {
                         if (cloudMaskData.getSampleInt(x, y) > 0) {
                             flagValue = BitSetter.setFlag(flagValue, IdepixConstants.IDEPIX_CLOUD);
                         }
-                        if (landMaskData.getSampleInt(x, y) == 0) {
+                        if (landMaskData.getSampleInt(x, y) > 0) {
                             flagValue = BitSetter.setFlag(flagValue, IdepixConstants.IDEPIX_LAND);
                         }
 
