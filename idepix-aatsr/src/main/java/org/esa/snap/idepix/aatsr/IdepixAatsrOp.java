@@ -73,7 +73,9 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -91,8 +93,7 @@ import java.util.stream.IntStream;
         description = "Pixel identification and classification for AATSR 4th repro data.")
 public class IdepixAatsrOp extends Operator {
 
-    private static final boolean DEBUG = false;
-    private final static int CLOUD_TOP_HEIGHT = 6000; // in meter
+    private static final boolean DEBUG = true;
     private final static int SPATIAL_RESOLUTION = 1000; // in meter // better to get it from product
 
     @SourceProduct(label = "AATSR L1b product",
@@ -104,6 +105,9 @@ public class IdepixAatsrOp extends Operator {
 
     @Parameter(label = "Copy source bands", defaultValue = "false")
     private boolean copySourceBands;
+
+    @Parameter(label = "Assumed cloud top height", defaultValue = "6000")
+    private int cloudTopHeight;
     private Mask startSearchMask;
     private Rectangle dayTimeROI;
     private RenderedOp orientationImage;
@@ -163,6 +167,7 @@ public class IdepixAatsrOp extends Operator {
 
             // 2) create north-corrected orientation image
             orientationImage = computeOrientationImage(sourceProduct);
+//            writeDebugImage(orientationImage, "orientationImage.png");
 
             // 3) create cloudMaskImage and landMaskImage
             // as alternative the bayesian_in and confidence_in could be used. See TechNote.
@@ -176,18 +181,28 @@ public class IdepixAatsrOp extends Operator {
                                                             Color.green, 0.5f);
             landMask.setOwner(sourceProduct);
 
+//            writeDebugImage(cloudMask.getSourceImage(), "cloud_mask.png");
+//            writeDebugImage(landMask.getSourceImage(), "land_mask.png");
+
             // 4) create startSearchMask using cloudMaskImage, landMaskImage and search radius
             // splitting cloudMask image into 2000 y-pixel slices but only in dayTimeArea
             final List<RenderedImage> convolvedCloudSlices = new ArrayList<>();
             final List<RenderedImage> convolvedLandSlices = new ArrayList<>();
             final List<Rectangle> slices = sliceRect(dayTimeROI, 2000);
+            // merge slices
+//            final Rectangle remove1 = slices.remove(slices.size() - 2);
+//            final Rectangle remove2 = slices.remove(slices.size() - 1);
+//            slices.add(remove1.union(remove2));
+
             convolveLandAndCloudSlices(slices, dayTimeROI, cloudMask, convolvedCloudSlices, landMask, convolvedLandSlices);
 
             // mosaic the generated slices
             final Rectangle mosaicBounds = new Rectangle(sceneWidth, sceneHeight);
             final Rectangle mosaicTileSize = new Rectangle(cloudMask.getSourceImage().getTileWidth(), cloudMask.getSourceImage().getTileHeight());
             final RenderedImage mosaicCloudImage = createMosaic(slices, convolvedCloudSlices, mosaicBounds, mosaicTileSize);
-            final RenderedImage landMosaicImage = createMosaic(slices, convolvedLandSlices, mosaicBounds, mosaicTileSize);
+            final RenderedImage mosaicLandImage = createMosaic(slices, convolvedLandSlices, mosaicBounds, mosaicTileSize);
+            writeDebugImage(mosaicCloudImage, "mosaicCloudImage.png");
+            writeDebugImage(mosaicLandImage, "mosaicLandImage.png");
 
 
             // create temporary product to compute the start-search-mask
@@ -196,7 +211,7 @@ public class IdepixAatsrOp extends Operator {
             convCloudMaskBand.setSourceImage(mosaicCloudImage);
             tempMaskProduct.addBand(convCloudMaskBand);
             final Band convLandMaskBand = new Band("__convLandMask", ProductData.TYPE_FLOAT32, sceneWidth, sceneHeight);
-            convLandMaskBand.setSourceImage(landMosaicImage);
+            convLandMaskBand.setSourceImage(mosaicLandImage);
             tempMaskProduct.addBand(convLandMaskBand);
 
             // use band math to combine mosaics to startSearchMask
@@ -204,6 +219,7 @@ public class IdepixAatsrOp extends Operator {
                                                         "__convCloudMask > 0.001 && __convCloudMask < 0.998 && __convLandMask > 0.001",
                                                         Color.BLUE, 0.0);
             tempMaskProduct.addBand(startSearchMask);
+            writeDebugImage(startSearchMask.getSourceImage(), "startSearchMask.png");
 
             final RasterDataNode elevationRaster = sourceProduct.getRasterDataNode("elevation_in");
             final RenderedOp croppedElev = CropDescriptor.create(elevationRaster.getSourceImage(), (float) dayTimeROI.x, (float) dayTimeROI.y, (float) dayTimeROI.width, (float) dayTimeROI.height, null);
@@ -229,6 +245,11 @@ public class IdepixAatsrOp extends Operator {
 
         final ExecutorService executorService = Executors.newFixedThreadPool((int) (Runtime.getRuntime().availableProcessors() * 0.8)); // Use 80% use cores; is this good?
 
+        final Rectangle extendedDayTimeRoi = (Rectangle) dayTimeROI.clone();
+        extendedDayTimeRoi.grow(0, maxShadowDistance);
+        final Tile elevation = getSourceTile(sourceProduct.getRasterDataNode("elevation_in"), extendedDayTimeRoi);
+        final Tile cloudMaskData = getSourceTile(cloudMask, extendedDayTimeRoi);
+
         final ArrayList<Callable<Object>> tasks = new ArrayList<>();
         for (Rectangle slice : slices) {
             tasks.add(() -> {
@@ -239,8 +260,6 @@ public class IdepixAatsrOp extends Operator {
                 final Raster orientation = orientationImage.getData(slice);
                 final Tile landMaskData = getSourceTile(landMask, slice);
                 final Raster startData = ((RenderedImage) startSearchMask.getSourceImage()).getData(slice);
-                final Tile elevation = getSourceTile(sourceProduct.getRasterDataNode("elevation_in"), dayTimeROI);
-                final Tile cloudMaskData = getSourceTile(cloudMask, dayTimeROI);
 
                 for (int y = slice.y; y < slice.y + slice.height; ++y) {
                     for (int x = slice.x; x < slice.x + slice.width; ++x) {
@@ -249,7 +268,7 @@ public class IdepixAatsrOp extends Operator {
                                                                                                      oza.getSampleFloat(x, y), x_tx.getSampleFloat(x, y),
                                                                                                      orientation.getSampleFloat(x, y, 0),
                                                                                                      SPATIAL_RESOLUTION,
-                                                                                                     CLOUD_TOP_HEIGHT,
+                                                                                                     cloudTopHeight,
                                                                                                      minSurfaceAltitude);
 
                             final int[][] indexArray = pathAndHeightInfo.illuPathSteps.clone();
@@ -278,6 +297,7 @@ public class IdepixAatsrOp extends Operator {
                                         i -> idepixFlagBand.setPixelInt(curIndexArray[i][0], curIndexArray[i][1], shadowValue));
                             }
                         }
+
                         int flagValue = idepixFlagBand.getPixelInt(x, y);
                         if (cloudMaskData.getSampleInt(x, y) > 0) {
                             flagValue = BitSetter.setFlag(flagValue, IdepixConstants.IDEPIX_CLOUD);
@@ -308,10 +328,7 @@ public class IdepixAatsrOp extends Operator {
                         cloudMask.wait(100);
                     }
 
-                    int numRunning = 0;
-                    for (Future<Object> future : futures) {
-                        numRunning = numRunning + (future.isDone() ? 0 : 1);
-                    }
+                    int numRunning = numRunningFutures(futures);
                     pm.worked(stillRunning - numRunning);
                     stillRunning = numRunning;
                 }
@@ -324,11 +341,27 @@ public class IdepixAatsrOp extends Operator {
 
     }
 
+    private int numRunningFutures(List<Future<Object>> futures) throws InterruptedException {
+        int numRunning = 0;
+        for (int i = 0; i < futures.size(); i++) {
+            Future<Object> future = futures.get(i);
+            numRunning = numRunning + (future.isDone() ? 0 : 1);
+            if (future.isDone()) {
+                final Future<Object> doneFuture = futures.remove(i);
+                try {
+                    doneFuture.get();
+                } catch (ExecutionException e) {
+                    throw new OperatorException("Error during calculation of cloud shadow", e);
+                }
+            }
+        }
+        return numRunning;
+    }
+
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         // We need to place the data into the targetTile even though it is already in the raster.
         // Otherwise, the data is not written to the product by GPF.
-//        final int[] samplesInt = getSourceTile(idepixFlagBand, targetTile.getRectangle()).getSamplesInt();
         final Rectangle rect = targetTile.getRectangle();
         final int[] pixels = new int[rect.width * rect.height];
         final int[] samplesInt = idepixFlagBand.getPixels(rect.x, rect.y, rect.width, rect.height, pixels);
@@ -336,7 +369,7 @@ public class IdepixAatsrOp extends Operator {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private PathAndHeightInfo calcPathAndTheoreticalHeight(double sza, double saa, double oza, double xtx, double orientation, int spatialRes, int maxObjectAltitude, double minSurfaceAltitude) {
+    static PathAndHeightInfo calcPathAndTheoreticalHeight(double sza, double saa, double oza, double xtx, double orientation, int spatialRes, int maxObjectAltitude, double minSurfaceAltitude) {
         sza = correctSzaForOzaInfluence(sza, saa, oza, xtx, orientation);
 
         final double shadowAngle = ((saa - orientation) + 180) * Math.PI / 180 - Math.PI / 2;
@@ -369,27 +402,27 @@ public class IdepixAatsrOp extends Operator {
             yCenters = arange(Math.round(y1) + 0.5, y0 + 0.5, 1.0);
         }
 
-        double[][] distance = new double[yCenters.length][xCenters.length];
-        int[][] xIndex = new int[yCenters.length][xCenters.length];
-        int[][] yIndex = new int[yCenters.length][xCenters.length];
+        double[][] distance = new double[xCenters.length][yCenters.length];
+        int[][] xIndex = new int[xCenters.length][yCenters.length];
+        int[][] yIndex = new int[xCenters.length][yCenters.length];
         int nxCenter = xCenters.length;
         int nyCenter = yCenters.length;
 
         final double divider = Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2);
-        for (int y = 0; y < nyCenter; y++) {
-            for (int x = 0; x < nxCenter; x++) {
-                double r = -((x0 - xCenters[x]) * (x0 - x1) + (y0 - yCenters[y]) * (y0 - y1)) / divider;
-                double d = Math.sqrt(Math.pow((x0 - xCenters[x]) + r * (x0 - x1), 2) + Math.pow((y0 - yCenters[y]) + r * (y0 - y1), 2));
-                distance[y][x] = d;
-                xIndex[y][x] = deltaProjX >= 0 ? x : x - nxCenter - 1;
-                yIndex[y][x] = deltaProjY >= 0 ? y : y - nyCenter - 1;
+        for (int i = 0; i < nxCenter; i++) {
+            for (int j = 0; j < nyCenter; j++) {
+                double r = -((x0 - xCenters[i]) * (x0 - x1) + (y0 - yCenters[j]) * (y0 - y1)) / divider;
+                double d = Math.sqrt(Math.pow((x0 - xCenters[i]) + r * (x0 - x1), 2) + Math.pow((y0 - yCenters[j]) + r * (y0 - y1), 2));
+                distance[i][j] = d;
+                xIndex[i][j] = deltaProjX < 0 ? i - (nxCenter - 1) : i;
+                yIndex[i][j] = deltaProjY < 0 ? j - (nyCenter - 1) : j;
             }
         }
         double halfPixelDistance = 0.5 * Math.sqrt(2);
-        int[][] id = new int[yCenters.length][xCenters.length];
-        for (int y = 0; y < id.length; y++) {
-            for (int x = 0; x < id[y].length; x++) {
-                id[y][x] = distance[y][x] <= halfPixelDistance ? 1 : 0;
+        int[][] id = new int[xCenters.length][yCenters.length];
+        for (int x = 0; x < id.length; x++) {
+            for (int y = 0; y < id[x].length; y++) {
+                id[x][y] = distance[x][y] <= halfPixelDistance ? 1 : 0;
             }
         }
         final int numCoords = Arrays.stream(id).flatMapToInt(Arrays::stream).sum();
@@ -414,12 +447,12 @@ public class IdepixAatsrOp extends Operator {
     }
 
     @SuppressWarnings("SameParameterValue")
-    double[] arange(double startValue, double endValue, double step) {
+    static double[] arange(double startValue, double endValue, double step) {
         final int numValues = (int) (Math.ceil((endValue - startValue) / step));
-        return IntStream.rangeClosed(0, numValues).mapToDouble(x -> x * step + startValue).toArray();
+        return IntStream.range(0, numValues).mapToDouble(x -> x * step + startValue).toArray();
     }
 
-    private double correctSzaForOzaInfluence(double sza, double saa, double oza, double xtx, double orientation) {
+    private static double correctSzaForOzaInfluence(double sza, double saa, double oza, double xtx, double orientation) {
         if (saa - orientation < 180) {
             sza = xtx < 0 ? correctSzaNegative(sza, oza) : correctSzaPositive(sza, oza);
         } else {
@@ -428,11 +461,11 @@ public class IdepixAatsrOp extends Operator {
         return sza;
     }
 
-    private double correctSzaPositive(double sza, double oza) {
+    private static double correctSzaPositive(double sza, double oza) {
         return Math.atan(Math.tan(sza * Math.PI / 180) + Math.tan(oza * Math.PI / 180)) * 180 / Math.PI;
     }
 
-    private double correctSzaNegative(double sza, double oza) {
+    private static double correctSzaNegative(double sza, double oza) {
         return Math.atan(Math.tan(sza * Math.PI / 180) - Math.tan(oza * Math.PI / 180)) * 180 / Math.PI;
     }
 
@@ -442,7 +475,7 @@ public class IdepixAatsrOp extends Operator {
         }
         String[] usedRasterNames = {"solar_zenith_tn", "solar_azimuth_tn", "sat_zenith_tn", "latitude_tx", "longitude_tx", "x_tx", "elevation_in", "confidence_in", "cloud_in"};
         for (String usedRasterName : usedRasterNames) {
-            if(!sourceProduct.containsRasterDataNode(usedRasterName)) {
+            if (!sourceProduct.containsRasterDataNode(usedRasterName)) {
                 throw new OperatorException(String.format("Missing raster '%s' in source product", usedRasterName));
             }
         }
@@ -556,6 +589,7 @@ public class IdepixAatsrOp extends Operator {
             if (slice.intersects(dayTimeROI)) {
                 // only convolve slices intersecting with dayTimeROI. Areas outside are handled by default background value when creating the mosaic.
                 double radius = computeKernelRadiusForSlice(sza, slice);
+                System.out.printf(Locale.ENGLISH, "slize[%d], radius[%f]%n", slice.y, radius);
                 maxShadowDistance = MathUtils.ceilInt(Math.max(radius, maxShadowDistance));
                 final KernelJAI jaiKernel = createJaiKernel(radius, new Dimension(1000, 1000));
                 convolveSlice(floatCloudMaskImage, slice, jaiKernel, convolvedCloudSlices, "convCloudImage");
@@ -566,9 +600,10 @@ public class IdepixAatsrOp extends Operator {
 
     @SuppressWarnings("unused")
     private void convolveSlice(RenderedImage sourceImage, Rectangle slice, KernelJAI jaiKernel, List<RenderedImage> convolvedSlices, String debugId) {
-        final RenderedOp curCloudSlice = CropDescriptor.create(sourceImage, (float) slice.x, (float) slice.y, (float) slice.width, (float) slice.height, null);
-        final RenderedImage convCloudImage = createConvolvedImage(curCloudSlice, jaiKernel);
-        convolvedSlices.add(convCloudImage);
+        final RenderedOp curSlice = CropDescriptor.create(sourceImage, (float) slice.x, (float) slice.y, (float) slice.width, (float) slice.height, null);
+        final RenderedImage convImage = createConvolvedImage(curSlice, jaiKernel);
+        convolvedSlices.add(convImage);
+        writeDebugImage(convImage, String.format("%s_%d_%dx%d.png", debugId, slice.y, jaiKernel.getWidth(), jaiKernel.getWidth()));
     }
 
     private double computeKernelRadiusForSlice(RasterDataNode sza, Rectangle slice) throws IOException {
@@ -581,7 +616,7 @@ public class IdepixAatsrOp extends Operator {
         } else {
             szaMedian = szaData[szaData.length / 2];
         }
-        return Math.abs(CLOUD_TOP_HEIGHT * Math.tan(szaMedian * Math.PI / 180.0));
+        return Math.abs(cloudTopHeight * Math.tan(szaMedian * Math.PI / 180.0));
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -651,23 +686,27 @@ public class IdepixAatsrOp extends Operator {
     }
 
     @SuppressWarnings("might be used for debug purpose")
-    private void writeDebugImage(RenderedImage image, String filename) throws IOException {
+    private void writeDebugImage(RenderedImage image, String filename) {
         if (DEBUG) {
             final File outputDir = new File("target/images");
             final File output = new File(outputDir, filename);
-            Files.createDirectories(output.toPath().getParent());
-            if (!ImageIO.write(image, "PNG", output)) {
-                SystemUtils.LOG.log(Level.WARNING, "No writer found for image '" + filename + "', trying to reformat the image");
-                final RenderedOp extrema = ExtremaDescriptor.create(image, null, 10, 10, Boolean.FALSE, 1, null);
-                final double[] minimum = (double[]) extrema.getProperty("minimum");
-                final double[] maximum = (double[]) extrema.getProperty("maximum");
-                final RenderedOp step1 = SubtractConstDescriptor.create(image, minimum, null);
-                final RenderedOp normImage = DivideByConstDescriptor.create(step1, new double[]{maximum[0] - minimum[0]}, null);
-                final RenderedOp scaledImage = MultiplyConstDescriptor.create(normImage, new double[]{255}, null);
-                final RenderedOp formattedImage = FormatDescriptor.create(scaledImage, DataBuffer.TYPE_BYTE, null);
-                if (!ImageIO.write(formattedImage, "PNG", output)) {
-                    SystemUtils.LOG.log(Level.WARNING, "Retry of writing if image '" + filename + "'did not work too. Giving up!");
+            try {
+                Files.createDirectories(output.toPath().getParent());
+                if (!ImageIO.write(image, "PNG", output)) {
+                    SystemUtils.LOG.log(Level.WARNING, "No writer found for image '" + filename + "', trying to reformat the image");
+                    final RenderedOp extrema = ExtremaDescriptor.create(image, null, 10, 10, Boolean.FALSE, 1, null);
+                    final double[] minimum = (double[]) extrema.getProperty("minimum");
+                    final double[] maximum = (double[]) extrema.getProperty("maximum");
+                    final RenderedOp step1 = SubtractConstDescriptor.create(image, minimum, null);
+                    final RenderedOp normImage = DivideByConstDescriptor.create(step1, new double[]{maximum[0] - minimum[0]}, null);
+                    final RenderedOp scaledImage = MultiplyConstDescriptor.create(normImage, new double[]{255}, null);
+                    final RenderedOp formattedImage = FormatDescriptor.create(scaledImage, DataBuffer.TYPE_BYTE, null);
+                    if (!ImageIO.write(formattedImage, "PNG", output)) {
+                        SystemUtils.LOG.log(Level.WARNING, "Retry of writing if image '" + filename + "'did not work too. Giving up!");
+                    }
                 }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }
@@ -683,10 +722,10 @@ public class IdepixAatsrOp extends Operator {
         }
     }
 
-    private static class PathAndHeightInfo {
-        private final int[][] illuPathSteps;
-        private final double[] illuPathHeight;
-        private final double threshHeight;
+    static class PathAndHeightInfo {
+        final int[][] illuPathSteps;
+        final double[] illuPathHeight;
+        final double threshHeight;
 
         public PathAndHeightInfo(int[][] stepIndex, double[] theoretHeight, double threshHeight) {
             this.illuPathSteps = stepIndex;
