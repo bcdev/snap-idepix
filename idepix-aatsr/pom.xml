@@ -25,12 +25,12 @@
     </parent>
 
     <artifactId>idepix-aatsr</artifactId>
-    <version>8.0.0</version>
+    <version>8.0.2-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
     
     <name>IdePix AATSR</name>
-    <description>Classification of pixels (cloud, snow, ice, land, water) originating from AATSR 4th reprocessing data.</description>
+    <description>Classification of pixels (cloud, cloud-shadow and land) originating from AATSR 4th reprocessing data.</description>
 
     <properties>
         <idepix.version>8.0.1</idepix.version>
