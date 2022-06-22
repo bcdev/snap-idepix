@@ -777,5 +777,8 @@ def analyse_AATSR4th_transect(varname='sat_azimuth_tn', start = 10950, end = 129
 ### cloud shadow processor
 cloud_shadow_processor_AASTR(cloudflagType='old')
 
+#testing setRelativePathIndex_and_TheoreticalHeight with specific values
+# illuPathSteps, illuPathHeight, threshHeight = setRelativePathIndex_and_TheoreticalHeight(83.9982, 313.2662, 16.4364, 173500.0, 154.91488, 1000, 6000, -65)
+
 # analyse_AATSR4th_transect()
 # analyse_AATSR4th_transect(start=11600, end=30860, step=1000)
