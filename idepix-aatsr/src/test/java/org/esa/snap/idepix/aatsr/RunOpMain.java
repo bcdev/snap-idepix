@@ -36,12 +36,14 @@ public class RunOpMain {
     public static void main(String[] args) throws IOException {
         SystemUtils.init3rdPartyLibs(RunOpMain.class);
 //        final Product aatsr = ProductIO.readProduct("H:/SENTINEL3/AATSR4RP/v2.0.5/ENV_AT_1_RBT____20021129T235200_20021130T013735_20210315T024827_6334_011_359______DSI_R_NT_004.SEN3/xfdumanifest.xml");
-        final Product aatsr = ProductIO.readProduct("H:\\related\\QA4EO\\AATSR4th Cloud Shadow\\ENV_AT_1_RBT____20020810T083508_20020810T102042_20210303T040313_6334_008_264______DSI_R_NT_004.dim");
+//        final Product aatsr = ProductIO.readProduct("H:\\related\\QA4EO\\AATSR4th Cloud Shadow\\ENV_AT_1_RBT____20020810T083508_20020810T102042_20210303T040313_6334_008_264______DSI_R_NT_004.dim");
+        final Product aatsr = ProductIO.readProduct("H:\\related\\QA4EO\\AATSR4th Cloud Shadow\\ENV_AT_1_RBT____20090615T133401_20090615T151936_20210625T140648_6334_079_496______DSI_R_NT_004.SEN3");
 
         Instant start = Instant.now();
 
         final HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("copySourceBands", false);
+        parameters.put("cloudTopHeight", 6000);
         final Product shadowProduct = GPF.createProduct("Idepix.Aatsr", parameters, aatsr);
         ProductIO.writeProduct(shadowProduct, "H:\\related\\QA4EO\\AATSR4th Cloud Shadow\\" + aatsr.getName() + "_shadow.dim", "BEAM-DIMAP");
         Instant stop = Instant.now();
