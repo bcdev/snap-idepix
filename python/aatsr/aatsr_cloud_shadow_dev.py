@@ -361,6 +361,7 @@ def setup_round_kernel(radius, spacing, normalise=True, type='', radius2=0.):
     kernel = np.sqrt(ydist[:, np.newaxis] ** 2. + \
                      xdist[np.newaxis, :] ** 2.) <= radius
 
+    print("kernel shape = ", kernel.shape)
     test = np.zeros(kernel.shape)
     test[kernel] = 1.
     kernel = np.copy(test)
@@ -415,7 +416,8 @@ def cloud_shadow_processor_AASTR(cloudflagType = 'new'):
     # filename = "subset_LowSunNorth_of_ENV_AT_1_RBT____20020810T083508_20020810T102042_20210303T040313_6334_008_264______DSI_R_NT_004.dim"
     # filename = "subset_HalfSwathWidth_of_ENV_AT_1_RBT____20020810T083508.dim"
     # filename = "subset_HalfSwathWidthRight_of_ENV_AT_1_RBT____20020810T083508.dim"
-    filename = "ENV_AT_1_RBT____20020810T083508_20020810T102042_20210303T040313_6334_008_264______DSI_R_NT_004.dim" #full orbit: 7min
+    # filename = "ENV_AT_1_RBT____20020810T083508_20020810T102042_20210303T040313_6334_008_264______DSI_R_NT_004.SEN3" #full orbit: 7min
+    filename = "ENV_AT_1_RBT____20090615T133401_20090615T151936_20210625T140648_6334_079_496______DSI_R_NT_004.SEN3"
     # filename = "ENV_AT_1_RBT____20021129T235200_20021130T013735_20210315T024827_6334_011_359______DSI_R_NT_004.dim" #full orbit: 55min
 
     # yline = None
@@ -470,19 +472,24 @@ def cloud_shadow_processor_AASTR(cloudflagType = 'new'):
     X, Y = np.mgrid[1:(width-1):GridStep, 1:(eline-sline-1):GridStep]
     print("start Position")
     orientationS = np.zeros(X.shape)
+
+    print('use latitude_tx')
+    lat = get_band_or_tiePointGrid(product, 'latitude_tx', subset=subset)
+    lon = get_band_or_tiePointGrid(product, 'longitude_tx', subset=subset)
     for iy in range(orientationS.shape[0]):
         for ix in range(orientationS.shape[1]):
             x = X[iy, ix]
             y = Y[iy, ix]
-            pixelPos1 = PixelPos(x-1 + 0.5, sline + y + 0.5)
-            geoPos = product.getSceneGeoCoding().getGeoPos(pixelPos1, None)
-            lat1 = geoPos.getLat()
-            lon1 = geoPos.getLon()
-            pixelPos2 = PixelPos(x + 1 + 0.5, sline + y + 0.5)
-            geoPos = product.getSceneGeoCoding().getGeoPos(pixelPos2, None)
-            lat2 = geoPos.getLat()
-            lon2 = geoPos.getLon()
+            # pixelPos1 = PixelPos(x - 1 + 0.5, sline + y + 0.5)
+            # geoPos = product.getSceneGeoCoding().getGeoPos(pixelPos1, None)
+            lat1 = lat[y, x-1]
+            lon1 = lon[y, x-1]
+            # pixelPos2 = PixelPos(x + 1 + 0.5, sline + y + 0.5)
+            # geoPos = product.getSceneGeoCoding().getGeoPos(pixelPos2, None)
+            lat2 = lat[y, x+1]
+            lon2 = lon[y, x+1]
             orientationS[iy, ix] = calculate_orientation(lat1, lon1, lat2, lon2) * 180. / np.pi
+
 
     f = interpolate.RectBivariateSpline(y=np.arange(1,(eline-sline-1), GridStep), x=np.arange(1, (width-1), GridStep),
                                         z=orientationS, bbox=[0, width, 0, (eline-sline)] , kx=3, ky=3, s=0)
@@ -714,7 +721,8 @@ def analyse_AATSR4th_transect(varname='sat_azimuth_tn', start = 10950, end = 129
     # scene_path = "E:\Documents\projects\QA4EO\AATSR4th\\"     #dagmar
     scene_path = "H:\\related\QA4EO\AATSR4th Cloud Shadow\\"    #marco
 
-    filename = "ENV_AT_1_RBT____20020810T083508_20020810T102042_20210303T040313_6334_008_264______DSI_R_NT_004.dim"
+    # filename = "ENV_AT_1_RBT____20020810T083508_20020810T102042_20210303T040313_6334_008_264______DSI_R_NT_004.SEN3"
+    filename = "ENV_AT_1_RBT____20090615T133401_20090615T151936_20210625T140648_6334_079_496______DSI_R_NT_004.SEN3"
     # filename = "subset_0_of_ENV_AT_1_RBT____20020810T083508_20020810T102042_20210303T040313_6334_008_264______DSI_R_NT_004.dim"
     # filename = "subset_SouthernHem_of_ENV_AT_1_RBT____20021129T235200_20021130T013735_20210315T024827_6334_011_359______DSI_R_NT_004.dim"
     # filename = "subset_LowSunNorth_of_ENV_AT_1_RBT____20020810T083508_20020810T102042_20210303T040313_6334_008_264______DSI_R_NT_004.dim"
