@@ -45,7 +45,7 @@ public class RunOpMain {
         parameters.put("copySourceBands", false);
         parameters.put("cloudTopHeight", 6000);
         final Product shadowProduct = GPF.createProduct("Idepix.Aatsr", parameters, aatsr);
-        ProductIO.writeProduct(shadowProduct, "H:\\related\\QA4EO\\AATSR4th Cloud Shadow\\" + aatsr.getName() + "_shadow.dim", "BEAM-DIMAP");
+        ProductIO.writeProduct(shadowProduct, "H:\\related\\QA4EO\\AATSR4th Cloud Shadow\\" + aatsr.getName() + "_shadowOnly.dim", "BEAM-DIMAP");
         Instant stop = Instant.now();
         SystemUtils.LOG.log(Level.INFO, "DURATION: " + Duration.between(start, stop));
     }

@@ -93,7 +93,7 @@ import java.util.stream.IntStream;
         description = "Pixel identification and classification for AATSR 4th repro data.")
 public class IdepixAatsrOp extends Operator {
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private final static int SPATIAL_RESOLUTION = 1000; // in meter // better to get it from product
 
     @SourceProduct(label = "AATSR L1b product",
@@ -261,52 +261,51 @@ public class IdepixAatsrOp extends Operator {
                 final Tile landMaskData = getSourceTile(landMask, slice);
                 final Raster startData = ((RenderedImage) startSearchMask.getSourceImage()).getData(slice);
 
-                for (int y = slice.y; y < slice.y + slice.height; ++y) {
-                    for (int x = slice.x; x < slice.x + slice.width; ++x) {
-                        if (startData.getSample(x, y, 0) > 0 && cloudMaskData.getSampleInt(x, y) > 0) {
-                            final PathAndHeightInfo pathAndHeightInfo = calcPathAndTheoreticalHeight(sza.getSampleFloat(x, y), saa.getSampleFloat(x, y),
-                                                                                                     oza.getSampleFloat(x, y), x_tx.getSampleFloat(x, y),
-                                                                                                     orientation.getSampleFloat(x, y, 0),
+                for (int i = slice.y; i < slice.y + slice.height; ++i) {
+                    for (int j = slice.x; j < slice.x + slice.width; ++j) {
+                        if (startData.getSample(j, i, 0) > 0 && cloudMaskData.getSampleInt(j, i) > 0) {
+                            final PathAndHeightInfo pathAndHeightInfo = calcPathAndTheoreticalHeight(sza.getSampleFloat(j, i), saa.getSampleFloat(j, i),
+                                                                                                     oza.getSampleFloat(j, i), x_tx.getSampleFloat(j, i),
+                                                                                                     orientation.getSampleFloat(j, i, 0),
                                                                                                      SPATIAL_RESOLUTION,
                                                                                                      cloudTopHeight,
                                                                                                      minSurfaceAltitude);
 
                             final int[][] indexArray = pathAndHeightInfo.illuPathSteps.clone();
-                            for (int i = 0; i < indexArray.length; i++) {
-                                indexArray[i][0] += x;
-                                indexArray[i][1] += y;
-                            }
+                            final int shiftJ = j;
+                            final int shiftI = i;
+                            IntStream.range(0, indexArray.length).parallel().forEach(n -> {indexArray[n][0]+=shiftJ;indexArray[n][1]+=shiftI;});
 
                             // find cloud free positions along the search path:
                             final Boolean[] id = Arrays.stream(indexArray).parallel().map(
-                                    ints -> ints[0] >= 0 && ints[0] < slice.x + slice.width &&
-                                            ints[1] >= 0 && ints[1] < slice.y + slice.height).toArray(Boolean[]::new);
+                                    ints -> ints[0] >= 0 && ints[0] < slice.x + dayTimeROI.width &&
+                                            ints[1] >= 0 && ints[1] < slice.y + dayTimeROI.height).toArray(Boolean[]::new);
 
                             final int sum = Arrays.stream(id).parallel().mapToInt(aBoolean -> aBoolean ? 1 : 0).sum();
                             if (sum > 3) { // path positions
 
-                                final int[][] curIndexArray = IntStream.range(0, indexArray.length).parallel().filter(i -> id[i]).mapToObj(i -> indexArray[i]).toArray(int[][]::new);
+                                final int[][] curIndexArray = IntStream.range(0, indexArray.length).parallel().filter(n -> id[n]).mapToObj(n -> indexArray[n]).toArray(int[][]::new);
                                 final double[] illuPathHeight = pathAndHeightInfo.illuPathHeight;
-                                final double[] baseHeightArray = IntStream.range(0, curIndexArray.length).parallel().filter(i -> id[i]).mapToDouble(i -> illuPathHeight[i]).toArray();
+                                final double[] baseHeightArray = IntStream.range(0, curIndexArray.length).parallel().filter(n -> id[n]).mapToDouble(n -> illuPathHeight[n]).toArray();
                                 final double[] elevPath = Arrays.stream(curIndexArray).parallel().mapToDouble(index -> elevation.getSampleFloat(index[0], index[1])).toArray();
                                 final Boolean[] cloudPath = Arrays.stream(curIndexArray).parallel().map(index -> cloudMaskData.getSampleInt(index[0], index[1]) > 0).toArray(Boolean[]::new);
 
                                 final Boolean[] id2 = IntStream.range(0, baseHeightArray.length).parallel().mapToObj(value -> (Math.abs(baseHeightArray[value] - elevPath[value]) < pathAndHeightInfo.threshHeight) && !cloudPath[value]).toArray(Boolean[]::new);
 
-                                IntStream.range(0, baseHeightArray.length).parallel().filter(i -> id2[i]).forEach(
-                                        i -> idepixFlagBand.setPixelInt(curIndexArray[i][0], curIndexArray[i][1], shadowValue));
+                                IntStream.range(0, baseHeightArray.length).parallel().filter(n -> id2[n]).forEach(
+                                        n -> idepixFlagBand.setPixelInt(curIndexArray[n][0], curIndexArray[n][1], shadowValue));
                             }
                         }
 
-                        int flagValue = idepixFlagBand.getPixelInt(x, y);
-                        if (cloudMaskData.getSampleInt(x, y) > 0) {
+                        int flagValue = idepixFlagBand.getPixelInt(j, i);
+                        if (cloudMaskData.getSampleInt(j, i) > 0) {
                             flagValue = BitSetter.setFlag(flagValue, IdepixConstants.IDEPIX_CLOUD);
                         }
-                        if (landMaskData.getSampleInt(x, y) > 0) {
+                        if (landMaskData.getSampleInt(j, i) > 0) {
                             flagValue = BitSetter.setFlag(flagValue, IdepixConstants.IDEPIX_LAND);
                         }
 
-                        idepixFlagBand.setPixelInt(x, y, flagValue);
+                        idepixFlagBand.setPixelInt(j, i, flagValue);
                     }
                 }
                 return slice;
@@ -589,7 +588,6 @@ public class IdepixAatsrOp extends Operator {
             if (slice.intersects(dayTimeROI)) {
                 // only convolve slices intersecting with dayTimeROI. Areas outside are handled by default background value when creating the mosaic.
                 double radius = computeKernelRadiusForSlice(sza, slice);
-                System.out.printf(Locale.ENGLISH, "slize[%d], radius[%f]%n", slice.y, radius);
                 maxShadowDistance = MathUtils.ceilInt(Math.max(radius, maxShadowDistance));
                 final KernelJAI jaiKernel = createJaiKernel(radius, new Dimension(1000, 1000));
                 convolveSlice(floatCloudMaskImage, slice, jaiKernel, convolvedCloudSlices, "convCloudImage");
