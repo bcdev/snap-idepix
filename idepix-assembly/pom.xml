@@ -136,12 +136,12 @@
                                 <!--     <version>9.0.0-SNAPSHOT</version>-->
                                 <!--     <type>nbm</type>-->
                                 <!-- </artifactItem>-->
-                                <!-- <artifactItem>-->
-                                <!--     <groupId>org.esa.snap</groupId>-->
-                                <!--     <artifactId>idepix-aatsr</artifactId>-->
-                                <!--     <version>9.0.0-SNAPSHOT</version>-->
-                                <!--     <type>nbm</type>-->
-                                <!-- </artifactItem>-->
+                                 <artifactItem>
+                                     <groupId>org.esa.snap</groupId>
+                                     <artifactId>idepix-aatsr</artifactId>
+                                     <version>9.0.0-SNAPSHOT</version>
+                                     <type>nbm</type>
+                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-core</artifactId>

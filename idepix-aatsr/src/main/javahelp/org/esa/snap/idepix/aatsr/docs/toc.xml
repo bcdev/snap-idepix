@@ -11,7 +11,9 @@
         <tocitem text="Optical">
             <tocitem text="Preprocessing">
                 <tocitem text="Masking">
-                    <tocitem text="IdePix (AATSR)" target="snapIdepixAatsrTool">
+                    <tocitem text="IdePix (AATSR)" target="snapIdepixAatsrIntro">
+                        <tocitem text="IdePix (AATSR) Algorithm" target="snapIdepixAatsrAlgo"/>
+                        <tocitem text="IdePix (AATSR) Processor" target="snapIdepixAatsrProcessor"/>
                     </tocitem>
                 </tocitem>
             </tocitem>

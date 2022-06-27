@@ -11,7 +11,7 @@
                 <attr name="operatorName" stringvalue="Idepix.Aatsr"/>
                 <attr name="dialogTitle" stringvalue="IdePix AATSR"/>
                 <attr name="targetProductNameSuffix" stringvalue="_idepix"/>
-                <attr name="helpId" stringvalue="snapIdepixAatsrTool"/>
+                <attr name="helpId" stringvalue="snapIdepixAatsrIntro"/>
             </file>
         </folder>
     </folder>
@@ -35,7 +35,7 @@
 
     <folder name="Services">
         <folder name="JavaHelp">
-            <file name="org-esa-snap-idepix-meris-helpset.xml" url="helpset.xml">
+            <file name="org-esa-snap-idepix-aatsr-helpset.xml" url="helpset.xml">
                 <attr name="position" intvalue="4600"/>
             </file>
         </folder>

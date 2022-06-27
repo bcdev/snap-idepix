@@ -5,6 +5,8 @@
 
 <map version="2.0">
 
-    <mapID target="snapIdepixAatsrTool" url="aatsr/AatsrTool.html"/>
+    <mapID target="snapIdepixAatsrIntro" url="aatsr/AatsrIntro.html"/>
+    <mapID target="snapIdepixAatsrAlgo" url="aatsr/AatsrAlgo.html"/>
+    <mapID target="snapIdepixAatsrProcessor" url="aatsr/AatsrProcessor.html"/>
 
 </map>
