@@ -22,11 +22,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>8.0.1</version>
+        <version>8.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>idepix-s2msi</artifactId>
-    <version>8.0.3</version>
+    <version>8.0.4-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
     
