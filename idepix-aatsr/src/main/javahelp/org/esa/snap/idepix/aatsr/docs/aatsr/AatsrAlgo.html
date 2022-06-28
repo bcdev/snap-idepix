@@ -35,6 +35,12 @@
 </table>
 
 <h3>Algorithm Description</h3>
+<p>The cloud shadow algorithm is based on geometrical considerations alone. With the cloud top height and the
+    illumination direction the shadow position can be determined. As elevated objects are mapped in their apparent
+    position on the ground if not viewed directly from nadir, the sun and observation angles have to be transformed
+    accordingly. In that way, the algorithm translates the question of shadows from spherical geometry of the Earth
+    observation and geo-positions into the space of the regular projection grid.</p>
+
 <h4>North Direction</h4>
 <p>As all calculations of the shadow are translated to the geometry of the pixel grid, it is necessary to calculate the
     north direction (also called orientation or bearing) for each pixel individually.
@@ -120,8 +126,11 @@ follows
 
 <h3>Algorithmic Limitations</h3>
 <h4>Cloud Top Height</h4>
-<p>The AATSR Level-1 product does not provide clooud top height information. Therefor this values is predefined to a
+<p>The AATSR Level-1 product does not provide cloud top height information. Therefor this values is predefined to a
     value of 6000 meter. The processor interface allows to adjust this value for each processed scene.</p>
+
+<h4>Limited to Land</h4>
+<p>The detection of cloud shadow is limited to pixels marked as land. Above water no shadow detection is performed.</p>
 
 <h4>Limited to Daytime</h4>
 <p>The cloud shadow calculation is limited to the daytime. As daytime is the part of the orgbit considered where SZA<85°
