@@ -1,0 +1,67 @@
+<!--
+  ~ Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>SNAP Data Processors - IdePix - AATSR Cloud Shadow</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            IdePix AATSR Cloud Shadow Intro
+        </td>
+        <td class="header" align="right"><a
+                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg" border=0></a>
+        </td>
+    </tr>
+</table>
+
+<h3>Overview</h3>
+
+<p>The nadir product of AATSR 4th reprocessing is missing a flag indicating cloud shadows. The IdePix AATSR Cloud Shadow
+    processor aims to provide such a flag over land.
+    It has been the goal to calculate this cloud shadow flag based on the information in the Level-1 product only. From
+    the
+    cloud flag and the geometry of sun illumination and observation almost all necessary information is given, which
+    allows a translation of the cloud shadow algorithm for OLCI to AATSR. The information which is missing in the
+    Level-1 product, is the cloud top height value. Thus this value can be provided as a parameter which is then used
+    for the whole scene.
+    The general idea of the shadow detection algorithm is to start from a pixel, which has been flagged as a cloud, and
+    follow the direction of illumination until the surface is reached.
+    This Idepix processor does not provide all flags which are defined by other IdePix processors. This one sets only
+    3 of the general IdePix flags.<br>
+    These are:<br>
+    <b>IDEPIX_CLOUD, IDEPIX_CLOUD_SHADOW and IDEPIX_LAND</b>
+</p>
+
+<p>Further details are provided</p>
+<ul>
+    <li><a href="AatsrAlgo.html">Description of the Algorithm</a></li>
+    <li><a href="AatsrIntro.html">Description of the Processor</a></li>
+    <li><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/idepix/core/docs/core/IdepixTool.html">Description of
+        IdePix in General</a></li>
+</ul>
+<br>
+
+<br>
+<hr>
+</body>
+</html>
