@@ -1,0 +1,141 @@
+<!--
+  ~ Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>SNAP Data Processors - IdePix AATSR Cloud Shadow</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            IdePix AATSR Cloud Shadow Algorithm
+        </td>
+        <td class="header" align="right"><a
+                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg" border=0></a>
+        </td>
+    </tr>
+</table>
+
+<h3>Algorithm Description</h3>
+<p>The cloud shadow algorithm is based on geometrical considerations alone. With the cloud top height and the
+    illumination direction the shadow position can be determined. As elevated objects are mapped in their apparent
+    position on the ground if not viewed directly from nadir, the sun and observation angles have to be transformed
+    accordingly. In that way, the algorithm translates the question of shadows from spherical geometry of the Earth
+    observation and geo-positions into the space of the regular projection grid.</p>
+
+<h4>North Direction</h4>
+<p>As all calculations of the shadow are translated to the geometry of the pixel grid, it is necessary to calculate the
+    north direction (also called orientation or bearing) for each pixel individually.
+    The orientation for a pixel (i,j) is derived from the neighboring pixel (i, j-1) and (i, j+1) from pixel-geocoded
+    location:</p>
+<p><img src="images/eq001_orientation.png"></p>
+<h4>Defining a cloud mask</h4>
+The following cloud flags have been combined in a cloud mask: <br>
+Cloud_in.visible (bit 0), cloud_in.gross_cloud (bit 7), cloud_in.thin_cirrus (bit 8) and the cloud_in.medium_high (bit
+9).
+<h4>Adjustment of Sun Zenith Angle for Elevated Objects</h4>
+Under tilted view (view zenith angle > 0°) elevated objects of unknown height like clouds are projected along the line
+of view on the surface, so that their apparent location differs from the actual position over ground (nadir view).
+If view and sun azimuth angle are positioned in the same halfspace, both left or right of the nadir line (center line of
+grid) in the projected grid, <code>x_tx>0 (VAA<sup>*</sup>180°)</code>, <code>SAA<sup>*</sup>>180°</code> or <code>x_tx<0
+    (VAA<sup>*</sup><180°)</code>,
+<code>SAA*<180°</code> (angles are corrected by
+orientation), the geometry of the apparent sun zenith angle which causes the shadow position can be described in the
+following way:
+From
+<p><img src="images/eq002_apparentSza_1.png"></p>
+follows
+<p><img src="images/eq002_apparentSza_2.png"></p>
+<p>For view and sun direction in opposite directions <code>(x_tx>0 (VAA<sup>*</sup>>180°)</code>, <code>SAA<sup>*</sup><180°</code>
+    or
+    <code>x_tx<0 (VAA<sup>*</sup><180°)</code>, <code>SAA<sup>*</sup>>180°</code>, angles corrected for orientation)
+    follows accordingly:</p>
+<p><img src="images/eq002_apparentSza_3.png"></p>
+
+<p>The sun azimuth angles are corrected by the orientation (North direction) at the current cloud pixel, so that they
+    represent the azimuth angle in the projected grid coordinates with 0° in upwards direction on the grid. The view
+    azimuth angle is replaced by the tie point grid x_tx, which gives the distance from the nadir line at the center
+    position of a pixel. It changes its sign from left of nadir x_tx <0 to right of nadir x_tx>0. This is the easiest
+    way to find the viewing direction (without interpolation and corrections), and it allows the algorithm to process
+    subsets of the swath width.</p>
+<table align="center">
+    <tr>
+        <td><img src="images/IlluminationPath_geometry1_small.png"></td>
+        <td><img src="images/IlluminationPath_geometry2_small.png"></td>
+    </tr>
+    <tr>
+        <td align="center">Geometrical correction for apparent sun zenith angle (VAA>180°, SAA<180° or VAA<180°,
+            SAA>180°)
+        </td>
+        <td align="center">Geometrical correction for apparent sun zenith angle (VAA>180°, SAA>180° or VAA<180°,
+            SAA<180°)
+        </td>
+    </tr>
+</table>
+
+<h4>Determining the search path in illumination direction</h4>
+<p>Starting from a cloud pixel, which is defined by the cloud flag expression, the illumination path is projected on the
+    grid and all pixels up to a maximum distance are identified which are intersected by this path.</p>
+<p>With the adjusted sun zenith angle &theta;<sup>*</sup><sub>S</sub> and the azimuth angles adjusted for North
+    direction, so that they represent
+    the azimuth on the grid against the Y-direction, the geometry of the illumination path on the projection grid can be
+    fully described.</p>
+<p>Orientation (North direction) at pixel [i, j] is calculated by the positions at neighboring pixels<br>
+    <code>p[i, j-1] = (lon1, lat1) and p[i, j+1]= (lon2, lat2)</code>. </p>
+<p align="center"><img src="images/eq003_searchPath_1.png"></p>
+<p>The theoretical maximum length of the projected path in grid coordinates is defined by the range of surface elevation
+    and the adjusted angles in x and y direction (spatial resolution 1km in AATSR products):</p>
+<p align="center"><img src="images/eq003_searchPath_2.png"></p>
+<p>The relative grid coordinates of the start point at the cloud pixel at set to <code>(x0, y0) = (0, 0)</code>.</p>
+<p>As the spatial resolution of the grid is quite coarse with regard to the expected cloud top heights, which are
+    currently fixed at 6km, the maximum extent of the search path is defined as </p>
+<p align="center"><img src="images/eq003_searchPath_3.png"></p>
+<p>With <code>sign(x)</code> defined as: for <code>x>=0, sign(x)=1; for x<0, sign(x)=-1</code>.<br>
+    For all integer value combinations between <code>(x0,y0)</code> and <code>(x1,y1)</code>, the center position of the
+    pixel is set to relative grid coordinates <code>+ (0.5, 0.5)</code>. The distance from each pixel center to the
+    theoretical line of illumination is calculated. If the distance is smaller than <code>0.5*&radic;2</code>, the pixel
+    area is intersected by the line, and the pixel is potentially a shadow pixel.</p>
+<p align="center"><img src="images/eq003_searchPath_4.png"></p>
+<p>For the intersected pixels (distance < <code>0.5*&radic;2</code>, relative grid coordinates x, y) the theoretical
+    height of the illumination path is calculated as:</p>
+<p align="center"><img src="images/eq003_searchPath_5.png"></p>
+<p>Where the theoretical line intersects the surface defined by its altitude, the shadow can be found. The discreet
+    nature of the grid calls for a height threshold, so that shadow pixels can be identified:</p>
+<p align="center"><img src="images/eq003_searchPath_6.png"></p>
+<p>The cloud shadow flag is raised for all the pixels of the path, which are not masked as cloud and the theoretical
+    height intersects with the surface elevation:</p>
+<p align="center"><img src="images/eq003_searchPath_7.png"></p>
+
+<h3>Algorithmic Limitations</h3>
+<h4>Cloud Top Height</h4>
+<p>The AATSR Level-1 product does not provide cloud top height information. Therefor this values is predefined to a
+    value of 6000 meter. The processor interface allows to adjust this value for each processed scene.</p>
+
+<h4>Limited to Land</h4>
+<p>The detection of cloud shadow is limited to pixels marked as land. Above water no shadow detection is performed.</p>
+
+<h4>Limited to Daytime</h4>
+<p>The cloud shadow calculation is limited to the daytime. As daytime is the part of the orgbit considered where SZA<85°
+    and the confidence_in flag day (bit value 10) is raised.</p>
+<br>
+<hr>
+</body>
+</html>
