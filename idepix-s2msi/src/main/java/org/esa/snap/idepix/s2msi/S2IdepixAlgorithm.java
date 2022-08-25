@@ -17,7 +17,8 @@ public class S2IdepixAlgorithm {
 
     static final float BRIGHTWHITE_THRESH = 1.5f;
     static final float NDSI_THRESH = 0.6f;
-    static final float BRIGHT_THRESH = 0.25f;
+//    static final float BRIGHT_THRESH = 0.25f;
+    static final float BRIGHT_THRESH = 0.45f;      // JW, GK 20220825
     static final float BRIGHT_FOR_WHITE_THRESH = 0.8f;
     static final float WHITE_THRESH = 0.9f;
     static final float NDVI_THRESH = 0.5f;
@@ -199,10 +200,20 @@ public class S2IdepixAlgorithm {
     }
 
     public float brightValue() {
-        if (refl[0] <= 0.0 || brr442Thresh <= 0.0) {
+//        if (refl[0] <= 0.0 || brr442Thresh <= 0.0) {
+//            return S2IdepixConstants.NO_DATA_VALUE;
+//        } else {
+//            return (float) (refl[0] / (6.0 * brr442Thresh));
+//        }
+
+        // JW, GK 20220825:
+        // use 0.3029*B2 + 0.2786*B3 + 0.4733*B4 + 0.5599*B8A + 0.508*B11 + 0.1872*B12
+        if (refl[1] <= 0.0 || refl[2] <= 0.0 || refl[3] <= 0.0 || refl[8] <= 0.0 ||
+                refl[11] <= 0.0 || refl[12] <= 0.0) {
             return S2IdepixConstants.NO_DATA_VALUE;
         } else {
-            return (float) (refl[0] / (6.0 * brr442Thresh));
+            return (float) (0.3029*refl[1] + 0.2786*refl[2] + 0.4733*refl[3] +
+                    0.5599*refl[8] + 0.508*refl[11] + 0.1872*refl[12]);
         }
     }
 
