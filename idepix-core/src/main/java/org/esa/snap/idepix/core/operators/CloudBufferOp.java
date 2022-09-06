@@ -23,7 +23,7 @@ import java.awt.*;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Cloudbuffer",
-        category = "Optical/Preprocessing",
+        category = "Optical/Pre-Processing",
         internal = true, // todo: remove when activated
         version = "3.0",
         authors = "Olaf Danne",

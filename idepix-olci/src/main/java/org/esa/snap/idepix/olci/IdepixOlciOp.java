@@ -35,8 +35,8 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Olci",
-        category = "Optical/Preprocessing/Masking",
-        version = "3.1.0",
+        category = "Optical/Pre-Processing",
+        version = "3.0.3",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
         description = "Pixel identification and classification for OLCI.")
@@ -101,6 +101,11 @@ public class IdepixOlciOp extends BasisOp {
             description = " If cloud shadow is computed, write CTP value to the target product ")
     private boolean outputCtp;
 
+    @Parameter(defaultValue = "true",
+            label = " Write altitude to the target product",
+            description = " Write altitude to the target product (default=true for WV-CCI) ")
+    private boolean outputAltitude;
+
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
 
@@ -164,7 +169,7 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
-        if (computeCloudBuffer || computeMountainShadow || computeCloudShadow) {
+        if (computeCloudBuffer || computeMountainShadow) {
             postProcess(olciIdepixProduct);
         }
 
@@ -180,9 +185,9 @@ public class IdepixOlciOp extends BasisOp {
 
     private Product createTargetProduct(Product idepixProduct) {
         Product targetProduct = new Product(idepixProduct.getName(),
-                                            idepixProduct.getProductType(),
-                                            idepixProduct.getSceneRasterWidth(),
-                                            idepixProduct.getSceneRasterHeight());
+                idepixProduct.getProductType(),
+                idepixProduct.getSceneRasterWidth(),
+                idepixProduct.getSceneRasterHeight());
 
         ProductUtils.copyMetadata(idepixProduct, targetProduct);
         ProductUtils.copyGeoCoding(idepixProduct, targetProduct);
@@ -204,6 +209,10 @@ public class IdepixOlciOp extends BasisOp {
 
         if (outputSchillerNNValue) {
             ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
+        }
+
+        if (outputAltitude) {
+            ProductUtils.copyBand(IdepixOlciConstants.OLCI_ALTITUDE_BAND_NAME, sourceProduct, targetProduct, true);
         }
 
         if (computeCloudShadow && outputCtp) {
@@ -232,9 +241,9 @@ public class IdepixOlciOp extends BasisOp {
 
         if (computeCloudShadow) {
             ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
-                                                                        o2CorrProduct,
-                                                                        alternativeNNDirPath,
-                                                                        outputCtp);
+                    o2CorrProduct,
+                    alternativeNNDirPath,
+                    outputCtp);
         }
 
     }
@@ -249,7 +258,7 @@ public class IdepixOlciOp extends BasisOp {
     private void computeCloudProduct() {
         setClassificationParameters();
         classificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciClassificationOp.class),
-                                                  classificationParameters, classificationInputProducts);
+                classificationParameters, classificationInputProducts);
     }
 
     private void setClassificationInputProducts() {
@@ -275,7 +284,7 @@ public class IdepixOlciOp extends BasisOp {
         params.put("mntShadowStrength", mntShadowExtent);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciPostProcessOp.class),
-                                                  params, input);
+                params, input);
     }
 
     /**

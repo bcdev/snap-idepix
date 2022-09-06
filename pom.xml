@@ -19,38 +19,27 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>SNAP IdePix</name>
+    <name>snap-idepix</name>
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-idepix</artifactId>
-    <version>9.0.0</version>
+<!--    <version>8.0.2-SNAPSHOT</version>-->
+    <version>8.0.2wvcci</version>
     <packaging>pom</packaging>
 
     <description>SNAP IdePix Parent project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>9.0.0</snap.version>
+        <snap.version>8.0.6</snap.version>
         <netbeans.version>RELEASE82</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
     </properties>
 
-    <!-- AVHRR and OLCI/SLSTR currently deactivated, 20190621 -->
-    <!-- AATSR is also still experimental, 20220630 -->
     <modules>
         <module>idepix-core</module>
-<!--        <module>idepix-aatsr</module>-->
-<!--        <module>idepix-avhrr</module>-->
-        <module>idepix-landsat8</module>
         <module>idepix-meris</module>
         <module>idepix-modis</module>
         <module>idepix-olci</module>
-<!--        <module>idepix-olcislstr</module>-->
-        <module>idepix-probav</module>
-        <module>idepix-s2msi</module>
-        <module>idepix-seawifs</module>
-        <module>idepix-spotvgt</module>
-        <module>idepix-viirs</module>
-        <module>idepix-assembly</module>
     </modules>
 
     <dependencyManagement>
@@ -121,10 +110,14 @@
                 <version>${netbeans.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>24.1.1-jre</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.13.1</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -163,9 +156,9 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>org.apache.netbeans.utilities</groupId>
+                    <groupId>org.codehaus.mojo</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>4.4</version>
+                    <version>4.1</version>
                     <extensions>true</extensions>
                     <dependencies>
                         <dependency>

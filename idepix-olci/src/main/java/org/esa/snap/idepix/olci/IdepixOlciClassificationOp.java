@@ -123,8 +123,8 @@ public class IdepixOlciClassificationOp extends Operator {
         if (useSrtmLandWaterMask) {
             try {
                 watermaskClassifier = new WatermaskClassifier(LAND_WATER_MASK_RESOLUTION,
-                                                              OVERSAMPLING_FACTOR_X,
-                                                              OVERSAMPLING_FACTOR_Y);
+                        OVERSAMPLING_FACTOR_X,
+                        OVERSAMPLING_FACTOR_Y);
             } catch (IOException e) {
                 throw new OperatorException("Could not initialise SRTM land-water mask", e);
             }
@@ -235,10 +235,10 @@ public class IdepixOlciClassificationOp extends Operator {
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLandFromAppliedMask);
                     if (isLandFromAppliedMask && !isOlciInlandWaterPixel(x, y, olciQualityFlagTile)) {
                         classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
-                                         surface13Tile, trans13Tile, y, x);
+                                surface13Tile, trans13Tile, y, x);
                     } else {
                         classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
-                                          cloudFlagTargetTile, nnTargetTile, y, x, isCoastlineFromAppliedMask);
+                                cloudFlagTargetTile, nnTargetTile, y, x, isCoastlineFromAppliedMask);
                     }
                 }
             }
@@ -431,7 +431,7 @@ public class IdepixOlciClassificationOp extends Operator {
         // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
         // is always 0 or 100!! (TS, OD, 20140502)
         return IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y).lat > -58f &&
-                waterFraction < 100 && waterFraction > 0;
+                waterFraction <= 100 && waterFraction < 100 && waterFraction > 0;
     }
 
     private boolean isGlintPixel(int x, int y, Tile l1FlagsTile) {

@@ -17,6 +17,9 @@
 package org.esa.snap.idepix.olci;
 
 
+//import org.esa.s3tbx.idepix.core.CloudShadowFronts;
+//import org.esa.s3tbx.idepix.core.IdepixConstants;
+//import org.esa.s3tbx.idepix.core.util.Bresenham;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -26,8 +29,7 @@ import org.esa.snap.idepix.core.CloudShadowFronts;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.util.Bresenham;
 
-import java.awt.Rectangle;
-import java.util.List;
+import java.awt.*;
 
 /**
  * Specific cloud shadow algorithm for OLCI based on fronts, using cloud top height computation based on
@@ -78,7 +80,7 @@ class IdepixOlciCloudShadowFronts {
         boolean[][] isCloudShadow = new boolean[w][h];
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                if (isCloudFree(sourceFlagTile, x, y) && isNotInvalid(sourceFlagTile, x, y)) {
+                if (isCloudFree(sourceFlagTile, x, y)) {
                     isCloudShadow[x - x0][y - y0] = getCloudShadow(sourceFlagTile, targetTile, x, y);
                     if (isCloudShadow[x - x0][y - y0]) {
                         setCloudShadow(targetTile, x, y);
@@ -136,10 +138,6 @@ class IdepixOlciCloudShadowFronts {
 
     private boolean isCloudFree(Tile sourceFlagTile, int x, int y) {
         return !sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-    }
-
-    private boolean isNotInvalid(Tile sourceFlagTile, int x, int y){
-        return !sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
     }
 
     private boolean isSurroundedByCloud(Tile sourceFlagTile, int x, int y) {
@@ -205,31 +203,14 @@ class IdepixOlciCloudShadowFronts {
         final double saaRadApparent = Math.toRadians(saaApparent);
 
 
-        final double azimuthAngleInRadiance = saaRadApparent + Math.PI;
-        GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, azimuthAngleInRadiance);
+        GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, saaRadApparent + Math.PI);
         PixelPos endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
-        int endPointX;
-        int endPointY;
-        if (!endPixPoint.isValid()) {
-            double cloudDistanceMin = 300.0 / tanSza;
-            double i = 1.0;
-            double cloudDistancePath = cloudDistanceMax;
-            while (!endPixPoint.isValid() && cloudDistancePath > 2.0 * cloudDistanceMin) {
-                cloudDistancePath = cloudDistanceMax - i * cloudDistanceMin;
-                endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistancePath, azimuthAngleInRadiance);
-                endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
-                i += 1.0;
-            }
-
-            if (!endPixPoint.isValid()) {
-                return false;
-            }
+        if (endPixPoint.x == -1 || endPixPoint.y == -1) {
+            return false;
         }
-
-        endPointX = (int) Math.round(endPixPoint.x);
-        endPointY = (int) Math.round(endPixPoint.y);
-
-        List<PixelPos> pathPixels = Bresenham.getPathPixels(x, y, endPointX, endPointY, sourceRectangle);
+        final int endPointX = (int) Math.round(endPixPoint.x);
+        final int endPointY = (int) Math.round(endPixPoint.y);
+        java.util.List<PixelPos> pathPixels = Bresenham.getPathPixels(x, y, endPointX, endPointY, sourceRectangle);
 
         double[] temperature = new double[temperatureProfileTPGTiles.length];
 

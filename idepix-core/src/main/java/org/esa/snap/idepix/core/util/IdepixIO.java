@@ -3,7 +3,6 @@ package org.esa.snap.idepix.core.util;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.dataio.envisat.EnvisatConstants;
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 
@@ -176,9 +175,6 @@ public class IdepixIO {
                 b.getName().startsWith("brr") || b.getName().startsWith("rho_toa");
     }
 
-    // TODO (mp:2022-01-13) - This should be specifcally implemented in the modules.
-    //  For example AVHRR and AATSR are not valid inputs. Because we have disabled it.
-    //  Also in addition it is strange if the OLCI IdePix states that L8 and Proba-V are valid.
     private static boolean isInputValid(Product inputProduct) {
         if (!isValidAvhrrProduct(inputProduct) &&
                 !isValidLandsat8Product(inputProduct) &&
@@ -191,14 +187,14 @@ public class IdepixIO {
                 !isValidOlciSlstrSynergyProduct(inputProduct) &&
                 !isValidVgtProduct(inputProduct)) {
             IdepixUtils.logErrorMessage("Input sensor must be either Landsat-8, MERIS, AATSR, AVHRR, " +
-                                                "OLCI, colocated OLCI/SLSTR, " +
-                                                "MODIS/SeaWiFS, PROBA-V or VGT!");
+                    "OLCI, colocated OLCI/SLSTR, " +
+                    "MODIS/SeaWiFS, PROBA-V or VGT!");
         }
         return true;
     }
 
     private static boolean isValidMerisProduct(Product product) {
-        final boolean merisL1TypePatternMatches = EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(product.getProductType()).matches();
+        final boolean merisL1TypePatternMatches = Pattern.compile("MER_..._1P").matcher(product.getProductType()).matches();
         // accept also ICOL L1N products...
         final boolean merisIcolTypePatternMatches = isValidMerisIcolL1NProduct(product);
         final boolean merisCCL1PTypePatternMatches = isValidMerisCCL1PProduct(product);
@@ -211,12 +207,13 @@ public class IdepixIO {
 
     private static boolean isValidOlciProduct(Product product) {
 //        return product.getProductType().startsWith("S3A_OL_");  // todo: clarify
-        return product.getProductType().contains("OL_1");  // new products have product type 'OL_1_ERR'
+//        return product.getProductType().contains("OL_1");  // new products have product type 'OL_1_ERR'
+        return product.getName().contains("S3A_OL_1_") ||
+                product.getProductType().contains("OL_1");  // new products have product type 'OL_1_ERR'
     }
 
     private static boolean isValidOlciSlstrSynergyProduct(Product product) {
-        return (product.getName().contains("S3A_SY_1")||
-                product.getName().contains("S3B_SY_1"));  // todo: clarify
+        return product.getName().contains("S3A_SY_1");  // todo: clarify
     }
 
     private static boolean isValidMerisIcolL1NProduct(Product product) {

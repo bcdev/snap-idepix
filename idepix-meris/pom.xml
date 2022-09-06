@@ -21,27 +21,28 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>9.0.0</version>
+        <version>8.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>idepix-meris</artifactId>
-    <version>9.0.0</version>
+<!--    <version>8.0.2-SNAPSHOT</version>-->
+    <version>8.0.2wvcci</version>
 
     <packaging>nbm</packaging>
-    
+
     <name>IdePix MERIS</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from MERIS.</description>
 
     <properties>
-        <idepix-core.version>9.0.0</idepix-core.version>
-        <s3tbx.version>9.0.0</s3tbx.version>
+        <idepix.version>8.0.2-SNAPSHOT</idepix.version>
+        <s3tbx.version>8.0.6</s3tbx.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
-            <version>${idepix-core.version}</version>
+            <version>${idepix.version}</version>
         </dependency>
 
         <dependency>
@@ -50,11 +51,11 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-jai</artifactId>
+            <artifactId>ceres-glayer</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-glayer</artifactId>
+            <artifactId>ceres-jai</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -89,12 +90,6 @@
 
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-sentinel3-reader</artifactId>
-            <version>${s3tbx.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-meris-sdr</artifactId>
             <version>${s3tbx.version}</version>
         </dependency>
@@ -116,6 +111,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
@@ -124,7 +124,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.netbeans.utilities</groupId>
+                <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
 

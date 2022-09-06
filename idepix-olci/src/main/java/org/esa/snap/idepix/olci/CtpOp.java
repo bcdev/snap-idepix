@@ -34,14 +34,14 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Olci.Ctp",
-        category = "Optical/Preprocessing",
+        category = "Optical/Pre-Processing",
         version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
         description = "CTP for OLCI based on Tensorflow neural nets.")
 public class CtpOp extends BasisOp {
 
-    @SourceProduct(alias = "sourceProduct",
+    @SourceProduct(alias = "l1bProduct",
             label = "OLCI L1b product",
             description = "The OLCI L1b source product.")
     private Product sourceProduct;

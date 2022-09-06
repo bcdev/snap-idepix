@@ -1,8 +1,8 @@
 package org.esa.snap.idepix.meris;
 
-import org.esa.s3tbx.dataio.s3.meris.reprocessing.Meris3rd4thReprocessingAdapter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -11,12 +11,12 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
-
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.BasisOp;
 import org.esa.snap.idepix.core.operators.CloudBufferOp;
 import org.esa.snap.idepix.core.util.IdepixIO;
+import org.esa.snap.idepix.meris.reprocessing.Meris3rd4thReprocessingAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,10 +27,10 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Meris",
-        category = "Optical/Preprocessing/Masking",
-        version = "3.0",
+        category = "Optical/Pre-Processing",
+        version = "3.1",
         authors = "Olaf Danne",
-        copyright = "(c) 2016 by Brockmann Consult",
+        copyright = "(c) 2016-2021 by Brockmann Consult",
         description = "Pixel identification and classification for MERIS.")
 public class IdepixMerisOp extends BasisOp {
 
@@ -163,12 +163,32 @@ public class IdepixMerisOp extends BasisOp {
         cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
 
         copyOutputBands();
-        ProductUtils.copyFlagBands(inputProductToProcess, targetProduct, true);   // we need the L1b flag!
+        if (!IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType())) {
+            ProductUtils.copyFlagBands(inputProductToProcess, targetProduct, true);   // we need the L1b flag!
+        }
+    }
+
+    //    @Override
+    public void initialize_test() throws OperatorException {
+        final int[] testUInt8s = new int[]{1, 2, 3, 4, 5, 6};
+
+        Product targetProduct = new Product("x", "NO_TYPE", 3, 2);
+
+        Band bandUInt8 = new Band("bandUInt8", ProductData.TYPE_UINT8, 3, 2);
+        bandUInt8.ensureRasterData();
+        bandUInt8.setPixels(0, 0, 3, 2, testUInt8s);
+        bandUInt8.setSourceImage(bandUInt8.getSourceImage());
+        // alternative: this works certainly for INT32, but not as it is for UINT8
+//        bandUInt8.setSourceImage(ImageUtils.createRenderedImage(3, 2, ProductData.createInstance(testUInt8s)));
+        targetProduct.addBand(bandUInt8);
+        setTargetProduct(targetProduct);
     }
 
     private void preProcess() {
         rad2reflProduct = IdepixMerisUtils.computeRadiance2ReflectanceProduct(inputProductToProcess);
-        ctpProduct = IdepixMerisUtils.computeCloudTopPressureProduct(inputProductToProcess);
+        if (computeCloudShadow) {
+            ctpProduct = IdepixMerisUtils.computeCloudTopPressureProduct(inputProductToProcess);
+        }
 
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
         waterMaskParameters.put("resolution", IdepixConstants.LAND_WATER_MASK_RESOLUTION);
@@ -265,12 +285,6 @@ public class IdepixMerisOp extends BasisOp {
         }
         if (outputRad2Refl) {
             IdepixMerisUtils.addMerisRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
-        }
-
-        for (Band b : targetProduct.getBands()) {
-            if (b.getName().contains("radiance") || b.getName().contains("reflectance")) {
-                b.setValidPixelExpression("!l1_flags.INVALID");
-            }
         }
     }
 

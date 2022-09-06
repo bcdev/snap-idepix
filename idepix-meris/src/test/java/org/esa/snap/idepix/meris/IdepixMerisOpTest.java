@@ -16,10 +16,10 @@
 
 package org.esa.snap.idepix.meris;
 
-import org.esa.s3tbx.dataio.s3.meris.reprocessing.Meris3rd4thReprocessingAdapter;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
+import org.esa.snap.idepix.meris.reprocessing.Meris3rd4thReprocessingAdapter;
 import org.junit.Test;
 
 import java.util.Locale;
@@ -44,10 +44,10 @@ public class IdepixMerisOpTest {
 
     // todo: continue
 
+
     @Test
     public void testMerisReproAdapterExists() {
         Meris3rd4thReprocessingAdapter adapter = new Meris3rd4thReprocessingAdapter();
         assertNotNull(adapter);
     }
-
 }
