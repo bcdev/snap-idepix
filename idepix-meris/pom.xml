@@ -35,6 +35,7 @@
 
     <properties>
         <idepix.version>8.0.2-SNAPSHOT</idepix.version>
+        <idepix-core.version>8.0.2wvcci</idepix-core.version>
         <s3tbx.version>8.0.6</s3tbx.version>
     </properties>
 
@@ -42,7 +43,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
-            <version>${idepix.version}</version>
+            <version>${idepix-core.version}</version>
         </dependency>
 
         <dependency>

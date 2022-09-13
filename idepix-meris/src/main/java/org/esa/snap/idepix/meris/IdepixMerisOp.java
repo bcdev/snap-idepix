@@ -141,6 +141,13 @@ public class IdepixMerisOp extends BasisOp {
             // adapt to 3rd reprocessing...
             Meris3rd4thReprocessingAdapter reprocessingAdapter = new Meris3rd4thReprocessingAdapter();
             inputProductToProcess = reprocessingAdapter.convertToLowerVersion(sourceProduct);
+
+            // more TPs needed in Idepix product for WV CCI Phase 2:
+            ProductUtils.copyTiePointGrid("total_columnar_water_vapour", sourceProduct, inputProductToProcess);
+            for (int i = 1; i <= IdepixMerisConstants.MERIS_NUM_TEMPERATURE_PROFILES; i++) {
+                ProductUtils.copyTiePointGrid("atmospheric_temperature_profile_pressure_level_" + i,
+                        sourceProduct, inputProductToProcess);
+            }
         } else {
             inputProductToProcess = sourceProduct;
         }

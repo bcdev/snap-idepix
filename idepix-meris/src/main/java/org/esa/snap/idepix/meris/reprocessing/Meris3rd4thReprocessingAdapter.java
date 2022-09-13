@@ -183,18 +183,22 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
         if (!thirdReproProduct.containsTiePointGrid("TP_latitude")) {
             ProductUtils.copyTiePointGrid("TP_latitude", inputProduct, thirdReproProduct);
         }
-        final TiePointGrid latitudeTargetTPG = thirdReproProduct.getTiePointGrid("TP_latitude");
-        latitudeTargetTPG.setName("latitude");
-        latitudeTargetTPG.setDescription("Latitude of the tie points (WGS-84), positive N");
-        latitudeTargetTPG.setUnit("deg");
+        if (!thirdReproProduct.containsBand("latitude")) {
+            final TiePointGrid latitudeTargetTPG = thirdReproProduct.getTiePointGrid("TP_latitude");
+            latitudeTargetTPG.setName("latitude");
+            latitudeTargetTPG.setDescription("Latitude of the tie points (WGS-84), positive N");
+            latitudeTargetTPG.setUnit("deg");
+        }
 
         if (!thirdReproProduct.containsTiePointGrid("TP_longitude")) {
             ProductUtils.copyTiePointGrid("TP_longitude", inputProduct, thirdReproProduct);
         }
-        final TiePointGrid longitudeTargetTPG = thirdReproProduct.getTiePointGrid("TP_longitude");
-        longitudeTargetTPG.setName("longitude");
-        longitudeTargetTPG.setDescription("Longitude of the tie points (WGS-84), Greenwich origin, positive E");
-        longitudeTargetTPG.setUnit("deg");
+        if (!thirdReproProduct.containsBand("longitude")) {
+            final TiePointGrid longitudeTargetTPG = thirdReproProduct.getTiePointGrid("TP_longitude");
+            longitudeTargetTPG.setName("longitude");
+            longitudeTargetTPG.setDescription("Longitude of the tie points (WGS-84), Greenwich origin, positive E");
+            longitudeTargetTPG.setUnit("deg");
+        }
 
         final TiePointGrid altitudeTargetTPG =
                 ProductUtils.copyTiePointGrid("TP_altitude", inputProduct, thirdReproProduct);

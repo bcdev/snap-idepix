@@ -20,6 +20,8 @@ public class IdepixOlciConstants {
     public static final int IDEPIX_MOUNTAIN_SHADOW = IdepixConstants.NUM_DEFAULT_FLAGS;  // first non-default flag
     static final String IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT = "Pixel is affected by a mountain/hill shadow";
 
+    public static final int OLCI_NUM_TEMPERATURE_PROFILES = 25;
+
     public static final String OLCI_ALTITUDE_BAND_NAME = "altitude";
     public static final String OLCI_LATITUDE_BAND_NAME = "latitude";
     public static final String OLCI_LONGITUDE_BAND_NAME = "longitude";
