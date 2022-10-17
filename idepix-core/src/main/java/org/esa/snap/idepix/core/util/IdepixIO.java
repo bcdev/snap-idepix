@@ -218,7 +218,10 @@ public class IdepixIO {
         return (product.getName().contains("S3A_SY_1")||
                 product.getName().contains("S3B_SY_1"));  // todo: clarify
     }
-
+    private static boolean isValidC3SOlciSlstrSynergyProduct(Product product) {
+        return (product.getName().contains("S3A_SY_1")||
+                product.getName().contains("S3B_SY_1"));  // todo: clarify
+    }
     private static boolean isValidMerisIcolL1NProduct(Product product) {
         final String icolProductType = product.getProductType();
         if (icolProductType.endsWith("_1N")) {
@@ -304,6 +307,8 @@ public class IdepixIO {
                 return (isValidOlciProduct(sourceProduct));
             case OLCISLSTR:
                 return (isValidOlciSlstrSynergyProduct(sourceProduct));
+            case C3SOLCISLSTR:
+                return (isValidC3SOlciSlstrSynergyProduct(sourceProduct));
             case VGT:
                 return (isValidVgtProduct(sourceProduct));
             default:

@@ -61,6 +61,12 @@
         <!--                                    <version>9.0.0-SNAPSHOT</version>-->
         <!--                                    <type>nbm</type>-->
         <!--                                </dependency>-->
+        <!--                                <dependency>-->
+        <!--                                    <groupId>org.esa.snap</groupId>-->
+        <!--                                    <artifactId>idepix-c3solcislstr</artifactId>-->
+        <!--                                    <version>9.0.0-SNAPSHOT</version>-->
+        <!--                                    <type>nbm</type>-->
+        <!--                                </dependency>-->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-probav</artifactId>
