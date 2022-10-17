@@ -36,6 +36,7 @@ import java.util.Map;
 @OperatorMetadata(alias = "Idepix.Olci.Ctp",
         category = "Optical/Preprocessing",
         version = "3.0",
+        internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",
         description = "CTP for OLCI based on Tensorflow neural nets.")
