@@ -24,7 +24,7 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Vgt",
-        category = "Optical/Preprocessing/Masking",
+        category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
         version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",

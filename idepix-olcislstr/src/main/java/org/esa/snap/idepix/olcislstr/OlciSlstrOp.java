@@ -25,7 +25,7 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Sentinel3.OlciSlstr",
-        category = "Optical/Preprocessing/Masking",
+        category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
         version = "3.0",
         authors = "Olaf Danne",
         internal = true,

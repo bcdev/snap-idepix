@@ -86,7 +86,7 @@ import java.util.stream.IntStream;
  * The IdePix pixel classification operator for AATSR products (4th repro).
  */
 @OperatorMetadata(alias = "Idepix.Aatsr",
-        category = "Optical/Preprocessing/Masking",
+        category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
         version = "1.0",
         authors = "Dagmar Mueller, Marco Peters",
         copyright = "(c) 2022 by Brockmann Consult",

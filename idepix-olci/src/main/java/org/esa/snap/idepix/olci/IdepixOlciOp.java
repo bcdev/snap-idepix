@@ -35,7 +35,7 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Olci",
-        category = "Optical/Preprocessing/Masking",
+        category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
         version = "3.1.0",
         authors = "Olaf Danne",
         copyright = "(c) 2018 by Brockmann Consult",

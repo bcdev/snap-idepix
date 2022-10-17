@@ -30,7 +30,7 @@ import java.util.Map;
 @OperatorMetadata(alias = "OlciViewAngleInterpolation", version = "0.6",
         authors = "Olaf Danne, Dagmar Müller (Brockmann Consult)",
         internal = true,
-        category = "Optical/Preprocessing/Masking",
+        category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
         copyright = "Copyright (C) 2021 by Brockmann Consult",
         description = "Performs interpolation at view zenith and azimuth discontinuities for OLCI L1b input products.")
 public class IdepixOlciViewAngleInterpolationOp extends Operator {

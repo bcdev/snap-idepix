@@ -28,7 +28,7 @@ import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.S2_MSI_REFLECTANC
  * @author Olaf Danne
  */
 @OperatorMetadata(alias = "Idepix.S2",
-        category = "Optical/Preprocessing/Masking",
+        category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
         version = "9.0",
         authors = "Tonio Fincke, Olaf Danne",
         copyright = "(c) 2019 by Brockmann Consult",
