@@ -1,11 +1,11 @@
 package org.esa.snap.idepix.c3solcislstr;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.idepix.c3solcislstr.rad2refl.Rad2ReflConstants;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;

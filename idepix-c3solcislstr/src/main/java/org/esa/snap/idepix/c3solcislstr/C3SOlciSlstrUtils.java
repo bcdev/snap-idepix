@@ -1,9 +1,6 @@
 package org.esa.snap.idepix.c3solcislstr;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
-import org.esa.s3tbx.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -12,6 +9,9 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.c3solcislstr.rad2refl.Rad2ReflConstants;
+import org.esa.snap.idepix.c3solcislstr.rad2refl.C3SOlciSlstrRad2ReflOp;
+import org.esa.snap.idepix.c3solcislstr.rad2refl.Sensor;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 
@@ -65,7 +65,7 @@ class C3SOlciSlstrUtils {
         Map<String, Object> params = new HashMap<>(2);
         params.put("sensor", sensor);
         params.put("copyNonSpectralBands", false);
-        return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
+        return GPF.createProduct(OperatorSpi.getOperatorAlias(C3SOlciSlstrRad2ReflOp.class), params, sourceProduct);
     }
 
     /**
