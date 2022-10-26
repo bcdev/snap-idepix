@@ -141,10 +141,7 @@ public class S2IdepixOp extends Operator {
 
     private Product computePostProcessProduct(Product l1cProduct, Product classificationProduct) {
 
-        // todo: Shouldn't this be actually within the if clause?
         HashMap<String, Product> input = new HashMap<>();
-        input.put("l1c", l1cProduct);
-        input.put("s2Cloud", classificationProduct);
         input.put("classifiedProduct", classificationProduct);
         Map<String, Object> paramsBuffer = new HashMap<>();
         paramsBuffer.put("cloudBufferWidth", cloudBufferWidth);
@@ -152,7 +149,6 @@ public class S2IdepixOp extends Operator {
         Product cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
                                                        paramsBuffer, input);
 
-        Product postProduct = cloudBufferProduct;
 
         if (computeCloudShadow || computeMountainShadow || computeCloudBuffer) {
             HashMap<String, Product> inputShadow = new HashMap<>();
@@ -167,11 +163,12 @@ public class S2IdepixOp extends Operator {
             params.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
             params.put("mode", "LandWater");
             params.put("demName", demName);
-            postProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixPostProcessOp.class),
+            return GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixPostProcessOp.class),
                                                       params, inputShadow);
+        } else {
+            return cloudBufferProduct;
         }
 
-        return postProduct;
     }
 
 
