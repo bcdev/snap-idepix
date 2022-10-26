@@ -55,12 +55,12 @@ public class S2IdepixCloudPostProcessOp extends Operator {
     public void initialize() throws OperatorException {
 
         Product cloudBufferProduct = createTargetProduct(classifiedProduct,
-                                                         classifiedProduct.getName(),
-                                                         classifiedProduct.getProductType());
+                classifiedProduct.getName(),
+                classifiedProduct.getProductType());
 
         rectCalculator = new RectangleExtender(new Rectangle(classifiedProduct.getSceneRasterWidth(),
-                                                             classifiedProduct.getSceneRasterHeight()),
-                                               cloudBufferWidth, cloudBufferWidth);
+                classifiedProduct.getSceneRasterHeight()),
+                cloudBufferWidth, cloudBufferWidth);
 
         origClassifFlagBand = classifiedProduct.getBand(IDEPIX_CLASSIF_FLAGS);
         ProductUtils.copyBand(IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
@@ -95,22 +95,21 @@ public class S2IdepixCloudPostProcessOp extends Operator {
             checkForCancellation();
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
-                boolean isCloud;
+                Tile workTile;
                 if (targetRectangle.contains(x, y)) {
-                    S2IdepixUtils.combineFlags(x, y, sourceFlagTile, targetTile);
-                    coastalCloudDistinction.correctCloudFlag(x, y, targetTile, targetTile);
-                    urbanCloudDistinction.correctCloudFlag(x, y, targetTile, targetTile);
-                    isCloud = isCloudPixel(targetTile, y, x);
-                } else {
-                    isCloud = isCloudPixel(sourceFlagTile, y, x);
+                    workTile = S2IdepixUtils.combineFlags(x, y, sourceFlagTile, targetTile); // overlap area of extended source tile
+                }else {
+                    workTile = sourceFlagTile;
                 }
+                coastalCloudDistinction.correctCloudFlag(x, y, workTile, workTile);
+                urbanCloudDistinction.correctCloudFlag(x, y, workTile, workTile);
 
-                if (isCloud) {
+                if (isCloudPixel(workTile, x, y)) {
                     S2IdepixCloudBuffer.computeSimpleCloudBuffer(x, y,
-                                                                 targetTile,
-                                                                 srcRectangle,
-                                                                 cloudBufferWidth,
-                                                                 IDEPIX_CLOUD_BUFFER);
+                            targetTile,
+                            srcRectangle,
+                            cloudBufferWidth,
+                            IDEPIX_CLOUD_BUFFER);
                 }
             }
         }
@@ -123,9 +122,8 @@ public class S2IdepixCloudPostProcessOp extends Operator {
         }
     }
 
-    private boolean isCloudPixel(Tile targetTile, int y, int x) {
-        boolean isCloud;
-        isCloud = targetTile.getSampleBit(x, y, IDEPIX_CLOUD_SURE);
+    private boolean isCloudPixel(Tile targetTile, int x, int y) {
+        boolean isCloud = targetTile.getSampleBit(x, y, IDEPIX_CLOUD_SURE);
         if (computeCloudBufferForCloudAmbiguous) {
             isCloud = isCloud || targetTile.getSampleBit(x, y, IDEPIX_CLOUD_AMBIGUOUS);
         }
