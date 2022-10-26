@@ -67,7 +67,7 @@ public class S2IdepixClassificationOp extends Operator {
             description = " Write all feature values to the target product")
     private boolean copyFeatureValues;
 
-    @Parameter(defaultValue = "0.01",
+    @Parameter(defaultValue = "0.007",
             label = " Threshold CW_THRESH",
             description = " Threshold CW_THRESH")
     private double cwThresh;
@@ -77,7 +77,7 @@ public class S2IdepixClassificationOp extends Operator {
             description = " Threshold GCL_THRESH")
     private double gclThresh;
 
-    @Parameter(defaultValue = "0.01",
+    @Parameter(defaultValue = "0.007",
             label = " Threshold CL_THRESH",
             description = " Threshold CL_THRESH")
     private double clThresh;

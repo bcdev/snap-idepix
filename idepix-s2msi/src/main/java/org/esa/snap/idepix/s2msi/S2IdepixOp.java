@@ -35,10 +35,6 @@ import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.S2_MSI_REFLECTANC
         description = "Pixel identification and classification for Sentinel-2 MSI.")
 public class S2IdepixOp extends Operator {
 
-    private static final double CW_THRESH = 0.01;
-    private static final double GCL_THRESH = -0.11;
-    private static final double CL_THRESH = 0.01;
-
     @Parameter(defaultValue = "true",
             label = " Write TOA reflectances to the target product",
             description = " Write TOA reflectances to the target product")
@@ -138,9 +134,6 @@ public class S2IdepixOp extends Operator {
     private Product createS2ClassificationProduct(Map<String, Product> inputProducts) {
         Map<String, Object> classificationParameter = new HashMap<>(10);
         classificationParameter.put("copyFeatureValues", copyFeatureValues);
-        classificationParameter.put("cwThresh", CW_THRESH);
-        classificationParameter.put("gclThresh", GCL_THRESH);
-        classificationParameter.put("clThresh", CL_THRESH);
 
         return GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixClassificationOp.class),
                                  classificationParameter, inputProducts);

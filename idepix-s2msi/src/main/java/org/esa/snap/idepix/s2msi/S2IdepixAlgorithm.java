@@ -17,7 +17,7 @@ public class S2IdepixAlgorithm {
 
     static final float BRIGHTWHITE_THRESH = 1.5f;
     static final float NDSI_THRESH = 0.6f;
-//    static final float BRIGHT_THRESH = 0.25f;
+    //    static final float BRIGHT_THRESH = 0.25f;
     static final float BRIGHT_THRESH = 0.45f;      // JW, GK 20220825
     static final float BRIGHT_FOR_WHITE_THRESH = 0.8f;
     static final float WHITE_THRESH = 0.9f;
@@ -46,7 +46,7 @@ public class S2IdepixAlgorithm {
     static final float ELEVATION_SNOW_THRESH = 3000.0f;
     static final float VISBRIGHT_THRESH = 0.12f;
     static final float TCL_TRESH = -0.085f;
-    static final float CLA_THRESH = 0.0035f;
+    static final float CLA_THRESH = 0.004f;
 
     public boolean isBrightWhite() {
         return !isInvalid() && (whiteValue() + brightValue() > getBrightWhiteThreshold());
@@ -60,25 +60,26 @@ public class S2IdepixAlgorithm {
         final boolean gcw = tc4CirrusValue() < GCW_THRESH;
         final boolean tcw = tc4Value() < TCW_TC_THRESH && ndwiValue() < TCW_NDWI_THRESH;
         final boolean acw = isB3B11Water() && (gcw || tcw);
-        final boolean gcl = !isB3B11Water() && tc4CirrusValue()  < gclThresh && visbrightValue() > VISBRIGHT_THRESH;
+        final boolean gcl = !isB3B11Water() && tc4CirrusValue() < gclThresh && visbrightValue() > VISBRIGHT_THRESH;
         return !isInvalid() && !isClearSnow() && (acw || gcl);
 
     }
 
     public boolean isCloudAmbiguous() {
-        final boolean tcl = !isB3B11Water() && tc4CirrusValue()  < TCL_TRESH && visbrightValue() > VISBRIGHT_THRESH;
+        final boolean tcl = !isB3B11Water() && tc4CirrusValue() < TCL_TRESH && visbrightValue() > VISBRIGHT_THRESH;
         return !isInvalid() && !isClearSnow() && !isCloudSure() && (tcl);
     }
 
     public boolean isCirrus() {
-        final boolean cw = refl[10] > cwThresh && elevation < ELEVATION_THRESH;
-        final boolean cl = refl[10] > clThresh && elevation < ELEVATION_THRESH;
-
+//      B10 > thresh + (thresh * exp(elevation/1000))
+        final boolean cl = refl[10] > clThresh + (clThresh * Math.exp(elevation / 1000));
+        final boolean cw = refl[10] > cwThresh + (cwThresh * Math.exp(elevation / 1000));
         return !isInvalid() && !isClearSnow() && (cw || cl);
     }
 
     public boolean isCirrusAmbiguous() {
-        final boolean cla = refl[10] > CLA_THRESH && elevation < ELEVATION_THRESH;
+        //      B10 > thresh + (thresh * exp(elevation/1000))
+        final boolean cla = refl[10] > CLA_THRESH + (CLA_THRESH * Math.exp(elevation / 1000));
         return !isInvalid() && !isClearSnow() && (cla);
     }
 
@@ -95,7 +96,7 @@ public class S2IdepixAlgorithm {
         } else {
             return false; // this means: if we have no information about land, we return isClearLand = false
         }
-        return (!isCloudSure() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() &&  landValue > LAND_THRESH);
+        return (!isCloudSure() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() && landValue > LAND_THRESH);
     }
 
     public boolean isClearWater() {
@@ -178,14 +179,14 @@ public class S2IdepixAlgorithm {
 
     public float spectralFlatnessValue() {
         final double slope0 = S2IdepixUtils.spectralSlope(refl[1], refl[0],
-                                                          S2IdepixConstants.S2_MSI_WAVELENGTHS[1],
-                                                          S2IdepixConstants.S2_MSI_WAVELENGTHS[0]);
+                S2IdepixConstants.S2_MSI_WAVELENGTHS[1],
+                S2IdepixConstants.S2_MSI_WAVELENGTHS[0]);
         final double slope1 = S2IdepixUtils.spectralSlope(refl[2], refl[3],
-                                                          S2IdepixConstants.S2_MSI_WAVELENGTHS[2],
-                                                          S2IdepixConstants.S2_MSI_WAVELENGTHS[3]);
+                S2IdepixConstants.S2_MSI_WAVELENGTHS[2],
+                S2IdepixConstants.S2_MSI_WAVELENGTHS[3]);
         final double slope2 = S2IdepixUtils.spectralSlope(refl[4], refl[6],
-                                                          S2IdepixConstants.S2_MSI_WAVELENGTHS[4],
-                                                          S2IdepixConstants.S2_MSI_WAVELENGTHS[6]);
+                S2IdepixConstants.S2_MSI_WAVELENGTHS[4],
+                S2IdepixConstants.S2_MSI_WAVELENGTHS[6]);
 
         final double flatness = 1.0f - Math.abs(1000.0 * (slope0 + slope1 + slope2) / 3.0);
         return (float) Math.max(0.0f, flatness);
@@ -212,8 +213,8 @@ public class S2IdepixAlgorithm {
                 refl[11] <= 0.0 || refl[12] <= 0.0) {
             return S2IdepixConstants.NO_DATA_VALUE;
         } else {
-            return (float) (0.3029*refl[1] + 0.2786*refl[2] + 0.4733*refl[3] +
-                    0.5599*refl[8] + 0.508*refl[11] + 0.1872*refl[12]);
+            return (float) (0.3029 * refl[1] + 0.2786 * refl[2] + 0.4733 * refl[3] +
+                    0.5599 * refl[8] + 0.508 * refl[11] + 0.1872 * refl[12]);
         }
     }
 
