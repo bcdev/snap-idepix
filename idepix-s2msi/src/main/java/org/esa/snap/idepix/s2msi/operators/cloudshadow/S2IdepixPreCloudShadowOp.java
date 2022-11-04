@@ -10,6 +10,7 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.StxFactory;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -26,7 +27,6 @@ import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtenderConstant;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -54,6 +54,9 @@ public class S2IdepixPreCloudShadowOp extends Operator {
 
     @TargetProduct
     private Product targetProduct;
+
+    // hidden parameter, may be set to true for mosaics with larger invalid areas
+    private boolean skipInvalidTiles;
 
     @Parameter(notNull=true)
     private float sunZenithMean;
@@ -119,7 +122,7 @@ public class S2IdepixPreCloudShadowOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-
+        skipInvalidTiles = Boolean.getBoolean("snap.idepix.s2msi.skipInvalidTiles");
         targetProduct = new Product(s2BandsProduct.getName(), s2BandsProduct.getProductType(),
                 s2BandsProduct.getSceneRasterWidth(), s2BandsProduct.getSceneRasterHeight());
 
@@ -153,6 +156,8 @@ public class S2IdepixPreCloudShadowOp extends Operator {
             if (imageToMapTransform instanceof AffineTransform) {
                 return ((AffineTransform) imageToMapTransform).getScaleX();
             }
+        } else {
+            return S2IdepixUtils.determineResolution(getSourceProduct());
         }
         throw new OperatorException("Invalid product");
     }
@@ -168,7 +173,11 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     }
 
     private float getRasterNodeValueAtCenter(RasterDataNode var, int width, int height) {
-        return var.getSampleFloat((int) (0.5 * width), (int) (0.5 * height));
+        float centralValue = var.getSampleFloat((int) (0.5 * width), (int) (0.5 * height));
+        if (Float.isNaN(centralValue)) {
+            centralValue = (float) new StxFactory().create(var, ProgressMonitor.NULL).getMedian();
+        }
+        return centralValue;
     }
 
     private int setCloudTopHeight(double lat) {
@@ -203,6 +212,10 @@ public class S2IdepixPreCloudShadowOp extends Operator {
                 getSourceProduct().getSceneRasterWidth(), spatialResolution, true, false);
 
         final Rectangle sourceRectangle = getSourceRectangle(targetRectangle, cloudShadowRelativePath);
+        Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle, new BorderExtenderConstant(new double[]{Double.NaN}));
+        if (skipInvalidTiles && S2IdepixPostCloudShadowOp.isCompletelyInvalid(sourceTileFlag1)) {
+            return;
+        }
 
         int sourceLength = sourceRectangle.width * sourceRectangle.height;
 
@@ -213,14 +226,25 @@ public class S2IdepixPreCloudShadowOp extends Operator {
 
         float[] sourceLatitudes = new float[sourceLength];
         float[] sourceLongitudes = new float[sourceLength];
-        ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).getPixels((int) sourceRectangle.getMinX(),
+        if (getSourceProduct().getSceneGeoCoding() instanceof CrsGeoCoding) {
+            ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).
+                    getPixels((int) sourceRectangle.getMinX(),
                 (int) sourceRectangle.getMinY(),
                 (int) sourceRectangle.getWidth(),
                 (int) sourceRectangle.getHeight(),
                 sourceLatitudes,
                 sourceLongitudes);
+        } else {
+            S2IdepixUtils.
+                    getPixels(getSourceProduct().getSceneGeoCoding(),
+                              (int) sourceRectangle.getMinX(),
+                              (int) sourceRectangle.getMinY(),
+                              (int) sourceRectangle.getWidth(),
+                              (int) sourceRectangle.getHeight(),
+                              sourceLatitudes,
+                              sourceLongitudes);
+        }
 
-        Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle, new BorderExtenderConstant(new double[]{Double.NaN}));
         FlagDetector flagDetector = new FlagDetector(sourceTileFlag1, sourceRectangle);
 
         PreparationMaskBand.prepareMaskBand(s2ClassifProduct.getSceneRasterWidth(),

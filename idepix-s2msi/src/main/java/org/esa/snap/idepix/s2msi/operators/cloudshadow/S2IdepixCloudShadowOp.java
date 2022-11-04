@@ -4,6 +4,8 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.jai.util.SunTileCache;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.StxFactory;
@@ -20,6 +22,7 @@ import org.esa.snap.core.image.VectorDataMaskOpImage;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.CachedTile;
@@ -230,6 +233,8 @@ public class S2IdepixCloudShadowOp extends Operator {
             if (imageToMapTransform instanceof AffineTransform) {
                 return (int) ((AffineTransform) imageToMapTransform).getScaleX();
             }
+        } else {
+            return (int) S2IdepixUtils.determineResolution(product);
         }
         throw new OperatorException("Invalid product");
     }
@@ -304,6 +309,10 @@ public class S2IdepixCloudShadowOp extends Operator {
     }
 
     private int[] findOverallMinimumReflectance() {
+        // catch cases of tiles completely invalid are skipped
+        if (meanReflPerTile.keySet().size() == 0) {
+            return new int[3];
+        }
         // we need to account for that not all mean values in meanReflPerTile are of the same length
         int pathLength = 0;
         for (double[][] meanRefls : meanReflPerTile.values()) {
