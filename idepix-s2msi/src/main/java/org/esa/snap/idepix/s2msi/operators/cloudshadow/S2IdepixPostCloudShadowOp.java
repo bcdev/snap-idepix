@@ -169,7 +169,7 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
         sourceBandFlag1 = s2ClassifProduct.getBand(sourceFlagName1);
 
-        spatialResolution = determineSourceResolution();
+        spatialResolution = S2IdepixUtils.determineResolution(getSourceProduct());
         switch (mode) {
             case "LandWater":
                 analysisMode = Mode.LAND_WATER;
@@ -286,19 +286,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
                 targetTile.setSample(targetX, targetY, inputData[sourceIndex]);
             }
         }
-    }
-
-    private double determineSourceResolution() throws OperatorException {
-        final GeoCoding sceneGeoCoding = getSourceProduct().getSceneGeoCoding();
-        if (sceneGeoCoding instanceof CrsGeoCoding) {
-            final MathTransform imageToMapTransform = sceneGeoCoding.getImageToMapTransform();
-            if (imageToMapTransform instanceof AffineTransform) {
-                return ((AffineTransform) imageToMapTransform).getScaleX();
-            }
-        } else {
-            return S2IdepixUtils.determineResolution(getSourceProduct());
-        }
-        throw new OperatorException("Invalid product: ");
     }
 
     private float[] getSamples(RasterDataNode rasterDataNode, Rectangle rectangle) {

@@ -143,23 +143,10 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         attachFlagCoding(targetBandCloudShadow);
         setupBitmasks(targetProduct);
 
-        spatialResolution = determineSourceResolution();
+        spatialResolution = S2IdepixUtils.determineResolution(getSourceProduct());
 
         int cacheSize = Integer.parseInt(System.getProperty("snap.idepix.s2msi.tilecache2", "600"));
         targetProduct = S2IdepixUtils.computeTileCacheProduct(targetProduct, cacheSize);
-    }
-
-    private double determineSourceResolution() throws OperatorException {
-        final GeoCoding sceneGeoCoding = getSourceProduct().getSceneGeoCoding();
-        if (sceneGeoCoding instanceof CrsGeoCoding) {
-            final MathTransform imageToMapTransform = sceneGeoCoding.getImageToMapTransform();
-            if (imageToMapTransform instanceof AffineTransform) {
-                return ((AffineTransform) imageToMapTransform).getScaleX();
-            }
-        } else {
-            return S2IdepixUtils.determineResolution(getSourceProduct());
-        }
-        throw new OperatorException("Invalid product");
     }
 
     double determineSearchBorderRadius(double spatialResolution, double maxSunZenith) {
