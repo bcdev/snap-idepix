@@ -2,6 +2,7 @@ package org.esa.snap.idepix.s2msi.util;
 
 
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -16,11 +17,13 @@ import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
+import org.opengis.referencing.operation.MathTransform;
 
 import javax.swing.JOptionPane;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 import java.util.Random;
 
 import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.*;
@@ -75,14 +78,21 @@ public class S2IdepixUtils {
     }
 
 
-    public static double determineResolution(Product product) {
+    public static int determineResolution(Product product) {
+       final GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
+        if (sceneGeoCoding instanceof CrsGeoCoding) {
+            final MathTransform imageToMapTransform = sceneGeoCoding.getImageToMapTransform();
+            if (imageToMapTransform instanceof AffineTransform) {
+                return (int) ((AffineTransform) imageToMapTransform).getScaleX();
+            }
+        }
         int width = product.getSceneRasterWidth();
         int height = product.getSceneRasterHeight();
         GeoPos geoPos1 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, 0), null);
         GeoPos geoPos2 = product.getSceneGeoCoding().getGeoPos(new PixelPos(width / 2, height - 1), null);
         double deltaLatInMeters = (geoPos1.lat - geoPos2.lat) / (height-1) / 180.0 * 6367500 * Math.PI;
         double deltaLonInMeters = (geoPos1.lon - geoPos2.lon) / (height-1) / 180.0 * 6367500 * Math.PI * Math.cos((geoPos1.lat + geoPos2.lat) / 2 / 180 * Math.PI);
-        double resolution = (int) Math.round(Math.sqrt(deltaLatInMeters * deltaLatInMeters + deltaLonInMeters * deltaLonInMeters));
+        int resolution = (int) Math.round(Math.sqrt(deltaLatInMeters * deltaLatInMeters + deltaLonInMeters * deltaLonInMeters));
         SystemUtils.LOG.info("Determined resolution as " + resolution + " m");
         return resolution;
     }

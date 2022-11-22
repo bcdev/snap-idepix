@@ -119,7 +119,7 @@ public class S2IdepixCloudShadowOp extends Operator {
             }
         };
 
-        int sourceResolution = determineSourceResolution(l1cProduct);
+        int sourceResolution = S2IdepixUtils.determineResolution(l1cProduct);
 
         Product[] internalSourceProducts = getInternalSourceProducts(sourceResolution);
 
@@ -226,20 +226,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         return (float) (sunAzimuthMean + diff_phi);
     }
 
-    private int determineSourceResolution(Product product) throws OperatorException {
-        final GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
-        if (sceneGeoCoding instanceof CrsGeoCoding) {
-            final MathTransform imageToMapTransform = sceneGeoCoding.getImageToMapTransform();
-            if (imageToMapTransform instanceof AffineTransform) {
-                return (int) ((AffineTransform) imageToMapTransform).getScaleX();
-            }
-        } else {
-            return (int) S2IdepixUtils.determineResolution(product);
-        }
-        throw new OperatorException("Invalid product");
-    }
-
-    private Product[] getInternalSourceProducts(int resolution) {
+     private Product[] getInternalSourceProducts(int resolution) {
         if (resolution == 60) {
             return new Product[]{s2ClassifProduct, s2BandsProduct};
         }
