@@ -44,29 +44,6 @@ public class IdepixMerisOp extends BasisOp {
 
     // overall parameters
 
-    private boolean outputRadiance = false;
-    private boolean outputRad2Refl = false;
-
-    @Parameter(description = "The list of radiance bands to write to target product.",
-            label = "Select TOA radiances to write to the target product",
-            valueSet = {
-                    "radiance_1", "radiance_2", "radiance_3", "radiance_4", "radiance_5",
-                    "radiance_6", "radiance_7", "radiance_8", "radiance_9", "radiance_10",
-                    "radiance_11", "radiance_12", "radiance_13", "radiance_14", "radiance_15"
-            },
-            defaultValue = "")
-    String[] radianceBandsToCopy;
-
-    @Parameter(description = "The list of reflectance bands to write to target product.",
-            label = "Select TOA reflectances to write to the target product",
-            valueSet = {
-                    "reflectance_1", "reflectance_2", "reflectance_3", "reflectance_4", "reflectance_5",
-                    "reflectance_6", "reflectance_7", "reflectance_8", "reflectance_9", "reflectance_10",
-                    "reflectance_11", "reflectance_12", "reflectance_13", "reflectance_14", "reflectance_15"
-            },
-            defaultValue = "")
-    String[] reflBandsToCopy;
-
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product.",
             description = " If applied, write NN value to the target product ")
@@ -102,7 +79,7 @@ public class IdepixMerisOp extends BasisOp {
             description = " NN cloud ambiguous cloud sure/snow separation value")
     double schillerLandNNCloudSureSnowSeparationValue;
 
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
             label = " Compute cloud shadow",
             description = " Compute cloud shadow with the algorithm from 'Fronts' project")
     private boolean computeCloudShadow;
@@ -130,6 +107,10 @@ public class IdepixMerisOp extends BasisOp {
     private Map<String, Object> waterClassificationParameters;
     private Map<String, Object> landClassificationParameters;
 
+    private final String[] radianceBandsToCopy = {"M13_radiance", "M14_radiance", "M15_radiance"};
+    private final String[] fluxBandsToCopy = {"solar_flux_band_13", "solar_flux_band_14", "solar_flux_band_15"};
+
+
     @Override
     public void initialize() throws OperatorException {
         final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.MERIS);
@@ -142,8 +123,11 @@ public class IdepixMerisOp extends BasisOp {
             Meris3rd4thReprocessingAdapter reprocessingAdapter = new Meris3rd4thReprocessingAdapter();
             inputProductToProcess = reprocessingAdapter.convertToLowerVersion(sourceProduct);
 
-            // more TPs needed in Idepix product for WV CCI Phase 2:
+            // TPs needed in Idepix product for WV CCI Phase 2 (keep their original names, stay in line with OLCI):
             ProductUtils.copyTiePointGrid("total_columnar_water_vapour", sourceProduct, inputProductToProcess);
+            ProductUtils.copyTiePointGrid("sea_level_pressure", sourceProduct, inputProductToProcess);
+            ProductUtils.copyTiePointGrid("horizontal_wind_vector_1", sourceProduct, inputProductToProcess);
+            ProductUtils.copyTiePointGrid("horizontal_wind_vector_2", sourceProduct, inputProductToProcess);
             for (int i = 1; i <= IdepixMerisConstants.MERIS_NUM_TEMPERATURE_PROFILES; i++) {
                 ProductUtils.copyTiePointGrid("atmospheric_temperature_profile_pressure_level_" + i,
                         sourceProduct, inputProductToProcess);
@@ -151,9 +135,6 @@ public class IdepixMerisOp extends BasisOp {
         } else {
             inputProductToProcess = sourceProduct;
         }
-
-        outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
-        outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
 
         preProcess();
         computeWaterCloudProduct();
@@ -164,7 +145,7 @@ public class IdepixMerisOp extends BasisOp {
         targetProduct = postProcessingProduct;
 
         targetProduct = IdepixIO.cloneProduct(mergedClassificationProduct, true);
-        targetProduct.setAutoGrouping("radiance:reflectance");
+//        targetProduct.setAutoGrouping("radiance:reflectance");
 
         Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
@@ -173,22 +154,6 @@ public class IdepixMerisOp extends BasisOp {
         if (!IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType())) {
             ProductUtils.copyFlagBands(inputProductToProcess, targetProduct, true);   // we need the L1b flag!
         }
-    }
-
-    //    @Override
-    public void initialize_test() throws OperatorException {
-        final int[] testUInt8s = new int[]{1, 2, 3, 4, 5, 6};
-
-        Product targetProduct = new Product("x", "NO_TYPE", 3, 2);
-
-        Band bandUInt8 = new Band("bandUInt8", ProductData.TYPE_UINT8, 3, 2);
-        bandUInt8.ensureRasterData();
-        bandUInt8.setPixels(0, 0, 3, 2, testUInt8s);
-        bandUInt8.setSourceImage(bandUInt8.getSourceImage());
-        // alternative: this works certainly for INT32, but not as it is for UINT8
-//        bandUInt8.setSourceImage(ImageUtils.createRenderedImage(3, 2, ProductData.createInstance(testUInt8s)));
-        targetProduct.addBand(bandUInt8);
-        setTargetProduct(targetProduct);
     }
 
     private void preProcess() {
@@ -286,13 +251,12 @@ public class IdepixMerisOp extends BasisOp {
 
     private void copyOutputBands() {
         ProductUtils.copyMetadata(inputProductToProcess, targetProduct);
+        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
+        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
         IdepixMerisUtils.setupMerisClassifBitmask(targetProduct);
-        if (outputRadiance) {
-            IdepixIO.addRadianceBands(inputProductToProcess, targetProduct, radianceBandsToCopy);
-        }
-        if (outputRad2Refl) {
-            IdepixMerisUtils.addMerisRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
-        }
+        IdepixIO.addRadianceBands(sourceProduct, targetProduct, radianceBandsToCopy);
+        IdepixIO.addSolarFluxBands(sourceProduct, targetProduct, fluxBandsToCopy);
+        ProductUtils.copyBand("altitude", sourceProduct, targetProduct, true);
     }
 
     /**

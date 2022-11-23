@@ -134,6 +134,14 @@ public class IdepixIO {
         }
     }
 
+    public static void addSolarFluxBands(Product l1bProduct, Product targetProduct, String[] bandsToCopy) {
+        for (String bandname : bandsToCopy) {
+            if (!targetProduct.containsBand(bandname) && bandname.contains("solar_flux")) {
+                ProductUtils.copyBand(bandname, l1bProduct, targetProduct, true);
+            }
+        }
+    }
+
     public static boolean isMeris4thReprocessingL1bProduct(String productType) {
         return productType.startsWith("ME_1");  // todo: discuss this criterion
     }
@@ -194,14 +202,16 @@ public class IdepixIO {
     }
 
     private static boolean isValidMerisProduct(Product product) {
-        final boolean merisL1TypePatternMatches = Pattern.compile("MER_..._1P").matcher(product.getProductType()).matches();
+        final boolean meris3RPL1TypePatternMatches = Pattern.compile("MER_..._1P").matcher(product.getProductType()).matches();
+        final boolean meris4RPL1TypePatternMatches = Pattern.compile("ENV_ME_..._1P").matcher(product.getProductType()).matches();
+        final boolean merisL1TypePatternMatches = meris3RPL1TypePatternMatches || meris4RPL1TypePatternMatches;
         // accept also ICOL L1N products...
         final boolean merisIcolTypePatternMatches = isValidMerisIcolL1NProduct(product);
         final boolean merisCCL1PTypePatternMatches = isValidMerisCCL1PProduct(product);
         // now accept also 4th reprocessing products (20210126):
         final boolean meris4thReproTypePatternMatches = isValidMeris4thReprocessingL1bProduct(product);
 
-        return merisL1TypePatternMatches || merisIcolTypePatternMatches ||
+        return meris3RPL1TypePatternMatches || merisIcolTypePatternMatches ||
                 merisCCL1PTypePatternMatches || meris4thReproTypePatternMatches;
     }
 
