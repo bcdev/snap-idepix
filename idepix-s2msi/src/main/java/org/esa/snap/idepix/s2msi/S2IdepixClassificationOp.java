@@ -82,9 +82,6 @@ public class S2IdepixClassificationOp extends Operator {
             description = " Threshold CL_THRESH")
     private double clThresh;
 
-    @Parameter(defaultValue = "true", label = " Classify invalid pixels as land/water")
-    private boolean classifyInvalid;
-
     @SourceProduct(alias = "l1c", description = "The MSI L1C source product.")
     Product sourceProduct;
 
