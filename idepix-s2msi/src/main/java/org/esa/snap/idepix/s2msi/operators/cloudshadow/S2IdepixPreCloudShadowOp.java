@@ -118,7 +118,7 @@ public class S2IdepixPreCloudShadowOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        skipInvalidTiles = Boolean.getBoolean("snap.idepix.s2msi.skipInvalidTiles");
+        skipInvalidTiles = Boolean.getBoolean(S2IdepixUtils.INVALID_TILES_PROPERTIES);
         targetProduct = new Product(s2BandsProduct.getName(), s2BandsProduct.getProductType(),
                 s2BandsProduct.getSceneRasterWidth(), s2BandsProduct.getSceneRasterHeight());
 
@@ -141,7 +141,7 @@ public class S2IdepixPreCloudShadowOp extends Operator {
 
         spatialResolution = S2IdepixUtils.determineResolution(getSourceProduct());
 
-        int cacheSize = Integer.parseInt(System.getProperty("snap.idepix.s2msi.tilecache2", "600"));
+        int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_2_PROPERTY, "600"));
         targetProduct = S2IdepixUtils.computeTileCacheProduct(targetProduct, cacheSize);
     }
 

@@ -136,7 +136,7 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        skipInvalidTiles = Boolean.getBoolean("snap.idepix.s2msi.skipInvalidTiles");
+        skipInvalidTiles = Boolean.getBoolean(S2IdepixUtils.INVALID_TILES_PROPERTIES);
 
         targetProduct = new Product(s2BandsProduct.getName(), s2BandsProduct.getProductType(),
                 s2BandsProduct.getSceneRasterWidth(), s2BandsProduct.getSceneRasterHeight());

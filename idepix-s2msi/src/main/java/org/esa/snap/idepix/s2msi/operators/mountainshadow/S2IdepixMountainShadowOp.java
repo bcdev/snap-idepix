@@ -55,7 +55,7 @@ public class S2IdepixMountainShadowOp extends PixelOperator {
                 sourceProduct.getBand(SlopeAspectOrientationOp.ORIENTATION_BAND_NAME) == null) {
             saoProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(SlopeAspectOrientationOp.class),
                                            GPF.NO_PARAMS, sourceProduct);
-            int cacheSize = Integer.parseInt(System.getProperty("snap.idepix.s2msi.tilecache", "1600")) / 2;
+            int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600")) / 2;
             saoProduct = S2IdepixUtils.computeTileCacheProduct(saoProduct, cacheSize);
         }
     }

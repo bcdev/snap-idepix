@@ -33,6 +33,9 @@ import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.*;
  */
 public class S2IdepixUtils {
 
+    public static final String TILECACHE_PROPERTY = "snap.idepix.s2msi.tilecache";
+    public static final String TILECACHE_2_PROPERTY = "snap.idepix.s2msi.tilecache2";
+    public static final String INVALID_TILES_PROPERTIES = "snap.idepix.s2msi.skipInvalidTiles";
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger("idepix");
 
     private S2IdepixUtils() {

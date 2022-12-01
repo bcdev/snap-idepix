@@ -125,7 +125,7 @@ public class S2IdepixClassificationOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        skipInvalidTiles = Boolean.getBoolean("snap.idepix.s2msi.skipInvalidTiles");
+        skipInvalidTiles = Boolean.getBoolean(S2IdepixUtils.INVALID_TILES_PROPERTIES);
 
         validateInputBandsExist(S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES);
         validateInputBandsExist(S2IdepixConstants.S2_MSI_ANNOTATION_BAND_NAMES);
