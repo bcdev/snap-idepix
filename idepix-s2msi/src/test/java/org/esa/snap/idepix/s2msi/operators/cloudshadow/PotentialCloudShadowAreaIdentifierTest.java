@@ -11,8 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
 import static org.esa.snap.idepix.s2msi.operators.cloudshadow.PotentialCloudShadowAreaIdentifier.identifyPotentialCloudShadowsPLUS;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Tonio Fincke
@@ -35,8 +35,8 @@ public class PotentialCloudShadowAreaIdentifierTest {
 
         assertEquals(expectedCloudPath.length, cloudPath.length);
         for (int i = 0; i < cloudPath.length; i++) {
-            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX());
-            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY());
+            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX(), 1.0e-6);
+            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY(), 1.0e-6);
         }
     }
 
@@ -81,8 +81,8 @@ public class PotentialCloudShadowAreaIdentifierTest {
 
         assertEquals(expectedCloudPath.length, cloudPath.length);
         for (int i = 0; i < cloudPath.length; i++) {
-            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX());
-            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY());
+            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX(), 1.0e-6);
+            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY(), 1.0e-6);
         }
     }
 
@@ -127,8 +127,8 @@ public class PotentialCloudShadowAreaIdentifierTest {
 
         assertEquals(expectedCloudPath.length, cloudPath.length);
         for (int i = 0; i < cloudPath.length; i++) {
-            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX());
-            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY());
+            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX(), 1.0e-6);
+            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY(), 1.0e-6);
         }
     }
 
@@ -172,8 +172,8 @@ public class PotentialCloudShadowAreaIdentifierTest {
 
         assertEquals(expectedCloudPath.length, cloudPath.length);
         for (int i = 0; i < cloudPath.length; i++) {
-            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX());
-            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY());
+            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX(), 1.0e-6);
+            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY(), 1.0e-6);
         }
     }
 
@@ -218,8 +218,8 @@ public class PotentialCloudShadowAreaIdentifierTest {
 
         assertEquals(expectedCloudPath.length, cloudPath.length);
         for (int i = 0; i < cloudPath.length; i++) {
-            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX());
-            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY());
+            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX(), 1.0e-6);
+            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY(), 1.0e-6);
         }
     }
 
@@ -264,8 +264,8 @@ public class PotentialCloudShadowAreaIdentifierTest {
 
         assertEquals(expectedCloudPath.length, cloudPath.length);
         for (int i = 0; i < cloudPath.length; i++) {
-            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX());
-            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY());
+            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX(), 1.0e-6);
+            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY(), 1.0e-6);
         }
     }
 
@@ -305,8 +305,8 @@ public class PotentialCloudShadowAreaIdentifierTest {
 
         assertEquals(expectedCloudPath.length, cloudPath.length);
         for (int i = 0; i < cloudPath.length; i++) {
-            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX());
-            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY());
+            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX(), 1.0e-6);
+            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY(), 1.0e-6);
         }
     }
 
@@ -343,8 +343,8 @@ public class PotentialCloudShadowAreaIdentifierTest {
 
         assertEquals(expectedCloudPath.length, cloudPath.length);
         for (int i = 0; i < cloudPath.length; i++) {
-            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX());
-            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY());
+            assertEquals(expectedCloudPath[i].getX(), cloudPath[i].getX(), 1.0e-6);
+            assertEquals(expectedCloudPath[i].getY(), cloudPath[i].getY(), 1.0e-6);
         }
     }
 

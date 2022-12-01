@@ -2,8 +2,6 @@ package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.jai.util.SunTileCache;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.StxFactory;
@@ -20,13 +18,12 @@ import org.esa.snap.core.image.VectorDataMaskOpImage;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
-import org.opengis.referencing.operation.MathTransform;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
 import javax.media.jai.CachedTile;
 import javax.media.jai.JAI;
 import javax.media.jai.PointOpImage;
 import javax.media.jai.TileCache;
-import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,7 +113,7 @@ public class S2IdepixCloudShadowOp extends Operator {
             }
         };
 
-        int sourceResolution = determineSourceResolution(l1cProduct);
+        int sourceResolution = S2IdepixUtils.determineResolution(l1cProduct);
 
         Product[] internalSourceProducts = getInternalSourceProducts(sourceResolution);
 
@@ -223,18 +220,7 @@ public class S2IdepixCloudShadowOp extends Operator {
         return (float) (sunAzimuthMean + diff_phi);
     }
 
-    private int determineSourceResolution(Product product) throws OperatorException {
-        final GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
-        if (sceneGeoCoding instanceof CrsGeoCoding) {
-            final MathTransform imageToMapTransform = sceneGeoCoding.getImageToMapTransform();
-            if (imageToMapTransform instanceof AffineTransform) {
-                return (int) ((AffineTransform) imageToMapTransform).getScaleX();
-            }
-        }
-        throw new OperatorException("Invalid product");
-    }
-
-    private Product[] getInternalSourceProducts(int resolution) {
+     private Product[] getInternalSourceProducts(int resolution) {
         if (resolution == 60) {
             return new Product[]{s2ClassifProduct, s2BandsProduct};
         }
@@ -304,6 +290,10 @@ public class S2IdepixCloudShadowOp extends Operator {
     }
 
     private int[] findOverallMinimumReflectance() {
+        // catch cases of tiles completely invalid are skipped
+        if (meanReflPerTile.keySet().size() == 0) {
+            return new int[3];
+        }
         // we need to account for that not all mean values in meanReflPerTile are of the same length
         int pathLength = 0;
         for (double[][] meanRefls : meanReflPerTile.values()) {

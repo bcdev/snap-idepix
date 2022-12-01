@@ -29,7 +29,7 @@ import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.S2_MSI_REFLECTANC
  */
 @OperatorMetadata(alias = "Idepix.S2",
         category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
-        version = "9.0.1",
+        version = "9.0.1cv",
         authors = "Tonio Fincke, Olaf Danne",
         copyright = "(c) 2019 by Brockmann Consult",
         description = "Pixel identification and classification for Sentinel-2 MSI.")
@@ -105,7 +105,7 @@ public class S2IdepixOp extends Operator {
 
         Product s2ClassifProduct = createS2ClassificationProduct(inputProducts);
 
-        int cacheSize = Integer.parseInt(System.getProperty("snap.idepix.s2msi.tilecache", "1600"));
+        int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600"));
         s2ClassifProduct = S2IdepixUtils.computeTileCacheProduct(s2ClassifProduct, cacheSize);
 
         // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
@@ -149,6 +149,8 @@ public class S2IdepixOp extends Operator {
         Product cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
                                                        paramsBuffer, input);
 
+        int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600")) / 5;
+        cloudBufferProduct = S2IdepixUtils.computeTileCacheProduct(cloudBufferProduct, cacheSize);
 
         if (computeCloudShadow || computeMountainShadow || computeCloudBuffer) {
             HashMap<String, Product> inputShadow = new HashMap<>();

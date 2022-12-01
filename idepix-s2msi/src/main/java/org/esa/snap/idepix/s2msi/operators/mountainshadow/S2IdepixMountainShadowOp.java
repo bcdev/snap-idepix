@@ -14,6 +14,7 @@ import org.esa.snap.core.gpf.pointop.Sample;
 import org.esa.snap.core.gpf.pointop.SourceSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.WritableSample;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
 /**
  * @author Tonio Fincke
@@ -54,6 +55,8 @@ public class S2IdepixMountainShadowOp extends PixelOperator {
                 sourceProduct.getBand(SlopeAspectOrientationOp.ORIENTATION_BAND_NAME) == null) {
             saoProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(SlopeAspectOrientationOp.class),
                                            GPF.NO_PARAMS, sourceProduct);
+            int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600")) / 2;
+            saoProduct = S2IdepixUtils.computeTileCacheProduct(saoProduct, cacheSize);
         }
     }
 

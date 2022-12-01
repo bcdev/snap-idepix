@@ -12,6 +12,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.Color;
@@ -32,7 +33,7 @@ public class CoastalCloudDistinction {
 
     public CoastalCloudDistinction(Product s2ClassifProduct) {
         final Product ccdHelperProduct = createCcdHelperProduct(s2ClassifProduct);
-        resolution = determineSourceResolution(s2ClassifProduct);
+        resolution = S2IdepixUtils.determineResolution(s2ClassifProduct);
         dilatedLandFlag = createDilatedLandFlag(ccdHelperProduct);
         dilatedWaterFlag = createDilatedWaterFlag(ccdHelperProduct);
         idx1band = getRatio2_11(ccdHelperProduct);
@@ -111,18 +112,7 @@ public class CoastalCloudDistinction {
         return createRatioBand(product.getBand("B8"), product.getBand("B11"), product);
     }
 
-    private int determineSourceResolution(Product product) throws OperatorException {
-        final GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
-        if (sceneGeoCoding instanceof CrsGeoCoding) {
-            final MathTransform imageToMapTransform = sceneGeoCoding.getImageToMapTransform();
-            if (imageToMapTransform instanceof AffineTransform) {
-                return (int) ((AffineTransform) imageToMapTransform).getScaleX();
-            }
-        }
-        throw new OperatorException("Invalid product");
-    }
-
-    private static Band createRatioBand(Band numerator, Band denominator, Product owner) {
+     private static Band createRatioBand(Band numerator, Band denominator, Product owner) {
         final String name = String.format("__ratio_%s_%s", numerator.getName(), denominator.getName());
         final String expression = String.format("%s / %s", numerator.getName(), denominator.getName());
         return createVirtualBand(name, expression, owner);

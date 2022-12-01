@@ -5,11 +5,11 @@ import org.junit.Test;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+
 
 public class CloudShadowUtilsTest {
 
@@ -53,8 +53,8 @@ public class CloudShadowUtilsTest {
                 20, S2IdepixPreCloudShadowOp.spatialResolution, true, false);
         assertEquals(expectedPath.length, cloudShadowRelativePath.length);
         for (int i = 0; i < expectedPath.length; i++) {
-            assertEquals(expectedPath[i].getX(), cloudShadowRelativePath[i].getX());
-            assertEquals(expectedPath[i].getY(), cloudShadowRelativePath[i].getY());
+            assertEquals(expectedPath[i].getX(), cloudShadowRelativePath[i].getX(), 1.0e-6);
+            assertEquals(expectedPath[i].getY(), cloudShadowRelativePath[i].getY(), 1.0e-6);
         }
     }
 }

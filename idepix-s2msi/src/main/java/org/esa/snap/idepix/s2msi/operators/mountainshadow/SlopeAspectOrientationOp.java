@@ -1,7 +1,11 @@
 package org.esa.snap.idepix.s2msi.operators.mountainshadow;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -15,7 +19,7 @@ import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtender;
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.util.Map;
 
@@ -40,7 +44,7 @@ public class SlopeAspectOrientationOp extends Operator {
     private double spatialResolution;
 
     private Band elevationBand;
-//    private Band saaBand;
+    //    private Band saaBand;
 //    private Band vzaBand;
 //    private Band vaaBand;
     private Band slopeBand;
@@ -110,12 +114,14 @@ public class SlopeAspectOrientationOp extends Operator {
         float[] elevationData = elevationTile.getDataBufferFloat();
         float[] sourceLatitudes = new float[(int) (sourceRectangle.getWidth() * sourceRectangle.getHeight())];
         float[] sourceLongitudes = new float[(int) (sourceRectangle.getWidth() * sourceRectangle.getHeight())];
-        ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).getPixels((int) sourceRectangle.getMinX(),
-                                                                          (int) sourceRectangle.getMinY(),
-                                                                          (int) sourceRectangle.getWidth(),
-                                                                          (int) sourceRectangle.getHeight(),
-                                                                          sourceLatitudes,
-                                                                          sourceLongitudes);
+        ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).
+                getPixels((int) sourceRectangle.getMinX(),
+                        (int) sourceRectangle.getMinY(),
+                        (int) sourceRectangle.getWidth(),
+                        (int) sourceRectangle.getHeight(),
+                        sourceLatitudes,
+                        sourceLongitudes);
+
         // possible additional params for computeSlopeAndAspect
 //        final Tile saaTile = getSourceTile(saaBand, sourceRectangle, borderExtender);
 //        float[] saaData = saaTile.getDataBufferFloat();
@@ -133,7 +139,7 @@ public class SlopeAspectOrientationOp extends Operator {
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                 final float orientation = computeOrientation(sourceLatitudes, sourceLongitudes, sourceIndex);
                 final float[] slopeAndAspect = computeSlopeAndAspect(elevationData, sourceIndex,
-                                                                     spatialResolution, sourceRectangle.width);
+                        spatialResolution, sourceRectangle.width);
                 // possible additional params for computeSlopeAndAspect
 //                                                                     saaData[sourceIndex], vaaData[sourceIndex],
 //                                                                     vzaData[sourceIndex], orientation);
@@ -200,7 +206,7 @@ public class SlopeAspectOrientationOp extends Operator {
 
     private static Rectangle getSourceRectangle(Rectangle targetRectangle) {
         return new Rectangle(targetRectangle.x - 1, targetRectangle.y - 1,
-                             targetRectangle.width + 2, targetRectangle.height + 2);
+                targetRectangle.width + 2, targetRectangle.height + 2);
     }
 
     private Product createTargetProduct() {
