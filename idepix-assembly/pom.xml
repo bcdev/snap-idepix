@@ -70,7 +70,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-s2msi</artifactId>
-            <version>9.0.2cv</version>
+            <version>9.0.2-SNAPSHOT</version>
             <type>nbm</type>
         </dependency>
         <dependency>
@@ -176,7 +176,7 @@
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-s2msi</artifactId>
-                                    <version>9.0.2cv</version>
+                                    <version>9.0.2-SNAPSHOT</version>
                                     <type>nbm</type>
                                 </artifactItem>
                                 <artifactItem>
