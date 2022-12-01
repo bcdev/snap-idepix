@@ -1,6 +1,9 @@
 package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.util.ShapeRasterizer;
+import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -144,4 +147,33 @@ public class CloudShadowUtils {
         return distAltArray;
     }
 
+    /*
+        package local for testing
+         */
+    @SuppressWarnings("WeakerAccess")
+    static Rectangle getSourceRectangle(Product sourceProduct, Rectangle targetRectangle, Point2D[] relativePath) {
+        final int productWidth = sourceProduct.getSceneRasterWidth();
+        final int productHeight = sourceProduct.getSceneRasterHeight();
+        final int relativeX = (int) relativePath[relativePath.length - 1].getX();
+        final int relativeY = (int) relativePath[relativePath.length - 1].getY();
+
+        // borders are now extended in both directions left-right, top-down.
+        // so it needs a reduction in x0,y0 and addition in x1,y1
+        int x0 = Math.max(0, targetRectangle.x + Math.min(0, -1 * Math.abs(relativeX)));
+        int y0 = Math.max(0, targetRectangle.y + Math.min(0, -1 * Math.abs(relativeY)));
+        int x1 = Math.min(productWidth, targetRectangle.x + targetRectangle.width + Math.max(0, Math.abs(relativeX)));
+        int y1 = Math.min(productHeight, targetRectangle.y + targetRectangle.height + Math.max(0, Math.abs(relativeY)));
+        return new Rectangle(x0, y0, x1 - x0, y1 - y0);
+    }
+
+    static boolean isCompletelyInvalid(Tile sourceTileFlag1) {
+        int invalid_byte = (int) Math.pow(2, S2IdepixConstants.IDEPIX_INVALID);
+        int[] classifData = sourceTileFlag1.getSamplesInt();
+        for (int i=0; i<classifData.length; ++i) {
+            if ((classifData[i] & invalid_byte) == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

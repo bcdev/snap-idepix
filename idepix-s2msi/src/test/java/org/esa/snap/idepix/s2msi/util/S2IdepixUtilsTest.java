@@ -1,6 +1,6 @@
 package org.esa.snap.idepix.s2msi.util;
 
-import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
+
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
@@ -40,16 +40,11 @@ public class S2IdepixUtilsTest {
         float refl2 = 100.0f;
         assertEquals(5.0f, S2IdepixUtils.spectralSlope(refl1, refl2, wvl1, wvl2), 1.0e-6f);
 
-        wvl1 = 450.0f;
-        wvl2 = 460.0f;
         refl1 = 500.0f;
-        refl2 = 100.0f;
         assertEquals(-40.0f, S2IdepixUtils.spectralSlope(refl1, refl2, wvl1, wvl2), 1.0e-6f);
 
-        wvl1 = 450.0f;
         wvl2 = 450.0f;
         refl1 = 50.0f;
-        refl2 = 100.0f;
         final float slope = S2IdepixUtils.spectralSlope(refl1, refl2, wvl1, wvl2);
         assertTrue(Float.isInfinite(slope));
     }
@@ -61,14 +56,14 @@ public class S2IdepixUtilsTest {
         assertEquals("bla", band1.getDescription());
         assertEquals("km", band1.getUnit());
         assertEquals(-999.0, band1.getNoDataValue(), 1.0e-8);
-        assertEquals(false, band1.isNoDataValueUsed());
+        assertFalse(band1.isNoDataValueUsed());
 
         Band band2 = new Band("test2", ProductData.TYPE_INT32, 10, 10);
         S2IdepixUtils.setNewBandProperties(band2, "blubb", "ton", -1, true);
         assertEquals("blubb", band2.getDescription());
         assertEquals("ton", band2.getUnit());
         assertEquals(-1.0, band2.getNoDataValue(), 1.0e-8);
-        assertEquals(true, band2.isNoDataValueUsed());
+        assertTrue(band2.isNoDataValueUsed());
     }
 
     @Test

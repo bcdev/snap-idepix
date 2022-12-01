@@ -19,8 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author Tonio Fincke
@@ -88,7 +87,7 @@ public class S2IdepixMountainShadowOp_IntegrationTest {
         final String targetFilePath = targetDirectory.getPath() + File.separator + "ms_test.dim";
         ProductIO.writeProduct(targetProduct, targetFilePath, "BEAM-DIMAP");
 
-        assertEquals(true, targetProduct.containsBand(S2IdepixMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME));
+        assertTrue(targetProduct.containsBand(S2IdepixMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME));
         final Band mountainShadowFlagBand = targetProduct.getBand(
                 S2IdepixMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
         int[][] expectedShadow = {
@@ -158,7 +157,7 @@ public class S2IdepixMountainShadowOp_IntegrationTest {
         final String targetFilePath = targetDirectory.getPath() + File.separator + "ms_test.dim";
         ProductIO.writeProduct(targetProduct, targetFilePath, "BEAM-DIMAP");
 
-        assertEquals(true, targetProduct.containsBand(S2IdepixMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME));
+        assertTrue(targetProduct.containsBand(S2IdepixMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME));
         final Band mountainShadowFlagBand = targetProduct.getBand(
                 S2IdepixMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
         int[][] expectedShadow = {

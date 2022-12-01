@@ -6,14 +6,11 @@ import org.junit.Test;
 
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Tonio Fincke
@@ -35,7 +32,7 @@ public class MountainShadowFlaggerTest {
     }
 
     @Test
-    public void testIdentifyMountainShadowArea_saa_27() throws Exception {
+    public void testIdentifyMountainShadowArea_saa_27() {
         int[] expectedFlagArray = {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -61,7 +58,7 @@ public class MountainShadowFlaggerTest {
     }
 
     @Test
-    public void testIdentifyMountainShadowArea_saa_45() throws Exception {
+    public void testIdentifyMountainShadowArea_saa_45() {
         int[] expectedFlagArray = {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -87,7 +84,7 @@ public class MountainShadowFlaggerTest {
     }
 
     @Test
-    public void testIdentifyMountainShadowArea_saa_180() throws Exception {
+    public void testIdentifyMountainShadowArea_saa_180() {
         int[] expectedFlagArray = {
                 0, 0, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,
                 0, 0, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,
@@ -113,7 +110,7 @@ public class MountainShadowFlaggerTest {
     }
 
     @Test
-    public void testIdentifyMountainShadowArea_saa_90() throws Exception {
+    public void testIdentifyMountainShadowArea_saa_90() {
         int[] expectedFlagArray = {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -139,7 +136,7 @@ public class MountainShadowFlaggerTest {
     }
 
     @Test
-    public void testIdentifyMountainShadowArea_saa_270() throws Exception {
+    public void testIdentifyMountainShadowArea_saa_270() {
         int[] expectedFlagArray = {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -165,7 +162,7 @@ public class MountainShadowFlaggerTest {
     }
 
     @Test
-    public void testIdentifyMountainShadowArea_saa_117() throws Exception {
+    public void testIdentifyMountainShadowArea_saa_117() {
         int[] expectedFlagArray = {
                 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0, 0, 0,
                 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0, 0, 0, 0,
@@ -191,7 +188,7 @@ public class MountainShadowFlaggerTest {
     }
 
     @Test
-    public void testIdentifyMountainShadowArea_saa_207() throws Exception {
+    public void testIdentifyMountainShadowArea_saa_207() {
         int[] expectedFlagArray = {
                 0, 0, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
                 0, 0, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
@@ -217,7 +214,7 @@ public class MountainShadowFlaggerTest {
     }
 
     @Test
-    public void testIdentifyMountainShadowArea_saa_297() throws Exception {
+    public void testIdentifyMountainShadowArea_saa_297() {
         int[] expectedFlagArray = {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -248,7 +245,6 @@ public class MountainShadowFlaggerTest {
         final Rectangle sourceRectangle = new Rectangle(20, 20);
         final Rectangle targetRectangle = new Rectangle(5, 5, 10, 10);
         final float[] sunZenith = createSmoothGrid(19.7446f, 19.6652f, 19.6997f, 19.6202f, 20, 20);
-        final float[] sunAzimuth = createSmoothGrid(saa, saa, saa, saa, 20, 20);
         final float[] elevation = createConicalGrid(5000, 20, 20);
 
         int[] flagArray = new int[20 * 20];
@@ -257,7 +253,6 @@ public class MountainShadowFlaggerTest {
         int yCenter = targetRectangle.y - sourceRectangle.y + (targetRectangle.height / 2);
         int sourceCenterIndex = yCenter * sourceWidth + xCenter;
         float sunZenithDegree = sunZenith[sourceCenterIndex];
-        final float sunAzimuthDegree = sunAzimuth[sourceCenterIndex];
         final List<Float> altitudes = Arrays.asList(ArrayUtils.toObject(elevation));
         float minAltitude = Collections.min(altitudes);
         float maxAltitude = Collections.max(altitudes);

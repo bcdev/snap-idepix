@@ -2,7 +2,8 @@ package org.esa.snap.idepix.s2msi.operators.mountainshadow;
 
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * @author Tonio Fincke

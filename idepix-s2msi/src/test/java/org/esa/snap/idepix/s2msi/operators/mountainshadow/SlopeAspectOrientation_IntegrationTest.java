@@ -19,8 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author Tonio Fincke
@@ -70,9 +69,9 @@ public class SlopeAspectOrientation_IntegrationTest {
         final String targetFilePath = targetDirectory.getPath() + File.separator + "sao_test.dim";
         ProductIO.writeProduct(targetProduct, targetFilePath, "BEAM-DIMAP");
 
-        assertEquals(true, targetProduct.containsBand(SlopeAspectOrientationOp.SLOPE_BAND_NAME));
-        assertEquals(true, targetProduct.containsBand(SlopeAspectOrientationOp.ASPECT_BAND_NAME));
-        assertEquals(true, targetProduct.containsBand(SlopeAspectOrientationOp.ORIENTATION_BAND_NAME));
+        assertTrue(targetProduct.containsBand(SlopeAspectOrientationOp.SLOPE_BAND_NAME));
+        assertTrue(targetProduct.containsBand(SlopeAspectOrientationOp.ASPECT_BAND_NAME));
+        assertTrue(targetProduct.containsBand(SlopeAspectOrientationOp.ORIENTATION_BAND_NAME));
 
         final Band slopeBand = targetProduct.getBand(SlopeAspectOrientationOp.SLOPE_BAND_NAME);
         final Band aspectBand = targetProduct.getBand(SlopeAspectOrientationOp.ASPECT_BAND_NAME);
