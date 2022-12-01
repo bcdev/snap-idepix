@@ -10,7 +10,6 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.StxFactory;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -22,8 +21,8 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
-import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
 import javax.media.jai.BorderExtenderConstant;
 import java.awt.Color;
@@ -70,10 +69,10 @@ public class S2IdepixPostCloudShadowOp extends Operator {
     // hidden parameter, may be set to true for mosaics with larger invalid areas
     private boolean skipInvalidTiles;
 
-     @Parameter(notNull=true)
+    @Parameter(notNull = true)
     private float sunZenithMean;
 
-    @Parameter(notNull=true)
+    @Parameter(notNull = true)
     private float sunAzimuthMean;
 
     private Band sourceBandClusterA;
@@ -182,14 +181,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         }
     }
 
-    private float getRasterNodeValueAtCenter(RasterDataNode var, int width, int height) {
-        float centralValue = var.getSampleFloat((int) (0.5 * width), (int) (0.5 * height));
-        if (Float.isNaN(centralValue)) {
-            centralValue = (float) new StxFactory().create(var, ProgressMonitor.NULL).getMedian();
-        }
-        return centralValue;
-    }
-
     private int setCloudTopHeigh(double lat) {
         return (int) Math.ceil(0.5 * Math.pow(90. - Math.abs(lat), 2.) + (90. - Math.abs(lat)) * 25 + 5000);
     }
@@ -197,7 +188,6 @@ public class S2IdepixPostCloudShadowOp extends Operator {
     private void attachFlagCoding(Band targetBandCloudShadow) {
         FlagCoding cloudCoding = new FlagCoding("cloudCoding");
         cloudCoding.addFlag("water", BitSetter.setFlag(0, F_WATER), F_WATER_DESCR_TEXT);
-        ;
         cloudCoding.addFlag("land", BitSetter.setFlag(0, F_LAND), F_LAND_DESCR_TEXT);
         cloudCoding.addFlag("cloud", BitSetter.setFlag(0, F_CLOUD), F_CLOUD_DESCR_TEXT);
         cloudCoding.addFlag("pot_haze", BitSetter.setFlag(0, F_HAZE), F_HAZE_DESCR_TEXT);
@@ -326,20 +316,20 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         if (getSourceProduct().getSceneGeoCoding() instanceof CrsGeoCoding) {
             ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).
                     getPixels((int) sourceRectangle.getMinX(),
-                (int) sourceRectangle.getMinY(),
-                (int) sourceRectangle.getWidth(),
-                (int) sourceRectangle.getHeight(),
-                sourceLatitudes,
-                sourceLongitudes);
+                            (int) sourceRectangle.getMinY(),
+                            (int) sourceRectangle.getWidth(),
+                            (int) sourceRectangle.getHeight(),
+                            sourceLatitudes,
+                            sourceLongitudes);
         } else {
             S2IdepixUtils.
                     getPixels(getSourceProduct().getSceneGeoCoding(),
-                              (int) sourceRectangle.getMinX(),
-                              (int) sourceRectangle.getMinY(),
-                              (int) sourceRectangle.getWidth(),
-                              (int) sourceRectangle.getHeight(),
-                              sourceLatitudes,
-                              sourceLongitudes);
+                            (int) sourceRectangle.getMinX(),
+                            (int) sourceRectangle.getMinY(),
+                            (int) sourceRectangle.getWidth(),
+                            (int) sourceRectangle.getHeight(),
+                            sourceLatitudes,
+                            sourceLongitudes);
         }
 
         FlagDetector flagDetector = new FlagDetector(sourceTileFlag1, sourceRectangle);

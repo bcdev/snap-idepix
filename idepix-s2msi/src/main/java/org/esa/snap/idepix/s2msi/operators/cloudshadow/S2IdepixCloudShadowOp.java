@@ -2,10 +2,6 @@ package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.jai.util.SunTileCache;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.StxFactory;
@@ -23,13 +19,11 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
-import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.CachedTile;
 import javax.media.jai.JAI;
 import javax.media.jai.PointOpImage;
 import javax.media.jai.TileCache;
-import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
 import java.util.Arrays;

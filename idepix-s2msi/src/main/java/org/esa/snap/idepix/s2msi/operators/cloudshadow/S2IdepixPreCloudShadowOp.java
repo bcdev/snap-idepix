@@ -9,7 +9,6 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.StxFactory;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -156,14 +155,6 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         return tile.getSamplesFloat();
     }
 
-    private float getRasterNodeValueAtCenter(RasterDataNode var, int width, int height) {
-        float centralValue = var.getSampleFloat((int) (0.5 * width), (int) (0.5 * height));
-        if (Float.isNaN(centralValue)) {
-            centralValue = (float) new StxFactory().create(var, ProgressMonitor.NULL).getMedian();
-        }
-        return centralValue;
-    }
-
     private int setCloudTopHeight(double lat) {
         return (int) Math.ceil(0.5 * Math.pow(90. - Math.abs(lat), 2.) + (90. - Math.abs(lat)) * 25 + 5000);
     }
@@ -238,6 +229,7 @@ public class S2IdepixPreCloudShadowOp extends Operator {
         return NCloudOverWater;
     }
 
+    // todo - if this is not used we can stop computing it
     Map<Integer, Integer> getNValidPixelTile() {
         return NValidPixelTile;
     }
