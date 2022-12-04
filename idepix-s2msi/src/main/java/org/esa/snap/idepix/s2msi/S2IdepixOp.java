@@ -149,7 +149,7 @@ public class S2IdepixOp extends Operator {
         Product cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
                                                        paramsBuffer, input);
 
-        int cacheSize = Integer.parseInt(System.getProperty("snap.idepix.s2msi.tilecache", "1600")) / 5;
+        int cacheSize = Integer.parseInt(System.getProperty("snap.idepix.s2msi.tilecache", "1600")) / 4;
         cloudBufferProduct = S2IdepixUtils.computeTileCacheProduct(cloudBufferProduct, cacheSize);
 
         if (computeCloudShadow || computeMountainShadow || computeCloudBuffer) {
