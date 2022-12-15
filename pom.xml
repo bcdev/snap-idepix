@@ -46,7 +46,7 @@
         <module>idepix-modis</module>
         <module>idepix-olci</module>
 <!--        <module>idepix-olcislstr</module>-->
-        <module>idepix-c3solcislstr</module>
+<!--        <module>idepix-c3solcislstr</module>-->
         <module>idepix-probav</module>
         <module>idepix-s2msi</module>
         <module>idepix-seawifs</module>
