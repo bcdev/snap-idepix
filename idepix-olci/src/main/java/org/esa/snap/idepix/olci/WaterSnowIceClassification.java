@@ -18,6 +18,7 @@
 package org.esa.snap.idepix.olci;
 
 import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.idepix.core.seaice.SeaIceClassification;
 import org.esa.snap.idepix.core.seaice.SeaIceClassifier;
 
@@ -28,6 +29,10 @@ public class WaterSnowIceClassification {
     private static final double MAX_LAT = 180.0;
     private static final double MIN_LAT = 0.0;
     private static final double SEA_ICE_CLIM_THRESHOLD = 10.0;
+    public static final int REFL06_560 = 5;
+    private static final int REFL18_885 = 17;
+    private static final int REFL20_940 = 19;
+    private static final int REFL21_1020 = 20;
 
     private final SeaIceClassifier seaIceClimatology;
 
@@ -39,22 +44,28 @@ public class WaterSnowIceClassification {
         this.seaIceClimatology = seaIceClimatology;
     }
 
-    public boolean classify(GeoPos pos, boolean isCloud, double nnOutput) {
+    public boolean classify(int x, int y, GeoPos pos, boolean isCloud, double nnOutput, Tile[] olciReflectanceTiles) {
         boolean isSeaIceClassified = false;
         if (seaIceClimatology != null) {
             isSeaIceClassified = isPixelClassifiedAsSeaIce(pos);
         }
 
         if (isSeaIceClassified && !isCloud) {
-            return spectralSnowIceTest();
+            return spectralSnowIceTest(x, y, olciReflectanceTiles);
         } else {
             return IdepixOlciCloudNNInterpreter.isSnowIce(nnOutput);
         }
     }
 
-    private boolean spectralSnowIceTest() {
+    private boolean spectralSnowIceTest(int x, int y, Tile[] olciReflectanceTiles) {
         // TODO
-        double ndwi = 0; // (b560 – b885)/(b560+b885)
+        double b560 = olciReflectanceTiles[REFL06_560].getSampleDouble(x, y);
+        double b885 = olciReflectanceTiles[REFL18_885].getSampleDouble(x, y);
+        double b940 = olciReflectanceTiles[REFL20_940].getSampleDouble(x, y);
+        double b1020 = olciReflectanceTiles[REFL21_1020].getSampleDouble(x, y);
+        double ndwi = (b560 - b885) / (b560 + b885);
+        double ndsi = (b560 - b1020) / (b560 + b1020);
+        double relDif = (b1020-b940) / b1020;
 
         return false;
     }

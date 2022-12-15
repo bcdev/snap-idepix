@@ -283,8 +283,8 @@ public class IdepixOlciClassificationOp extends Operator {
 
             final GeoPos geoPos = IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y);
             // 'sea' ice can be also ice over inland water!
-            boolean isSeaIce = waterSnowIceClassification.classify(geoPos, cloudAmbiguous || cloudSure,
-                    nnOutput1);
+            boolean isSeaIce = waterSnowIceClassification.classify(x, y, geoPos, cloudAmbiguous || cloudSure,
+                    nnOutput1, olciReflectanceTiles);
             // Should be like:
             // if(seaIceClima && !cloudAmbiguous && !cloudSure) {
             //     IDEPIX_SNOW_ICE = spectralSnowIceTest()
