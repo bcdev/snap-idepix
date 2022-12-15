@@ -29,7 +29,7 @@
     <version>9.0.2-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
-    
+
     <name>IdePix OLCI</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from OLCI.</description>
 
@@ -75,6 +75,14 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-envisat-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <!-- O2A Harmonisation 9.0.3 misses dependency to snap-netcdf.
+            That's why it is added here. Can be removed when switching to 9.0.4
+            -->
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-netcdf</artifactId>
             <version>${snap.version}</version>
         </dependency>
         <dependency>
@@ -134,18 +142,18 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>org.tensorflow</groupId>-->
-            <!--<artifactId>proto</artifactId>-->
-            <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
-            <!--<version>1.9.0-rc1</version>-->
+        <!--<groupId>org.tensorflow</groupId>-->
+        <!--<artifactId>proto</artifactId>-->
+        <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+        <!--<version>1.9.0-rc1</version>-->
         <!--</dependency>-->
 
         <!--<dependency>-->
-            <!--<groupId>com.google.protobuf</groupId>-->
-            <!--<artifactId>protobuf-java</artifactId>-->
-            <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
-            <!--<version>3.5.1</version>-->
-            <!--&lt;!&ndash;<version>2.6.1</version>&ndash;&gt;-->
+        <!--<groupId>com.google.protobuf</groupId>-->
+        <!--<artifactId>protobuf-java</artifactId>-->
+        <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+        <!--<version>3.5.1</version>-->
+        <!--&lt;!&ndash;<version>2.6.1</version>&ndash;&gt;-->
         <!--</dependency>-->
 
     </dependencies>
@@ -159,5 +167,5 @@
 
         </plugins>
     </build>
-    
+
 </project>

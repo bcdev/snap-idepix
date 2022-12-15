@@ -2,7 +2,12 @@ package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -13,7 +18,6 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.seaice.SeaIceClassification;
 import org.esa.snap.idepix.core.seaice.SeaIceClassifier;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
@@ -104,20 +108,16 @@ public class IdepixOlciClassificationOp extends Operator {
 
     private ThreadLocal<SchillerNeuralNetWrapper> olciAllNeuralNet;
 
-    private IdepixOlciCloudNNInterpreter nnInterpreter;
-    private SeaIceClassifier seaIceClassifier;
-
-    private static final double SEA_ICE_CLIM_THRESHOLD = 10.0;
     private GeometryFactory gf;
     private Polygon arcticPolygon;
     private Polygon antarcticaPolygon;
     private WatermaskClassifier watermaskClassifier;
+    private WaterSnowIceClassification waterSnowIceClassification;
 
 
     @Override
     public void initialize() throws OperatorException {
         setBands();
-        nnInterpreter = IdepixOlciCloudNNInterpreter.create();
         readSchillerNeuralNets();
         createTargetProduct();
         if (useSrtmLandWaterMask) {
@@ -130,7 +130,7 @@ public class IdepixOlciClassificationOp extends Operator {
             }
         }
 
-        initSeaIceClassifier();
+        waterSnowIceClassification = initSnowIceClassifier();
 
         if (o2CorrProduct != null) {
             surface13Band = o2CorrProduct.getBand("surface_13");
@@ -148,13 +148,22 @@ public class IdepixOlciClassificationOp extends Operator {
         olciAllNeuralNet = SchillerNeuralNetWrapper.create(olciAllIS);
     }
 
-    private void initSeaIceClassifier() {
+    private WaterSnowIceClassification initSnowIceClassifier() {
+        if(ignoreSeaIceClimatology) {
+            return new WaterSnowIceClassification();
+        } else {
+            return new WaterSnowIceClassification(createSeaIceClassifier());
+        }
+
+    }
+
+    private SeaIceClassifier createSeaIceClassifier() {
         final ProductData.UTC startTime = getSourceProduct().getStartTime();
         final int monthIndex = startTime.getAsCalendar().get(Calendar.MONTH);
         try {
-            seaIceClassifier = new SeaIceClassifier(monthIndex + 1);
+            return new SeaIceClassifier(monthIndex + 1);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new OperatorException("Could not initialise climatology for snow/ice classification", e);
         }
     }
 
@@ -162,8 +171,8 @@ public class IdepixOlciClassificationOp extends Operator {
         olciReflBands = new Band[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
         for (int i = 0; i < Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
             final int suffixStart = Rad2ReflConstants.OLCI_REFL_BAND_NAMES[i].indexOf("_");
-            final String reflBandname = Rad2ReflConstants.OLCI_REFL_BAND_NAMES[i].substring(0, suffixStart);
-            olciReflBands[i] = rad2reflProduct.getBand(reflBandname + "_reflectance");
+            final String reflBandName = Rad2ReflConstants.OLCI_REFL_BAND_NAMES[i].substring(0, suffixStart);
+            olciReflBands[i] = rad2reflProduct.getBand(reflBandName + "_reflectance");
         }
     }
 
@@ -220,10 +229,7 @@ public class IdepixOlciClassificationOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    int waterFraction = -1;
-                    if (useSrtmLandWaterMask) {
-                        waterFraction = watermaskClassifier.getWaterMaskFraction(geoCoding, x, y);
-                    }
+                    int waterFraction = useSrtmLandWaterMask ? watermaskClassifier.getWaterMaskFraction(geoCoding, x, y) : -1;
 
                     initCloudFlag(olciQualityFlagTile, targetTiles.get(cloudFlagTargetBand), olciReflectanceTiles, y, x);
                     final boolean isBright = olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_BRIGHT);
@@ -238,7 +244,7 @@ public class IdepixOlciClassificationOp extends Operator {
                                          surface13Tile, trans13Tile, y, x);
                     } else {
                         classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
-                                          cloudFlagTargetTile, nnTargetTile, y, x, isCoastlineFromAppliedMask);
+                                          cloudFlagTargetTile, nnTargetTile, y, x);
                     }
                 }
             }
@@ -254,11 +260,8 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private void classifyOverWater(Tile olciQualityFlagTile, Tile[] olciReflectanceTiles,
-                                   Tile cloudFlagTargetTile, Tile nnTargetTile, int y, int x, boolean isCoastline) {
+                                   Tile cloudFlagTargetTile, Tile nnTargetTile, int y, int x) {
 
-        final GeoPos geoPos = IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y);
-        // 'sea' ice can be also ice over inland water!
-        final boolean checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsSeaice(geoPos);
 
         double nnOutput1 = getOlciNNOutput(x, y, olciReflectanceTiles)[0];
         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
@@ -270,15 +273,25 @@ public class IdepixOlciClassificationOp extends Operator {
             final boolean isGlint = isGlintPixel(x, y, olciQualityFlagTile);
             // CB 20170406:
             final boolean cloudSure = olciReflectanceTiles[16].getSampleFloat(x, y) > THRESH_WATER_MINBRIGHT1 &&
-                    nnInterpreter.isCloudSure(nnOutput1);
+                    IdepixOlciCloudNNInterpreter.isCloudSure(nnOutput1);
             final boolean cloudAmbiguous = olciReflectanceTiles[16].getSampleFloat(x, y) > THRESH_WATER_MINBRIGHT2 &&
-                    nnInterpreter.isCloudAmbiguous(nnOutput1, false, isGlint);
+                    IdepixOlciCloudNNInterpreter.isCloudAmbiguous(nnOutput1, false, isGlint);
 
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, cloudAmbiguous);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, cloudSure);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, cloudAmbiguous || cloudSure);
 
-            if (checkForSeaIce && nnInterpreter.isSnowIce(nnOutput1)) {
+            final GeoPos geoPos = IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y);
+            // 'sea' ice can be also ice over inland water!
+            boolean isSeaIce = waterSnowIceClassification.classify(geoPos, cloudAmbiguous || cloudSure,
+                    nnOutput1);
+            // Should be like:
+            // if(seaIceClima && !cloudAmbiguous && !cloudSure) {
+            //     IDEPIX_SNOW_ICE = spectralSnowIceTest()
+            // } else {
+            //     IDEPIX_SNOW_ICE = nnInterpreter.isSnowIce(nnOutput1)
+            // }
+            if (isSeaIce) {
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
@@ -316,16 +329,13 @@ public class IdepixOlciClassificationOp extends Operator {
 
             // CB 20170406:
             boolean isCloudSure = olciReflectances[2] > THRESH_LAND_MINBRIGHT1 &&
-                    nnInterpreter.isCloudSure(nnOutput);
+                    IdepixOlciCloudNNInterpreter.isCloudSure(nnOutput);
             boolean isCloudAmbiguous = olciReflectances[2] > THRESH_LAND_MINBRIGHT2 &&
-                    nnInterpreter.isCloudAmbiguous(nnOutput, true, false);
+                    IdepixOlciCloudNNInterpreter.isCloudAmbiguous(nnOutput, true, false);
             boolean isCloud = isCloudAmbiguous || isCloudSure;
 
-            boolean isSnowIce = nnInterpreter.isSnowIce(nnOutput);
+            boolean isSnowIce = IdepixOlciCloudNNInterpreter.isSnowIce(nnOutput);
 
-            // cloud over snow from harmonisation approach:
-            // String expr = "pixel_classif_flags.IDEPIX_LAND && " +
-            //        "((Oa21_reflectance > 0.5 && surface_13 - trans_13 < 0.01) || Oa21_reflectance > 0.76)";
             double surface13;
             double trans13;
             if (surface13Tile != null && trans13Tile != null) {
@@ -398,31 +408,6 @@ public class IdepixOlciClassificationOp extends Operator {
             nnInput[i] = Math.sqrt(rhoToaTiles[i].getSampleFloat(x, y));
         }
         return nnWrapper.getNeuralNet().calc(nnInput);
-    }
-
-    private boolean isPixelClassifiedAsSeaice(GeoPos geoPos) {
-        // check given pixel, but also neighbour cell from 1x1 deg sea ice climatology...
-        final double maxLon = 360.0;
-        final double minLon = 0.0;
-        final double maxLat = 180.0;
-        final double minLat = 0.0;
-
-        for (int y = -1; y <= 1; y++) {
-            for (int x = -1; x <= 1; x++) {
-                // for sea ice climatology indices, we need to shift lat/lon onto [0,180]/[0,360]...
-                double lon = geoPos.lon + 180.0 + x * 1.0;
-                double lat = 90.0 - geoPos.lat + y * 1.0;
-                lon = Math.max(lon, minLon);
-                lon = Math.min(lon, maxLon);
-                lat = Math.max(lat, minLat);
-                lat = Math.min(lat, maxLat);
-                final SeaIceClassification classification = seaIceClassifier.getClassification(lat, lon);
-                if (classification.max >= SEA_ICE_CLIM_THRESHOLD) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private boolean isCoastlinePixel(int x, int y, int waterFraction) {

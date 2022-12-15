@@ -14,24 +14,10 @@ class IdepixOlciCloudNNInterpreter {
     private static final ValueRange SPATIAL_MIXED_BOUNDS_WATER_GLINT = new ValueRange(3.5, 3.5, true, false);
     private static final ValueRange SPATIAL_MIXED_BOUNDS_WATER_NOGLINT = new ValueRange(3.5, 3.75, true, false);
 
-    // currently not used
-//    private static final ValueRange CLEAR_LAND_BOUNDS = new ValueRange(3.75, 5.3, true, false);
-//    private static final ValueRange CLEAR_WATER_BOUNDS = new ValueRange(5.3, 6.00, true, true);
-
     private IdepixOlciCloudNNInterpreter() {
     }
 
-    // Here we might add the nn as parameter to decide which valueRanges to load
-    static IdepixOlciCloudNNInterpreter create() {
-        return new IdepixOlciCloudNNInterpreter();
-    }
-
-    // currently not used
-//    boolean isCloudAmbiguous(double nnValue) {
-//        return SEMI_TRANS_CLOUD_BOUNDS.contains(nnValue) || SPATIAL_MIXED_BOUNDS.contains(nnValue);
-//    }
-
-    boolean isCloudAmbiguous(double nnValue, boolean isLand, boolean considerGlint) {
+    static boolean isCloudAmbiguous(double nnValue, boolean isLand, boolean considerGlint) {
         if (isLand) {
             return SEMI_TRANS_CLOUD_BOUNDS.contains(nnValue) || SPATIAL_MIXED_BOUNDS_LAND.contains(nnValue);
         } else {
@@ -43,11 +29,11 @@ class IdepixOlciCloudNNInterpreter {
         }
     }
 
-    boolean isCloudSure(double nnValue) {
+    static boolean isCloudSure(double nnValue) {
         return OPAQUE_CLOUD_BOUNDS.contains(nnValue);
     }
 
-    boolean isSnowIce(double nnValue) {
+    static boolean isSnowIce(double nnValue) {
         return CLEAR_SNOW_ICE_BOUNDS.contains(nnValue);
 
     }
