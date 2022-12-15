@@ -22,11 +22,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>9.0.2-SNAPSHOT</version>
+        <version>9.0.1</version>
     </parent>
 
     <artifactId>idepix-c3solcislstr</artifactId>
-    <version>9.0.2-SNAPSHOT</version>
+    <version>9.0.2</version>
 
     <packaging>nbm</packaging>
 
@@ -36,7 +36,7 @@
     </description>
 
     <properties>
-        <idepix-core.version>9.0.2-SNAPSHOT</idepix-core.version>
+        <idepix-core.version>9.0.1</idepix-core.version>
         <s3tbx.version>9.0.0</s3tbx.version>
     </properties>
 
