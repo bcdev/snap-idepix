@@ -17,7 +17,7 @@
     <description>Collects NBM modules in one directory for uploading to SNAP repository</description>
 
     <dependencies>
-        <!-- mp: Shall not be released yet -->
+        <!-- mp: Shall not be released -->
         <!--                                <dependency>-->
         <!--                                    <groupId>org.esa.snap</groupId>-->
         <!--                                    <artifactId>idepix-avhrr</artifactId>-->
@@ -54,10 +54,17 @@
             <version>9.0.2-SNAPSHOT</version>
             <type>nbm</type>
         </dependency>
-        <!-- mp: Shall not be released yet -->
+        <!-- mp: Shall not be released -->
         <!--                                <dependency>-->
         <!--                                    <groupId>org.esa.snap</groupId>-->
         <!--                                    <artifactId>idepix-olcislstr</artifactId>-->
+        <!--                                    <version>9.0.2-SNAPSHOT</version>-->
+        <!--                                    <type>nbm</type>-->
+        <!--                                </dependency>-->
+        <!-- mp: Shall not be released -->
+        <!--                                <dependency>-->
+        <!--                                    <groupId>org.esa.snap</groupId>-->
+        <!--                                    <artifactId>idepix-c3solcislstr</artifactId>-->
         <!--                                    <version>9.0.2-SNAPSHOT</version>-->
         <!--                                    <type>nbm</type>-->
         <!--                                </dependency>-->

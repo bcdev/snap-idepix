@@ -1,0 +1,5 @@
+org.esa.snap.idepix.c3solcislstr.C3SOlciSlstrOp$Spi
+org.esa.snap.idepix.c3solcislstr.C3SOlciSlstrCtpOp$Spi
+org.esa.snap.idepix.c3solcislstr.C3SOlciSlstrClassificationOp$Spi
+org.esa.snap.idepix.c3solcislstr.C3SOlciSlstrPostProcessOp$Spi
+org.esa.snap.idepix.c3solcislstr.rad2refl.C3SOlciSlstrRad2ReflOp$Spi
