@@ -74,8 +74,12 @@ public class SlstrRadReflConverter implements RadReflConverter {
             final int spectralIndex = Integer.parseInt(bandName.substring(1, 2)) - 1;
             final String bandNameChannel = bandName.substring(0, 2);
             final String stringToReplace = radToReflMode ? "radiance" : "reflectance";
-            final MetadataElement qualityElement = sourceProduct.getMetadataRoot().getElement("SLSTRmetadata");
-
+            final MetadataElement qualityElement =
+                    sourceProduct.getMetadataRoot().containsElement("SLSTRmetadata") ?
+                    sourceProduct.getMetadataRoot().getElement("SLSTRmetadata") :
+                    sourceProduct.getMetadataRoot().containsElement("SecondaryMetadata") ?
+                    sourceProduct.getMetadataRoot().getElement("SecondaryMetadata").getElementAt(0) :
+                    null;
             if (qualityElement != null) {
                 final MetadataElement variableAttributesElement = qualityElement.getElement(bandNameChannel);
                 if (variableAttributesElement != null) {
