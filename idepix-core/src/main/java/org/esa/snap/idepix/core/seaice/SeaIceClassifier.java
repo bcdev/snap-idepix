@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -45,12 +46,10 @@ public class SeaIceClassifier {
         if (month < 1 || month > 12) {
             throw new IllegalArgumentException("month must be in between 1 and 12.");
         }
-        InputStream classificationZipStream = getClass().getResourceAsStream("classification.zip");
-        ZipInputStream zip = new ZipInputStream(classificationZipStream);
-        try {
-            loadClassifications(month, zip);
-        } finally {
-            zip.close();
+        try (InputStream classificationZipStream = getClass().getResourceAsStream("classification.zip")) {
+            try (ZipInputStream zip = new ZipInputStream(Objects.requireNonNull(classificationZipStream))) {
+                loadClassifications(month, zip);
+            }
         }
     }
 
@@ -69,7 +68,7 @@ public class SeaIceClassifier {
         final double min = entry[1];
         final double max = entry[2];
         final double stdDev = entry[3];
-        return SeaIceClassification.create(mean, min, max, stdDev);
+        return new SeaIceClassification(mean, min, max, stdDev);
     }
 
     private double[] getEntry(double lat, double lon) {
@@ -99,10 +98,9 @@ public class SeaIceClassifier {
     }
 
     private void loadClassifications(int month, ZipInputStream zip) throws IOException {
+        final String fileName = String.format("classification_%d.csv", month);
         ZipEntry ze = zip.getNextEntry();
-
         while (ze != null) {
-            final String fileName = String.format("classification_%d.csv", month);
             if (ze.getName().equals(fileName)) {
                 final InputStreamReader reader = new InputStreamReader(zip);
                 final CsvReader csvReader = new CsvReader(reader, new char[]{' '}, true, "#");

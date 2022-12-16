@@ -27,12 +27,12 @@ public class SeaIceClassification {
     /**
      * The minimum sea ice value.
      */
-    public final double min;
+    private final double min;
 
     /**
      * The maximum sea ice value.
      */
-    public final double max;
+    private final double max;
 
     /**
      * The mean sea ice value.
@@ -44,14 +44,26 @@ public class SeaIceClassification {
      */
     private final double standardDeviation;
 
-    private SeaIceClassification(double mean, double min, double max, double standardDeviation) {
+    public SeaIceClassification(double mean, double min, double max, double standardDeviation) {
         this.mean = mean;
         this.min = min;
         this.max = max;
         this.standardDeviation = standardDeviation;
     }
 
-    static SeaIceClassification create(double mean, double min, double max, double standardDeviation) {
-        return new SeaIceClassification(mean, min, max, standardDeviation);
+    public double getMin() {
+        return min;
+    }
+
+    public double getMax() {
+        return max;
+    }
+
+    public double getMean() {
+        return mean;
+    }
+
+    public double getStandardDeviation() {
+        return standardDeviation;
     }
 }
