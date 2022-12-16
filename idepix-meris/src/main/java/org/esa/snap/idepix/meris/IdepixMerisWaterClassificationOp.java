@@ -264,9 +264,9 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         if (!isCoastline) {
             // over water
             final GeoPos geoPos = getGeoPos(x, y);
-            checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsSeaice(geoPos);
+            checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsSeaIce(geoPos);
             // glint makes sense only if we have no sea ice
-            is_glint_risk = is_glint_risk && !isPixelClassifiedAsSeaice(geoPos);
+            is_glint_risk = is_glint_risk && !isPixelClassifiedAsSeaIce(geoPos);
 
         }
 
@@ -357,24 +357,15 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         return Interp.interpolate(auxData.rog.getJavaArray(), rogIndex);
     }
 
-    private boolean isPixelClassifiedAsSeaice(GeoPos geoPos) {
+    private boolean isPixelClassifiedAsSeaIce(GeoPos geoPos) {
         // check given pixel, but also neighbour cell from 1x1 deg sea ice climatology...
-        final double maxLon = 360.0;
-        final double minLon = 0.0;
-        final double maxLat = 180.0;
-        final double minLat = 0.0;
-
         for (int y = -1; y <= 1; y++) {
             for (int x = -1; x <= 1; x++) {
                 // for sea ice climatology indices, we need to shift lat/lon onto [0,180]/[0,360]...
-                double lon = geoPos.lon + 180.0 + x * 1.0;
-                double lat = 90.0 - geoPos.lat + y * 1.0;
-                lon = Math.max(lon, minLon);
-                lon = Math.min(lon, maxLon);
-                lat = Math.max(lat, minLat);
-                lat = Math.min(lat, maxLat);
+                double lon = geoPos.lon + x;
+                double lat = geoPos.lat + y;
                 final SeaIceClassification classification = seaIceClassifier.getClassification(lat, lon);
-                if (classification.max >= SEA_ICE_CLIM_THRESHOLD) {
+                if (classification.getMax() >= SEA_ICE_CLIM_THRESHOLD) {
                     return true;
                 }
             }

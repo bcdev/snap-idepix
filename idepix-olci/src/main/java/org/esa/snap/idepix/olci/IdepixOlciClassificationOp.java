@@ -113,6 +113,7 @@ public class IdepixOlciClassificationOp extends Operator {
     private Polygon antarcticaPolygon;
     private WatermaskClassifier watermaskClassifier;
     private WaterSnowIceClassification waterSnowIceClassification;
+    private WaterSnowIceClassification landSnowIceClassification;
 
 
     @Override
@@ -131,6 +132,7 @@ public class IdepixOlciClassificationOp extends Operator {
         }
 
         waterSnowIceClassification = initSnowIceClassifier();
+        landSnowIceClassification = new WaterSnowIceClassification();
 
         if (o2CorrProduct != null) {
             surface13Band = o2CorrProduct.getBand("surface_13");
@@ -240,7 +242,7 @@ public class IdepixOlciClassificationOp extends Operator {
                     final boolean isLandFromAppliedMask = isOlciLandPixel(x, y, olciQualityFlagTile, waterFraction);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLandFromAppliedMask);
                     if (isLandFromAppliedMask && !isOlciInlandWaterPixel(x, y, olciQualityFlagTile)) {
-                        classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
+                        classifyOverLand(olciQualityFlagTile, olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
                                          surface13Tile, trans13Tile, y, x);
                     } else {
                         classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
@@ -263,7 +265,7 @@ public class IdepixOlciClassificationOp extends Operator {
                                    Tile cloudFlagTargetTile, Tile nnTargetTile, int y, int x) {
 
 
-        double nnOutput1 = getOlciNNOutput(x, y, olciReflectanceTiles)[0];
+        double nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles)[0];
         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
@@ -273,9 +275,9 @@ public class IdepixOlciClassificationOp extends Operator {
             final boolean isGlint = isGlintPixel(x, y, olciQualityFlagTile);
             // CB 20170406:
             final boolean cloudSure = olciReflectanceTiles[16].getSampleFloat(x, y) > THRESH_WATER_MINBRIGHT1 &&
-                    IdepixOlciCloudNNInterpreter.isCloudSure(nnOutput1);
+                    IdepixOlciCloudNNInterpreter.isCloudSure(nnOutput);
             final boolean cloudAmbiguous = olciReflectanceTiles[16].getSampleFloat(x, y) > THRESH_WATER_MINBRIGHT2 &&
-                    IdepixOlciCloudNNInterpreter.isCloudAmbiguous(nnOutput1, false, isGlint);
+                    IdepixOlciCloudNNInterpreter.isCloudAmbiguous(nnOutput, false, isGlint);
 
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, cloudAmbiguous);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, cloudSure);
@@ -283,27 +285,24 @@ public class IdepixOlciClassificationOp extends Operator {
 
             final GeoPos geoPos = IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y);
             // 'sea' ice can be also ice over inland water!
-            boolean isSeaIce = waterSnowIceClassification.classify(x, y, geoPos, cloudAmbiguous || cloudSure,
-                    nnOutput1, olciReflectanceTiles);
-            // Should be like:
-            // if(seaIceClima && !cloudAmbiguous && !cloudSure) {
-            //     IDEPIX_SNOW_ICE = spectralSnowIceTest()
-            // } else {
-            //     IDEPIX_SNOW_ICE = nnInterpreter.isSnowIce(nnOutput1)
-            // }
+            boolean isInvalid = olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
+
+            boolean isSeaIce = waterSnowIceClassification.classify(x, y, geoPos, isInvalid, cloudAmbiguous || cloudSure,
+                    nnOutput, olciReflectanceTiles);
+
             if (isSeaIce) {
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
             }
         }
+
         if (outputSchillerNNValue) {
-            final double[] nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles);
-            nnTargetTile.setSample(x, y, nnOutput[0]);
+            nnTargetTile.setSample(x, y, nnOutput);
         }
     }
 
-    private void classifyOverLand(Tile[] olciReflectanceTiles,
+    private void classifyOverLand(Tile olciQualityFlagTile, Tile[] olciReflectanceTiles,
                                   Tile cloudFlagTargetTile, Tile nnTargetTile,
                                   Tile surface13Tile, Tile trans13Tile,
                                   int y, int x) {
@@ -334,12 +333,16 @@ public class IdepixOlciClassificationOp extends Operator {
                     IdepixOlciCloudNNInterpreter.isCloudAmbiguous(nnOutput, true, false);
             boolean isCloud = isCloudAmbiguous || isCloudSure;
 
-            boolean isSnowIce = IdepixOlciCloudNNInterpreter.isSnowIce(nnOutput);
+//            boolean isSnowIce = IdepixOlciCloudNNInterpreter.isSnowIce(nnOutput);
+            final GeoPos geoPos = IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y);
+            boolean isInvalid = olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
+
+            boolean isSnowIce = landSnowIceClassification.classify(x, y, geoPos, isInvalid, isCloud,
+                    nnOutput, olciReflectanceTiles);
 
             double surface13;
             double trans13;
             if (surface13Tile != null && trans13Tile != null) {
-                GeoPos geoPos = IdepixUtils.getGeoPos(sourceProduct.getSceneGeoCoding(), x, y);
                 final Coordinate coord = new Coordinate(geoPos.getLon(), geoPos.getLat());
                 final boolean isInsideGreenland =
                         IdepixOlciUtils.isCoordinateInsideGeometry(coord, arcticPolygon, gf);

@@ -16,6 +16,7 @@
 
 package org.esa.snap.idepix.core.seaice;
 
+import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.util.io.CsvReader;
 
 import java.io.IOException;
@@ -33,6 +34,10 @@ import java.util.zip.ZipInputStream;
  */
 public class SeaIceClassifier {
 
+    public static final double MAX_LON = 360.0;
+    public static final double MIN_LON = 0.0;
+    public static final double MAX_LAT = 180.0;
+    public static final double MIN_LAT = 0.0;
     private final double[][][] map = new double[180][360][4];
 
     /**
@@ -63,12 +68,26 @@ public class SeaIceClassifier {
      */
     public SeaIceClassification getClassification(double lat, double lon) {
         validateParameters(lat, lon);
-        final double[] entry = getEntry(lat, lon);
+        GeoPos geoPos = shiftLatLon(new GeoPos(lat, lon));
+        final double[] entry = getEntry(geoPos.lat, geoPos.lon);
         final double mean = entry[0];
         final double min = entry[1];
         final double max = entry[2];
         final double stdDev = entry[3];
         return new SeaIceClassification(mean, min, max, stdDev);
+    }
+
+    private GeoPos shiftLatLon(GeoPos geoPos) {
+        // for sea ice climatology indices, we need to shift lat/lon onto [0,180]/[0,360]...
+        double lon = geoPos.lon + 180.0;
+        lon = Math.max(lon, MIN_LON);
+        lon = Math.min(lon, MAX_LON);
+        double lat = 90.0 - geoPos.lat;
+        lat = Math.max(lat, MIN_LAT);
+        lat = Math.min(lat, MAX_LAT);
+
+        geoPos.setLocation(lat, lon);
+        return geoPos;
     }
 
     private double[] getEntry(double lat, double lon) {
@@ -78,6 +97,7 @@ public class SeaIceClassifier {
             // therefore we map 180 to 179
             latIndex--;
         }
+
         int lonIndex = (int) lon;
         if (lonIndex == 360) {
             // latitude of 360 is a valid value, but value range in map is 0..359
@@ -89,11 +109,11 @@ public class SeaIceClassifier {
     }
 
     private static void validateParameters(double lat, double lon) {
-        if (lat > 180 || lat < 0) {
-            throw new IllegalArgumentException("lat must be >= 0 and <= 180, was '" + lat + "'.");
+        if (lat > 90 || lat < -90) {
+            throw new IllegalArgumentException("lat must be >= -90 and <= 90, was '" + lat + "'.");
         }
-        if (lon > 360 || lon < 0) {
-            throw new IllegalArgumentException("lon must be >= 0 and <= 360, was '" + lon + "'.");
+        if (lon > 180 || lon < -180) {
+            throw new IllegalArgumentException("lon must be >= -180 and <= 180, was '" + lon + "'.");
         }
     }
 
