@@ -91,7 +91,7 @@ public class WaterSnowIceClassification {
         if(!isWater) {
             return false;
         }
-        // Empirically taken from plot
+        // Values empirically taken from plot
         boolean isIce = ndwi < (0.1 - 0.56) / (0.2 - 0.74) * (ndsi - 0.74) + 0.56;
         boolean isMixedTidal = isMixedTidal(refToaB1B6);
         return curvatureTest(b940, b1020, ndwi, ndsi, isWater, isIce, isMixedTidal);
@@ -102,6 +102,7 @@ public class WaterSnowIceClassification {
         if (isIce && isWater) {
             double ndsiRotated = ndsi * cosRotateAngle - ndwi * sinRotateAngle;
             double ndwiRotated = ndsi * sinRotateAngle + ndwi * cosRotateAngle;
+            // Values empirically taken from plot
             double minBound = 0.31120702820971125;
             double maxBound = 0.7563567684961906;
 
