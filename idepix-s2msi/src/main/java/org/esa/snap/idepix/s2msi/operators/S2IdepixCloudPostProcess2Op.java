@@ -10,6 +10,7 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
@@ -35,6 +36,8 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
     private static final int IDEPIX_CIRRUS_AMBIGUOUS_BIT = 1 << IDEPIX_CIRRUS_AMBIGUOUS;
     private static final int IDEPIX_CIRRUS_SURE_BIT = 1 << IDEPIX_CIRRUS_SURE;
     private static final int IDEPIX_WATER_BIT = 1 << IDEPIX_WATER;
+
+    private static final boolean BORDER_COPY = true;
 
     @SourceProduct(alias = "classifiedProduct")
     private Product classifiedProduct;
@@ -81,10 +84,10 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         contextRadius = contextSize / 2;
         cloudBufferSize = 2 * cloudBufferWidth + 1;
         
-        pixelStateRectCalculator = createRectCalculator(contextSize/2);
-        urbanRectCalculator = createRectCalculator(urbanContextSize/2);
-        cdiRectCalculator = createRectCalculator(cdiStddevContextSize/2);
-        contextRectCalculator = createRectCalculator(contextSize/2);
+        pixelStateRectCalculator = createRectCalculator(contextRadius);
+        urbanRectCalculator = createRectCalculator(urbanContextRadius);
+        cdiRectCalculator = createRectCalculator(cdiStddevContextRadius);
+        contextRectCalculator = createRectCalculator(contextRadius);
         cloudBufferRectCalculator = createRectCalculator(cloudBufferWidth);
 
         Product cloudBufferProduct = createTargetProduct(classifiedProduct,
@@ -98,6 +101,9 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         b8aBand = classifiedProduct.getBand("B8A");
         b11Band = classifiedProduct.getBand("B11");
 
+        ProductUtils.copyBand("pixel_classif_flags", classifiedProduct,
+                              "flags_before_postprocessing", cloudBufferProduct, true);
+
         setTargetProduct(cloudBufferProduct);
     }
 
@@ -108,8 +114,13 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         final Rectangle pixelStateRectangle = pixelStateRectCalculator.extend(targetRectangle);
         final Rectangle urbanRectangle = urbanRectCalculator.extend(targetRectangle);
         final Rectangle cdiRectangle = cdiRectCalculator.extend(targetRectangle);
-        final Rectangle contextRectangle = contextRectCalculator.extend(targetRectangle);
+        final Rectangle cdiExtendedRectangle = new Rectangle(targetRectangle);
+        cdiExtendedRectangle.grow(cdiStddevContextRadius, cdiStddevContextRadius);
+        final Rectangle contextRectangle = new Rectangle(targetRectangle);
+        contextRectangle.grow(contextRadius, contextRadius);  //contextRectCalculator.extend(targetRectangle);
         final Rectangle cloudBufferRectangle = cloudBufferRectCalculator.extend(targetRectangle);
+        final Rectangle cloudBufferExtendedRectangle = new Rectangle(targetRectangle);
+        cloudBufferExtendedRectangle.grow(cloudBufferWidth, cloudBufferWidth);
 
         final Tile sourceFlagTile = getSourceTile(origClassifFlagBand, pixelStateRectangle);
         final Tile b7Tile = getSourceTile(b7Band, cdiRectangle);
@@ -118,24 +129,31 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         final Tile b2Tile = getSourceTile(b2Band, targetRectangle);
         final Tile b11Tile = getSourceTile(b11Band, targetRectangle);
 
-        correctCoastalAndUrbanClouds(contextRectangle, pixelStateRectangle, urbanRectangle, cdiRectangle, targetRectangle, 
-                                     b7Tile, b2Tile, b8Tile, b8aTile, b11Tile, sourceFlagTile, targetTile);
+        correctCoastalAndUrbanClouds(contextRectangle,
+                                     pixelStateRectangle, urbanRectangle, cdiRectangle, cdiExtendedRectangle,
+                                     targetRectangle,
+                                     b2Tile, b7Tile, b8Tile, b8aTile, b11Tile, sourceFlagTile, targetTile);
 
         // cloud buffer is based on the corrected clouds
-        addCloudBuffer(targetRectangle, cloudBufferRectangle, sourceFlagTile, targetTile);
+        addCloudBuffer(cloudBufferExtendedRectangle, cloudBufferRectangle, targetRectangle, sourceFlagTile, targetTile);
     }
 
-    private void correctCoastalAndUrbanClouds(Rectangle contextRectangle, Rectangle pixelStateRectangle, Rectangle urbanRectangle, Rectangle cdiRectangle, Rectangle targetRectangle, Tile b7Tile, Tile b2Tile, Tile b8Tile, Tile b8aTile, Tile b11Tile, Tile sourceFlagTile, Tile targetTile) {
+    private void correctCoastalAndUrbanClouds(Rectangle contextRectangle,
+                                              Rectangle pixelStateRectangle, Rectangle urbanRectangle,
+                                              Rectangle cdiRectangle, Rectangle cdiExtendedRectangle,
+                                              Rectangle targetRectangle,
+                                              Tile b2Tile, Tile b7Tile, Tile b8Tile, Tile b8aTile, Tile b11Tile,
+                                              Tile sourceFlagTile, Tile targetTile) {
         // allocate and initialise some lines of full width to collect pixel contributions
         // The lines will be re-used for later image lines in a rolling manner.
         final boolean[][] landAccu = new boolean[contextSize][targetRectangle.width];
         final boolean[][] waterAccu = new boolean[contextSize][targetRectangle.width];
         final boolean[][] urbanSomeClearAccu = new boolean[contextSize][targetRectangle.width];
-        final double m7[][] = new double[contextSize][targetRectangle.width];
-        final double c7[][] = new double[contextSize][targetRectangle.width];
-        final double m8[][] = new double[contextSize][targetRectangle.width];
-        final double c8[][] = new double[contextSize][targetRectangle.width];
-        final short n78[][] = new short[contextSize][targetRectangle.width];
+        final double[][] m7 = new double[contextSize][targetRectangle.width];
+        final double[][] c7 = new double[contextSize][targetRectangle.width];
+        final double[][] m8 = new double[contextSize][targetRectangle.width];
+        final double[][] c8 = new double[contextSize][targetRectangle.width];
+        final short[][] n78 = new short[contextSize][targetRectangle.width];
 
         // loop over extended source tile
         for (int y = contextRectangle.y; y < contextRectangle.y + contextRectangle.height; y++) {
@@ -145,31 +163,55 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
                 // write dilated land and water patch into accu, required for coastal cloud distinction
                 if (pixelStateRectangle.contains(x, y)) {  
                     if (isLand(sourceFlagTile, y, x)) {
-                        fillPatchInAccu(y, x, targetRectangle, landWaterContextRadius, contextSize, true, landAccu);
+                        fillPatchInAccu(y, x, targetRectangle, landWaterContextRadius, contextSize,
+                                        true, landAccu);
                     }
                     if (isWater(sourceFlagTile, y, x)) {
-                        fillPatchInAccu(y, x, targetRectangle, landWaterContextRadius, contextSize, true, waterAccu);
+                        fillPatchInAccu(y, x, targetRectangle, landWaterContextRadius, contextSize,
+                                        true, waterAccu);
                     }
                 }
 
                 // write 11x11 "filtered" non-cloud patch into accu, required for urban cloud distinction
                 if (urbanRectangle.contains(x, y)) {
                     if (!isCloud(sourceFlagTile, y, x)) {
-                        fillPatchInAccu(y, x, targetRectangle, urbanContextRadius, contextSize, true, urbanSomeClearAccu);
+                        fillPatchInAccu(y, x, targetRectangle, urbanContextRadius, contextSize,
+                                        true, urbanSomeClearAccu);
                     }
                 }
 
                 // add stddev contributions to accu of sums, squares, counts, required for urban cloud distinction
-                if (cdiRectangle.contains(x, y)) {
-                    final float b7 = b7Tile.getSampleFloat(x, y);
-                    final float b8 = b8Tile.getSampleFloat(x, y);
-                    final float b8a = b8aTile.getSampleFloat(x, y);
-                    if (!Float.isNaN(b7) && !Float.isNaN(b8) && b8a != 0.0f) {
-                        final float b7b8a = b7 / b8a;
-                        final float b8b8a = b8 / b8a;
-                        final float b7b8a2 = b7b8a * b7b8a;
-                        final float b8b8a2 = b8b8a * b8b8a;
-                        addStddevPatchInAccu(y, x, targetRectangle, cdiStddevContextRadius, b8b8a, b7b8a2, b8b8a2, b7b8a, m7, c7, m8, c8, n78);
+                if (BORDER_COPY) {
+                    if (cdiExtendedRectangle.contains(x, y)) {
+                        final int xt =
+                                x < cdiRectangle.x ? cdiRectangle.x
+                                        : x >= cdiRectangle.x + cdiRectangle.width ? cdiRectangle.x + cdiRectangle.width - 1
+                                        : x;
+                        final int yt =
+                                y < cdiRectangle.y ? cdiRectangle.y
+                                        : y >= cdiRectangle.y + cdiRectangle.height ? cdiRectangle.y + cdiRectangle.height - 1
+                                        : y;
+                        final float b7 = b7Tile.getSampleFloat(xt, yt);
+                        final float b8 = b8Tile.getSampleFloat(xt, yt);
+                        final float b8a = b8aTile.getSampleFloat(xt, yt);
+                        if (!Float.isNaN(b7) && !Float.isNaN(b8) && b8a != 0.0f) {
+                            final float b7b8a = b7 / b8a;
+                            final float b8b8a = b8 / b8a;
+                            addStddevPatchInAccu(y, x, targetRectangle, cdiStddevContextRadius, b7b8a, b8b8a,
+                                                 m7, c7, m8, c8, n78);
+                        }
+                    }
+                } else {
+                    if (cdiRectangle.contains(x, y)) {
+                        final float b7 = b7Tile.getSampleFloat(x, y);
+                        final float b8 = b8Tile.getSampleFloat(x, y);
+                        final float b8a = b8aTile.getSampleFloat(x, y);
+                        if (!Float.isNaN(b7) && !Float.isNaN(b8) && b8a != 0.0f) {
+                            final float b7b8a = b7 / b8a;
+                            final float b8b8a = b8 / b8a;
+                            addStddevPatchInAccu(y, x, targetRectangle, cdiStddevContextRadius, b7b8a, b8b8a,
+                                                 m7, c7, m8, c8, n78);
+                        }
                     }
                 }
 
@@ -177,21 +219,26 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
                 // target pixel yt/xt
                 final int yt = y - contextRadius;
                 final int xt = x - contextRadius;
-                // accu position jt/it
-                final int jt = (yt - targetRectangle.y) % contextSize;
+                // tile relative pixel, already mapped to accu position
+                final int jjt = (yt - targetRectangle.y) % contextSize;
                 final int it = xt - targetRectangle.x;
                 if (targetRectangle.contains(xt, yt)) {
                     // read pixel classif flags from source, apply corrections, write it to target
                     int pixelClassifFlags = sourceFlagTile.getSampleInt(xt, yt);
-                    pixelClassifFlags = coastalCloudDistinction(yt, xt, jt, it, landAccu, waterAccu, sourceFlagTile, b2Tile, b8Tile, b11Tile, pixelClassifFlags);
-                    pixelClassifFlags = urbanCloudDistinction(jt, it, urbanSomeClearAccu, m7, m8, c7, c8, n78, pixelClassifFlags);
+                    pixelClassifFlags = coastalCloudDistinction(yt, xt, jjt, it, landAccu, waterAccu,
+                                                                sourceFlagTile, b2Tile, b8Tile, b11Tile,
+                                                                pixelClassifFlags);
+                    pixelClassifFlags = urbanCloudDistinction(jjt, it, urbanSomeClearAccu,
+                                                              m7, m8, c7, c8, n78,
+                                                              pixelClassifFlags);
                     targetTile.setSample(xt, yt, pixelClassifFlags);
                 }
             }
         }
     }
 
-    private void fillPatchInAccu(int y, int x, Rectangle targetRectangle, int halfWidth, int contextSize, boolean value, boolean[][] accu) {
+    private void fillPatchInAccu(int y, int x, Rectangle targetRectangle, int halfWidth, int contextSize,
+                                 boolean value, boolean[][] accu) {
         // reduce patch to part overlapping with target image
         final int jMin = Math.max(y - targetRectangle.y - halfWidth, 0);
         final int jMax = Math.min(y - targetRectangle.y + 1 + halfWidth, targetRectangle.height);
@@ -207,7 +254,7 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
     }
 
     private void addStddevPatchInAccu(int y, int x, Rectangle targetRectangle, int halfWidth,
-                                      float b8b8a, float b7b8a2, float b8b8a2, float b7b8a, 
+                                      float b7b8a, float b8b8a,
                                       double[][] m7, double[][] c7, double[][] m8, double[][] c8, short[][] n78) {
         // reduce patch to part overlapping with target image
         final int jMin = Math.max(y - targetRectangle.y - halfWidth, 0);
@@ -215,7 +262,9 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         final int iMin = Math.max(x - targetRectangle.x - halfWidth, 0);
         final int iMax = Math.min(x - targetRectangle.x + 1 + halfWidth, targetRectangle.width);
         // add to mean and to sum of squares within patch
-        for (int j = jMin; j < jMax; ++j) {  
+        final float b7b8a2 = b7b8a * b7b8a;
+        final float b8b8a2 = b8b8a * b8b8a;
+        for (int j = jMin; j < jMax; ++j) {
             final int jj = j % contextSize;
             for (int i = iMin; i < iMax; ++i) {
                 m7[jj][i] += b7b8a;
@@ -227,14 +276,14 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         }
     }
 
-    private static int coastalCloudDistinction(int yt, int xt, int jt, int it,
+    private static int coastalCloudDistinction(int yt, int xt, int jjt, int it,
                                                boolean[][] landAccu, boolean[][] waterAccu,
                                                Tile sourceFlagTile, Tile b2Tile, Tile b8Tile, Tile b11Tile,
                                                int pixelClassifFlags) {
         // not land but there is some land nearby, or not water and some water nearby
         final boolean isCoastal =
-                (!isLand(sourceFlagTile, yt, xt) && landAccu[jt][it]) ||
-                (!isWater(sourceFlagTile, yt, xt) && waterAccu[jt][it]);
+                (!isLand(sourceFlagTile, yt, xt) && landAccu[jjt][it]) ||
+                (!isWater(sourceFlagTile, yt, xt) && waterAccu[jjt][it]);
         if (isCoastal) {
             // another cloud test
             final float b2 = b2Tile.getSampleFloat(xt, yt);
@@ -245,65 +294,79 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
             final boolean notCoastalCloud = idx1 > 0.7f || (idx1 > 0.6f && idx2 > 0.9f);
             if (notCoastalCloud) {
                 // clear cloud flags if cloud test fails
-                pixelClassifFlags = removeBit(pixelClassifFlags, IDEPIX_CLOUD_AMBIGUOUS);
-                pixelClassifFlags = removeBit(pixelClassifFlags, IDEPIX_CLOUD_SURE);
-                pixelClassifFlags = removeBit(pixelClassifFlags, IDEPIX_CLOUD);
+                pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD_AMBIGUOUS, false);
+                pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD_SURE, false);
+                pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD, false);
             } else if ((pixelClassifFlags & ((1 << IDEPIX_CLOUD_AMBIGUOUS) | (1 << IDEPIX_CLOUD_SURE))) == 0) {
                 // align cloud flag with combination of ambiguous and sure if none of them is set
-                pixelClassifFlags = removeBit(pixelClassifFlags, IDEPIX_CLOUD);
+                pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD, false);
             } else {
                 // align cloud flag with combination of ambiguous and sure if one of them is set
                 pixelClassifFlags |= IDEPIX_CLOUD_BIT;
             }
         }
         // reset accu for re-use
-        landAccu[jt][it] = false;
-        waterAccu[jt][it] = false;
+        landAccu[jjt][it] = false;
+        waterAccu[jjt][it] = false;
         return pixelClassifFlags;
     }
 
-    private static int urbanCloudDistinction(int jt, int it, boolean[][] urbanSomeClearAccu, double[][] m7, double[][] m8, double[][] c7, double[][] c8, short[][] n78, int pixelClassifFlags) {
+    private static int urbanCloudDistinction(int jjt, int it,
+                                             boolean[][] urbanSomeClearAccu,
+                                             double[][] m7, double[][] m8, double[][] c7, double[][] c8, short[][] n78,
+                                             int pixelClassifFlags) {
         // some clear pixels nearby, and not cirrus or water
-        final boolean notInTheMiddleOfACloud = urbanSomeClearAccu[jt][it];
+        final boolean notInTheMiddleOfACloud = urbanSomeClearAccu[jjt][it];
         if (notInTheMiddleOfACloud
                 && (pixelClassifFlags & (IDEPIX_CIRRUS_AMBIGUOUS_BIT | IDEPIX_CIRRUS_SURE_BIT | IDEPIX_WATER_BIT)) == 0
                 && (pixelClassifFlags & (IDEPIX_CLOUD_AMBIGUOUS_BIT | IDEPIX_CLOUD_SURE_BIT | IDEPIX_CLOUD_BIT)) != 0) {
             // another non-cloud test
-            final double variance7 = variance_of(c7[jt][it], m7[jt][it], n78[jt][it]);
-            final double variance8 = variance_of(c8[jt][it], m8[jt][it], n78[jt][it]);
+            final double variance7 = variance_of(c7[jjt][it], m7[jjt][it], n78[jjt][it]);
+            final double variance8 = variance_of(c8[jjt][it], m8[jjt][it], n78[jjt][it]);
             final double cdiValue = (variance7 - variance8) / (variance7 + variance8);
             if (cdiValue >= CDI_THRESHOLD) {
                 // clear cloud flags if CDI test succeeds
-                pixelClassifFlags = removeBit(pixelClassifFlags, IDEPIX_CLOUD_AMBIGUOUS);
-                pixelClassifFlags = removeBit(pixelClassifFlags, IDEPIX_CLOUD_SURE);
-                pixelClassifFlags = removeBit(pixelClassifFlags, IDEPIX_CLOUD);
+                pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD_AMBIGUOUS, false);
+                pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD_SURE, false);
+                pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD, false);
             }
         }
         // clear accu for re-use
-        urbanSomeClearAccu[jt][it] = false;
+        urbanSomeClearAccu[jjt][it] = false;
+        c7[jjt][it] = 0.0;
+        m7[jjt][it] = 0.0;
+        c8[jjt][it] = 0.0;
+        m8[jjt][it] = 0.0;
+        n78[jjt][it] = 0;
         return pixelClassifFlags;
     }
 
-    private void addCloudBuffer(Rectangle targetRectangle, Rectangle cloudBufferRectangle, Tile sourceFlagTile, Tile targetTile) {
+    private void addCloudBuffer(Rectangle cloudBufferExtendedRectangle, Rectangle cloudBufferRectangle,
+                                Rectangle targetRectangle, Tile sourceFlagTile, Tile targetTile) {
         final boolean[][] cloudBufferAccu = new boolean[cloudBufferSize][targetRectangle.width];
-        for (int y = cloudBufferRectangle.y; y < cloudBufferRectangle.y + cloudBufferRectangle.height; y++) {
+        for (int y = cloudBufferExtendedRectangle.y; y < cloudBufferExtendedRectangle.y + cloudBufferExtendedRectangle.height; y++) {
             checkForCancellation();
-            for (int x = cloudBufferRectangle.x; x < cloudBufferRectangle.x + cloudBufferRectangle.width; x++) {
-                if (isCloudForBuffer(targetRectangle.contains(x, y) ? targetTile : sourceFlagTile, x, y)) {
-                    fillPatchInAccu(y, x, targetRectangle, cloudBufferWidth, cloudBufferSize, true, cloudBufferAccu);
+            for (int x = cloudBufferExtendedRectangle.x; x < cloudBufferExtendedRectangle.x + cloudBufferExtendedRectangle.width; x++) {
+                if (cloudBufferRectangle.contains(x, y)) {
+                    if (isCloudForBuffer(targetRectangle.contains(x, y) ? targetTile : sourceFlagTile, x, y)) {
+                        fillPatchInAccu(y, x, targetRectangle, cloudBufferWidth, cloudBufferSize, true, cloudBufferAccu);
+                    }
                 }
                 // target pixel yt/xt
                 final int yt = y - cloudBufferWidth;
                 final int xt = x - cloudBufferWidth;
-                // accu position jt/it
-                final int jt = (yt - targetRectangle.y) % cloudBufferSize;
+                // accu position jjt/it
+                final int jjt = (yt - targetRectangle.y) % cloudBufferSize;
                 final int it = xt - targetRectangle.x;
                 // evaluate accu if we have enough context
                 // set cloud buffer flag if it is not cloud but there is a cloud nearby
-                if (targetRectangle.contains(xt, yt)
-                        && cloudBufferAccu[jt][it]
+                if (targetRectangle.contains(xt, yt)) {
+                    if (cloudBufferAccu[jjt][it]
                         && (targetTile.getSampleInt(xt, yt) & ((1 << IDEPIX_CLOUD_AMBIGUOUS) | (1 << IDEPIX_CLOUD_SURE) | (1 << IDEPIX_CLOUD))) == 0) {
-                    targetTile.setSample(xt, yt, IDEPIX_CLOUD_BUFFER, true);
+                        targetTile.setSample(xt, yt, IDEPIX_CLOUD_BUFFER, true);
+                    }
+                    // clear accu for re-use
+                    cloudBufferAccu[jjt][it] = false;
                 }
             }
         }
@@ -326,11 +389,6 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         return targetProduct;
     }
 
-    private static int removeBit(int x, int i) {
-        final int mask = -1 << i;
-        return ((x ^ (x >>> 1)) & mask) ^ x;
-    }
-
     private static boolean isLand(Tile tile, int y, int x) {
         return tile.getSampleBit(x, y, IDEPIX_LAND);
     }
@@ -343,13 +401,14 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         return (tile.getSampleInt(x, y) & ((1 << IDEPIX_CLOUD_AMBIGUOUS) | (1 << IDEPIX_CLOUD_SURE) | (1 << IDEPIX_CLOUD))) != 0;
     }
 
-    private static double variance_of(double c, double m, int n) {
-        return n == 0 ? Double.NaN : n == 1 ? 0.0 : (c - m * m / n) / (n - 1);
-    }
-
     private boolean isCloudForBuffer(Tile targetTile, int x, int y) {
         return targetTile.getSampleBit(x, y, IDEPIX_CLOUD_SURE) ||
                 (computeCloudBufferForCloudAmbiguous && targetTile.getSampleBit(x, y, IDEPIX_CLOUD_AMBIGUOUS));
+    }
+
+    private static double variance_of(double c, double m, int n) {
+        //return n == 0 ? Double.NaN : n == 1 ? 0.0 : (c - m * m / n) / (n - 1);
+        return n == 0 ? Double.NaN : n == 1 ? 0.0 : (c - m * m / n) / n;
     }
 
 

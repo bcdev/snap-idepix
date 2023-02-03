@@ -11,6 +11,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.dem.gpf.AddElevationOp;
+import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudPostProcess2Op;
 import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudPostProcessOp;
 import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
@@ -108,6 +109,9 @@ public class S2IdepixOp extends Operator {
         int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600"));
         s2ClassifProduct = S2IdepixUtils.computeTileCacheProduct(s2ClassifProduct, cacheSize);
 
+        targetProduct = s2ClassifProduct;
+        if (true) return;
+
         // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
         Product postProcessingProduct = computePostProcessProduct(sourceProduct, s2ClassifProduct);
 
@@ -146,7 +150,9 @@ public class S2IdepixOp extends Operator {
         Map<String, Object> paramsBuffer = new HashMap<>();
         paramsBuffer.put("cloudBufferWidth", cloudBufferWidth);
         paramsBuffer.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
-        Product cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
+        //Product cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
+        //                                               paramsBuffer, input);
+        Product cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcess2Op.class),
                                                        paramsBuffer, input);
 
         int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600")) / 5;
