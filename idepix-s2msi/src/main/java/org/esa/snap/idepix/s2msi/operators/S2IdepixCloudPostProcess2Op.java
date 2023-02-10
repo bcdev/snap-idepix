@@ -174,7 +174,7 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
 
                 // write 11x11 "filtered" non-cloud patch into accu, required for urban cloud distinction
                 if (urbanRectangle.contains(x, y)) {
-                    if (!isCloud(sourceFlagTile, y, x)) {
+                    if (!mayBeCloud(sourceFlagTile, y, x)) {
                         fillPatchInAccu(y, x, targetRectangle, urbanContextRadius, contextSize,
                                         true, urbanSomeClearAccu);
                     }
@@ -284,15 +284,17 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         final boolean isCoastal =
                 (!isLand(sourceFlagTile, yt, xt) && landAccu[jjt][it]) ||
                 (!isWater(sourceFlagTile, yt, xt) && waterAccu[jjt][it]);
-        if (isCoastal) {
+        if (isCoastal && (pixelClassifFlags & (1 << IDEPIX_INVALID)) == 0) {
             // another cloud test
             final float b2 = b2Tile.getSampleFloat(xt, yt);
             final float b8 = b8Tile.getSampleFloat(xt, yt);
             final float b11 = b11Tile.getSampleFloat(xt, yt);
             final float idx1 = b2 / b11;
             final float idx2 = b8 / b11;
-            final boolean notCoastalCloud = idx1 > 0.7f || (idx1 > 0.6f && idx2 > 0.9f);
-            if (notCoastalCloud) {
+            //final boolean notCoastal = idx1 > 0.7f || (idx1 > 0.6f && idx2 > 0.9f);
+            // handles NaN as non-coastal
+            final boolean isCoastal2 = idx1 <= 0.6f || (idx1 <= 0.7f && idx2 <= 0.9f);
+            if (isCoastal2) {
                 // clear cloud flags if cloud test fails
                 pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD_AMBIGUOUS, false);
                 pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD_SURE, false);
@@ -302,7 +304,7 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
                 pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD, false);
             } else {
                 // align cloud flag with combination of ambiguous and sure if one of them is set
-                pixelClassifFlags |= IDEPIX_CLOUD_BIT;
+                pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD, true);;
             }
         }
         // reset accu for re-use
@@ -362,7 +364,7 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
                 // set cloud buffer flag if it is not cloud but there is a cloud nearby
                 if (targetRectangle.contains(xt, yt)) {
                     if (cloudBufferAccu[jjt][it]
-                        && (targetTile.getSampleInt(xt, yt) & ((1 << IDEPIX_CLOUD_AMBIGUOUS) | (1 << IDEPIX_CLOUD_SURE) | (1 << IDEPIX_CLOUD))) == 0) {
+                        && (targetTile.getSampleInt(xt, yt) & ((1 << IDEPIX_CLOUD_AMBIGUOUS) | (1 << IDEPIX_CLOUD_SURE) | (1 << IDEPIX_CLOUD) | (1 << IDEPIX_INVALID))) == 0) {
                         targetTile.setSample(xt, yt, IDEPIX_CLOUD_BUFFER, true);
                     }
                     // clear accu for re-use
@@ -397,8 +399,8 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         return tile.getSampleBit(x, y, IDEPIX_WATER);
     }
 
-    private static boolean isCloud(Tile tile, int y, int x) {
-        return (tile.getSampleInt(x, y) & ((1 << IDEPIX_CLOUD_AMBIGUOUS) | (1 << IDEPIX_CLOUD_SURE) | (1 << IDEPIX_CLOUD))) != 0;
+    private static boolean mayBeCloud(Tile tile, int y, int x) {
+        return (tile.getSampleInt(x, y) & ((1 << IDEPIX_CLOUD_AMBIGUOUS) | (1 << IDEPIX_CLOUD_SURE) | (1 << IDEPIX_CLOUD) | 1 << IDEPIX_INVALID)) != 0;
     }
 
     private boolean isCloudForBuffer(Tile targetTile, int x, int y) {
