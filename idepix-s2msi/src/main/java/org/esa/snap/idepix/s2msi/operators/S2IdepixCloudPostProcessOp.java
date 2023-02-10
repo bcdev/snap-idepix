@@ -67,6 +67,7 @@ public class S2IdepixCloudPostProcessOp extends Operator {
 
         coastalCloudDistinction = new CoastalCloudDistinction(classifiedProduct);
         urbanCloudDistinction = new UrbanCloudDistinction(classifiedProduct);
+        //urbanCloudDistinction.addDebugBandsToTargetProduct(cloudBufferProduct);
 
         setTargetProduct(cloudBufferProduct);
     }
@@ -88,6 +89,19 @@ public class S2IdepixCloudPostProcessOp extends Operator {
 
         Rectangle targetRectangle = targetTile.getRectangle();
         final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
+
+//        if (! "pixel_classif_flags".equals(targetBand.getName())) {
+//            if ("__ucd_cdi__".equals(targetBand.getName())) {
+//                for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
+//                    for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
+//                        if (targetRectangle.contains(x, y)) {
+//                            targetTile.setSample(x, y, urbanCloudDistinction.getCdiValue(x, y));
+//                        }
+//                    }
+//                }
+//            }
+//            return;
+//        }
 
         final Tile sourceFlagTile = getSourceTile(origClassifFlagBand, srcRectangle);
 
