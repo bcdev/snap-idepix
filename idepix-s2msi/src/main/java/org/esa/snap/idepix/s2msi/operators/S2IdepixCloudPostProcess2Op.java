@@ -191,14 +191,16 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
             for (int x = contextExtendedRectangle.x; x < contextExtendedRectangle.x + contextExtendedRectangle.width; x++) {
 
                 // write dilated land and water patch into accu, required for coastal cloud distinction
-                if (pixelStateRectangle.contains(x, y)) {
-                    collectLand(y, x, sourceFlagTile, cloudBufferRectangle, landNearbyAccu);
-                    collectWater(y, x, sourceFlagTile, cloudBufferRectangle, waterNearbyAccu);
+                if (pixelStateRectangle.contains(x, y) && isLand(sourceFlagTile, y, x)) {
+                    fillPatchInAccu(y, x, cloudBufferRectangle, landWaterContextSize, landNearbyAccu);
+                }
+                if (pixelStateRectangle.contains(x, y) && isWater(sourceFlagTile, y, x)) {
+                    fillPatchInAccu(y, x, cloudBufferRectangle, landWaterContextSize, waterNearbyAccu);
                 }
 
                 // write 11x11 "filtered" non-cloud patch into accu, required for urban cloud distinction
-                if (urbanRectangle.contains(x, y)) {
-                    collectClear(y, x, sourceFlagTile, cloudBufferRectangle, clearNearbyAccu);
+                if (urbanRectangle.contains(x, y) && isClear(sourceFlagTile, y, x)) {
+                    fillPatchInAccu(y, x, cloudBufferRectangle, urbanContextSize, clearNearbyAccu);
                 }
 
                 // add stddev contributions to accu of sums, squares, counts, required for urban cloud distinction
@@ -215,7 +217,7 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
                                         landNearbyAccu, waterNearbyAccu, clearNearbyAccu,
                                         m7, c7, m8, c8, n78,
                                         sourceFlagTile, b2Tile, b8Tile, b11Tile,
-                                        targetRectangle, cloudBufferRectangle,
+                                        cloudBufferRectangle, targetRectangle,
                                         cloudBufferAccu);
                 }
                 // yb/xb is the target pixel where we have seen just the last pixel of some possible cloud buffer
@@ -232,7 +234,7 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
                                      boolean[][] landAccu, boolean[][] waterAccu, boolean[][] clearNearbyAccu,
                                      double[][] m7, double[][] c7, double[][] m8, double[][] c8, short[][] n78,
                                      Tile sourceFlagTile, Tile b2Tile, Tile b8Tile, Tile b11Tile,
-                                     Rectangle targetRectangle, Rectangle cloudBufferRectangle,
+                                     Rectangle cloudBufferRectangle, Rectangle targetRectangle,
                                      int[][] cloudBufferAccu) {
         // land/water/urban accu pixel position
         final int jt = (yt - cloudBufferRectangle.y) % contextSize;
@@ -298,9 +300,9 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
             final float b11 = b11Tile.getSampleFloat(xt, yt);
             final float idx1 = b2 / b11;
             final float idx2 = b8 / b11;
-            //final boolean notCoastal = idx1 > 0.7f || (idx1 > 0.6f && idx2 > 0.9f);
-            // handles NaN as non-coastal
-            final boolean isCoastal2 = idx1 <= 0.6f || (idx1 <= 0.7f && idx2 <= 0.9f);
+            //final boolean notCoast = idx1 > 0.7 || (idx1 < 1 && idx1 > 0.6 && idx2 > 0.9);
+            // inverted condition handles NaN as non-coastal, using double for constants preserves former results
+            final boolean isCoastal2 = idx1 <= 0.6 || (idx1 <= 0.7 && idx2 <= 0.9);
             if (isCoastal2) {
                 // clear cloud flags if cloud test fails
                 pixelClassifFlags = BitSetter.setFlag(pixelClassifFlags, IDEPIX_CLOUD_AMBIGUOUS, false);
@@ -334,33 +336,6 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         return pixelClassifFlags;
     }
 
-    private void collectLand(int y, int x,
-                                     Tile sourceFlagTile,
-                                     Rectangle cloudBufferRectangle,
-                                     boolean[][] landAccu) {
-        if (isLand(sourceFlagTile, y, x)) {
-            fillPatchInAccu(y, x, cloudBufferRectangle, landWaterContextRadius, landAccu);
-        }
-    }
-
-    private void collectWater(int y, int x,
-                                     Tile sourceFlagTile,
-                                     Rectangle cloudBufferRectangle,
-                                     boolean[][] waterAccu) {
-        if (isWater(sourceFlagTile, y, x)) {
-            fillPatchInAccu(y, x, cloudBufferRectangle, landWaterContextRadius, waterAccu);
-        }
-    }
-
-    private void collectClear(int y, int x,
-                              Tile sourceFlagTile,
-                              Rectangle cloudBufferRectangle,
-                              boolean[][] clearNearbyAccu) {
-        if (isClear(sourceFlagTile, y, x)) {
-            fillPatchInAccu(y, x, cloudBufferRectangle, urbanContextRadius, clearNearbyAccu);
-        }
-    }
-
     private void collectCdiSumsAndSquares(int y, int x,
                                           Tile b7Tile, Tile b8Tile, Tile b8aTile,
                                           Rectangle cdiRectangle, Rectangle cloudBufferRectangle,
@@ -387,12 +362,12 @@ public class S2IdepixCloudPostProcess2Op extends Operator {
         }
     }
 
-    private void fillPatchInAccu(int y, int x, Rectangle cloudBufferRectangle, int halfWidth, boolean[][] accu) {
+    private void fillPatchInAccu(int y, int x, Rectangle cloudBufferRectangle, int width, boolean[][] accu) {
         // reduce patch to part overlapping with target image
-        final int jMin = Math.max(y - cloudBufferRectangle.y - halfWidth, 0);
-        final int jMax = Math.min(y - cloudBufferRectangle.y + 1 + halfWidth, cloudBufferRectangle.height);
-        final int iMin = Math.max(x - cloudBufferRectangle.x - halfWidth, 0);
-        final int iMax = Math.min(x - cloudBufferRectangle.x + 1 + halfWidth, cloudBufferRectangle.width);
+        final int jMin = Math.max(y - cloudBufferRectangle.y - width / 2, 0);
+        final int jMax = Math.min(y - cloudBufferRectangle.y - width / 2 + width, cloudBufferRectangle.height);
+        final int iMin = Math.max(x - cloudBufferRectangle.x - width / 2, 0);
+        final int iMax = Math.min(x - cloudBufferRectangle.x - width / 2 + width, cloudBufferRectangle.width);
         // fill patch with value
         for (int j = jMin; j < jMax; ++j) {
             final int jj = j % contextSize;

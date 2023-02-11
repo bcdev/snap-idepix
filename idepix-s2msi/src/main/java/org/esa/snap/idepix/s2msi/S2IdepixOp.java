@@ -109,6 +109,10 @@ public class S2IdepixOp extends Operator {
         int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600"));
         s2ClassifProduct = S2IdepixUtils.computeTileCacheProduct(s2ClassifProduct, cacheSize);
 
+        // breakpoint output to generate input for cloud post-processing
+        //targetProduct = s2ClassifProduct;
+        //if (true) return;
+
         // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
         Product postProcessingProduct = computePostProcessProduct(sourceProduct, s2ClassifProduct);
 
