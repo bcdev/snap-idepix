@@ -241,6 +241,16 @@ public class IdepixOlciClassificationOp extends Operator {
 
                     final boolean isLandFromAppliedMask = isOlciLandPixel(x, y, olciQualityFlagTile, waterFraction);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLandFromAppliedMask);
+                    if(sourceProduct.getName().contains("20180314")) {
+                        if((x == 397 && y == 289) || (x == 185 && y == 270) || (x == 705 && y == 92)) {
+                            System.out.println("STOP");
+                        }
+                    }
+                    if(sourceProduct.getName().contains("20200330")) {
+                        if((x == 667 && y == 446) || (x == 1485 && y == 342) || (x == 2363 && y == 900) || (x == 1215 && y == 413)) {
+                            System.out.println("STOP");
+                        }
+                    }
                     if (isLandFromAppliedMask && !isOlciInlandWaterPixel(x, y, olciQualityFlagTile)) {
                         classifyOverLand(olciQualityFlagTile, olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
                                          surface13Tile, trans13Tile, y, x);
@@ -287,7 +297,7 @@ public class IdepixOlciClassificationOp extends Operator {
             // 'sea' ice can be also ice over inland water!
             boolean isInvalid = olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
 
-            boolean isSeaIce = waterSnowIceClassification.classify(x, y, geoPos, isInvalid, cloudAmbiguous || cloudSure,
+            boolean isSeaIce = waterSnowIceClassification.classify(x, y, geoPos, isInvalid, false,
                     nnOutput, olciReflectanceTiles);
 
             if (isSeaIce) {
