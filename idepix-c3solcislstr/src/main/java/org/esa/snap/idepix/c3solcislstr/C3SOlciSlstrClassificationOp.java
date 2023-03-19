@@ -216,8 +216,9 @@ public class C3SOlciSlstrClassificationOp extends Operator {
                     oaaTargetTile.setSample(x, y, oaa);
                     final int waterFraction = waterFractionTile.getSampleInt(x, y);
                     final boolean isL1bLand = olciQualityFlagTile.getSampleBit(x, y, C3SOlciSlstrConstants.L1_F_LAND);
-                    final boolean isLand =
-                            IdepixUtils.isLandPixel(x, y, sourceProduct.getSceneGeoCoding(), isL1bLand, waterFraction);
+                    //final boolean isLand =
+                    //        IdepixUtils.isLandPixel(x, y, sourceProduct.getSceneGeoCoding(), isL1bLand, waterFraction);
+                    final boolean isLand = isOlciSlstrLandPixel(x, y, isL1bLand, waterFraction);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLand);
 
                     for (int i = 0; i < Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
@@ -353,6 +354,26 @@ public class C3SOlciSlstrClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, true);   // already checked
+    }
+
+    private boolean isOlciSlstrLandPixel(int x, int y, boolean isL1Land, int waterFraction) {
+        if (waterFraction < 0) {
+            return isL1Land;
+        } else {
+            // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
+            if (IdepixUtils.getGeoPos(getSourceProduct().getSceneGeoCoding(), x, y).lat > -58f) {
+                // values bigger than 100 indicate no data
+                if (waterFraction <= 100) {
+                    // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
+                    // is always 0 or 100!! (TS, OD, 20140502)
+                    return waterFraction == 0;
+                } else {
+                    return isL1Land;
+                }
+            } else {
+                return isL1Land;
+            }
+        }
     }
 
     public static class Spi extends OperatorSpi {
