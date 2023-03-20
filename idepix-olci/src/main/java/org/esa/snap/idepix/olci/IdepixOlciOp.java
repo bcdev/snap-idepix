@@ -16,6 +16,7 @@ import org.esa.snap.idepix.core.util.IdepixIO;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,6 +79,11 @@ public class IdepixOlciOp extends BasisOp {
             label = " Write NN value to the target product",
             description = " If applied, write NN value to the target product ")
     private boolean outputSchillerNNValue;
+
+    @Parameter(description = "Alternative NN file. " +
+            "If set, it MUST follow format and input/output as used in default '11x10x4x3x2_207.9.net. ",
+            label = " Alternative NN file")
+    private File alternativeNNFile;
 
     @Parameter(defaultValue = "true", label = " Compute mountain shadow")
     private boolean computeMountainShadow;
@@ -243,6 +249,7 @@ public class IdepixOlciOp extends BasisOp {
         classificationParameters = new HashMap<>();
         classificationParameters.put("copyAllTiePoints", true);
         classificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
+        classificationParameters.put("alternativeNNFile", alternativeNNFile);
         classificationParameters.put("useSrtmLandWaterMask", useSrtmLandWaterMask);
     }
 

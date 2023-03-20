@@ -218,7 +218,7 @@ public class S2IdepixClassificationOp extends Operator {
             }
 
         } catch (Exception e) {
-            throw new OperatorException("Failed to provide GA cloud screening:\n" + e.getMessage(), e);
+            throw new OperatorException("Failed to provide cloud screening:\n" + e.getMessage(), e);
         }
     }
 

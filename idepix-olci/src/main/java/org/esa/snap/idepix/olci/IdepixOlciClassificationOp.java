@@ -24,8 +24,8 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
 import java.awt.Rectangle;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -62,6 +62,11 @@ public class IdepixOlciClassificationOp extends Operator {
             label = " Write NN value to the target product.",
             description = " If applied, write Schiller NN value to the target product ")
     private boolean outputSchillerNNValue;
+
+    @Parameter(description = "Alternative NN file. " +
+            "If set, it MUST follow format and input/output as used in default '11x10x4x3x2_207.9.net. ",
+            label = " Alternative NN file")
+    private File alternativeNNFile;
 
     @Parameter(defaultValue = "false",
             description = "Check for sea/lake ice also outside Sea Ice Climatology area.",
@@ -144,8 +149,21 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private void readSchillerNeuralNets() {
-        InputStream olciAllIS = getClass().getResourceAsStream(OLCI_ALL_NET_NAME);
-        olciAllNeuralNet = SchillerNeuralNetWrapper.create(olciAllIS);
+        InputStream olciAllInputStream;
+        try {
+            olciAllInputStream = getNNInputStream();
+        } catch (IOException e) {
+            throw new OperatorException("Cannot read specified alternative Neural Net - please check!", e);
+        }
+        olciAllNeuralNet = SchillerNeuralNetWrapper.create(olciAllInputStream);
+    }
+
+    private InputStream getNNInputStream() throws IOException {
+        if (alternativeNNFile != null) {
+            return Files.newInputStream(alternativeNNFile.toPath());
+        } else {
+            return getClass().getResourceAsStream(OLCI_ALL_NET_NAME);
+        }
     }
 
     private void initSeaIceClassifier() {
@@ -243,7 +261,7 @@ public class IdepixOlciClassificationOp extends Operator {
                 }
             }
         } catch (Exception e) {
-            throw new OperatorException("Failed to provide GA cloud screening:\n" + e.getMessage(), e);
+            throw new OperatorException("Failed to provide cloud screening:\n" + e.getMessage(), e);
         }
     }
 
@@ -300,7 +318,12 @@ public class IdepixOlciClassificationOp extends Operator {
         }
         final float olciReflectance21 = olciReflectances[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length - 1];
 
-        SchillerNeuralNetWrapper nnWrapper = olciAllNeuralNet.get();
+        SchillerNeuralNetWrapper nnWrapper;
+        try {
+            nnWrapper = olciAllNeuralNet.get();
+        } catch (Exception e) {
+            throw new OperatorException("Cannot get values from Neural Net file - check format!" + e.getMessage());
+        }
         double[] inputVector = nnWrapper.getInputVector();
         for (int i = 0; i < inputVector.length; i++) {
             inputVector[i] = Math.sqrt(olciReflectances[i]);
@@ -392,7 +415,12 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private double[] getOlciNNOutput(int x, int y, Tile[] rhoToaTiles) {
-        SchillerNeuralNetWrapper nnWrapper = olciAllNeuralNet.get();
+        SchillerNeuralNetWrapper nnWrapper;
+        try {
+            nnWrapper = olciAllNeuralNet.get();
+        } catch (Exception e) {
+            throw new OperatorException("Cannot get values from Neural Net file - check format! " + e.getMessage());
+        }
         double[] nnInput = nnWrapper.getInputVector();
         for (int i = 0; i < nnInput.length; i++) {
             nnInput[i] = Math.sqrt(rhoToaTiles[i].getSampleFloat(x, y));
