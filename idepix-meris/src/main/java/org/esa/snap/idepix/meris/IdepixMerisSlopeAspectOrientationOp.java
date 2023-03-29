@@ -1,4 +1,4 @@
-package org.esa.snap.idepix.olci;
+package org.esa.snap.idepix.meris;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.*;
@@ -16,14 +16,15 @@ import java.awt.*;
 import java.util.Map;
 
 /**
- * Computes Slope, Aspect and Orientation for a Sentinel-3 OLCI product.
+ * Computes Slope, Aspect and Orientation for a MERIS L1b product.
+ * Only 4RP, as this contains altitude band with original resolution. In 3RP we have only TPG.
  * See theory e.g. at
  * <a href="https://www.e-education.psu.edu/geog480/node/490">...</a>, or
  * <a href="https://desktop.arcgis.com/en/arcmap/10.3/tools/spatial-analyst-toolbox/how-hillshade-works.htm">...</a>
  *
  * @author Tonio Fincke, Olaf Danne, Dagmar Mueller
  */
-@OperatorMetadata(alias = "Idepix.Olci.SlopeAspect",
+@OperatorMetadata(alias = "Idepix.Meris.SlopeAspect",
         version = "2.0",
         internal = true,
         authors = "Tonio Fincke, Olaf Danne, Dagmar Mueller",
@@ -31,23 +32,23 @@ import java.util.Map;
         description = "Computes Slope, Aspect and Orientation for a Sentinel-3 OLCI product. " +
                 "See theory e.g. at https://www.e-education.psu.edu/geog480/node/490, or " +
                 "https://desktop.arcgis.com/en/arcmap/10.3/tools/spatial-analyst-toolbox/how-hillshade-works.htm")
-public class IdepixOlciSlopeAspectOrientationOp extends Operator {
+public class IdepixMerisSlopeAspectOrientationOp extends Operator {
 
     @SourceProduct(alias = "l1b")
     private Product l1bProduct;
 
-    private static final String ELEVATION_BAND_NAME = IdepixOlciConstants.OLCI_ALTITUDE_BAND_NAME;
+    private static final String ELEVATION_BAND_NAME = IdepixMerisConstants.MERIS_4RP_ALTITUDE_BAND_NAME;
 
     private double spatialResolution;
 
-    private Band latitudeBand;
-    private Band longitudeBand;
+    private TiePointGrid latitudeTpg;
+    private TiePointGrid longitudeTpg;
+    private TiePointGrid sunAzimuthTpg;
+    private TiePointGrid viewZenithTpg;
+    private TiePointGrid viewAzimuthTpg;
     private Band elevationBand;
     private Band viewZenithBand;
     private Band viewAzimuthBand;
-    private TiePointGrid sunAzimuthTiePointGrid;
-    private TiePointGrid viewZenithTiePointGrid;
-    private TiePointGrid viewAzimuthTiePointGrid;
     private Band slopeBand;
     private Band aspectBand;
     private Band orientationBand;
@@ -67,6 +68,12 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
+
+        if (!(l1bProduct.containsBand(IdepixMerisConstants.MERIS_4RP_ALTITUDE_BAND_NAME))) {
+            throw new OperatorException("Slope/Aspect/Orientation requires altitude band at original resolution. " +
+                    "Use MERIS 4RP input product");
+        }
+
         ensureSingleRasterSize(l1bProduct);
         GeoCoding sourceGeoCoding = l1bProduct.getSceneGeoCoding();
         if (sourceGeoCoding == null) {
@@ -79,28 +86,29 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
         if (elevationBand == null) {
             throw new OperatorException("Elevation band required to compute slope or aspect");
         }
-        latitudeBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_LATITUDE_BAND_NAME);
-        longitudeBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_LONGITUDE_BAND_NAME);
+        latitudeTpg = l1bProduct.getTiePointGrid(IdepixMerisConstants.MERIS_LATITUDE_BAND_NAME);
+        longitudeTpg = l1bProduct.getTiePointGrid(IdepixMerisConstants.MERIS_LONGITUDE_BAND_NAME);
 
         Product targetProduct = createTargetProduct();
-        if (IdepixOlciUtils.isFullResolution(l1bProduct) || IdepixOlciUtils.isReducedResolution(l1bProduct)) {
-            IdepixOlciViewAngleInterpolationOp viewAngleInterpolationOp = new IdepixOlciViewAngleInterpolationOp();
+
+        if (IdepixMerisUtils.isFullResolution(l1bProduct) || IdepixMerisUtils.isReducedResolution(l1bProduct)) {
+            IdepixMerisViewAngleInterpolationOp viewAngleInterpolationOp = new IdepixMerisViewAngleInterpolationOp();
             viewAngleInterpolationOp.setParameterDefaultValues();
             viewAngleInterpolationOp.setSourceProduct(l1bProduct);
             Product viewAngleInterpolationProduct = viewAngleInterpolationOp.getTargetProduct();
 
-            viewZenithBand = viewAngleInterpolationProduct.getBand(IdepixOlciConstants.OLCI_VIEW_ZENITH_INTERPOLATED_BAND_NAME);
-            viewAzimuthBand = viewAngleInterpolationProduct.getBand(IdepixOlciConstants.OLCI_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME);
-            ProductUtils.copyBand(IdepixOlciConstants.OLCI_VIEW_ZENITH_INTERPOLATED_BAND_NAME,
+            viewZenithBand = viewAngleInterpolationProduct.getBand(IdepixMerisConstants.MERIS_VIEW_ZENITH_INTERPOLATED_BAND_NAME);
+            viewAzimuthBand = viewAngleInterpolationProduct.getBand(IdepixMerisConstants.MERIS_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME);
+            ProductUtils.copyBand(IdepixMerisConstants.MERIS_VIEW_ZENITH_INTERPOLATED_BAND_NAME,
                     viewAngleInterpolationProduct, targetProduct, true);
-            ProductUtils.copyBand(IdepixOlciConstants.OLCI_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME,
+            ProductUtils.copyBand(IdepixMerisConstants.MERIS_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME,
                     viewAngleInterpolationProduct, targetProduct, true);
         } else {
-            viewZenithTiePointGrid = l1bProduct.getTiePointGrid(IdepixOlciConstants.OLCI_VIEW_ZENITH_BAND_NAME);
-            viewAzimuthTiePointGrid = l1bProduct.getTiePointGrid(IdepixOlciConstants.OLCI_VIEW_AZIMUTH_BAND_NAME);
+            viewZenithTpg = l1bProduct.getTiePointGrid(IdepixMerisConstants.MERIS_VIEW_ZENITH_BAND_NAME);
+            viewAzimuthTpg = l1bProduct.getTiePointGrid(IdepixMerisConstants.MERIS_VIEW_AZIMUTH_BAND_NAME);
         }
 
-        sunAzimuthTiePointGrid = l1bProduct.getTiePointGrid(IdepixOlciConstants.OLCI_SUN_AZIMUTH_BAND_NAME);
+        sunAzimuthTpg = l1bProduct.getTiePointGrid(IdepixMerisConstants.MERIS_SUN_AZIMUTH_BAND_NAME);
 
         setTargetProduct(targetProduct);
     }
@@ -119,20 +127,19 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
             throws OperatorException {
         final Rectangle sourceRectangle = getSourceRectangle(targetRectangle);
         final BorderExtender borderExtender = BorderExtender.createInstance(BorderExtender.BORDER_COPY);
-        final Tile latitudeTile = getSourceTile(latitudeBand, sourceRectangle, borderExtender);
-        final Tile longitudeTile = getSourceTile(longitudeBand, sourceRectangle, borderExtender);
+        final Tile latitudeTile = getSourceTile(latitudeTpg, sourceRectangle, borderExtender);
+        final Tile longitudeTile = getSourceTile(longitudeTpg, sourceRectangle, borderExtender);
         final Tile elevationTile = getSourceTile(elevationBand, sourceRectangle, borderExtender);
         Tile viewZenithAngleTile;
         Tile viewAzimuthAngleTile;
-        if (IdepixOlciUtils.isFullResolution(l1bProduct) || IdepixOlciUtils.isReducedResolution(l1bProduct)) {
+        if (IdepixMerisUtils.isFullResolution(l1bProduct) || IdepixMerisUtils.isReducedResolution(l1bProduct)) {
             viewZenithAngleTile = getSourceTile(viewZenithBand, sourceRectangle, borderExtender);
             viewAzimuthAngleTile = getSourceTile(viewAzimuthBand, sourceRectangle, borderExtender);
         } else {
-            viewZenithAngleTile = getSourceTile(viewZenithTiePointGrid, sourceRectangle, borderExtender);
-            viewAzimuthAngleTile = getSourceTile(viewAzimuthTiePointGrid, sourceRectangle, borderExtender);
+            viewZenithAngleTile = getSourceTile(viewZenithTpg, sourceRectangle, borderExtender);
+            viewAzimuthAngleTile = getSourceTile(viewAzimuthTpg, sourceRectangle, borderExtender);
         }
-        final Tile sunAzimuthAngleTile = getSourceTile(sunAzimuthTiePointGrid, sourceRectangle, borderExtender);
-
+        final Tile sunAzimuthAngleTile = getSourceTile(sunAzimuthTpg, sourceRectangle, borderExtender);
 
         final Tile slopeTile = targetTiles.get(slopeBand);
         final Tile aspectTile = targetTiles.get(aspectBand);
@@ -147,6 +154,9 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
                     final float vza = viewZenithAngleTile.getSampleFloat(x, y);
                     final float vaa = viewAzimuthAngleTile.getSampleFloat(x, y);
                     final float saa = sunAzimuthAngleTile.getSampleFloat(x, y);
+                    if (x == 2783 && y == 642) {
+                        System.out.println("x, y = " + x + ", " + y);  // small subset, shadow
+                    }
                     final float[] latitudeDataMacropixel =
                             SlopeAspectOrientationUtils.get3x3MacropixelData(latitudeTile, y, x);
                     final float[] longitudeDataMacropixel =
@@ -155,8 +165,7 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
                             longitudeDataMacropixel);
                     orientationTile.setSample(x, y, orientation);
                     final float[] slopeAspect = SlopeAspectOrientationUtils.computeSlopeAspect3x3(elevationDataMacropixel,
-                            orientation, vza, vaa, saa,
-                            spatialResolution);
+                            orientation, vza, vaa, saa, spatialResolution);
                     slopeTile.setSample(x, y, slopeAspect[0]);
                     aspectTile.setSample(x, y, slopeAspect[1]);
                 }
@@ -187,7 +196,7 @@ public class IdepixOlciSlopeAspectOrientationOp extends Operator {
 
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(IdepixOlciSlopeAspectOrientationOp.class);
+            super(IdepixMerisSlopeAspectOrientationOp.class);
         }
     }
 }
