@@ -27,8 +27,8 @@ import java.util.Map;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Meris",
-        category = "Optical/Pre-Processing",
-        version = "3.1",
+        category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
+        version = "3.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016-2021 by Brockmann Consult",
         description = "Pixel identification and classification for MERIS.")
@@ -102,6 +102,13 @@ public class IdepixMerisOp extends BasisOp {
             description = " NN cloud ambiguous cloud sure/snow separation value")
     double schillerLandNNCloudSureSnowSeparationValue;
 
+    @Parameter(defaultValue = "true", label = " Compute mountain shadow")
+    private boolean computeMountainShadow;
+
+    @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
+            description = "Extent of mountain shadow detection")
+    private double mntShadowExtent;
+
     @Parameter(defaultValue = "true",
             label = " Compute cloud shadow",
             description = " Compute cloud shadow with the algorithm from 'Fronts' project")
@@ -137,10 +144,17 @@ public class IdepixMerisOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        if (IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType())) {
+        final boolean isMeris4thReprocessingProduct =
+                IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType());
+        computeMountainShadow = computeMountainShadow && isMeris4thReprocessingProduct;
+        if (isMeris4thReprocessingProduct) {
             // adapt to 3rd reprocessing...
             Meris3rd4thReprocessingAdapter reprocessingAdapter = new Meris3rd4thReprocessingAdapter();
             inputProductToProcess = reprocessingAdapter.convertToLowerVersion(sourceProduct);
+            if (computeMountainShadow) {
+                // altitude TPG is too coarse in this case!
+                ProductUtils.copyBand("altitude", sourceProduct, inputProductToProcess, true);
+            }
         } else {
             inputProductToProcess = sourceProduct;
         }
@@ -163,32 +177,12 @@ public class IdepixMerisOp extends BasisOp {
         cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
 
         copyOutputBands();
-        if (!IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType())) {
-            ProductUtils.copyFlagBands(inputProductToProcess, targetProduct, true);   // we need the L1b flag!
-        }
-    }
-
-    //    @Override
-    public void initialize_test() throws OperatorException {
-        final int[] testUInt8s = new int[]{1, 2, 3, 4, 5, 6};
-
-        Product targetProduct = new Product("x", "NO_TYPE", 3, 2);
-
-        Band bandUInt8 = new Band("bandUInt8", ProductData.TYPE_UINT8, 3, 2);
-        bandUInt8.ensureRasterData();
-        bandUInt8.setPixels(0, 0, 3, 2, testUInt8s);
-        bandUInt8.setSourceImage(bandUInt8.getSourceImage());
-        // alternative: this works certainly for INT32, but not as it is for UINT8
-//        bandUInt8.setSourceImage(ImageUtils.createRenderedImage(3, 2, ProductData.createInstance(testUInt8s)));
-        targetProduct.addBand(bandUInt8);
-        setTargetProduct(targetProduct);
+        ProductUtils.copyFlagBands(inputProductToProcess, targetProduct, true);   // we need the L1b flag!
     }
 
     private void preProcess() {
         rad2reflProduct = IdepixMerisUtils.computeRadiance2ReflectanceProduct(inputProductToProcess);
-        if (computeCloudShadow) {
-            ctpProduct = IdepixMerisUtils.computeCloudTopPressureProduct(inputProductToProcess);
-        }
+        ctpProduct = IdepixMerisUtils.computeCloudTopPressureProduct(inputProductToProcess);
 
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
         waterMaskParameters.put("resolution", IdepixConstants.LAND_WATER_MASK_RESOLUTION);
@@ -260,6 +254,7 @@ public class IdepixMerisOp extends BasisOp {
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudShadow", computeCloudShadow);
+        params.put("computeMountainShadow", computeMountainShadow);
         params.put("refineClassificationNearCoastlines", true);  // always an improvement
 
         final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixMerisPostProcessOp.class),
@@ -285,6 +280,12 @@ public class IdepixMerisOp extends BasisOp {
         }
         if (outputRad2Refl) {
             IdepixMerisUtils.addMerisRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
+        }
+
+        for (Band b : targetProduct.getBands()) {
+            if (b.getName().contains("radiance") || b.getName().contains("reflectance")) {
+                b.setValidPixelExpression("!l1_flags.INVALID");
+            }
         }
     }
 
