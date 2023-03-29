@@ -3,3 +3,5 @@ org.esa.snap.idepix.meris.IdepixMerisLandClassificationOp$Spi
 org.esa.snap.idepix.meris.IdepixMerisWaterClassificationOp$Spi
 org.esa.snap.idepix.meris.IdepixMerisMergeLandWaterOp$Spi
 org.esa.snap.idepix.meris.IdepixMerisPostProcessOp$Spi
+org.esa.snap.idepix.meris.IdepixMerisMountainShadowOp$Spi
+org.esa.snap.idepix.meris.IdepixMerisSlopeAspectOrientationOp$Spi

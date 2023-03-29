@@ -102,6 +102,13 @@ public class IdepixMerisOp extends BasisOp {
             description = " NN cloud ambiguous cloud sure/snow separation value")
     double schillerLandNNCloudSureSnowSeparationValue;
 
+    @Parameter(defaultValue = "true", label = " Compute mountain shadow")
+    private boolean computeMountainShadow;
+
+    @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
+            description = "Extent of mountain shadow detection")
+    private double mntShadowExtent;
+
     @Parameter(defaultValue = "true",
             label = " Compute cloud shadow",
             description = " Compute cloud shadow with the algorithm from 'Fronts' project")
@@ -137,10 +144,18 @@ public class IdepixMerisOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        if (IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType())) {
+        final boolean isMeris4thReprocessingProduct =
+                IdepixIO.isMeris4thReprocessingL1bProduct(sourceProduct.getProductType());
+        computeMountainShadow = computeMountainShadow && isMeris4thReprocessingProduct;
+        if (isMeris4thReprocessingProduct) {
             // adapt to 3rd reprocessing...
             Meris3rd4thReprocessingAdapter reprocessingAdapter = new Meris3rd4thReprocessingAdapter();
             inputProductToProcess = reprocessingAdapter.convertToLowerVersion(sourceProduct);
+            if (computeMountainShadow) {
+                // altitude TPG is too coarse in this case!
+                ProductUtils.copyBand(IdepixMerisConstants.MERIS_4RP_ALTITUDE_BAND_NAME, sourceProduct,
+                        inputProductToProcess, true);
+            }
         } else {
             inputProductToProcess = sourceProduct;
         }
@@ -240,6 +255,7 @@ public class IdepixMerisOp extends BasisOp {
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudShadow", computeCloudShadow);
+        params.put("computeMountainShadow", computeMountainShadow);
         params.put("refineClassificationNearCoastlines", true);  // always an improvement
 
         final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixMerisPostProcessOp.class),

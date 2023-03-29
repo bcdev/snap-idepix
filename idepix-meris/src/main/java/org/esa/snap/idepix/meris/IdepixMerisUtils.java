@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.meris;
 
+import org.apache.commons.math3.fitting.PolynomialFitter;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
@@ -11,6 +12,7 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 
+import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 
@@ -33,8 +35,13 @@ class IdepixMerisUtils {
     static FlagCoding createMerisFlagCoding() {
         FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
 
-        flagCoding.addFlag("IDEPIX_GLINT_RISK", BitSetter.setFlag(0, IdepixMerisConstants.IDEPIX_GLINT_RISK),
-                           IdepixMerisConstants.IDEPIX_GLINT_RISK_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_MOUNTAIN_SHADOW", BitSetter.setFlag(0,
+                        IdepixMerisConstants.IDEPIX_MOUNTAIN_SHADOW),
+                IdepixMerisConstants.IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT);
+
+        flagCoding.addFlag("IDEPIX_GLINT_RISK", BitSetter.setFlag(0,
+                        IdepixMerisConstants.IDEPIX_GLINT_RISK),
+                IdepixMerisConstants.IDEPIX_GLINT_RISK_DESCR_TEXT);
 
         return flagCoding;
     }
@@ -52,9 +59,14 @@ class IdepixMerisUtils {
         Mask mask;
         Random r = new Random(1234567);
 
+        mask = Mask.BandMathsType.create("IDEPIX_MOUNTAIN_SHADOW", IdepixMerisConstants.IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_MOUNTAIN_SHADOW",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
+        classifProduct.getMaskGroup().add(index++, mask);
+
         mask = Mask.BandMathsType.create("IDEPIX_GLINT_RISK", IdepixMerisConstants.IDEPIX_GLINT_RISK_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_GLINT_RISK",
-                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+                "pixel_classif_flags.IDEPIX_GLINT_RISK",
+                IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index, mask);
 
     }
@@ -84,4 +96,65 @@ class IdepixMerisUtils {
         return GPF.createProduct("Meris.CloudTopPressureOp", GPF.NO_PARAMS, sourceProduct);
     }
 
+    static double computeApparentSaa(double sza, double saa, double oza, double oaa, double lat) {
+        final double szaRad = sza * MathUtils.DTOR;
+        final double ozaRad = oza * MathUtils.DTOR;
+
+        double deltaPhi;
+        if (oaa < 0.0) {
+            deltaPhi = 360.0 - Math.abs(oaa) - saa;
+        } else {
+            deltaPhi = saa - oaa;
+        }
+        final double deltaPhiRad = deltaPhi * MathUtils.DTOR;
+        final double numerator = Math.tan(szaRad) - Math.tan(ozaRad) * Math.cos(deltaPhiRad);
+        final double denominator = Math.sqrt(Math.tan(ozaRad) * Math.tan(ozaRad) + Math.tan(szaRad) * Math.tan(szaRad) -
+                2.0 * Math.tan(szaRad) * Math.tan(ozaRad) * Math.cos(deltaPhiRad));
+
+        double delta = Math.acos(numerator / denominator);
+// Sun in the North (Southern hemisphere), change sign!
+        if (saa > 270. || saa < 90){
+            delta = -1.0 * delta;
+        }
+        if (oaa < 0.0) {
+            return saa - delta * MathUtils.RTOD;
+        } else {
+            return saa + delta * MathUtils.RTOD;
+        }
+    }
+
+    static boolean isFullResolution(Product sourceProduct) {
+        // less strict to allow subsets:
+        return sourceProduct.getProductType().contains("_FR");
+    }
+
+    static boolean isReducedResolution(Product sourceProduct) {
+        // less strict to allow subsets:
+        return sourceProduct.getProductType().contains("_RR");
+    }
+    static float[] interpolateViewAngles(PolynomialFitter curveFitter1, PolynomialFitter curveFitter2,
+                                         float[] viewAngleOrig, int[] nx, int nxChange) {
+        float[] viewAngleInterpol = viewAngleOrig.clone();
+
+        curveFitter1.clearObservations();
+        for (int x = nx[0]; x < nx[1]; x++) {
+            curveFitter1.addObservedPoint(x * 1.0f, viewAngleOrig[x]);
+        }
+        final double[] fit1 = curveFitter1.fit(IdepixMerisConstants.POLYNOM_FIT_INITIAL);
+
+        curveFitter2.clearObservations();
+        for (int x = nx[2]; x < nx[3]; x++) {
+            curveFitter2.addObservedPoint(x * 1.0f, viewAngleOrig[x]);
+        }
+        final double[] fit2 = curveFitter2.fit(IdepixMerisConstants.POLYNOM_FIT_INITIAL);
+
+        for (int x = nx[1]; x < nxChange; x++) {
+            viewAngleInterpol[x] = (float) (fit1[0] + fit1[1] * x + fit1[2] * x * x);
+        }
+        for (int x = nxChange; x < nx[2]; x++) {
+            viewAngleInterpol[x] = (float) (fit2[0] + fit2[1] * x + fit2[2] * x * x);
+        }
+
+        return viewAngleInterpol;
+    }
 }

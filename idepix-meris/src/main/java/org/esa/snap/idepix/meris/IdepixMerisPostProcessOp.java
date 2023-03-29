@@ -2,23 +2,21 @@ package org.esa.snap.idepix.meris;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.gpf.Operator;
-import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.core.gpf.OperatorSpi;
-import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.*;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
-
 import org.esa.snap.idepix.core.CloudShadowFronts;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Operator used to consolidate IdePix classification flag for MERIS:
@@ -34,6 +32,13 @@ import java.awt.*;
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Refines the MERIS pixel classification over both land and water.")
 public class IdepixMerisPostProcessOp extends Operator {
+
+    @Parameter(defaultValue = "true", label = " Compute mountain shadow")
+    private boolean computeMountainShadow;
+
+    @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
+            description = "Extent of mountain shadow detection")
+    private double mntShadowExtent;
 
     @Parameter(defaultValue = "true",
             label = " Compute cloud shadow",
@@ -58,10 +63,11 @@ public class IdepixMerisPostProcessOp extends Operator {
     private Band waterFractionBand;
     private Band origCloudFlagBand;
     private Band ctpBand;
-    private TiePointGrid szaTPG;
-    private TiePointGrid saaTPG;
-    private TiePointGrid altTPG;
+    private TiePointGrid szaTpg;
+    private TiePointGrid saaTpg;
+    private TiePointGrid altTpg;
     private GeoCoding geoCoding;
+    private Band mountainShadowFlagBand;
 
     private RectangleExtender rectCalculator;
 
@@ -77,9 +83,13 @@ public class IdepixMerisPostProcessOp extends Operator {
         geoCoding = l1bProduct.getSceneGeoCoding();
 
         origCloudFlagBand = merisCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
-        szaTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
-        saaTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME);
-        altTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_DEM_ALTITUDE_DS_NAME);
+        szaTpg = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
+        saaTpg = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME);
+        altTpg = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_DEM_ALTITUDE_DS_NAME);
+
+        final TiePointGrid latTpg = l1bProduct.getTiePointGrid(IdepixMerisConstants.MERIS_LATITUDE_BAND_NAME);
+        final TiePointGrid lonTpg = l1bProduct.getTiePointGrid(IdepixMerisConstants.MERIS_LONGITUDE_BAND_NAME);
+
         if (ctpProduct != null) {
             ctpBand = ctpProduct.getBand("cloud_top_press");
         }
@@ -99,9 +109,29 @@ public class IdepixMerisPostProcessOp extends Operator {
                                                extendedWidth, extendedHeight
         );
 
+        if (computeMountainShadow) {
+            ensureBandsAreCopied(l1bProduct, merisCloudProduct, latTpg.getName(), lonTpg.getName(), altTpg.getName());
+            Map<String, Object> mntShadowParams = new HashMap<>();
+            mntShadowParams.put("mntShadowStrength", mntShadowExtent);
+
+            HashMap<String, Product> input = new HashMap<>();
+            input.put("l1b", l1bProduct);
+            final Product mountainShadowProduct = GPF.createProduct(
+                    OperatorSpi.getOperatorAlias(IdepixMerisMountainShadowOp.class), mntShadowParams, input);
+            mountainShadowFlagBand = mountainShadowProduct.getBand(
+                    IdepixMerisMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
+        }
 
         ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, merisCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
+    }
+
+    private void ensureBandsAreCopied(Product source, Product target, String... bandNames) {
+        for (String bandName : bandNames) {
+            if (!target.containsBand(bandName)) {
+                ProductUtils.copyBand(bandName, source, target, true);
+            }
+        }
     }
 
     @Override
@@ -110,14 +140,14 @@ public class IdepixMerisPostProcessOp extends Operator {
         final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
 
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
-        Tile szaTile = getSourceTile(szaTPG, srcRectangle);
-        Tile saaTile = getSourceTile(saaTPG, srcRectangle);
+        Tile szaTile = getSourceTile(szaTpg, srcRectangle);
+        Tile saaTile = getSourceTile(saaTpg, srcRectangle);
         Tile ctpTile = null;
         if (ctpBand != null) {
             ctpTile = getSourceTile(ctpBand, srcRectangle);
         }
 
-        Tile altTile = getSourceTile(altTPG, targetRectangle);
+        Tile altTile = getSourceTile(altTpg, targetRectangle);
         final Tile waterFractionTile = getSourceTile(waterFractionBand, srcRectangle);
 
         for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
@@ -161,10 +191,7 @@ public class IdepixMerisPostProcessOp extends Operator {
                         is_cloud_current = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     }
                     if (is_cloud_current) {
-                        final boolean isNearCoastline = isNearCoastline(x, y, waterFractionTile, srcRectangle);
-                        if (!isNearCoastline) {
-                            return true;
-                        }
+                        return !isNearCoastline(x, y, waterFractionTile, srcRectangle);
                     }
                     return false;
                 }
@@ -185,6 +212,17 @@ public class IdepixMerisPostProcessOp extends Operator {
                 }
             };
             cloudShadowFronts.computeCloudShadow();
+        }
+
+        if (computeMountainShadow) {
+            final Tile mountainShadowFlagTile = getSourceTile(mountainShadowFlagBand, targetRectangle);
+            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+                checkForCancellation();
+                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                    final boolean mountainShadow = mountainShadowFlagTile.getSampleInt(x, y) > 0;
+                    targetTile.setSample(x, y, IdepixMerisConstants.IDEPIX_MOUNTAIN_SHADOW, mountainShadow);
+                }
+            }
         }
     }
 
