@@ -21,11 +21,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>9.0.2-SNAPSHOT</version>
+        <version>9.0.2.1</version>
     </parent>
 
     <artifactId>idepix-meris</artifactId>
-    <version>9.0.2-SNAPSHOT</version>
+    <version>9.0.2.1</version>
 
     <packaging>nbm</packaging>
     
@@ -33,7 +33,7 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from MERIS.</description>
 
     <properties>
-        <idepix-core.version>9.0.2-SNAPSHOT</idepix-core.version>
+        <idepix-core.version>9.0.2.1</idepix-core.version>
         <s3tbx.version>9.0.3</s3tbx.version>
     </properties>
 
