@@ -227,20 +227,14 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         final boolean isCoastline = IdepixMerisUtils.isCoastlinePixel(geoPos, waterFraction);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, isCoastline);
 
-        boolean is_snow_ice;
         boolean is_glint_risk = !isCoastline &&
                 isGlintRisk(x, y, rhoToaTiles, winduTile, windvTile, szaTile, vzaTile, saaTile, vaaTile);
-        boolean checkForSeaIce = false;
-        if (!isCoastline) {
-            // over water
-            checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsLakeSeaIce(geoPos);
-            // glint makes sense only if we have no sea ice
-            is_glint_risk = is_glint_risk && !isPixelClassifiedAsLakeSeaIce(geoPos);
 
-        }
+        final boolean classifiedAsLakeSeaIce = isPixelClassifiedAsLakeSeaIce(geoPos);
+        // glint makes sense only if we have no sea ice
+        is_glint_risk = is_glint_risk && !classifiedAsLakeSeaIce;
 
         boolean isCloudSure = false;
-        boolean isCloudAmbiguous;
 
         double[] nnOutput = getMerisNNOutput(x, y, rhoToaTiles);
         if (!targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
@@ -248,9 +242,8 @@ public class IdepixMerisWaterClassificationOp extends Operator {
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
-            isCloudAmbiguous = nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
-                    nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue;
-            if (isCloudAmbiguous) {
+            if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
+                    nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue) {
                 // this would be as 'CLOUD_AMBIGUOUS'...
                 targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
                 targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
@@ -263,15 +256,14 @@ public class IdepixMerisWaterClassificationOp extends Operator {
                 targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
             }
 
-            is_snow_ice = false;
-            if (checkForSeaIce) {
-                is_snow_ice = nnOutput[0] > schillerNNCloudSureSnowSeparationValue;
-            }
-            if (is_snow_ice) {
-                // this would be as 'SNOW/ICE'...
-                targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
-                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
-                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+            if (ignoreSeaIceClimatology || classifiedAsLakeSeaIce) {
+                if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue) {
+                    // this would be as 'SNOW/ICE'...
+                    targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
+                    targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                    targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+
+                }
             }
         }
         targetTile.setSample(x, y, IdepixMerisConstants.IDEPIX_GLINT_RISK, is_glint_risk && !isCloudSure);

@@ -53,8 +53,7 @@ public class IdepixMerisOp extends BasisOp {
                     "radiance_1", "radiance_2", "radiance_3", "radiance_4", "radiance_5",
                     "radiance_6", "radiance_7", "radiance_8", "radiance_9", "radiance_10",
                     "radiance_11", "radiance_12", "radiance_13", "radiance_14", "radiance_15"
-            },
-            defaultValue = "")
+            })
     String[] radianceBandsToCopy;
 
     @Parameter(description = "The list of reflectance bands to write to target product.",
@@ -63,58 +62,57 @@ public class IdepixMerisOp extends BasisOp {
                     "reflectance_1", "reflectance_2", "reflectance_3", "reflectance_4", "reflectance_5",
                     "reflectance_6", "reflectance_7", "reflectance_8", "reflectance_9", "reflectance_10",
                     "reflectance_11", "reflectance_12", "reflectance_13", "reflectance_14", "reflectance_15"
-            },
-            defaultValue = "")
+            })
     String[] reflBandsToCopy;
 
     @Parameter(defaultValue = "false",
-            label = " Write NN value to the target product.",
-            description = " If applied, write NN value to the target product ")
+            label = "Write NN value to the target product.",
+            description = "If applied, write NN value to the target product ")
     private boolean outputSchillerNNValue;
 
     @Parameter(defaultValue = "2.0",
-            label = " NN cloud ambiguous lower boundary (applied on WATER)",
-            description = " NN cloud ambiguous lower boundary (applied on WATER)")
+            label = "NN cloud ambiguous lower boundary (applied on WATER)",
+            description = "NN cloud ambiguous lower boundary (applied on WATER)")
     double schillerWaterNNCloudAmbiguousLowerBoundaryValue;
 
     @Parameter(defaultValue = "3.7",
-            label = " NN cloud ambiguous/sure separation value (applied on WATER)",
-            description = " NN cloud ambiguous cloud ambiguous/sure separation value (applied on WATER)")
+            label = "NN cloud ambiguous/sure separation value (applied on WATER)",
+            description = "NN cloud ambiguous cloud ambiguous/sure separation value (applied on WATER)")
     double schillerWaterNNCloudAmbiguousSureSeparationValue;
 
     @Parameter(defaultValue = "4.05",
-            label = " NN cloud sure/snow separation value (applied on WATER)",
-            description = " NN cloud ambiguous cloud sure/snow separation value (applied on WATER)")
+            label = "NN cloud sure/snow separation value (applied on WATER)",
+            description = "NN cloud ambiguous cloud sure/snow separation value (applied on WATER)")
     double schillerWaterNNCloudSureSnowSeparationValue;
 
     @Parameter(defaultValue = "1.1",
-            label = " NN cloud ambiguous lower boundary (applied on LAND)",
-            description = " NN cloud ambiguous lower boundary (applied on LAND)")
+            label = "NN cloud ambiguous lower boundary (applied on LAND)",
+            description = "NN cloud ambiguous lower boundary (applied on LAND)")
     double schillerLandNNCloudAmbiguousLowerBoundaryValue;
 
     @Parameter(defaultValue = "2.7",
-            label = " NN cloud ambiguous/sure separation value (applied on LAND)",
-            description = " NN cloud ambiguous cloud ambiguous/sure separation value")
+            label = "NN cloud ambiguous/sure separation value (applied on LAND)",
+            description = "NN cloud ambiguous cloud ambiguous/sure separation value")
     double schillerLandNNCloudAmbiguousSureSeparationValue;
 
     @Parameter(defaultValue = "4.6",
-            label = " NN cloud sure/snow separation value (applied on LAND)",
-            description = " NN cloud ambiguous cloud sure/snow separation value")
+            label = "NN cloud sure/snow separation value (applied on LAND)",
+            description = "NN cloud ambiguous cloud sure/snow separation value")
     double schillerLandNNCloudSureSnowSeparationValue;
 
-    @Parameter(defaultValue = "true", label = " Compute mountain shadow")
+    @Parameter(defaultValue = "true", label = "Compute mountain shadow")
     private boolean computeMountainShadow;
 
-    @Parameter(label = " Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
+    @Parameter(label = "Extent of mountain shadow", defaultValue = "0.9", interval = "[0,1]",
             description = "Extent of mountain shadow detection")
     private double mntShadowExtent;
 
     @Parameter(defaultValue = "true",
-            label = " Compute cloud shadow",
-            description = " Compute cloud shadow with the algorithm from 'Fronts' project")
+            label = "Compute cloud shadow",
+            description = "Compute cloud shadow with the algorithm from 'Fronts' project")
     private boolean computeCloudShadow;
 
-    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
+    @Parameter(defaultValue = "true", label = "Compute a cloud buffer")
     private boolean computeCloudBuffer;
 
     @Parameter(defaultValue = "2", interval = "[0,100]",

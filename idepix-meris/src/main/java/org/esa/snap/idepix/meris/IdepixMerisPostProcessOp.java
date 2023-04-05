@@ -55,7 +55,6 @@ public class IdepixMerisPostProcessOp extends Operator {
     @SourceProduct(alias = "merisCloud")
     private Product merisCloudProduct;
     @SourceProduct(alias = "ctp", optional = true)
-//    @SourceProduct(alias = "ctp")
     private Product ctpProduct;
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
@@ -142,13 +141,9 @@ public class IdepixMerisPostProcessOp extends Operator {
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
         Tile szaTile = getSourceTile(szaTpg, srcRectangle);
         Tile saaTile = getSourceTile(saaTpg, srcRectangle);
-        Tile ctpTile = null;
-        if (ctpBand != null) {
-            ctpTile = getSourceTile(ctpBand, srcRectangle);
-        }
-
         Tile altTile = getSourceTile(altTpg, targetRectangle);
-        final Tile waterFractionTile = getSourceTile(waterFractionBand, srcRectangle);
+        Tile ctpTile =  (ctpBand != null) ? getSourceTile(ctpBand, srcRectangle) : null;
+        Tile waterFractionTile = getSourceTile(waterFractionBand, srcRectangle);
 
         for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
             checkForCancellation();
@@ -161,7 +156,9 @@ public class IdepixMerisPostProcessOp extends Operator {
                     if (refineClassificationNearCoastlines) {
                         if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
                             targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, true);
-                            refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
+                            // this causes problems for 'coastlines' over frozen inland lakes (OD 20200421)
+                            // todo: this is a conflict between master and CGLOPS
+//                            refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
                             if (isCloud) {
                                 refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, waterFractionTile, targetTile, srcRectangle);
                             }
@@ -232,20 +229,6 @@ public class IdepixMerisPostProcessOp extends Operator {
         targetTile.setSample(x, y, sourceFlags | computedFlags);
     }
 
-    private boolean isCoastlinePixel(int x, int y, Tile waterFractionTile) {
-        boolean isCoastline = false;
-        // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
-        if (IdepixUtils.getGeoPos(geoCoding, x, y).lat > -58f) {
-            final int waterFraction = waterFractionTile.getSampleInt(x, y);
-            // values bigger than 100 indicate no data
-            if (waterFraction <= 100) {
-                // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
-                // is always 0 or 100!! (TS, OD, 20140502)
-                isCoastline = waterFraction < 100 && waterFraction > 0;
-            }
-        }
-        return isCoastline;
-    }
 
     private boolean isNearCoastline(int x, int y, Tile waterFractionTile, Rectangle rectangle) {
         final int windowWidth = 1;
@@ -263,7 +246,8 @@ public class IdepixMerisPostProcessOp extends Operator {
                             return true;
                         }
                     } else {
-                        if (isCoastlinePixel(i, j, waterFractionTile)) {
+                        GeoPos geoPos = IdepixUtils.getGeoPos(geoCoding, x, y);
+                        if (IdepixMerisUtils.isCoastlinePixel(geoPos, waterFractionCenter)) {
                             return true;
                         }
                     }
