@@ -211,5 +211,41 @@ class C3SOlciSlstrTensorflowNNCalculator {
         }
     }
 
+    /**
+     * Applies NN to vector of pixel band stacks and returns converted array.
+     * Functional implementation of setNnTensorInput(.) plus getNNResult().
+     * Makes sure the Tensors are closed after use.
+     * Requires that loadModel() is run once before.
+     *
+     * @param nnInput - image vector of band vectors, band vectors are input for neural net
+     * @return float[][] - image vector of output band vector (length 1)
+     */
+    float[][] calculate1(float[][] nnInput) {
+        if (transformMethod.equals("sqrt")) {
+            for (int i = 0; i < nnInput.length; i++) {
+                for (int j = 0; j < nnInput[i].length; j++) {
+                    nnInput[i][j] = (float) Math.sqrt(nnInput[i][j]);
+                }
+            }
+        } else if (transformMethod.equals("log")) {
+            for (int i = 0; i < nnInput.length; i++) {
+                for (int j = 0; j < nnInput[i].length; j++) {
+                    nnInput[i][j] = (float) Math.log10(nnInput[i][j]);
+                }
+            }
+        }
+        final Session.Runner runner = model.session().runner();
+        try (
+                Tensor<?> inputTensor = Tensor.create(nnInput);
+                Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
+        ) {
+            long[] ts = outputTensor.shape();
+            int numPixels = (int) ts[0];
+            int numOutputVars = (int) ts[1];
+            float[][] m = new float[numPixels][numOutputVars];
+            outputTensor.copyTo(m);
+            return m;
+        }
+    }
 
 }
