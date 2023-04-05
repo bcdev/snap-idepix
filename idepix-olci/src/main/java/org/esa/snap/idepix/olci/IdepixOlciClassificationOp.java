@@ -140,8 +140,8 @@ public class IdepixOlciClassificationOp extends Operator {
         if (useSrtmLandWaterMask) {
             try {
                 watermaskClassifier = new WatermaskClassifier(LAND_WATER_MASK_RESOLUTION,
-                                                              OVERSAMPLING_FACTOR_X,
-                                                              OVERSAMPLING_FACTOR_Y);
+                        OVERSAMPLING_FACTOR_X,
+                        OVERSAMPLING_FACTOR_Y);
             } catch (IOException e) {
                 throw new OperatorException("Could not initialise SRTM land-water mask", e);
             }
@@ -259,13 +259,16 @@ public class IdepixOlciClassificationOp extends Operator {
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, isCoastlineFromAppliedMask);
 
                     final boolean isLandFromAppliedMask = isOlciLandPixel(x, y, olciQualityFlagTile, waterFraction);
+                    final boolean isInlandWaterFromAppliedMask = isOlciInlandWaterPixel(x, y, olciQualityFlagTile, waterFraction);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLandFromAppliedMask);
-                    if (isLandFromAppliedMask && !isOlciInlandWaterPixel(x, y, olciQualityFlagTile)) {
+
+                    if (isLandFromAppliedMask && !isInlandWaterFromAppliedMask) {
                         classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
-                                         surface13Tile, trans13Tile, x, y);
+                                surface13Tile, trans13Tile, x, y);
                     } else {
                         classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
-                                          cloudFlagTargetTile, nnTargetTile, x, y);
+                                cloudFlagTargetTile, nnTargetTile, x, y,
+                                isInlandWaterFromAppliedMask);
                     }
                 }
             }
@@ -281,7 +284,7 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private void classifyOverWater(Tile olciQualityFlagTile, Tile[] olciReflectanceTiles,
-                                   Tile cloudFlagTargetTile, Tile nnTargetTile, int x, int y) {
+                                   Tile cloudFlagTargetTile, Tile nnTargetTile, int x, int y, boolean isInlandWater) {
 
         final GeoPos geoPos = IdepixUtils.getGeoPos(l1bProduct.getSceneGeoCoding(), x, y);
         final boolean checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsLakeSeaIce(geoPos);
@@ -309,6 +312,20 @@ public class IdepixOlciClassificationOp extends Operator {
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
             }
+
+            if (isInlandWater && cloudAmbiguous) {
+                final double NDVI = getNDVI(x, y, olciReflectanceTiles);
+                if (NDVI > 0.07) {
+                    //catches mixed pixels at coast lines.
+                    cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                    cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+
+                }
+                if (olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_BRIGHT)) {
+                    cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
+                    cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
+                }
+            }
         }
         if (outputSchillerNNValue) {
             nnTargetTile.setSample(x, y, nnOutput);
@@ -320,7 +337,7 @@ public class IdepixOlciClassificationOp extends Operator {
                                   Tile surface13Tile, Tile trans13Tile,
                                   int x, int y) {
 
-        final double nnOutput = getOlciNNOutput(x,y, olciReflectanceTiles);
+        final double nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles);
 
         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
@@ -399,8 +416,29 @@ public class IdepixOlciClassificationOp extends Operator {
         }
     }
 
-    private boolean isOlciInlandWaterPixel(int x, int y, Tile olciL1bFlagTile) {
-        return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_FRESH_INLAND_WATER);
+    private boolean isOlciInlandWaterPixel(int x, int y, Tile olciL1bFlagTile, int waterFraction) {
+        if (waterFraction < 0) {
+            // SRTM has not been used! Rely on OLCI flags!
+            return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND) &&
+                    olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_FRESH_INLAND_WATER);
+        } else {
+            // SRTM water mask is used.
+            // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
+            if (IdepixUtils.getGeoPos(l1bProduct.getSceneGeoCoding(), x, y).lat > -58f) {
+                // values bigger than 100 indicate no data
+                if (waterFraction <= 100) {
+                    // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
+                    // is always 0 or 100!! (TS, OD, 20140502)
+                    return waterFraction > 0 && olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
+                } else {
+                    return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND) &&
+                            olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_FRESH_INLAND_WATER);
+                }
+            } else {
+                return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND) &&
+                        olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_FRESH_INLAND_WATER);
+            }
+        }
     }
 
     private double getOlciNNOutput(int x, int y, Tile[] rhoToaTiles) {
@@ -415,6 +453,12 @@ public class IdepixOlciClassificationOp extends Operator {
             nnInput[i] = Math.sqrt(rhoToaTiles[i].getSampleFloat(x, y));
         }
         return nnWrapper.getNeuralNet().calc(nnInput)[0];
+    }
+
+    private double getNDVI(int x, int y, Tile[] rhoToaTiles) {
+        double rho17 = rhoToaTiles[16].getSampleDouble(x, y);
+        double rho8 = rhoToaTiles[7].getSampleDouble(x, y);
+        return (rho17 - rho8) / (rho17 + rho8);
     }
 
     private boolean isPixelClassifiedAsLakeSeaIce(GeoPos geoPos) {
