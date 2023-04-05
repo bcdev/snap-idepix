@@ -103,20 +103,8 @@ public class IdepixMerisMountainShadowOp extends PixelOperator {
             final GeoPos geoPos = l1bProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
             final double saaApparent = IdepixMerisUtils.computeApparentSaa(sza, saa, oza, oaa, geoPos.getLat());
 
-            if (x == 2783 && y == 642) {
-                System.out.println("x, y = " + x + ", " + y);  // small subset, shadow
-            }
-            if (x == 2783 && y == 2181) {
-                System.out.println("x, y = " + x + ", " + y);  // large subset, no shadow
-            }
-            final boolean isMountainShadow =
-                    isMountainShadow(sza, (float) saaApparent, slope, aspect, orientation, mntShadowExtent);
-
-            if (isMountainShadow) {
-                System.out.println("x, y, slope, aspect, orientation = " +
-                        x + ", " + y + ", " + slope + ", " + aspect + ", " + orientation);
-            }
-            targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(isMountainShadow);
+            targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(isMountainShadow(sza, (float) saaApparent,
+                    slope, aspect, orientation, mntShadowExtent));
         }
     }
 

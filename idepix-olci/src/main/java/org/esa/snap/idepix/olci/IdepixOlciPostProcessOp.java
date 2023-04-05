@@ -114,7 +114,7 @@ public class IdepixOlciPostProcessOp extends Operator {
         if (computeMountainShadow) {
             ensureBandsAreCopied(l1bProduct, olciCloudProduct, latBand.getName(), lonBand.getName(), altBand.getName());
             Map<String, Object> mntShadowParams = new HashMap<>();
-            mntShadowParams.put("mntShadowStrength", mntShadowExtent);
+            mntShadowParams.put("mntShadowExtent", mntShadowExtent);
 
             HashMap<String, Product> input = new HashMap<>();
             input.put("l1b", l1bProduct);
