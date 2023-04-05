@@ -21,10 +21,10 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.gpf.Tile;
-import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.core.CloudShadowFronts;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.util.Bresenham;
+import org.esa.snap.idepix.core.util.IdepixUtils;
 
 import java.awt.Rectangle;
 import java.util.List;
@@ -38,8 +38,6 @@ import java.util.List;
  * @author olafd
  */
 class IdepixOlciCloudShadowFronts {
-
-    private static final int MEAN_EARTH_RADIUS = 6372000;
 
     private final GeoCoding geoCoding;
 
@@ -192,7 +190,6 @@ class IdepixOlciCloudShadowFronts {
                 alt = 0; // do NOT use bathimetry
             }
         }
-//        final double saaRad = Math.toRadians(saa);
 
         PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
 
@@ -243,7 +240,7 @@ class IdepixOlciCloudShadowFronts {
                 if (isCloudForShadow(sourceFlagTile, targetTile, xCurrent, yCurrent)) {
                     pixelPos.setLocation(xCurrent + 0.5f, yCurrent + 0.5f);
                     geoCoding.getGeoPos(pixelPos, geoPosCurrent);
-                    final double cloudSearchHeight = (computeDistance(geoPos, geoPosCurrent) * tanSza) + alt;
+                    final double cloudSearchHeight = (IdepixUtils.computeDistanceOnEarth(geoPos, geoPosCurrent) * tanSza) + alt;
                     final float ctp = ctpTile.getSampleFloat(xCurrent, yCurrent);
                     final float slp = slpTile.getSampleFloat(xCurrent, yCurrent);
                     for (int i = 0; i < temperature.length; i++) {
@@ -265,26 +262,4 @@ class IdepixOlciCloudShadowFronts {
         return false;
     }
 
-    private double computeDistance(GeoPos geoPos1, GeoPos geoPos2) {
-        final float lon1 = (float) geoPos1.getLon();
-        final float lon2 = (float) geoPos2.getLon();
-        final float lat1 = (float) geoPos1.getLat();
-        final float lat2 = (float) geoPos2.getLat();
-
-        final double cosLat1 = Math.cos(MathUtils.DTOR * lat1);
-        final double cosLat2 = Math.cos(MathUtils.DTOR * lat2);
-        final double sinLat1 = Math.sin(MathUtils.DTOR * lat1);
-        final double sinLat2 = Math.sin(MathUtils.DTOR * lat2);
-
-        final double delta = MathUtils.DTOR * (lon2 - lon1);
-        final double cosDelta = Math.cos(delta);
-        final double sinDelta = Math.sin(delta);
-
-        final double y = Math.sqrt(Math.pow(cosLat2 * sinDelta, 2) + Math.pow(cosLat1 * sinLat2 - sinLat1 * cosLat2 * cosDelta, 2));
-        final double x = sinLat1 * sinLat2 + cosLat1 * cosLat2 * cosDelta;
-
-        final double ad = Math.atan2(y, x);
-
-        return ad * MEAN_EARTH_RADIUS;
-    }
 }

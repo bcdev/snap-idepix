@@ -17,6 +17,7 @@ import java.util.Calendar;
  */
 public class IdepixUtils {
 
+    public static final int MEAN_EARTH_RADIUS = 6372000;
     private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("idepix");
 
     static void logErrorMessage(String msg) {
@@ -148,5 +149,28 @@ public class IdepixUtils {
      */
     public static double computeAzimuthDifference(final double vaa, final double saa) {
         return MathUtils.RTOD * Math.acos(Math.cos(MathUtils.DTOR * (vaa - saa)));
+    }
+
+    public static double computeDistanceOnEarth(GeoPos geoPos1, GeoPos geoPos2) {
+        final float lon1 = (float) geoPos1.getLon();
+        final float lon2 = (float) geoPos2.getLon();
+        final float lat1 = (float) geoPos1.getLat();
+        final float lat2 = (float) geoPos2.getLat();
+
+        final double cosLat1 = Math.cos(MathUtils.DTOR * lat1);
+        final double cosLat2 = Math.cos(MathUtils.DTOR * lat2);
+        final double sinLat1 = Math.sin(MathUtils.DTOR * lat1);
+        final double sinLat2 = Math.sin(MathUtils.DTOR * lat2);
+
+        final double delta = MathUtils.DTOR * (lon2 - lon1);
+        final double cosDelta = Math.cos(delta);
+        final double sinDelta = Math.sin(delta);
+
+        final double y = Math.sqrt(Math.pow(cosLat2 * sinDelta, 2) + Math.pow(cosLat1 * sinLat2 - sinLat1 * cosLat2 * cosDelta, 2));
+        final double x = sinLat1 * sinLat2 + cosLat1 * cosLat2 * cosDelta;
+
+        final double ad = Math.atan2(y, x);
+
+        return ad * MEAN_EARTH_RADIUS;
     }
 }

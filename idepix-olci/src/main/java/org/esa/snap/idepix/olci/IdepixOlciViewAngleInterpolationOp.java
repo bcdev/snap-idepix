@@ -167,25 +167,6 @@ public class IdepixOlciViewAngleInterpolationOp extends Operator {
             if (nxChange != -1) {
                 nx_vza = new int[4];
                 nx_vaa = new int[4];
-//                if (isFullResolution) {
-//                    nx_vza[0] = Math.max(0, nxChange - 116);
-//                    nx_vza[1] = Math.max(0, nxChange - 36);
-//                    nx_vza[2] = Math.min(productWidth, nxChange + 33);
-//                    nx_vza[3] = Math.min(productWidth, nxChange + 113);
-//                    nx_vaa[0] = Math.max(0, nxChange - 1616);
-//                    nx_vaa[1] = Math.max(0, nxChange - 216);
-//                    nx_vaa[2] = Math.min(productWidth, nxChange + 284);
-//                    nx_vaa[3] = productWidth;
-//                } else {
-//                    nx_vza[0] = Math.max(0, nxChange - 29);
-//                    nx_vza[1] = Math.max(0, nxChange - 9);
-//                    nx_vza[2] = Math.min(productWidth, nxChange + 8);
-//                    nx_vza[3] = Math.min(productWidth, nxChange + 28);
-//                    nx_vaa[0] = Math.max(0, nxChange - 404);
-//                    nx_vaa[1] = Math.max(0, nxChange - 54);
-//                    nx_vaa[2] = Math.min(productWidth, nxChange + 71);
-//                    nx_vaa[3] = productWidth;
-//                }
                 nx_vza[0] = (int) (0.97*nxChange);
                 nx_vza[1] = (int) (0.99*nxChange);
                 nx_vza[2] = Math.min(productWidth, (int) (1.01*nxChange));

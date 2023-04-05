@@ -232,7 +232,6 @@ public class IdepixOlciUtilsTest {
         double saa = 147.73538;
         double oza = 2.3104007;
         double oaa = -76.864624;
-        double lat = 25.;
         assertEquals(146.03134, IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa), 1.E-4);
 
         sza = 45.74776;

@@ -23,6 +23,7 @@ import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.core.util.IdepixUtils;
 
 import java.awt.*;
 
@@ -30,8 +31,6 @@ import java.awt.*;
  * Cloud shadow algorithm based on fronts
  */
 public abstract class CloudShadowFronts {
-
-    private static final int MEAN_EARTH_RADIUS = 6372000;
 
     private final GeoCoding geoCoding;
     private final Rectangle sourceRectangle;
@@ -184,7 +183,7 @@ public abstract class CloudShadowFronts {
                 if (isCloudForShadow(xCurrent, yCurrent)) {
                     pixelPos.setLocation(xCurrent + 0.5f, yCurrent + 0.5f);
                     geoCoding.getGeoPos(pixelPos, geoPosCurrent);
-                    final double cloudSearchHeight = (computeDistance(geoPos, geoPosCurrent) * tanSza) + alt;
+                    final double cloudSearchHeight = (IdepixUtils.computeDistanceOnEarth(geoPos, geoPosCurrent) * tanSza) + alt;
                     final float cloudHeight = computeHeightFromPressure(ctpTile.getSampleFloat(xCurrent, yCurrent));
                     if (cloudSearchHeight <= cloudHeight + 300) {
                         float cloudBase = getCloudBase(xCurrent, yCurrent);
@@ -229,8 +228,8 @@ public abstract class CloudShadowFronts {
         final double deltaY = lengthInMeters * Math.cos(azimuthAngleInRadiance);
 
         // distLat and distLon are in degrees
-        final float distLat = (float) (-(deltaY / MEAN_EARTH_RADIUS) * MathUtils.RTOD);
-        final float distLon = (float) (-(deltaX / (MEAN_EARTH_RADIUS * Math
+        final float distLat = (float) (-(deltaY / IdepixUtils.MEAN_EARTH_RADIUS) * MathUtils.RTOD);
+        final float distLon = (float) (-(deltaX / (IdepixUtils.MEAN_EARTH_RADIUS * Math
                 .cos(startPoint.lat * MathUtils.DTOR))) * MathUtils.RTOD);
 
         return new GeoPos(startPoint.lat + distLat, startPoint.lon + distLon);
@@ -240,26 +239,4 @@ public abstract class CloudShadowFronts {
         return (float) (-8000 * Math.log(pressure / 1013.0f));
     }
 
-    private double computeDistance(GeoPos geoPos1, GeoPos geoPos2) {
-        final float lon1 = (float) geoPos1.getLon();
-        final float lon2 = (float) geoPos2.getLon();
-        final float lat1 = (float) geoPos1.getLat();
-        final float lat2 = (float) geoPos2.getLat();
-
-        final double cosLat1 = Math.cos(MathUtils.DTOR * lat1);
-        final double cosLat2 = Math.cos(MathUtils.DTOR * lat2);
-        final double sinLat1 = Math.sin(MathUtils.DTOR * lat1);
-        final double sinLat2 = Math.sin(MathUtils.DTOR * lat2);
-
-        final double delta = MathUtils.DTOR * (lon2 - lon1);
-        final double cosDelta = Math.cos(delta);
-        final double sinDelta = Math.sin(delta);
-
-        final double y = Math.sqrt(Math.pow(cosLat2 * sinDelta, 2) + Math.pow(cosLat1 * sinLat2 - sinLat1 * cosLat2 * cosDelta, 2));
-        final double x = sinLat1 * sinLat2 + cosLat1 * cosLat2 * cosDelta;
-
-        final double ad = Math.atan2(y, x);
-
-        return ad * MEAN_EARTH_RADIUS;
-    }
 }
