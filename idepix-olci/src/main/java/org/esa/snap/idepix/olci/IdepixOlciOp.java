@@ -43,7 +43,7 @@ import java.util.Map;
         description = "Pixel identification and classification for OLCI.")
 public class IdepixOlciOp extends BasisOp {
 
-    @SourceProduct(alias = "sourceProduct",
+    @SourceProduct(alias = "l1bProduct",
             label = "OLCI L1b product",
             description = "The OLCI L1b source product.")
     private Product sourceProduct;
@@ -186,9 +186,9 @@ public class IdepixOlciOp extends BasisOp {
 
     private Product createTargetProduct(Product idepixProduct) {
         Product targetProduct = new Product(idepixProduct.getName(),
-                                            idepixProduct.getProductType(),
-                                            idepixProduct.getSceneRasterWidth(),
-                                            idepixProduct.getSceneRasterHeight());
+                idepixProduct.getProductType(),
+                idepixProduct.getSceneRasterWidth(),
+                idepixProduct.getSceneRasterHeight());
 
         ProductUtils.copyMetadata(idepixProduct, targetProduct);
         ProductUtils.copyGeoCoding(idepixProduct, targetProduct);
@@ -238,9 +238,9 @@ public class IdepixOlciOp extends BasisOp {
 
         if (computeCloudShadow) {
             ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
-                                                                        o2CorrProduct,
-                                                                        alternativeNNDirPath,
-                                                                        outputCtp);
+                    o2CorrProduct,
+                    alternativeNNDirPath,
+                    outputCtp);
         }
 
     }
@@ -256,7 +256,7 @@ public class IdepixOlciOp extends BasisOp {
     private void computeCloudProduct() {
         setClassificationParameters();
         classificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciClassificationOp.class),
-                                                  classificationParameters, classificationInputProducts);
+                classificationParameters, classificationInputProducts);
     }
 
     private void setClassificationInputProducts() {
@@ -282,7 +282,7 @@ public class IdepixOlciOp extends BasisOp {
         params.put("mntShadowStrength", mntShadowExtent);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciPostProcessOp.class),
-                                                  params, input);
+                params, input);
     }
 
     /**

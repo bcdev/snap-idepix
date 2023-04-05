@@ -102,15 +102,6 @@ public class IdepixIO {
         return true;
     }
 
-    public static boolean areAllReflectancesValid(double[] reflectance) {
-        for (double aReflectance : reflectance) {
-            if (Double.isNaN(aReflectance) || aReflectance <= 0.0f) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public static void setNewBandProperties(Band band, String description, String unit, double noDataValue,
                                             boolean useNoDataValue) {
         band.setDescription(description);
@@ -138,6 +129,7 @@ public class IdepixIO {
     public static boolean isMeris4thReprocessingL1bProduct(String productType) {
         return productType.startsWith("ME_1");  // todo: discuss this criterion
     }
+
 
     /// END of public ///
 
@@ -191,8 +183,8 @@ public class IdepixIO {
                 !isValidOlciSlstrSynergyProduct(inputProduct) &&
                 !isValidVgtProduct(inputProduct)) {
             IdepixUtils.logErrorMessage("Input sensor must be either Landsat-8, MERIS, AATSR, AVHRR, " +
-                                                "OLCI, colocated OLCI/SLSTR, " +
-                                                "MODIS/SeaWiFS, PROBA-V or VGT!");
+                    "OLCI, colocated OLCI/SLSTR, " +
+                    "MODIS/SeaWiFS, PROBA-V or VGT!");
         }
         return true;
     }
@@ -307,7 +299,7 @@ public class IdepixIO {
             case VGT:
                 return (isValidVgtProduct(sourceProduct));
             default:
-                throw new OperatorException("Algorithm " + algorithm.toString() + " not supported.");
+                throw new OperatorException(String.format("Algorithm %s not supported.", algorithm));
         }
     }
 
