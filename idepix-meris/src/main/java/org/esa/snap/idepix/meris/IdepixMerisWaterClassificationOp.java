@@ -333,9 +333,27 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         return MathUtils.RTOD * (Math.acos(Math.cos(arg)));
     }
 
+    static double computeChiW1(double windU, double windV, double saa) {
+        final double phiw = azimuth(windU, windV);
+        /* and "scattering" angle */
+        final double arg = MathUtils.DTOR * (saa - phiw);
+        return MathUtils.RTOD * (Math.acos(Math.cos(arg)));
+    }
+
+    static double computeChiW2(double windU, double windV, double saa) {
+        final double phiw = MathUtils.RTOD * Math.atan2(windU, windV);
+        final double delta = (720.0 + saa - phiw) % 360.0;
+        if (delta > 180.0) {
+            return 360.0 - delta;
+        } else {
+            return delta;
+        }
+    }
+
     private double computeRhoGlint(int x, int y, Tile winduTile, Tile windvTile,
                                    Tile szaTile, Tile vzaTile, Tile saaTile, Tile vaaTile) {
-        final double chiw = computeChiW(x, y, winduTile, windvTile, saaTile);
+        //final double chiw = computeChiW(x, y, winduTile, windvTile, saaTile);
+        final double chiw = computeChiW2(winduTile.getSampleFloat(x, y), windvTile.getSampleFloat(x, y), saaTile.getSampleFloat(x, y));
         final float vaa = vaaTile.getSampleFloat(x, y);
         final float saa = saaTile.getSampleFloat(x, y);
         final double deltaAzimuth = (float) IdepixUtils.computeAzimuthDifference(vaa, saa);
@@ -390,7 +408,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         return geoPos;
     }
 
-    private double azimuth(double x, double y) {
+    static double azimuth1(double x, double y) {
         if (y > 0.0) {
             // DPM #2.6.5.1.1-1
             return (MathUtils.RTOD * Math.atan(x / y));
@@ -401,6 +419,9 @@ public class IdepixMerisWaterClassificationOp extends Operator {
             // DPM #2.6.5.1.1-6
             return (x >= 0.0 ? 90.0 : 270.0);
         }
+    }
+    static double azimuth(double y, double x) {
+        return MathUtils.RTOD * Math.atan2(y, x);
     }
 
     public static class Spi extends OperatorSpi {
