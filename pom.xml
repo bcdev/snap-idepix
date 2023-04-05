@@ -39,14 +39,14 @@
     <!-- c3solcislstr is also only for project internal use, 20221215 -->
     <modules>
         <module>idepix-core</module>
-<!--        <module>idepix-aatsr</module>-->
-<!--        <module>idepix-avhrr</module>-->
+        <!--        <module>idepix-aatsr</module>-->
+        <!--        <module>idepix-avhrr</module>-->
         <module>idepix-landsat8</module>
         <module>idepix-meris</module>
         <module>idepix-modis</module>
         <module>idepix-olci</module>
-<!--        <module>idepix-olcislstr</module>-->
-<!--        <module>idepix-c3solcislstr</module>-->
+        <!--        <module>idepix-olcislstr</module>-->
+        <!--        <module>idepix-c3solcislstr</module>-->
         <module>idepix-probav</module>
         <module>idepix-s2msi</module>
         <module>idepix-seawifs</module>
@@ -100,6 +100,11 @@
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-gpf</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-netcdf</artifactId>
                 <version>${snap.version}</version>
             </dependency>
             <dependency>
