@@ -7,7 +7,13 @@ import org.esa.s3tbx.meris.l2auxdata.L2AuxDataProvider;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.util.math.FractIndex;
 import org.esa.s3tbx.util.math.Interp;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -20,13 +26,13 @@ import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.seaice.SeaIceClassification;
-import org.esa.snap.idepix.core.seaice.SeaIceClassifier;
+import org.esa.snap.idepix.core.seaice.LakeSeaIceAuxdata;
+import org.esa.snap.idepix.core.seaice.LakeSeaIceClassification;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
@@ -46,7 +52,6 @@ import java.util.Calendar;
 public class IdepixMerisWaterClassificationOp extends Operator {
 
     private Band cloudFlagBand;
-    private SeaIceClassifier seaIceClassifier;
     private Band landWaterBand;
     private Band nnOutputBand;
 
@@ -57,24 +62,14 @@ public class IdepixMerisWaterClassificationOp extends Operator {
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
-    @SuppressWarnings({"FieldCanBeLocal"})
     @TargetProduct
     private Product targetProduct;
-
-    @Parameter(label = " Sea Ice Climatology Value", defaultValue = "false")
-    private boolean ccOutputSeaIceClimatologyValue;
 
     @Parameter(defaultValue = "false",
             description = "Check for sea/lake ice also outside Sea Ice Climatology area.",
             label = "Check for sea/lake ice also outside Sea Ice Climatology area"
     )
     private boolean ignoreSeaIceClimatology;
-
-    @Parameter(label = "Cloud screening 'ambiguous' threshold", defaultValue = "1.4")
-    private double cloudScreeningAmbiguous;     // Schiller, used in previous approach only
-
-    @Parameter(label = "Cloud screening 'sure' threshold", defaultValue = "1.8")
-    private double cloudScreeningSure;         // Schiller, used in previous approach only
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product.",
@@ -106,6 +101,8 @@ public class IdepixMerisWaterClassificationOp extends Operator {
 
     private RectangleExtender rectExtender;
 
+    private LakeSeaIceClassification lakeSeaIceClassification;
+
     @Override
     public void initialize() throws OperatorException {
         try {
@@ -117,12 +114,12 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         readSchillerNets();
         createTargetProduct();
 
-        initSeaIceClassifier();
+        initLakeSeaIceClassification();
 
         landWaterBand = waterMaskProduct.getBand("land_water_fraction");
 
         rectExtender = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
-                                                           l1bProduct.getSceneRasterHeight()), 1, 1);
+                l1bProduct.getSceneRasterHeight()), 1, 1);
     }
 
     private void readSchillerNets() {
@@ -133,14 +130,10 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         }
     }
 
-    private void initSeaIceClassifier() {
-        final ProductData.UTC startTime = getSourceProduct().getStartTime();
+    private void initLakeSeaIceClassification() {
+        final ProductData.UTC startTime = l1bProduct.getStartTime();
         final int monthIndex = startTime.getAsCalendar().get(Calendar.MONTH);
-        try {
-            seaIceClassifier = new SeaIceClassifier(monthIndex + 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        lakeSeaIceClassification = new LakeSeaIceClassification(null, LakeSeaIceAuxdata.AUXDATA_DIRECTORY, monthIndex + 1);
     }
 
     private void createTargetProduct() {
@@ -153,7 +146,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
 
         if (outputSchillerNNValue) {
             nnOutputBand = targetProduct.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME,
-                                                 ProductData.TYPE_FLOAT32);
+                    ProductData.TYPE_FLOAT32);
         }
     }
 
@@ -172,7 +165,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
             }
 
             Tile l1FlagsTile = getSourceTile(l1bProduct.getBand(EnvisatConstants.MERIS_L1B_FLAGS_DS_NAME),
-                                             sourceRectangle);
+                    sourceRectangle);
             Tile waterFractionTile = getSourceTile(landWaterBand, sourceRectangle);
 
             Tile szaTile = null;
@@ -183,13 +176,13 @@ public class IdepixMerisWaterClassificationOp extends Operator {
             Tile windVTile = null;
             if (band == cloudFlagBand) {
                 szaTile = getSourceTile(l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME),
-                                        sourceRectangle);
+                        sourceRectangle);
                 vzaTile = getSourceTile(l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME),
-                                        sourceRectangle);
+                        sourceRectangle);
                 saaTile = getSourceTile(l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME),
-                                        sourceRectangle);
+                        sourceRectangle);
                 vaaTile = getSourceTile(l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_VIEW_AZIMUTH_DS_NAME),
-                                        sourceRectangle);
+                        sourceRectangle);
                 windUTile = getSourceTile(l1bProduct.getTiePointGrid("zonal_wind"), sourceRectangle);
                 windVTile = getSourceTile(l1bProduct.getTiePointGrid("merid_wind"), sourceRectangle);
             }
@@ -200,7 +193,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
                     if (!l1FlagsTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_INVALID)) {
                         final int waterFraction = waterFractionTile.getSampleInt(x, y);
 
-                        if (isLandPixel(x, y, l1FlagsTile, waterFraction)) {
+                        if (IdepixMerisUtils.isLandPixel(x, y, getGeoPos(x, y), l1FlagsTile, waterFraction)) {
                             if (band == cloudFlagBand) {
                                 targetTile.setSample(x, y, IdepixMerisConstants.L1_F_LAND, true);
                             } else {
@@ -209,7 +202,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
                         } else {
                             if (band == cloudFlagBand) {
                                 classifyCloud(x, y, rhoToaTiles, windUTile, windVTile, szaTile, vzaTile, saaTile, vaaTile,
-                                              targetTile, waterFraction);
+                                        targetTile, waterFraction);
                             }
                             if (outputSchillerNNValue && band == nnOutputBand) {
                                 final double[] nnOutput = getMerisNNOutput(x, y, rhoToaTiles);
@@ -226,47 +219,23 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         }
     }
 
-    private boolean isLandPixel(int x, int y, Tile l1FlagsTile, int waterFraction) {
-        // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
-        if (getGeoPos(x, y).lat > -58f) {
-            // values bigger than 100 indicate no data
-            if (waterFraction <= 100) {
-                // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
-                // is always 0 or 100!! (TS, OD, 20140502)
-                return waterFraction == 0;
-            } else {
-                return l1FlagsTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_LAND);
-            }
-        } else {
-            return l1FlagsTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_LAND);
-        }
-    }
-
-    private boolean isCoastlinePixel(int x, int y, int waterFraction) {
-        // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
-        // values bigger than 100 indicate no data
-        // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
-        // is always 0 or 100!! (TS, OD, 20140502)
-        return getGeoPos(x, y).lat > -58f && waterFraction < 100 && waterFraction > 0;
-    }
-
     private void classifyCloud(int x, int y, Tile[] rhoToaTiles, Tile winduTile, Tile windvTile,
-                               Tile szaTile, Tile vzaTile, Tile saaTile, Tile vaaTile, Tile targetTile, 
+                               Tile szaTile, Tile vzaTile, Tile saaTile, Tile vaaTile, Tile targetTile,
                                int waterFraction) {
 
-        final boolean isCoastline = isCoastlinePixel(x, y, waterFraction);
+        GeoPos geoPos = getGeoPos(x, y);
+        final boolean isCoastline = IdepixMerisUtils.isCoastlinePixel(geoPos, waterFraction);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, isCoastline);
 
         boolean is_snow_ice;
-        boolean is_glint_risk = !isCoastline && 
+        boolean is_glint_risk = !isCoastline &&
                 isGlintRisk(x, y, rhoToaTiles, winduTile, windvTile, szaTile, vzaTile, saaTile, vaaTile);
         boolean checkForSeaIce = false;
         if (!isCoastline) {
             // over water
-            final GeoPos geoPos = getGeoPos(x, y);
-            checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsSeaice(geoPos);
+            checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsLakeSeaIce(geoPos);
             // glint makes sense only if we have no sea ice
-            is_glint_risk = is_glint_risk && !isPixelClassifiedAsSeaice(geoPos);
+            is_glint_risk = is_glint_risk && !isPixelClassifiedAsLakeSeaIce(geoPos);
 
         }
 
@@ -309,7 +278,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
     }
 
     private double[] getMerisNNOutput(int x, int y, Tile[] rhoToaTiles) {
-            return getMerisNNOutputImpl(x, y, rhoToaTiles, merisAllNeuralNet.get());
+        return getMerisNNOutputImpl(x, y, rhoToaTiles, merisAllNeuralNet.get());
     }
 
     private double[] getMerisNNOutputImpl(int x, int y, Tile[] rhoToaTiles, SchillerNeuralNetWrapper nnWrapper) {
@@ -342,7 +311,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         final float windU = winduTile.getSampleFloat(x, y);
         final float windV = windvTile.getSampleFloat(x, y);
         final double windm = Math.sqrt(windU * windU + windV * windV);
-            /* allows to retrieve Glint reflectance for current geometry and wind */
+        /* allows to retrieve Glint reflectance for current geometry and wind */
         return glintRef(szaTile.getSampleFloat(x, y), vzaTile.getSampleFloat(x, y), deltaAzimuth, windm, chiw);
     }
 
@@ -357,29 +326,11 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         return Interp.interpolate(auxData.rog.getJavaArray(), rogIndex);
     }
 
-    private boolean isPixelClassifiedAsSeaice(GeoPos geoPos) {
-        // check given pixel, but also neighbour cell from 1x1 deg sea ice climatology...
-        final double maxLon = 360.0;
-        final double minLon = 0.0;
-        final double maxLat = 180.0;
-        final double minLat = 0.0;
-
-        for (int y = -1; y <= 1; y++) {
-            for (int x = -1; x <= 1; x++) {
-                // for sea ice climatology indices, we need to shift lat/lon onto [0,180]/[0,360]...
-                double lon = geoPos.lon + 180.0 + x * 1.0;
-                double lat = 90.0 - geoPos.lat + y * 1.0;
-                lon = Math.max(lon, minLon);
-                lon = Math.min(lon, maxLon);
-                lat = Math.max(lat, minLat);
-                lat = Math.min(lat, maxLat);
-                final SeaIceClassification classification = seaIceClassifier.getClassification(lat, lon);
-                if (classification.max >= SEA_ICE_CLIM_THRESHOLD) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    private boolean isPixelClassifiedAsLakeSeaIce(GeoPos geoPos) {
+        final int lakeSeaIceMaskX = (int) (180.0 + geoPos.lon);
+        final int lakeSeaIceMaskY = (int) (90.0 - geoPos.lat);
+        final float monthlyMaskValue = lakeSeaIceClassification.getMonthlyMaskValue(lakeSeaIceMaskX, lakeSeaIceMaskY);
+        return monthlyMaskValue >= SEA_ICE_CLIM_THRESHOLD;
     }
 
     private GeoPos getGeoPos(int x, int y) {

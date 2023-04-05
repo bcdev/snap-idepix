@@ -5,13 +5,14 @@ import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
-
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
@@ -96,7 +97,7 @@ class IdepixMerisUtils {
         return GPF.createProduct("Meris.CloudTopPressureOp", GPF.NO_PARAMS, sourceProduct);
     }
 
-    static double computeApparentSaa(double sza, double saa, double oza, double oaa, double lat) {
+    static double computeApparentSaa(double sza, double saa, double oza, double oaa) {
         final double szaRad = sza * MathUtils.DTOR;
         final double ozaRad = oza * MathUtils.DTOR;
 
@@ -156,5 +157,29 @@ class IdepixMerisUtils {
         }
 
         return viewAngleInterpol;
+    }
+
+    static boolean isLandPixel(int x, int y, GeoPos geoPos, Tile l1FlagsTile, int waterFraction) {
+        // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
+        if (geoPos.lat > -58f) {
+            // values bigger than 100 indicate no data
+            if (waterFraction <= 100) {
+                // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
+                // is always 0 or 100!! (TS, OD, 20140502)
+                return waterFraction == 0;
+            } else {
+                return l1FlagsTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_LAND);
+            }
+        } else {
+            return l1FlagsTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_LAND);
+        }
+    }
+
+    static boolean isCoastlinePixel(GeoPos geoPos, int waterFraction) {
+        // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
+        // values bigger than 100 indicate no data
+        // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
+        // is always 0 or 100!! (TS, OD, 20140502)
+        return geoPos.lat > -58f && waterFraction < 100 && waterFraction > 0;
     }
 }

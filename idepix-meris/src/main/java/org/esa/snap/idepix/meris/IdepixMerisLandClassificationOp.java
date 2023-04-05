@@ -74,9 +74,6 @@ public class IdepixMerisLandClassificationOp extends Operator {
     private static final String MERIS_LAND_NET_NAME = "11x8x5x3_1062.5_land.net";
     private ThreadLocal<SchillerNeuralNetWrapper> merisLandNeuralNet;
 
-//    static final int MERIS_L1B_F_LAND = 4;
-//    static final int MERIS_L1B_F_INVALID = 7;
-
     @Override
     public void initialize() throws OperatorException {
         setBands();
@@ -156,7 +153,7 @@ public class IdepixMerisLandClassificationOp extends Operator {
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
                     final int waterFraction = waterFractionTile.getSampleInt(x, y);
                     initCloudFlag(merisL1bFlagTile, targetTiles.get(cloudFlagTargetBand), merisReflectance, y, x);
-                    if (!isLandPixel(x, y, merisL1bFlagTile, waterFraction)) {
+                    if (!IdepixMerisUtils.isLandPixel(x, y, getGeoPos(x, y), merisL1bFlagTile, waterFraction)) {
                         cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, false);
                         cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
                         cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
@@ -208,22 +205,6 @@ public class IdepixMerisLandClassificationOp extends Operator {
             }
         } catch (Exception e) {
             throw new OperatorException("Failed to provide cloud screening:\n" + e.getMessage(), e);
-        }
-    }
-
-    private boolean isLandPixel(int x, int y, Tile merisL1bFlagTile, int waterFraction) {
-        // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
-        if (getGeoPos(x, y).lat > -58f) {
-            // values bigger than 100 indicate no data
-            if (waterFraction <= 100) {
-                // todo: this does not work if we have a PixelGeocoding. In that case, waterFraction
-                // is always 0 or 100!! (TS, OD, 20140502)
-                return waterFraction == 0;
-            } else {
-                return merisL1bFlagTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_LAND);
-            }
-        } else {
-            return merisL1bFlagTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_LAND);
         }
     }
 

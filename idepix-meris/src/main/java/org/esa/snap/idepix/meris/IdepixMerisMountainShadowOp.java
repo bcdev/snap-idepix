@@ -1,7 +1,5 @@
 package org.esa.snap.idepix.meris;
 
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
@@ -10,7 +8,12 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.core.gpf.pointop.*;
+import org.esa.snap.core.gpf.pointop.PixelOperator;
+import org.esa.snap.core.gpf.pointop.ProductConfigurer;
+import org.esa.snap.core.gpf.pointop.Sample;
+import org.esa.snap.core.gpf.pointop.SourceSampleConfigurer;
+import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
+import org.esa.snap.core.gpf.pointop.WritableSample;
 import org.esa.snap.core.util.math.MathUtils;
 
 import java.util.HashMap;
@@ -99,9 +102,7 @@ public class IdepixMerisMountainShadowOp extends PixelOperator {
             final float oaa = sourceSamples[OAA_INDEX].getFloat();
             final float orientation = sourceSamples[ORIENTATION_INDEX].getFloat();
 
-            final PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
-            final GeoPos geoPos = l1bProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
-            final double saaApparent = IdepixMerisUtils.computeApparentSaa(sza, saa, oza, oaa, geoPos.getLat());
+            final double saaApparent = IdepixMerisUtils.computeApparentSaa(sza, saa, oza, oaa);
 
             if (x == 2783 && y == 642) {
                 System.out.println("x, y = " + x + ", " + y);  // small subset, shadow
