@@ -260,15 +260,17 @@ public class IdepixOlciClassificationOp extends Operator {
 
                     final boolean isLandFromAppliedMask = isOlciLandPixel(x, y, olciQualityFlagTile, waterFraction);
                     final boolean isInlandWaterFromAppliedMask = isOlciInlandWaterPixel(x, y, olciQualityFlagTile, waterFraction);
-                    cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLandFromAppliedMask);
+                    //todo: for CGLOPS, coastlines are added to LAND to exclude them from L2 processing
+                    cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLandFromAppliedMask ||
+                            isCoastlineFromAppliedMask);
 
-                    if (isLandFromAppliedMask && !isInlandWaterFromAppliedMask) {
+                    // todo: for cglops, coastlines are treated as LAND
+                    if ((isLandFromAppliedMask && !isInlandWaterFromAppliedMask) || isCoastlineFromAppliedMask) {
                         classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
                                 surface13Tile, trans13Tile, x, y);
                     } else {
                         classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
-                                cloudFlagTargetTile, nnTargetTile, x, y,
-                                isInlandWaterFromAppliedMask);
+                                          cloudFlagTargetTile, nnTargetTile, x, y, isInlandWaterFromAppliedMask);
                     }
                 }
             }
@@ -286,8 +288,6 @@ public class IdepixOlciClassificationOp extends Operator {
     private void classifyOverWater(Tile olciQualityFlagTile, Tile[] olciReflectanceTiles,
                                    Tile cloudFlagTargetTile, Tile nnTargetTile, int x, int y, boolean isInlandWater) {
 
-        final GeoPos geoPos = IdepixUtils.getGeoPos(l1bProduct.getSceneGeoCoding(), x, y);
-        final boolean checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsLakeSeaIce(geoPos);
 
         double nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles);
         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
@@ -307,6 +307,8 @@ public class IdepixOlciClassificationOp extends Operator {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, cloudSure);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, cloudAmbiguous || cloudSure);
 
+            final GeoPos geoPos = IdepixUtils.getGeoPos(l1bProduct.getSceneGeoCoding(), x, y);
+            final boolean checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsLakeSeaIce(geoPos);
             if (checkForSeaIce && nnInterpreter.isSnowIce(nnOutput)) {
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
@@ -319,6 +321,8 @@ public class IdepixOlciClassificationOp extends Operator {
                     //catches mixed pixels at coast lines.
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+                    // todo: for CGLOPS it is OK, if these mixed pixels are classified as LAND!
+                    cloudFlagTargetTile.setSample(x, y, IDEPIX_LAND, true);
 
                 }
                 if (olciQualityFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_BRIGHT)) {
