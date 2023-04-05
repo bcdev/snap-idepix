@@ -115,7 +115,7 @@ class IdepixMerisUtils {
         double delta = Math.acos(numerator / denominator);
 // Sun in the North (Southern hemisphere), change sign!
         if (saa > 270. || saa < 90){
-            delta = -1.0 * delta;
+            delta = -delta;
         }
         if (oaa < 0.0) {
             return saa - delta * MathUtils.RTOD;

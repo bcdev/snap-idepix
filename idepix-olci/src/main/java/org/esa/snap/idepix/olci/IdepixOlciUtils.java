@@ -59,7 +59,7 @@ class IdepixOlciUtils {
     static FlagCoding createOlciFlagCoding() {
         FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         flagCoding.addFlag("IDEPIX_MOUNTAIN_SHADOW", BitSetter.setFlag(0,
-                IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW),
+                        IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW),
                 IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT);
         return flagCoding;
     }
@@ -150,10 +150,9 @@ class IdepixOlciUtils {
      * @param saa - sun azimuth (deg)
      * @param oza - view zenith (deg)
      * @param oaa - view azimuth (deg)
-     * @param lat - latitude (deg)
      * @return the apparent saa (deg)
      */
-    static double computeApparentSaa(double sza, double saa, double oza, double oaa, double lat) {
+    static double computeApparentSaa(double sza, double saa, double oza, double oaa) {
         final double szaRad = sza * MathUtils.DTOR;
         final double ozaRad = oza * MathUtils.DTOR;
 
@@ -170,8 +169,10 @@ class IdepixOlciUtils {
 
         double delta = Math.acos(numerator / denominator);
 // Sun in the North (Southern hemisphere), change sign!
-        if (saa > 270. || saa < 90){
-            delta = -1.0 * delta;
+// todo: conflict between master and cglops
+//        if (saa < 270 && saa > 90){
+        if (saa > 270. || saa < 90) {
+            delta = -delta;
         }
         if (oaa < 0.0) {
             return saa - delta * MathUtils.RTOD;

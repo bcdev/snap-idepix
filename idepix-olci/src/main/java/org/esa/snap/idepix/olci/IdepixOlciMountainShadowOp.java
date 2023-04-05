@@ -99,9 +99,7 @@ public class IdepixOlciMountainShadowOp extends PixelOperator {
             final float oaa = sourceSamples[OAA_INDEX].getFloat();
             final float orientation = sourceSamples[ORIENTATION_INDEX].getFloat();
 
-            final PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
-            final GeoPos geoPos = l1bProduct.getSceneGeoCoding().getGeoPos(pixelPos, null);
-            final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa, geoPos.getLat());
+            final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa);
 
             targetSamples[MOUNTAIN_SHADOW_FLAG_BAND_INDEX].set(isMountainShadow(sza, (float) saaApparent,
                     slope, aspect, orientation, mntShadowExtent));
