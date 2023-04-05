@@ -254,6 +254,7 @@ public class IdepixMerisOp extends BasisOp {
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudShadow", computeCloudShadow);
         params.put("computeMountainShadow", computeMountainShadow);
+        params.put("mntShadowExtent", mntShadowExtent);
         params.put("refineClassificationNearCoastlines", true);  // always an improvement
 
         final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixMerisPostProcessOp.class),

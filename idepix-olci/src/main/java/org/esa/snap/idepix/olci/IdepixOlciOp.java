@@ -279,7 +279,7 @@ public class IdepixOlciOp extends BasisOp {
         params.put("cloudBufferWidth", cloudBufferWidth);
         params.put("computeCloudShadow", computeCloudShadow);
         params.put("computeMountainShadow", computeMountainShadow);
-        params.put("mntShadowStrength", mntShadowExtent);
+        params.put("mntShadowExtent", mntShadowExtent);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciPostProcessOp.class),
                 params, input);
