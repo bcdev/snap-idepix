@@ -4,6 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
@@ -73,6 +74,7 @@ public class IdepixOlciPostProcessOp extends Operator {
     private Product ctpProduct;
 
     private Band origCloudFlagBand;
+    private Band targetFlagBand;
 
     private Band ctpBand;
     private TiePointGrid szaTPG;
@@ -105,8 +107,11 @@ public class IdepixOlciPostProcessOp extends Operator {
 
         origCloudFlagBand = olciCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
 
-        ProductUtils.copyBand("distance", olciCloudProduct, postProcessedCloudProduct, true);
-        distanceBand = postProcessedCloudProduct.getBand("distance");
+        distanceBand = postProcessedCloudProduct.addBand("distance", ProductData.TYPE_FLOAT32);
+        distanceBand.setNoDataValue(Float.NaN);
+        distanceBand.setNoDataValueUsed(true);
+        distanceBand.setUnit("m");
+        distanceBand.setDescription("Distance to scene border");
 
         szaTPG = l1bProduct.getTiePointGrid("SZA");
         saaTPG = l1bProduct.getTiePointGrid("SAA");
@@ -146,7 +151,7 @@ public class IdepixOlciPostProcessOp extends Operator {
         rectExtender = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
                 l1bProduct.getSceneRasterHeight()), extent, extent);
 
-        ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, olciCloudProduct, postProcessedCloudProduct, false);
+        targetFlagBand = ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, olciCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
 
@@ -159,11 +164,17 @@ public class IdepixOlciPostProcessOp extends Operator {
     }
 
     @Override
-    public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        Rectangle targetRectangle = targetTile.getRectangle();
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
         final Rectangle srcRectangle = rectExtender.extend(targetRectangle);
 
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
+
+        Tile targetFlagTile = targetTiles.get(targetFlagBand);
+        Tile distanceTile = null;
+        if (distanceBand != null) {
+            distanceTile = targetTiles.get(distanceBand);
+        }
+
 
         for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
             checkForCancellation();
@@ -171,20 +182,20 @@ public class IdepixOlciPostProcessOp extends Operator {
 
                 if (targetRectangle.contains(x, y)) {
                     boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
-                    combineFlags(x, y, sourceFlagTile, targetTile);
+                    combineFlags(x, y, sourceFlagTile, targetFlagTile);
                     if (isCloud) {
-                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+                        targetFlagTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                     }
                 }
             }
         }
 
         if (computeCloudBuffer) {
-            CloudBuffer.setCloudBuffer(targetTile, srcRectangle, sourceFlagTile, cloudBufferWidth);
+            CloudBuffer.setCloudBuffer(targetFlagTile, srcRectangle, sourceFlagTile, cloudBufferWidth);
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
                 checkForCancellation();
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                    IdepixUtils.consolidateCloudAndBuffer(targetTile, x, y);
+                    IdepixUtils.consolidateCloudAndBuffer(targetFlagTile, x, y);
                 }
             }
         }
@@ -197,7 +208,6 @@ public class IdepixOlciPostProcessOp extends Operator {
             Tile ctpTile = getSourceTile(ctpBand, srcRectangle);
             Tile slpTile = getSourceTile(slpTPG, srcRectangle);
             Tile altTile = getSourceTile(altBand, targetRectangle);
-            Tile distanceTile = getSourceTile(distanceBand, targetRectangle);
 
             Tile[] temperatureProfileTPGTiles = new Tile[temperatureProfileTPGs.length];
             for (int i = 0; i < temperatureProfileTPGTiles.length; i++) {
@@ -213,7 +223,7 @@ public class IdepixOlciPostProcessOp extends Operator {
                     ctpTile, slpTile,
                     temperatureProfileTPGTiles,
                     altTile, distanceTile, CLOUD_TOP_MAX);
-            cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
+            cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetFlagTile);
         }
 
         if (computeMountainShadow) {
@@ -222,10 +232,11 @@ public class IdepixOlciPostProcessOp extends Operator {
                 checkForCancellation();
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                     final boolean mountainShadow = mountainShadowFlagTile.getSampleInt(x, y) > 0;
-                    targetTile.setSample(x, y, IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW, mountainShadow);
+                    targetFlagTile.setSample(x, y, IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW, mountainShadow);
                 }
             }
         }
+
     }
 
     private void combineFlags(int x, int y, Tile sourceFlagTile, Tile targetTile) {
