@@ -97,6 +97,21 @@ class IdepixMerisUtils {
         return GPF.createProduct("Meris.CloudTopPressureOp", GPF.NO_PARAMS, sourceProduct);
     }
 
+    static Product computeRayleighCorrectedProduct(Product sourceProduct) {
+        Map<String, Product> raylSourceProducts = new HashMap<>();
+        raylSourceProducts.put("sourceProduct", sourceProduct);
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("sourceBandNames", "radiance_1,radiance_3,radiance_5,radiance_7,radiance_13");
+        params.put("computeTaur", false);
+        params.put("computeRBrr", true);
+        params.put("computeRtoaNg", false);
+        params.put("computeRtoa", false);
+        params.put("addAirMass", false);
+
+        return GPF.createProduct("RayleighCorrection", params, raylSourceProducts);
+    }
+
     static double computeApparentSaa(double sza, double saa, double oza, double oaa) {
         final double szaRad = sza * MathUtils.DTOR;
         final double ozaRad = oza * MathUtils.DTOR;

@@ -80,12 +80,12 @@ class IdepixOlciUtils {
 
         classifProduct.getMaskGroup().add(index,
                 Mask.BandMathsType.create("IDEPIX_MOUNTAIN_SHADOW", IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT, w, h,
-                "pixel_classif_flags.IDEPIX_MOUNTAIN_SHADOW",
-                IdepixFlagCoding.getRandomColour(r), 0.5f));
+                        "pixel_classif_flags.IDEPIX_MOUNTAIN_SHADOW",
+                        IdepixFlagCoding.getRandomColour(r), 0.5f));
         classifProduct.getMaskGroup().add(index,
                 Mask.BandMathsType.create("IDEPIX_WATER_PROCESSABLE", IdepixOlciConstants.IDEPIX_WATER_PROCESSABLE_DESCR_TEXT, w, h,
-                "pixel_classif_flags.IDEPIX_WATER_PROCESSABLE",
-                IdepixFlagCoding.getRandomColour(r), 0.5f));
+                        "pixel_classif_flags.IDEPIX_WATER_PROCESSABLE",
+                        IdepixFlagCoding.getRandomColour(r), 0.5f));
     }
 
     static void addOlciRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
@@ -101,7 +101,7 @@ class IdepixOlciUtils {
     }
 
     static void addOlciRbrrBands(Product rBRRProduct, Product targetProduct) {
-        String [] rBrrBandNumber = new String[]{"01", "04", "06", "08", "17"};
+        String[] rBrrBandNumber = new String[]{"01", "04", "06", "08", "17"};
         for (String s : rBrrBandNumber) {
             String bandname = "rBRR_" + s;
             if (!targetProduct.containsBand(bandname)) {
@@ -203,8 +203,6 @@ class IdepixOlciUtils {
 
         double delta = Math.acos(numerator / denominator);
 // Sun in the North (Southern hemisphere), change sign!
-// todo: conflict between master and cglops
-//        if (saa < 270 && saa > 90){
         if (saa > 270. || saa < 90) {
             delta = -delta;
         }

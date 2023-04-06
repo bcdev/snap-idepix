@@ -104,6 +104,11 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-meris-brr</artifactId>
+            <version>${s3tbx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-meris-l2auxdata</artifactId>
             <version>${s3tbx.version}</version>
         </dependency>

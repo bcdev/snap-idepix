@@ -60,28 +60,22 @@ public class IdepixMerisLandClassificationOp extends Operator {
     Product sourceProduct;
     @SourceProduct(alias = "rhotoa")
     private Product rad2reflProduct;
-    @SourceProduct(alias = "waterMask")
-    private Product waterMaskProduct;
+    @SourceProduct(alias = "waterClassProduct")
+    private Product waterClassProduct;
 
     @TargetProduct(description = "The target product.")
     Product targetProduct;
 
     Band cloudFlagBand;
-
     private Band[] merisReflBands;
-    private Band landWaterBand;
-
     private static final String MERIS_LAND_NET_NAME = "11x8x5x3_1062.5_land.net";
     private ThreadLocal<SchillerNeuralNetWrapper> merisLandNeuralNet;
 
     @Override
     public void initialize() throws OperatorException {
         setBands();
-
         readSchillerNeuralNets();
         createTargetProduct();
-
-        landWaterBand = waterMaskProduct.getBand("land_water_fraction");
     }
 
     private void readSchillerNeuralNets() {
@@ -126,8 +120,6 @@ public class IdepixMerisLandClassificationOp extends Operator {
 
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle rectangle, ProgressMonitor pm) throws OperatorException {
-        // MERIS variables
-        final Tile waterFractionTile = getSourceTile(landWaterBand, rectangle);
 
         final Band merisL1bFlagBand = sourceProduct.getBand(EnvisatConstants.MERIS_L1B_FLAGS_DS_NAME);
         final Tile merisL1bFlagTile = getSourceTile(merisL1bFlagBand, rectangle);
@@ -141,6 +133,9 @@ public class IdepixMerisLandClassificationOp extends Operator {
         final Band cloudFlagTargetBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         final Tile cloudFlagTargetTile = targetTiles.get(cloudFlagTargetBand);
 
+        final Band waterClassFlagBand = waterClassProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
+        final Tile waterClassFlagTile =getSourceTile(waterClassFlagBand, rectangle);
+
         Band nnTargetBand;
         Tile nnTargetTile = null;
         if (outputSchillerNNValue) {
@@ -151,9 +146,8 @@ public class IdepixMerisLandClassificationOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    final int waterFraction = waterFractionTile.getSampleInt(x, y);
                     initCloudFlag(merisL1bFlagTile, targetTiles.get(cloudFlagTargetBand), merisReflectance, y, x);
-                    if (!IdepixMerisUtils.isLandPixel(x, y, getGeoPos(x, y), merisL1bFlagTile, waterFraction)) {
+                    if (!waterClassFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND)) { //already refined land mask! with spectral tests in coastal zone.
                         cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, false);
                         cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
                         cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
@@ -161,6 +155,7 @@ public class IdepixMerisLandClassificationOp extends Operator {
                             nnTargetTile.setSample(x, y, Float.NaN);
                         }
                     } else {
+                        cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, true);
                         classifyPixel(merisReflectanceTiles, merisReflectance,
                                 cloudFlagTargetTile, nnTargetTile, y, x);
                     }
@@ -214,14 +209,6 @@ public class IdepixMerisLandClassificationOp extends Operator {
         }
     }
 
-    private GeoPos getGeoPos(int x, int y) {
-        final GeoPos geoPos = new GeoPos();
-        final GeoCoding geoCoding = getSourceProduct().getSceneGeoCoding();
-        final PixelPos pixelPos = new PixelPos(x, y);
-        geoCoding.getGeoPos(pixelPos, geoPos);
-        return geoPos;
-    }
-
     private void initCloudFlag(Tile merisL1bFlagTile, Tile targetTile, float[] merisReflectances, int y, int x) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
         final boolean l1Invalid = merisL1bFlagTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_INVALID);
@@ -236,7 +223,6 @@ public class IdepixMerisLandClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, false);
         targetTile.setSample(x, y, IdepixMerisConstants.IDEPIX_GLINT_RISK, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, false);
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, true);   // already checked
     }
 
     public static class Spi extends OperatorSpi {

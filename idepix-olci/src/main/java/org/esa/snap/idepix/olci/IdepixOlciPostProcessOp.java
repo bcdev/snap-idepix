@@ -3,6 +3,8 @@ package org.esa.snap.idepix.olci;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.*;
@@ -63,7 +65,7 @@ public class IdepixOlciPostProcessOp extends Operator {
     private Product olciCloudProduct;
 
     @SourceProduct(alias = "ctp", optional = true,
-    description = "Must contain a band with the name 'ctp'.")
+            description = "Must contain a band with the name 'ctp'.")
     private Product ctpProduct;
 
     private Band origCloudFlagBand;
@@ -81,6 +83,8 @@ public class IdepixOlciPostProcessOp extends Operator {
     private GeoCoding geoCoding;
 
     private RectangleExtender rectExtender;
+
+    private static int maxcloudTop = 12000;
 
     @Override
     public void initialize() throws OperatorException {
@@ -128,6 +132,10 @@ public class IdepixOlciPostProcessOp extends Operator {
 
         if (computeCloudShadow) {
             ctpBand = ctpProduct.getBand("ctp");
+            final GeoPos centerGeoPos =
+                    getCenterGeoPos(l1bProduct.getSceneGeoCoding(), l1bProduct.getSceneRasterWidth(),
+                            l1bProduct.getSceneRasterHeight());
+            maxcloudTop = setCloudTopHeight(centerGeoPos.getLat());
         }
 
         int cloudShadowExtent = l1bProduct.getName().contains("FR____") ? 64 : 16;
@@ -145,6 +153,17 @@ public class IdepixOlciPostProcessOp extends Operator {
                 ProductUtils.copyBand(bandName, source, target, true);
             }
         }
+    }
+
+    private GeoPos getCenterGeoPos(GeoCoding geoCoding, int width, int height) {
+        final PixelPos centerPixelPos = new PixelPos(0.5 * width + 0.5,
+                0.5 * height + 0.5);
+        return geoCoding.getGeoPos(centerPixelPos, null);
+    }
+
+    private int setCloudTopHeight(double lat) {
+        double absLat = Math.abs(lat);
+        return (int) Math.ceil(0.5 * Math.pow(90. - absLat, 2.) + (90. - absLat) * 25 + 5000);
     }
 
     @Override
@@ -200,7 +219,7 @@ public class IdepixOlciPostProcessOp extends Operator {
                     ozaTile, oaaTile,
                     ctpTile, slpTile,
                     temperatureProfileTPGTiles,
-                    altTile);
+                    altTile, maxcloudTop);
             cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
         }
 
@@ -222,123 +241,21 @@ public class IdepixOlciPostProcessOp extends Operator {
         targetTile.setSample(x, y, sourceFlags | computedFlags);
     }
 
-    public static  boolean isPixelSurrounded_2Flags(int x, int y, Tile sourceFlagTile, int pixelFlag, int pixelFlagNOT,
-                                             int buffer) {
+    public static boolean isPixelSurrounded_2Flags(int x, int y, Tile sourceFlagTile, int pixelFlag, int pixelFlagNOT,
+                                                   int buffer) {
         // check if pixel is surrounded by other pixels flagged as 'pixelFlag' and not 'pixelFlagNOT'
         int surroundingPixelCount = 0;
         Rectangle rectangle = sourceFlagTile.getRectangle();
         for (int i = x - buffer; i <= x + buffer; i++) {
             for (int j = y - buffer; j <= y + buffer; j++) {
                 if (rectangle.contains(i, j) && sourceFlagTile.getSampleBit(i, j, pixelFlag) &&
-                    !sourceFlagTile.getSampleBit(i, j, pixelFlagNOT)) {
+                        !sourceFlagTile.getSampleBit(i, j, pixelFlagNOT)) {
                     surroundingPixelCount++;
                 }
             }
         }
-        return (surroundingPixelCount>0);
+        return (surroundingPixelCount > 0);
     }
-
-    private boolean isCoastalZone(Tile sourceFlagTile, int x, int y, Integer bufferValue){
-        int buffer = bufferValue != null ? bufferValue : 3; //default value 3 for dilation 7x7
-        // check if in window is at least one, but not all of them.
-        int pixelCount = 0;
-        int sizeRectangle = 0;
-        Rectangle rectangle = sourceFlagTile.getRectangle();
-        for (int i = x - buffer; i <= x + buffer; i++) {
-            for (int j = y - buffer; j <= y + buffer; j++) {
-                if (rectangle.contains(i, j)){
-                    sizeRectangle++;
-                    if (sourceFlagTile.getSampleBit(i, j, IdepixOlciConstants.L1_F_LAND) &&
-                            !sourceFlagTile.getSampleBit(i, j, IdepixOlciConstants.L1_F_FRESH_INLAND_WATER)) {
-                        pixelCount++;
-                    }
-                }
-
-            }
-        }
-        return (pixelCount>0 && pixelCount < sizeRectangle);
-    }
-
-    private float getDistanceToShoreORCloud(int x, int y, Tile sourceFlagTile, Integer bufferValue){
-        int buffer = bufferValue != null ? bufferValue : 7; //
-        // find minimum distance in window from LAND or CLOUD to central pixel, which is processable water.
-        double maxDist = (double) buffer * Math.sqrt(2.);
-        double pixelDist = maxDist;
-
-        Rectangle rectangle = sourceFlagTile.getRectangle();
-        boolean noLandCloudFound = true;
-        for (int bf = 1; bf <= buffer; bf++) {
-            for (int i = x - bf; i <= x + bf; i++) {
-                int ix = i;
-                int iy = y + bf;
-                if (rectangle.contains(ix, iy)) { //oben
-                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
-                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
-                        if (thisDist < pixelDist){
-                            pixelDist = thisDist;
-                        }
-                    }
-                }
-                ix = i;
-                iy = y - bf;
-                if (rectangle.contains(ix, iy)) { //unten
-                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
-                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
-                        if (thisDist < pixelDist){
-                            pixelDist = thisDist;
-                        }
-                    }
-                }
-                ix = x - bf;
-                iy = i;
-                if (rectangle.contains(ix, iy)) { //links
-                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
-                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
-                        if (thisDist < pixelDist){
-                            pixelDist = thisDist;
-                        }
-                    }
-                }
-                ix = x + bf;
-                iy = i;
-                if (rectangle.contains(ix, iy)) { //rechts
-                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
-                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
-                        if (thisDist < pixelDist){
-                            pixelDist = thisDist;
-                        }
-                    }
-                }
-            }
-            if (pixelDist < maxDist){
-                break;
-            }
-        }
-        return (float)pixelDist;
-    }
-
-    private boolean CloudOrLandTest(int ix, int iy, Tile sourceFlagTile){
-        return sourceFlagTile.getSampleBit(ix, iy, IdepixConstants.IDEPIX_LAND) || sourceFlagTile.getSampleBit(ix, iy, IdepixConstants.IDEPIX_CLOUD);
-    }
-
-    private void refineCloudFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile, Rectangle srcRectangle) {
-        final int windowWidth = 2;
-        final int LEFT_BORDER = Math.max(x - windowWidth, srcRectangle.x);
-        final int RIGHT_BORDER = Math.min(x + windowWidth, srcRectangle.x + srcRectangle.width - 1);
-        final int TOP_BORDER = Math.max(y - windowWidth, srcRectangle.y);
-        final int BOTTOM_BORDER = Math.min(y + windowWidth, srcRectangle.y + srcRectangle.height - 1);
-        boolean removeCloudFlag = true;
-        if (isPixelSurrounded_2Flags(x, y, sourceFlagTile, IdepixConstants.IDEPIX_CLOUD, IdepixOlciConstants.L1_F_COASTLINE, windowWidth)) {
-            removeCloudFlag = false;
-        }
-
-        if (removeCloudFlag) {
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
-        }
-    }
-
 
     /**
      * The Service Provider Interface (SPI) for the operator.
