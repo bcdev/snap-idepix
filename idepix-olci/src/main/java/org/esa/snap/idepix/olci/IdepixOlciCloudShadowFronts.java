@@ -48,6 +48,7 @@ class IdepixOlciCloudShadowFronts {
     private final Tile slpTile;
     private final Tile[] temperatureProfileTPGTiles;
     private final Tile altTile;
+    private final Tile distTile;
     private final double cloudHeightMax;
 
     IdepixOlciCloudShadowFronts(GeoCoding geoCoding,
@@ -55,7 +56,7 @@ class IdepixOlciCloudShadowFronts {
                                 Tile ozaTile, Tile oaaTile,
                                 Tile ctpTile, Tile slpTile,
                                 Tile[] temperatureProfileTPGTiles,
-                                Tile altTile,
+                                Tile altTile, Tile distTile,
                                 double cloudHeightMax) {
         this.geoCoding = geoCoding;
         this.szaTile = szaTile;
@@ -66,6 +67,7 @@ class IdepixOlciCloudShadowFronts {
         this.slpTile = slpTile;
         this.temperatureProfileTPGTiles = temperatureProfileTPGTiles;
         this.altTile = altTile;
+        this.distTile = distTile;
         this.cloudHeightMax = cloudHeightMax;
     }
 
@@ -79,52 +81,16 @@ class IdepixOlciCloudShadowFronts {
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
                 if (isCloudFree(sourceFlagTile, x, y) && isNotInvalid(sourceFlagTile, x, y)) {
-                    isCloudShadow[x - x0][y - y0] = getCloudShadow(sourceFlagTile, targetTile, x, y);
+                    isCloudShadow[x - x0][y - y0] = getCloudShadow(sourceFlagTile, targetTile, x, y, x0, y0);
                     if (isCloudShadow[x - x0][y - y0]) {
                         setCloudShadow(targetTile, x, y);
                     }
                 }
             }
         }
-        // first 'post-correction': fill gaps surrounded by other cloud or cloud shadow pixels
-        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
-            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                if (isCloudFree(sourceFlagTile, x, y)) {
-                    final boolean pixelSurroundedByClouds = isSurroundedByCloud(sourceFlagTile, x, y);
-                    final boolean pixelSurroundedByCloudShadow =
-                            isPixelSurroundedByCloudShadow(targetRectangle, x, y, isCloudShadow);
-
-                    if (pixelSurroundedByClouds || pixelSurroundedByCloudShadow) {
-                        setCloudShadow(targetTile, x, y);
-                    }
-                }
-            }
-        }
-        // second post-correction, called 'belt' (why??): flag a pixel as cloud shadow if neighbour pixel is shadow
-        for (int y = y0; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
-                if (isCloudFree(sourceFlagTile, x, y)) {
-                    performCloudShadowBeltCorrection(targetTile, x, y, isCloudShadow);
-                }
-            }
-        }
     }
 
     ///////////////////// end of public ///////////////////////////////////////////////////////
-
-    private static boolean isPixelSurrounded(int x, int y, Tile sourceFlagTile) {
-        // check if pixel is surrounded by other pixels flagged as 'pixelFlag'
-        int surroundingPixelCount = 0;
-        Rectangle rectangle = sourceFlagTile.getRectangle();
-        for (int i = x - 1; i <= x + 1; i++) {
-            for (int j = y - 1; j <= y + 1; j++) {
-                if (rectangle.contains(i, j) && sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD)) {
-                    surroundingPixelCount++;
-                }
-            }
-        }
-        return (surroundingPixelCount * 1.0 / 9 >= 0.7);  // at least 6 pixel in a 3x3 box
-    }
 
     private boolean isCloudForShadow(Tile sourceFlagTile, Tile targetTile, int x, int y) {
         if (!targetTile.getRectangle().contains(x, y)) {
@@ -139,101 +105,15 @@ class IdepixOlciCloudShadowFronts {
     }
 
     private boolean isNotInvalid(Tile sourceFlagTile, int x, int y) {
+        // todo rename
         return !sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
-    }
-
-    private boolean isSurroundedByCloud(Tile sourceFlagTile, int x, int y) {
-        return isPixelSurrounded(x, y, sourceFlagTile);
     }
 
     private void setCloudShadow(Tile targetTile, int x, int y) {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, true);
     }
 
-    private boolean isPixelSurroundedByCloudShadow(Rectangle targetRectangle, int x, int y, boolean[][] isCloudShadow) {
-        // check if pixel is surrounded by other cloud shadow pixels
-        int surroundingPixelCount = 0;
-        for (int i = x - 1; i <= x + 1; i++) {
-            for (int j = y - 1; j <= y + 1; j++) {
-                if (targetRectangle.contains(i, j)) {
-                    if (isCloudShadow[i - targetRectangle.x][j - targetRectangle.y]) {
-                        surroundingPixelCount++;
-                    }
-                }
-            }
-        }
-        return surroundingPixelCount * 1.0 / 9 >= 0.7; // at least 6 pixel in a 3x3 box
-    }
-
-    private void performCloudShadowBeltCorrection(Tile targetTile, int x, int y, boolean[][] isCloudShadow) {
-        // flag a pixel as cloud shadow if neighbour pixel is shadow
-        final Rectangle targetRectangle = targetTile.getRectangle();
-        for (int i = x - 1; i <= x + 1; i++) {
-            for (int j = y - 1; j <= y + 1; j++) {
-                if (targetRectangle.contains(i, j) && isCloudShadow[i - targetRectangle.x][j - targetRectangle.y]) {
-                    setCloudShadow(targetTile, x, y);
-                    break;
-                }
-            }
-        }
-    }
-
-    private double checkDistanceInDirection(double saaApparent, double aNorth, int x, int y,
-                                            float height, float width, GeoPos geoPos) {
-
-        double buffer = 2;
-        //angles in the observation plane, based on pixel coordinates
-        double a = -Math.toDegrees(Math.atan((width - x) / (0. - y)));
-        double b = -Math.toDegrees(Math.atan((width - x) / (height - y))) + 180.;
-        double c = -Math.toDegrees(Math.atan((0. - x) / (height - y))) + 180.;
-        double d = 360. - Math.toDegrees(Math.atan((0. - x) / (0. - y)));
-
-        //converting saaApparent into angle in observation plane, against angle towards North
-        saaApparent = saaApparent - aNorth;
-        //alpha: angle of slope
-        double alpha = Math.toRadians(saaApparent - 90.);
-        double xnew = 0;
-        double ynew = 0;
-        if (saaApparent > d || saaApparent < a) {
-            ynew = 0 + buffer;
-            xnew = (ynew - y) / Math.tan(alpha) + x;
-        } else if (saaApparent > a && saaApparent < b) {
-            xnew = width - buffer;
-            ynew = Math.tan(alpha) * (xnew - x) + y;
-        } else if (saaApparent > b && saaApparent < c) {
-            ynew = height - buffer;
-            xnew = (ynew - y) / Math.tan(alpha) + x;
-        } else if (saaApparent > c && saaApparent < d) {
-            xnew = 0 + buffer;
-            ynew = Math.tan(alpha) * (xnew - x) + y;
-        }
-
-        PixelPos pixelpPos2 = new PixelPos((Math.floor(xnew)) + 0.5f, Math.floor(ynew) + 0.5f);
-        final GeoPos geoPos2 = geoCoding.getGeoPos(pixelpPos2, null);
-        return IdepixUtils.computeDistanceOnEarth(geoPos2, geoPos);
-    }
-
-    private double computeNorthDirection(int x, int y, Tile sourceTile) {
-        final Rectangle sourceRectangle = sourceTile.getRectangle();
-        final int w = sourceRectangle.width;
-        double alpha = 43.60281897270362; //constant angle between AP, BP with P(x,y), A(x-4, y-10), B(x+4,y-10), in pixel coordinates
-
-        if (x < 4) x = 4;
-        if (x > w - 4) x = w;
-        if (y < 10) y = 10;
-
-        PixelPos pixelPosP = new PixelPos(x + 0.5f, y + 0.5f);
-        PixelPos pixelPosA = new PixelPos(x + 0.5f - 4.f, y + 0.5f - 10.f);
-        PixelPos pixelPosB = new PixelPos(x + 0.5f + 4.f, y + 0.5f - 10.f);
-
-        final GeoPos geoPosP = geoCoding.getGeoPos(pixelPosP, null);
-        final GeoPos geoPosA = geoCoding.getGeoPos(pixelPosA, null);
-        final GeoPos geoPosB = geoCoding.getGeoPos(pixelPosB, null);
-
-        return alpha * (geoPosA.getLon() - geoPosB.getLon()) / (geoPosP.getLon() - geoPosB.getLon());
-    }
-
-    private boolean getCloudShadow(Tile sourceFlagTile, Tile targetTile, int x, int y) {
+    private boolean getCloudShadow(Tile sourceFlagTile, Tile targetTile, int x, int y, int x0, int y0) {
 
         final Rectangle sourceRectangle = sourceFlagTile.getRectangle();
         final double sza = szaTile.getSampleDouble(x, y);
@@ -248,33 +128,97 @@ class IdepixOlciCloudShadowFronts {
             }
         }
 
+        PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
 
+        final GeoPos geoPos = geoCoding.getGeoPos(pixelPos, null);
         double tanSza = Math.tan(Math.toRadians(90.0 - sza));
 
         final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa);
         final double saaRadApparent = Math.toRadians(saaApparent);
 
-        PixelPos pixelPos = new PixelPos(x + 0.5f, y + 0.5f);
-        final GeoPos geoPos = geoCoding.getGeoPos(pixelPos, null);
-
-        final double aNorth = computeNorthDirection(x, y, sourceFlagTile);
-        double cloudDistanceMax = checkDistanceInDirection(saaApparent, aNorth, x, y, sourceFlagTile.getHeight(),
-                sourceFlagTile.getWidth(), geoPos);
-
-        //cloudHeightMax as function of center pixel Lat.
-        double cloudDistanceMax2 = cloudHeightMax / tanSza;
-        if (cloudDistanceMax > cloudDistanceMax2) cloudDistanceMax = cloudDistanceMax2;
-        if (cloudDistanceMax*tanSza < 300.){
-            //lower boundary of clouds (300m minimum); if lower, no calculation of shadow from that position.
-            return false;
-        }
+        double cloudDistanceMax = cloudHeightMax / tanSza;
 
 
         GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, saaRadApparent + Math.PI);
         PixelPos endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
-        if (endPixPoint.x == -1 || endPixPoint.y == -1) {
-            return false;
+        if (!endPixPoint.isValid()) {
+            double cloudDistanceMin = 300. / tanSza;
+            //compute distance with scene intersection, approximation
+            final int width = sourceFlagTile.getWidth();
+            final int height = sourceFlagTile.getHeight();
+            double beta_North_rad = 0.;
+            if (x - x0 > 4 && x - x0 < width - 4) {
+                //estimation of North direction against -y-axis (y increases downwards)
+                if (saa > 90. && saa < 270.) { //approximation for a decision on the pixel grid, Sun in South
+                    if (y - y0 > 10) {
+                        PixelPos pixelPos1 = new PixelPos(x + 0.5f - 4.f, y + 0.5f - 10.f);
+                        PixelPos pixelPos2 = new PixelPos(x + 0.5f + 4.f, y + 0.5f - 10.f);
+                        GeoPos geoPos1 = geoCoding.getGeoPos(pixelPos1, null);
+                        GeoPos geoPos2 = geoCoding.getGeoPos(pixelPos2, null);
+                        double XN = (geoPos.lon - geoPos2.lon) / (geoPos1.lon - geoPos2.lon) * (-8.) + 4.;
+                        beta_North_rad = Math.atan(XN / 10.);
+                    } else {
+                        return false;
+                    }
+                } else if (saa < 90. || saa > 270.) {//approximation for a decision on the pixel grid, Sun in North
+                    if (y - y0 < height - 10) {
+                        PixelPos pixelPos1 = new PixelPos(x + 0.5f - 4.f, y + 0.5f + 10.f);
+                        PixelPos pixelPos2 = new PixelPos(x + 0.5f + 4.f, y + 0.5f + 10.f);
+                        GeoPos geoPos1 = geoCoding.getGeoPos(pixelPos1, null);
+                        GeoPos geoPos2 = geoCoding.getGeoPos(pixelPos2, null);
+                        double XN = (geoPos.lon - geoPos2.lon) / (geoPos1.lon - geoPos2.lon) * (-8.) + 4.;
+                        beta_North_rad = Math.atan(-XN / 10.);
+                    } else {
+                        return false;
+                    }
+                }
+
+                double resolution = 300.;
+                double X_max = x + cloudDistanceMax / resolution * Math.sin(saaRadApparent + beta_North_rad);
+                double Y_max = y + cloudDistanceMax / resolution * (-1.) * Math.cos(saaRadApparent + beta_North_rad);
+
+                double x_test;
+                double y_test;
+                double newDistance = 0.0;
+                if (X_max < 0) { //at x_test=0
+                    x_test = 0.;
+                    y_test = (Y_max - (y - y0)) / (X_max - (x - x0)) * (x_test - (x - x0)) + (y - y0);
+                    if (y_test >= 0 && y_test < height)
+                        newDistance = Math.sqrt(Math.pow((y_test - (y - y0)), 2.) + Math.pow((x_test - (x - x0)), 2.));
+                }
+                if (X_max > width) {
+                    x_test = width - 1.;
+                    y_test = (Y_max - (y - y0)) / (X_max - (x - x0)) * (x_test - (x - x0)) + (y - y0);
+                    if (y_test >= 0 && y_test < height)
+                        newDistance = Math.sqrt(Math.pow((y_test - (y - y0)), 2.) + Math.pow((x_test - (x - x0)), 2.));
+                }
+                if (Y_max < 0) {
+                    y_test = 0.;
+                    x_test = (X_max - (x - x0)) / (Y_max - (y - x0)) * (y_test - (y - x0)) + (x - x0);
+                    if (x_test >= 0 && x_test < width)
+                        newDistance = Math.sqrt(Math.pow((y_test - (y - y0)), 2.) + Math.pow((x_test - (x - x0)), 2.));
+                }
+                if (Y_max > height) {
+                    y_test = height - 1.;
+                    x_test = (X_max - (x - x0)) / (Y_max - (y - y0)) * (y_test - (y - y0)) + (x - x0);
+                    if (x_test >= 0 && x_test < width)
+                        newDistance = Math.sqrt(Math.pow((y_test - (y - y0)), 2.) + Math.pow((x_test - (x - x0)), 2.));
+                }
+
+                distTile.setSample(x, y, newDistance * resolution);
+
+                if (newDistance * resolution < cloudDistanceMin) {
+                    return false;
+                }else {
+                    endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, newDistance, saaRadApparent + Math.PI);
+                    endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
+                    return endPixPoint.isValid();
+                }
+            } else {
+                return false;
+            }
         }
+
         final int endPointX = (int) Math.round(endPixPoint.x);
         final int endPointY = (int) Math.round(endPixPoint.y);
         java.util.List<PixelPos> pathPixels = Bresenham.getPathPixels(x, y, endPointX, endPointY, sourceRectangle);

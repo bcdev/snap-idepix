@@ -3,11 +3,13 @@ package org.esa.snap.idepix.olci;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.gpf.*;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
@@ -18,7 +20,7 @@ import org.esa.snap.idepix.core.operators.CloudBuffer;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +37,8 @@ import java.util.Map;
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Refines the OLCI pixel classification over both land and water.")
 public class IdepixOlciPostProcessOp extends Operator {
+
+    private static final int CLOUD_TOP_MAX = 12000;
 
     @Parameter(defaultValue = "true",
             label = " Compute a cloud buffer",
@@ -78,13 +82,13 @@ public class IdepixOlciPostProcessOp extends Operator {
     private TiePointGrid slpTPG;
     private TiePointGrid[] temperatureProfileTPGs;
     private Band altBand;
+    private Band distanceBand;
     private Band mountainShadowFlagBand;
 
     private GeoCoding geoCoding;
 
     private RectangleExtender rectExtender;
 
-    private static int maxcloudTop = 12000;
 
     @Override
     public void initialize() throws OperatorException {
@@ -101,15 +105,18 @@ public class IdepixOlciPostProcessOp extends Operator {
 
         origCloudFlagBand = olciCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
 
+        ProductUtils.copyBand("distance", olciCloudProduct, postProcessedCloudProduct, true);
+        distanceBand = postProcessedCloudProduct.getBand("distance");
+
         szaTPG = l1bProduct.getTiePointGrid("SZA");
         saaTPG = l1bProduct.getTiePointGrid("SAA");
         ozaTPG = l1bProduct.getTiePointGrid("OZA");
         oaaTPG = l1bProduct.getTiePointGrid("OAA");
         slpTPG = l1bProduct.getTiePointGrid("sea_level_pressure");
+        altBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_ALTITUDE_BAND_NAME);
 
         final Band latBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_LATITUDE_BAND_NAME);
         final Band lonBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_LONGITUDE_BAND_NAME);
-        altBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_ALTITUDE_BAND_NAME);
 
         temperatureProfileTPGs = new TiePointGrid[IdepixOlciConstants.referencePressureLevels.length];
         for (int i = 0; i < IdepixOlciConstants.referencePressureLevels.length; i++) {
@@ -132,10 +139,6 @@ public class IdepixOlciPostProcessOp extends Operator {
 
         if (computeCloudShadow) {
             ctpBand = ctpProduct.getBand("ctp");
-            final GeoPos centerGeoPos =
-                    getCenterGeoPos(l1bProduct.getSceneGeoCoding(), l1bProduct.getSceneRasterWidth(),
-                            l1bProduct.getSceneRasterHeight());
-            maxcloudTop = setCloudTopHeight(centerGeoPos.getLat());
         }
 
         int cloudShadowExtent = l1bProduct.getName().contains("FR____") ? 64 : 16;
@@ -153,17 +156,6 @@ public class IdepixOlciPostProcessOp extends Operator {
                 ProductUtils.copyBand(bandName, source, target, true);
             }
         }
-    }
-
-    private GeoPos getCenterGeoPos(GeoCoding geoCoding, int width, int height) {
-        final PixelPos centerPixelPos = new PixelPos(0.5 * width + 0.5,
-                0.5 * height + 0.5);
-        return geoCoding.getGeoPos(centerPixelPos, null);
-    }
-
-    private int setCloudTopHeight(double lat) {
-        double absLat = Math.abs(lat);
-        return (int) Math.ceil(0.5 * Math.pow(90. - absLat, 2.) + (90. - absLat) * 25 + 5000);
     }
 
     @Override
@@ -205,6 +197,7 @@ public class IdepixOlciPostProcessOp extends Operator {
             Tile ctpTile = getSourceTile(ctpBand, srcRectangle);
             Tile slpTile = getSourceTile(slpTPG, srcRectangle);
             Tile altTile = getSourceTile(altBand, targetRectangle);
+            Tile distanceTile = getSourceTile(distanceBand, targetRectangle);
 
             Tile[] temperatureProfileTPGTiles = new Tile[temperatureProfileTPGs.length];
             for (int i = 0; i < temperatureProfileTPGTiles.length; i++) {
@@ -219,7 +212,7 @@ public class IdepixOlciPostProcessOp extends Operator {
                     ozaTile, oaaTile,
                     ctpTile, slpTile,
                     temperatureProfileTPGTiles,
-                    altTile, maxcloudTop);
+                    altTile, distanceTile, CLOUD_TOP_MAX);
             cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
         }
 
@@ -239,22 +232,6 @@ public class IdepixOlciPostProcessOp extends Operator {
         int sourceFlags = sourceFlagTile.getSampleInt(x, y);
         int computedFlags = targetTile.getSampleInt(x, y);
         targetTile.setSample(x, y, sourceFlags | computedFlags);
-    }
-
-    public static boolean isPixelSurrounded_2Flags(int x, int y, Tile sourceFlagTile, int pixelFlag, int pixelFlagNOT,
-                                                   int buffer) {
-        // check if pixel is surrounded by other pixels flagged as 'pixelFlag' and not 'pixelFlagNOT'
-        int surroundingPixelCount = 0;
-        Rectangle rectangle = sourceFlagTile.getRectangle();
-        for (int i = x - buffer; i <= x + buffer; i++) {
-            for (int j = y - buffer; j <= y + buffer; j++) {
-                if (rectangle.contains(i, j) && sourceFlagTile.getSampleBit(i, j, pixelFlag) &&
-                        !sourceFlagTile.getSampleBit(i, j, pixelFlagNOT)) {
-                    surroundingPixelCount++;
-                }
-            }
-        }
-        return (surroundingPixelCount > 0);
     }
 
     /**
