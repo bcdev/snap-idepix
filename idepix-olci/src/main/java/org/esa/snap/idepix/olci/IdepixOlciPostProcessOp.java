@@ -53,7 +53,7 @@ public class IdepixOlciPostProcessOp extends Operator {
 
     @Parameter(defaultValue = "false",
             label = " Compute cloud shadow",
-            description = " Compute cloud shadow with latest 'fronts' algorithm. Requires CTP.")
+            description = " Compute cloud shadow with latest 'fronts' algorithm. Requires CTP product.")
     private boolean computeCloudShadow;
 
     @SourceProduct(alias = "l1b")
@@ -62,7 +62,8 @@ public class IdepixOlciPostProcessOp extends Operator {
     @SourceProduct(alias = "olciCloud")
     private Product olciCloudProduct;
 
-    @SourceProduct(alias = "ctp", optional = true)
+    @SourceProduct(alias = "ctp", optional = true,
+    description = "Must contain a band with the name 'ctp'.")
     private Product ctpProduct;
 
     private Band origCloudFlagBand;
@@ -79,7 +80,7 @@ public class IdepixOlciPostProcessOp extends Operator {
 
     private GeoCoding geoCoding;
 
-    private RectangleExtender rectCalculator;
+    private RectangleExtender rectExtender;
 
     @Override
     public void initialize() throws OperatorException {
@@ -89,6 +90,10 @@ public class IdepixOlciPostProcessOp extends Operator {
                 true);
 
         geoCoding = l1bProduct.getSceneGeoCoding();
+
+        if (computeCloudShadow && (ctpProduct == null || !ctpProduct.containsBand("ctp"))) {
+            throw new OperatorException("Cloud shadow computation needs a CTP product containing a band named 'ctp'.");
+        }
 
         origCloudFlagBand = olciCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
 
@@ -108,9 +113,6 @@ public class IdepixOlciPostProcessOp extends Operator {
                     l1bProduct.getTiePointGrid("atmospheric_temperature_profile_pressure_level_" + (i + 1));
         }
 
-        rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
-                l1bProduct.getSceneRasterHeight()), cloudBufferWidth, cloudBufferWidth);
-
         if (computeMountainShadow) {
             ensureBandsAreCopied(l1bProduct, olciCloudProduct, latBand.getName(), lonBand.getName(), altBand.getName());
             Map<String, Object> mntShadowParams = new HashMap<>();
@@ -124,23 +126,14 @@ public class IdepixOlciPostProcessOp extends Operator {
                     IdepixOlciMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
         }
 
-        if (computeCloudShadow && ctpProduct != null) {
+        if (computeCloudShadow) {
             ctpBand = ctpProduct.getBand("ctp");
-            int extendedWidth;
-            int extendedHeight;
-            if (l1bProduct.getName().contains("FR____")) {
-                extendedWidth = 64;     // todo: check these values
-                extendedHeight = 64;
-            } else {
-                extendedWidth = 16;
-                extendedHeight = 16;
-            }
-            rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
-                    l1bProduct.getSceneRasterHeight()),
-                    extendedWidth, extendedHeight
-            );
         }
 
+        int cloudShadowExtent = l1bProduct.getName().contains("FR____") ? 64 : 16;
+        int extent = computeCloudShadow ? cloudShadowExtent : computeCloudBuffer ? cloudBufferWidth : 0;
+        rectExtender = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
+                l1bProduct.getSceneRasterHeight()), extent, extent);
 
         ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, olciCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
@@ -157,7 +150,7 @@ public class IdepixOlciPostProcessOp extends Operator {
     @Override
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Rectangle targetRectangle = targetTile.getRectangle();
-        final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
+        final Rectangle srcRectangle = rectExtender.extend(targetRectangle);
 
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
 
@@ -185,7 +178,7 @@ public class IdepixOlciPostProcessOp extends Operator {
             }
         }
 
-        if (computeCloudShadow && ctpProduct != null) {
+        if (computeCloudShadow) {
             Tile szaTile = getSourceTile(szaTPG, srcRectangle);
             Tile saaTile = getSourceTile(saaTPG, srcRectangle);
             Tile ozaTile = getSourceTile(ozaTPG, srcRectangle);
