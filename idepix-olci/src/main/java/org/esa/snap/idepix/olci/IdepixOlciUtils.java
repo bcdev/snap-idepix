@@ -61,6 +61,8 @@ class IdepixOlciUtils {
         flagCoding.addFlag("IDEPIX_MOUNTAIN_SHADOW", BitSetter.setFlag(0,
                         IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW),
                 IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_WATER_PROCESSABLE", BitSetter.setFlag(0, IdepixOlciConstants.IDEPIX_WATER_PROCESSABLE),
+                IdepixOlciConstants.IDEPIX_WATER_PROCESSABLE_DESCR_TEXT);
         return flagCoding;
     }
 
@@ -74,13 +76,16 @@ class IdepixOlciUtils {
 
         int w = classifProduct.getSceneRasterWidth();
         int h = classifProduct.getSceneRasterHeight();
-        Mask mask;
         Random r = new Random(1234567);
 
-        mask = Mask.BandMathsType.create("IDEPIX_MOUNTAIN_SHADOW", IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT, w, h,
+        classifProduct.getMaskGroup().add(index,
+                Mask.BandMathsType.create("IDEPIX_MOUNTAIN_SHADOW", IdepixOlciConstants.IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT, w, h,
                 "pixel_classif_flags.IDEPIX_MOUNTAIN_SHADOW",
-                IdepixFlagCoding.getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index, mask);
+                IdepixFlagCoding.getRandomColour(r), 0.5f));
+        classifProduct.getMaskGroup().add(index,
+                Mask.BandMathsType.create("IDEPIX_WATER_PROCESSABLE", IdepixOlciConstants.IDEPIX_WATER_PROCESSABLE_DESCR_TEXT, w, h,
+                "pixel_classif_flags.IDEPIX_WATER_PROCESSABLE",
+                IdepixFlagCoding.getRandomColour(r), 0.5f));
     }
 
     static void addOlciRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
@@ -95,6 +100,18 @@ class IdepixOlciUtils {
         }
     }
 
+    static void addOlciRbrrBands(Product rBRRProduct, Product targetProduct) {
+        String [] rBrrBandNumber = new String[]{"01", "04", "06", "08", "17"};
+        for (String s : rBrrBandNumber) {
+            String bandname = "rBRR_" + s;
+            if (!targetProduct.containsBand(bandname)) {
+                ProductUtils.copyBand(bandname, rBRRProduct, targetProduct, true);
+                targetProduct.getBand(bandname).setUnit("");
+            }
+
+        }
+    }
+
     static Product computeRadiance2ReflectanceProduct(Product sourceProduct) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("sensor", Sensor.OLCI);
@@ -102,7 +119,24 @@ class IdepixOlciUtils {
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
     }
 
-    static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct, String alternativeNNDirPath, boolean outputCtp) {
+    static Product computeRayleighCorrectedProduct(Product sourceProduct) {
+        Map<String, Product> raylSourceProducts = new HashMap<>();
+        raylSourceProducts.put("sourceProduct", sourceProduct);
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("sourceBandNames", "Oa01_radiance,Oa04_radiance,Oa06_radiance,Oa08_radiance,Oa17_radiance");
+        params.put("computeTaur", false);
+        params.put("computeRBrr", true);
+        params.put("computeRtoaNg", false);
+        params.put("computeRtoa", false);
+        params.put("addAirMass", false);
+
+        return GPF.createProduct("RayleighCorrection", params, raylSourceProducts);
+    }
+
+
+    static Product computeCloudTopPressureProduct(Product sourceProduct, Product o2CorrProduct,
+                                                  String alternativeNNDirPath, boolean outputCtp) {
         Map<String, Product> ctpSourceProducts = new HashMap<>();
         ctpSourceProducts.put("sourceProduct", sourceProduct);
         ctpSourceProducts.put("o2CorrProduct", o2CorrProduct);

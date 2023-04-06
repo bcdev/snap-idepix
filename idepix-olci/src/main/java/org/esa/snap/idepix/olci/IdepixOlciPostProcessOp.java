@@ -162,7 +162,7 @@ public class IdepixOlciPostProcessOp extends Operator {
                     boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     combineFlags(x, y, sourceFlagTile, targetTile);
                     if (isCloud) {
-                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);   // necessary??
+                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                     }
                 }
             }
@@ -221,6 +221,124 @@ public class IdepixOlciPostProcessOp extends Operator {
         int computedFlags = targetTile.getSampleInt(x, y);
         targetTile.setSample(x, y, sourceFlags | computedFlags);
     }
+
+    public static  boolean isPixelSurrounded_2Flags(int x, int y, Tile sourceFlagTile, int pixelFlag, int pixelFlagNOT,
+                                             int buffer) {
+        // check if pixel is surrounded by other pixels flagged as 'pixelFlag' and not 'pixelFlagNOT'
+        int surroundingPixelCount = 0;
+        Rectangle rectangle = sourceFlagTile.getRectangle();
+        for (int i = x - buffer; i <= x + buffer; i++) {
+            for (int j = y - buffer; j <= y + buffer; j++) {
+                if (rectangle.contains(i, j) && sourceFlagTile.getSampleBit(i, j, pixelFlag) &&
+                    !sourceFlagTile.getSampleBit(i, j, pixelFlagNOT)) {
+                    surroundingPixelCount++;
+                }
+            }
+        }
+        return (surroundingPixelCount>0);
+    }
+
+    private boolean isCoastalZone(Tile sourceFlagTile, int x, int y, Integer bufferValue){
+        int buffer = bufferValue != null ? bufferValue : 3; //default value 3 for dilation 7x7
+        // check if in window is at least one, but not all of them.
+        int pixelCount = 0;
+        int sizeRectangle = 0;
+        Rectangle rectangle = sourceFlagTile.getRectangle();
+        for (int i = x - buffer; i <= x + buffer; i++) {
+            for (int j = y - buffer; j <= y + buffer; j++) {
+                if (rectangle.contains(i, j)){
+                    sizeRectangle++;
+                    if (sourceFlagTile.getSampleBit(i, j, IdepixOlciConstants.L1_F_LAND) &&
+                            !sourceFlagTile.getSampleBit(i, j, IdepixOlciConstants.L1_F_FRESH_INLAND_WATER)) {
+                        pixelCount++;
+                    }
+                }
+
+            }
+        }
+        return (pixelCount>0 && pixelCount < sizeRectangle);
+    }
+
+    private float getDistanceToShoreORCloud(int x, int y, Tile sourceFlagTile, Integer bufferValue){
+        int buffer = bufferValue != null ? bufferValue : 7; //
+        // find minimum distance in window from LAND or CLOUD to central pixel, which is processable water.
+        double maxDist = (double) buffer * Math.sqrt(2.);
+        double pixelDist = maxDist;
+
+        Rectangle rectangle = sourceFlagTile.getRectangle();
+        boolean noLandCloudFound = true;
+        for (int bf = 1; bf <= buffer; bf++) {
+            for (int i = x - bf; i <= x + bf; i++) {
+                int ix = i;
+                int iy = y + bf;
+                if (rectangle.contains(ix, iy)) { //oben
+                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
+                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
+                        if (thisDist < pixelDist){
+                            pixelDist = thisDist;
+                        }
+                    }
+                }
+                ix = i;
+                iy = y - bf;
+                if (rectangle.contains(ix, iy)) { //unten
+                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
+                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
+                        if (thisDist < pixelDist){
+                            pixelDist = thisDist;
+                        }
+                    }
+                }
+                ix = x - bf;
+                iy = i;
+                if (rectangle.contains(ix, iy)) { //links
+                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
+                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
+                        if (thisDist < pixelDist){
+                            pixelDist = thisDist;
+                        }
+                    }
+                }
+                ix = x + bf;
+                iy = i;
+                if (rectangle.contains(ix, iy)) { //rechts
+                    if (CloudOrLandTest(ix, iy, sourceFlagTile)){
+                        double thisDist = Math.sqrt(Math.pow(x-ix,2) + Math.pow(y-iy, 2));
+                        if (thisDist < pixelDist){
+                            pixelDist = thisDist;
+                        }
+                    }
+                }
+            }
+            if (pixelDist < maxDist){
+                break;
+            }
+        }
+        return (float)pixelDist;
+    }
+
+    private boolean CloudOrLandTest(int ix, int iy, Tile sourceFlagTile){
+        return sourceFlagTile.getSampleBit(ix, iy, IdepixConstants.IDEPIX_LAND) || sourceFlagTile.getSampleBit(ix, iy, IdepixConstants.IDEPIX_CLOUD);
+    }
+
+    private void refineCloudFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile, Rectangle srcRectangle) {
+        final int windowWidth = 2;
+        final int LEFT_BORDER = Math.max(x - windowWidth, srcRectangle.x);
+        final int RIGHT_BORDER = Math.min(x + windowWidth, srcRectangle.x + srcRectangle.width - 1);
+        final int TOP_BORDER = Math.max(y - windowWidth, srcRectangle.y);
+        final int BOTTOM_BORDER = Math.min(y + windowWidth, srcRectangle.y + srcRectangle.height - 1);
+        boolean removeCloudFlag = true;
+        if (isPixelSurrounded_2Flags(x, y, sourceFlagTile, IdepixConstants.IDEPIX_CLOUD, IdepixOlciConstants.L1_F_COASTLINE, windowWidth)) {
+            removeCloudFlag = false;
+        }
+
+        if (removeCloudFlag) {
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+        }
+    }
+
 
     /**
      * The Service Provider Interface (SPI) for the operator.
