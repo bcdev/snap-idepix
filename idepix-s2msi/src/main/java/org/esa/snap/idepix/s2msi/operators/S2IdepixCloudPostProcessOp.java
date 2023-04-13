@@ -496,7 +496,6 @@ public class S2IdepixCloudPostProcessOp extends Operator {
     }
 
     private static double variance_of(double c, double m, int n) {
-        //return n == 0 ? Double.NaN : n == 1 ? 0.0 : (c - m * m / n) / (n - 1);  // seems JNI uses different formula
         return n == 0 ? Double.NaN : n == 1 ? 0.0 : (c - m * m / n) / n;
     }
 

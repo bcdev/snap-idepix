@@ -113,22 +113,14 @@ class IdepixMerisUtils {
     }
 
     static double computeApparentSaa(double sza, double saa, double oza, double oaa) {
-        final double szaRad = sza * MathUtils.DTOR;
-        final double ozaRad = oza * MathUtils.DTOR;
-
-        double deltaPhi;
-        if (oaa < 0.0) {
-            deltaPhi = 360.0 - Math.abs(oaa) - saa;
-        } else {
-            deltaPhi = saa - oaa;
-        }
-        final double deltaPhiRad = deltaPhi * MathUtils.DTOR;
-        final double numerator = Math.tan(szaRad) - Math.tan(ozaRad) * Math.cos(deltaPhiRad);
-        final double denominator = Math.sqrt(Math.tan(ozaRad) * Math.tan(ozaRad) + Math.tan(szaRad) * Math.tan(szaRad) -
-                2.0 * Math.tan(szaRad) * Math.tan(ozaRad) * Math.cos(deltaPhiRad));
-
+        final double tanSza = Math.tan(sza * MathUtils.DTOR);
+        final double tanOza = Math.tan(oza * MathUtils.DTOR);
+        final double cosDeltaPhi = Math.cos((saa - oaa) * MathUtils.DTOR);
+        final double numerator = tanSza - tanOza * cosDeltaPhi;
+        final double denominator = Math.sqrt(tanOza * tanOza + tanSza * tanSza -
+                2.0 * tanSza * tanOza * cosDeltaPhi);
         double delta = Math.acos(numerator / denominator);
-// Sun in the North (Southern hemisphere), change sign!
+        // Sun in the North (Southern hemisphere), change sign!
         if (saa > 270. || saa < 90){
             delta = -delta;
         }

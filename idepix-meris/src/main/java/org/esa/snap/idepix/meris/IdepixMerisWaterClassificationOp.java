@@ -368,16 +368,18 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         return (rhoGlint >= 0.2 * rhoToaTiles[12].getSampleFloat(x, y));
     }
 
-    private double computeChiW(int x, int y, Tile winduTile, Tile windvTile, Tile saaTile) {
-        final double phiw = azimuth(winduTile.getSampleFloat(x, y), windvTile.getSampleFloat(x, y));
-        /* and "scattering" angle */
-        final double arg = MathUtils.DTOR * (saaTile.getSampleFloat(x, y) - phiw);
-        return MathUtils.RTOD * (Math.acos(Math.cos(arg)));
+    static double computeChiW(double windU, double windV, double saa) {
+        final double phiw = MathUtils.RTOD * Math.atan2(windU, windV);
+        final double delta = (720.0 + saa - phiw) % 360.0;
+        if (delta > 180.0) {
+            return 360.0 - delta;
+        } else {
+            return delta;
+        }
     }
-
     private double computeRhoGlint(int x, int y, Tile winduTile, Tile windvTile,
                                    Tile szaTile, Tile vzaTile, Tile saaTile, Tile vaaTile) {
-        final double chiw = computeChiW(x, y, winduTile, windvTile, saaTile);
+        final double chiw = computeChiW(winduTile.getSampleFloat(x, y), windvTile.getSampleFloat(x, y), saaTile.getSampleFloat(x, y));
         final float vaa = vaaTile.getSampleFloat(x, y);
         final float saa = saaTile.getSampleFloat(x, y);
         final double deltaAzimuth = (float) IdepixUtils.computeAzimuthDifference(vaa, saa);
@@ -412,19 +414,6 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         final PixelPos pixelPos = new PixelPos(x, y);
         geoCoding.getGeoPos(pixelPos, geoPos);
         return geoPos;
-    }
-
-    private double azimuth(double x, double y) {
-        if (y > 0.0) {
-            // DPM #2.6.5.1.1-1
-            return (MathUtils.RTOD * Math.atan(x / y));
-        } else if (y < 0.0) {
-            // DPM #2.6.5.1.1-5
-            return (180.0 + MathUtils.RTOD * Math.atan(x / y));
-        } else {
-            // DPM #2.6.5.1.1-6
-            return (x >= 0.0 ? 90.0 : 270.0);
-        }
     }
 
     public static class Spi extends OperatorSpi {
