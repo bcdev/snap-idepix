@@ -10,9 +10,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-//import org.tensorflow.framework.MetaGraphDef;
-//import org.tensorflow.framework.NodeDef;
-
 /**
  * Applies a tensorflow model and provides corresponding NN output for given input.
  *
@@ -40,9 +37,11 @@ class TensorflowNNCalculator {
         try {
             TensorFlow.version(); // triggers init of TensorFlow
         } catch (LinkageError e) {
-            throw new IllegalStateException("TensorFlow could not be initialised. " +
-                                                    "Make sure that your CPU supports 64Bit and AVX instruction set " +
-                                                    "(Are you using a VM?) and that you have installed the Microsoft Visual C++ 2015 Redistributable when you are on windows.", e);
+            throw new IllegalStateException(
+                    "TensorFlow could not be initialised. " +
+                            "Make sure that your CPU supports 64Bit and AVX instruction set " +
+                            "(Are you using a VM?) and that you have installed the Microsoft Visual C++ 2015 " +
+                            "Redistributable when you are on windows.", e);
         }
 
         this.transformMethod = transformMethod;
@@ -92,33 +91,6 @@ class TensorflowNNCalculator {
         return lastNodeName;
     }
 
-    // package local for testing
-    // todo: actually this code requires protobuf-java in a version >= 3, which may lead to conflicts in SNAP and at Calvalus
-    // for the moment, read from the .pbtxt file with the method below
-//    void setFirstAndLastNodeNameFromBinaryProtocolBuffer(SavedModelBundle model) throws Exception {
-//        // extract names of first and last relevant nodes (i.e. name contains 'dense') from binary 'saved_model.pb'
-//        // rather than text file '*.pbtxt'. So we do not need the pbtxt in case it is very large.
-//        MetaGraphDef m = MetaGraphDef.parseFrom(model.metaGraphDef());
-//        final List<NodeDef> nodeList = m.getGraphDef().getNodeList();
-//        int index = 0;
-//        for (int i = 1; i < nodeList.size(); i++) {
-//            NodeDef nodeDefPrev = nodeList.get(i-1);
-//            NodeDef nodeDef = nodeList.get(i);
-//            if (!nodeDefPrev.getName().contains("dense") && nodeDef.getName().contains("dense")) {
-//                firstNodeName = nodeDef.getName();
-//                index = i;
-//                break;
-//            }
-//        }
-//
-//        for (int i = index; i < nodeList.size()-1; i++) {
-//            NodeDef nodeDef = nodeList.get(i);
-//            NodeDef nodeDefNext = nodeList.get(i+1);
-//            if (nodeDef.getName().contains("dense") && !nodeDefNext.getName().contains("dense")) {
-//                lastNodeName = nodeDef.getName();
-//            }
-//        }
-//    }
 
     // package local for testing
     void setFirstAndLastNodeNameFromTextProtocolBuffer() throws IOException {
@@ -185,26 +157,41 @@ class TensorflowNNCalculator {
      * @return float[][] - the converted result array
      */
     float[][] calculate(float[] nnInput) {
+        return calculate(new float[][]{nnInput});
+    }
+
+    /**
+     * Applies NN to vector of pixel band stacks and returns converted array.
+     * Functional implementation of setNnTensorInput(.) plus getNNResult().
+     * Makes sure the Tensors are closed after use.
+     * Requires that loadModel() is run once before.
+     *
+     * @param nnInput - image vector of band vectors, band vectors are input for neural net
+     * @return float[][] - image vector of output band vector (length 1)
+     */
+    float[][] calculate(float[][] nnInput) {
         if (transformMethod.equals("sqrt")) {
             for (int i = 0; i < nnInput.length; i++) {
-                nnInput[i] = (float) Math.sqrt(nnInput[i]);
+                for (int j = 0; j < nnInput[i].length; j++) {
+                    nnInput[i][j] = (float) Math.sqrt(nnInput[i][j]);
+                }
             }
         } else if (transformMethod.equals("log")) {
             for (int i = 0; i < nnInput.length; i++) {
-                nnInput[i] = (float) Math.log10(nnInput[i]);
+                for (int j = 0; j < nnInput[i].length; j++) {
+                    nnInput[i][j] = (float) Math.log10(nnInput[i][j]);
+                }
             }
         }
-        float[][] inputData = new float[1][nnInput.length];
-        inputData[0] = nnInput;
         final Session.Runner runner = model.session().runner();
         try (
-                // Tensor class implements java.lang.Autocloseable
-                Tensor<?> inputTensor = Tensor.create(inputData);
+                Tensor<?> inputTensor = Tensor.create(nnInput);
                 Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
         ) {
             long[] ts = outputTensor.shape();
-            int dimension = (int) ts[1];
-            float[][] m = new float[1][dimension];
+            int numPixels = (int) ts[0];
+            int numOutputVars = (int) ts[1];
+            float[][] m = new float[numPixels][numOutputVars];
             outputTensor.copyTo(m);
             return m;
         }
