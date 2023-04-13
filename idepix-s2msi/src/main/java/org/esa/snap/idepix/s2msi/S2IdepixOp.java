@@ -11,7 +11,6 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.dem.gpf.AddElevationOp;
-import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudPostProcess2Op;
 import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudPostProcessOp;
 import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
@@ -154,7 +153,7 @@ public class S2IdepixOp extends Operator {
         //Product cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
         //                                               paramsBuffer, input);
         paramsBuffer.put("computeCloudBuffer", computeCloudBuffer);
-        Product cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcess2Op.class),
+        Product cloudBufferProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudPostProcessOp.class),
                                                        paramsBuffer, input);
 
         int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600")) / 5;
