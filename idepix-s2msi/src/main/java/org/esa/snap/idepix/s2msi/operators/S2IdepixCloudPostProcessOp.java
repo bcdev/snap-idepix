@@ -30,8 +30,6 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
-import org.esa.snap.idepix.s2msi.CoastalCloudDistinction;
-import org.esa.snap.idepix.s2msi.UrbanCloudDistinction;
 import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
 import java.awt.Rectangle;
@@ -83,9 +81,6 @@ public class S2IdepixCloudPostProcessOp extends Operator {
     private RectangleExtender cdiRectCalculator;
     private RectangleExtender cloudBufferRectCalculator;
 
-    private CoastalCloudDistinction coastalCloudDistinction;
-    private UrbanCloudDistinction urbanCloudDistinction;
-
     private static final float COAST_BUFFER_SIZE = 1000f;  // [m]
     private static final double CDI_THRESHOLD = -0.5;
 
@@ -111,9 +106,6 @@ public class S2IdepixCloudPostProcessOp extends Operator {
         b8Band = classifiedProduct.getBand("B8");
         b8aBand = classifiedProduct.getBand("B8A");
         b11Band = classifiedProduct.getBand("B11");
-
-        coastalCloudDistinction = new CoastalCloudDistinction(classifiedProduct);
-        urbanCloudDistinction = new UrbanCloudDistinction(classifiedProduct);
 
         // add previous state for debugging, comment out in operational version
         //ProductUtils.copyBand("pixel_classif_flags", classifiedProduct,
@@ -231,10 +223,6 @@ public class S2IdepixCloudPostProcessOp extends Operator {
                     collectCdiSumsAndSquares(y, x, b7Tile, b8Tile, b8aTile, cdiRectangle, cloudBufferRectangle,
                                              m7, c7, m8, c8, n78);
                 }
-
-                // TODO cglops - is this still necessary?
-                coastalCloudDistinction.correctCloudFlag(x, y, sourceFlagTile, sourceFlagTile);
-                urbanCloudDistinction.correctCloudFlag(x, y, sourceFlagTile, sourceFlagTile);
 
                 // yt/xt is the target pixel where we have just seen the last pixel of its context
                 final int yt = y - contextRadius;
