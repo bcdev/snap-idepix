@@ -21,11 +21,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>9.0.2-SNAPSHOT</version>
+        <version>9.0.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>idepix-avhrr</artifactId>
-    <version>9.0.2-SNAPSHOT</version>
+    <version>9.0.6-SNAPSHOT</version>
     <packaging>nbm</packaging>
 
     <name>IdePix AVHRR</name>
@@ -33,7 +33,7 @@
     </description>
 
     <properties>
-        <idepix-core.version>9.0.2-SNAPSHOT</idepix-core.version>
+        <idepix-core.version>9.0.6-SNAPSHOT</idepix-core.version>
     </properties>
 
     <dependencies>
