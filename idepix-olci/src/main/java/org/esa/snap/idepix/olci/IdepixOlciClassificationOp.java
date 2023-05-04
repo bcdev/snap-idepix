@@ -402,7 +402,9 @@ public class IdepixOlciClassificationOp extends Operator {
 
     private boolean isOlciLandPixel(int x, int y, Tile olciL1bFlagTile, int waterFraction) {
         if (waterFraction < 0) {
-            return olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
+            boolean landFlag = olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
+            boolean inlandWaterFlag = olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_FRESH_INLAND_WATER);
+            return landFlag && !inlandWaterFlag;
         } else {
             // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
             if (IdepixUtils.getGeoPos(l1bProduct.getSceneGeoCoding(), x, y).lat > -58f) {
