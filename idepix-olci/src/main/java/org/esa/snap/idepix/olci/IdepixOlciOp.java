@@ -172,6 +172,12 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
+        Band distanceBand = olciIdepixProduct.addBand("distance", ProductData.TYPE_FLOAT32);
+        distanceBand.setNoDataValue(Float.NaN);
+        distanceBand.setNoDataValueUsed(true);
+        distanceBand.setUnit("m");
+        distanceBand.setDescription("Distance to scene border");
+
         if (computeCloudBuffer || computeCloudShadow) {
             postProcess(olciIdepixProduct);
         }
@@ -182,7 +188,6 @@ public class IdepixOlciOp extends BasisOp {
         if (postProcessingProduct != null) {
             Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
             cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
-            ProductUtils.copyBand("distance", postProcessingProduct, targetProduct, true);
         }
         setTargetProduct(targetProduct);
     }
