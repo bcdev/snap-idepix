@@ -129,7 +129,6 @@ public class IdepixOlciOp extends BasisOp {
     private Product rad2reflProduct;
     private Product ctpProduct;
     private Product o2CorrProduct;
-    private Product rBrrProduct;
 
     private Map<String, Product> classificationInputProducts;
     private Map<String, Object> classificationParameters;
@@ -171,7 +170,7 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
-        if (computeCloudBuffer || computeCloudShadow) {
+        if (computeCloudBuffer || computeMountainShadow || computeCloudShadow) {
             postProcess(olciIdepixProduct);
         }
 
@@ -209,8 +208,6 @@ public class IdepixOlciOp extends BasisOp {
             IdepixOlciUtils.addOlciRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
         }
 
-        IdepixOlciUtils.addOlciRbrrBands(rBrrProduct, targetProduct);
-
         if (outputSchillerNNValue) {
             ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
         }
@@ -225,7 +222,6 @@ public class IdepixOlciOp extends BasisOp {
 
     private void preProcess() {
         rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
-        rBrrProduct = IdepixOlciUtils.computeRayleighCorrectedProduct(sourceProduct);
 
         if (considerCloudsOverSnow) {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
@@ -267,7 +263,6 @@ public class IdepixOlciOp extends BasisOp {
         classificationInputProducts = new HashMap<>();
         classificationInputProducts.put("l1b", sourceProduct);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
-        classificationInputProducts.put("rBRR", rBrrProduct);
         if (considerCloudsOverSnow) {
             classificationInputProducts.put("o2Corr", o2CorrProduct);
         }
