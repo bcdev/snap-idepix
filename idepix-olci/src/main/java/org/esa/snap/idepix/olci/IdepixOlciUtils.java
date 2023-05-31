@@ -100,6 +100,18 @@ class IdepixOlciUtils {
         }
     }
 
+    static void addOlciRbrrBands(Product rBRRProduct, Product targetProduct) {
+        String[] rBrrBandNumber = new String[]{"01", "04", "06", "08", "17"};
+        for (String s : rBrrBandNumber) {
+            String bandname = "rBRR_" + s;
+            if (!targetProduct.containsBand(bandname)) {
+                ProductUtils.copyBand(bandname, rBRRProduct, targetProduct, true);
+                targetProduct.getBand(bandname).setUnit("");
+            }
+
+        }
+    }
+
     static Product computeRadiance2ReflectanceProduct(Product sourceProduct) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("sensor", Sensor.OLCI);

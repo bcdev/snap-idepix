@@ -2,7 +2,6 @@ package org.esa.snap.idepix.olci;
 
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -172,12 +171,6 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
-        Band distanceBand = olciIdepixProduct.addBand("distance", ProductData.TYPE_FLOAT32);
-        distanceBand.setNoDataValue(Float.NaN);
-        distanceBand.setNoDataValueUsed(true);
-        distanceBand.setUnit("m");
-        distanceBand.setDescription("Distance to scene border");
-
         if (computeCloudBuffer || computeCloudShadow) {
             postProcess(olciIdepixProduct);
         }
@@ -215,6 +208,8 @@ public class IdepixOlciOp extends BasisOp {
         if (outputRad2Refl) {
             IdepixOlciUtils.addOlciRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
         }
+
+        IdepixOlciUtils.addOlciRbrrBands(rBrrProduct, targetProduct);
 
         if (outputSchillerNNValue) {
             ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
