@@ -45,6 +45,11 @@ public class IdepixMerisPostProcessOp extends Operator {
             description = " Compute cloud shadow with latest 'fronts' algorithm")
     private boolean computeCloudShadow;
 
+    @Parameter(defaultValue = "true",
+            label = " Refine pixel classification near coastlines",
+            description = "Refine pixel classification near coastlines. ")
+    private boolean refineClassificationNearCoastlines;
+
     @SourceProduct(alias = "l1b")
     private Product l1bProduct;
     @SourceProduct(alias = "merisCloud")
@@ -145,12 +150,22 @@ public class IdepixMerisPostProcessOp extends Operator {
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
                 if (targetRectangle.contains(x, y)) {
+                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     combineFlags(x, y, sourceFlagTile, targetTile);
 
-                    if (isCoastalFromLandFlag(sourceFlagTile, x, y)) {
-                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, true);
+                    if (refineClassificationNearCoastlines) {
+                        if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
+                            targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, true);
+                            // this causes problems for 'coastlines' over frozen inland lakes (OD 20200421)
+                            // todo: this is a conflict between master and CGLOPS
+//                            refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
+                            if (isCloud) {
+                                refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, waterFractionTile, targetTile, srcRectangle);
+                            }
+                        }
                     }
-                    if (targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD)) {
+                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+                    if (isCloudAfterRefinement) {
                         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                     }
                 }
@@ -214,6 +229,7 @@ public class IdepixMerisPostProcessOp extends Operator {
         targetTile.setSample(x, y, sourceFlags | computedFlags);
     }
 
+
     private boolean isNearCoastline(int x, int y, Tile waterFractionTile, Rectangle rectangle) {
         final int windowWidth = 1;
         final int LEFT_BORDER = Math.max(x - windowWidth, rectangle.x);
@@ -241,23 +257,40 @@ public class IdepixMerisPostProcessOp extends Operator {
         return false;
     }
 
-    private boolean isCoastalFromLandFlag(Tile flagTile, int x, int y){
-        int buffer = 1;
-        int pixelCount = 0;
-        int sizeRectangle = 0;
-        Rectangle rectangle = flagTile.getRectangle();
-        for (int i = x - buffer; i <= x + buffer; i++) {
-            for (int j = y - buffer; j <= y + buffer; j++) {
-                if (rectangle.contains(i, j)){
-                    sizeRectangle++;
-                    if (flagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_LAND)) {
-                        pixelCount++;
+    private void refineCloudFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile waterFractionTile, Tile targetTile, Rectangle srcRectangle) {
+        final int windowWidth = 1;
+        final int LEFT_BORDER = Math.max(x - windowWidth, srcRectangle.x);
+        final int RIGHT_BORDER = Math.min(x + windowWidth, srcRectangle.x + srcRectangle.width - 1);
+        final int TOP_BORDER = Math.max(y - windowWidth, srcRectangle.y);
+        final int BOTTOM_BORDER = Math.min(y + windowWidth, srcRectangle.y + srcRectangle.height - 1);
+        boolean removeCloudFlag = true;
+        if (CloudShadowFronts.isPixelSurrounded(x, y, sourceFlagTile, IdepixConstants.IDEPIX_CLOUD)) {
+            removeCloudFlag = false;
+        } else {
+            Rectangle targetTileRectangle = targetTile.getRectangle();
+            for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
+                for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
+                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.IDEPIX_CLOUD);
+                    if (is_cloud && targetTileRectangle.contains(i, j) && !isNearCoastline(i, j, waterFractionTile, srcRectangle)) {
+                        removeCloudFlag = false;
+                        break;
                     }
                 }
-
             }
         }
-        return (pixelCount>0 && pixelCount < sizeRectangle && flagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND));
+
+        if (removeCloudFlag) {
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+        }
+    }
+
+    private void refineSnowIceFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile) {
+        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
+        if (isSnowIce) {
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+        }
     }
 
     public static class Spi extends OperatorSpi {

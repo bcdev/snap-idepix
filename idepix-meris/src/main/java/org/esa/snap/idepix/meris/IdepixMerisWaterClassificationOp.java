@@ -54,7 +54,6 @@ public class IdepixMerisWaterClassificationOp extends Operator {
     private Band cloudFlagBand;
     private Band landWaterBand;
     private Band nnOutputBand;
-    private Band[] rBRRBands;
 
     @SourceProduct(alias = "l1b")
     private Product l1bProduct;
@@ -62,8 +61,6 @@ public class IdepixMerisWaterClassificationOp extends Operator {
     private Product rhoToaProduct;
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
-    @SourceProduct(alias = "rBRR", optional = true)
-    private Product rBRRProduct;
 
     @TargetProduct
     private Product targetProduct;
@@ -121,19 +118,8 @@ public class IdepixMerisWaterClassificationOp extends Operator {
 
         landWaterBand = waterMaskProduct.getBand("land_water_fraction");
 
-        setrBRRBands();
-
         rectExtender = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
                 l1bProduct.getSceneRasterHeight()), 1, 1);
-    }
-
-    private void setrBRRBands() {
-        rBRRBands = new Band[5];
-
-        String [] rBRRBandname = new String[]{"01", "03", "05", "07", "13"};
-        for (int i = 0; i < rBRRBandname.length; i++) {
-            rBRRBands[i] = rBRRProduct.getBand("rBRR_"  + rBRRBandname[i]);
-        }
     }
 
     private void readSchillerNets() {
@@ -178,11 +164,6 @@ public class IdepixMerisWaterClassificationOp extends Operator {
                 rhoToaTiles[i] = getSourceTile(rhoToaBand, sourceRectangle);
             }
 
-            Tile[] rBRRTiles = new Tile[rBRRBands.length];
-            for (int i = 0; i < rBRRBands.length; i++) {
-                rBRRTiles[i] = getSourceTile(rBRRBands[i], sourceRectangle);
-            }
-
             Tile l1FlagsTile = getSourceTile(l1bProduct.getBand(EnvisatConstants.MERIS_L1B_FLAGS_DS_NAME),
                     sourceRectangle);
             Tile waterFractionTile = getSourceTile(landWaterBand, sourceRectangle);
@@ -215,17 +196,17 @@ public class IdepixMerisWaterClassificationOp extends Operator {
                         if (IdepixMerisUtils.isLandPixel(x, y, getGeoPos(x, y), l1FlagsTile, waterFraction)) {
                             if (band == cloudFlagBand) {
                                 targetTile.setSample(x, y, IdepixMerisConstants.L1_F_LAND, true);
-                                targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, true);
                             } else {
                                 targetTile.setSample(x, y, Float.NaN);
                             }
                         } else {
                             if (band == cloudFlagBand) {
-                                classifyPixel(x, y, rhoToaTiles, windUTile, windVTile, szaTile, vzaTile, saaTile, vaaTile,
-                                        targetTile, waterFraction, waterFractionTile, rBRRTiles);
+                                classifyCloud(x, y, rhoToaTiles, windUTile, windVTile, szaTile, vzaTile, saaTile, vaaTile,
+                                        targetTile, waterFraction);
                             }
                             if (outputSchillerNNValue && band == nnOutputBand) {
-                                targetTile.setSample(x, y, getMerisNNOutput(x, y, rhoToaTiles));
+                                final double[] nnOutput = getMerisNNOutput(x, y, rhoToaTiles);
+                                targetTile.setSample(x, y, nnOutput[0]);
                             }
                         }
                     } else {
@@ -238,46 +219,37 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         }
     }
 
-    private void classifyPixel(int x, int y, Tile[] rhoToaTiles, Tile winduTile, Tile windvTile,
+    private void classifyCloud(int x, int y, Tile[] rhoToaTiles, Tile winduTile, Tile windvTile,
                                Tile szaTile, Tile vzaTile, Tile saaTile, Tile vaaTile, Tile targetTile,
-                               int waterFraction, Tile waterFractionTile, Tile[] rBRRTiles) {
+                               int waterFraction) {
 
-        boolean isLAND = waterFraction == 0;
-        if (isCoastalZone(waterFractionTile, x, y, 3)){
-            isLAND = isMerisLandUpdatedInCoastalZone(x, y, isLAND, targetTile, rBRRTiles
-            ); //865nm
-        }
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, isLAND);
-
-        final boolean isBright = targetTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_BRIGHT);
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, isBright);
-
-        final boolean isCoastline = isCoastalZone(waterFractionTile, x, y, 0);
+        GeoPos geoPos = getGeoPos(x, y);
+        final boolean isCoastline = IdepixMerisUtils.isCoastlinePixel(geoPos, waterFraction);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, isCoastline);
 
         boolean is_glint_risk = !isCoastline &&
                 isGlintRisk(x, y, rhoToaTiles, winduTile, windvTile, szaTile, vzaTile, saaTile, vaaTile);
 
-        GeoPos geoPos = getGeoPos(x, y);
         final boolean classifiedAsLakeSeaIce = isPixelClassifiedAsLakeSeaIce(geoPos);
         // glint makes sense only if we have no sea ice
         is_glint_risk = is_glint_risk && !classifiedAsLakeSeaIce;
 
         boolean isCloudSure = false;
 
-        double nnOutput = getMerisNNOutput(x, y, rhoToaTiles);
-        initCloudIceFlag(x, y, targetTile);
-        if (!targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID) &&
-                !targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND)) {
-            boolean isCloudAmbiguous = nnOutput > schillerNNCloudAmbiguousLowerBoundaryValue &&
-                    nnOutput <= schillerNNCloudAmbiguousSureSeparationValue;
-            if (isCloudAmbiguous) {
+        double[] nnOutput = getMerisNNOutput(x, y, rhoToaTiles);
+        if (!targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
+            if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
+                    nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue) {
                 // this would be as 'CLOUD_AMBIGUOUS'...
                 targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
                 targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
             }
             // check for snow_ice separation below if needed, first set all to cloud
-            isCloudSure = nnOutput > schillerNNCloudAmbiguousSureSeparationValue;
+            isCloudSure = nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue;
             if (isCloudSure) {
                 // this would be as 'CLOUD_SURE'...
                 targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
@@ -285,7 +257,7 @@ public class IdepixMerisWaterClassificationOp extends Operator {
             }
 
             if (ignoreSeaIceClimatology || classifiedAsLakeSeaIce) {
-                if (nnOutput > schillerNNCloudSureSnowSeparationValue) {
+                if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue) {
                     // this would be as 'SNOW/ICE'...
                     targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
                     targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
@@ -297,69 +269,16 @@ public class IdepixMerisWaterClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixMerisConstants.IDEPIX_GLINT_RISK, is_glint_risk && !isCloudSure);
     }
 
-    private void initCloudIceFlag(int x, int y, Tile targetTile){
-        if (!targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)){
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
-        }
+    private double[] getMerisNNOutput(int x, int y, Tile[] rhoToaTiles) {
+        return getMerisNNOutputImpl(x, y, rhoToaTiles, merisAllNeuralNet.get());
     }
 
-    private boolean isCoastalZone(Tile waterFractionTile, int x, int y, Integer bufferValue){
-        int buffer = bufferValue != null ? bufferValue : 3; //default value 3 for dilation 7x7
-        // check if in window is at least one, but not all of them.
-        int pixelCount = 0;
-        int sizeRectangle = 0;
-        Rectangle rectangle = waterFractionTile.getRectangle();
-        for (int i = x - buffer; i <= x + buffer; i++) {
-            for (int j = y - buffer; j <= y + buffer; j++) {
-                if (rectangle.contains(i, j)){
-                    sizeRectangle++;
-                    if (waterFractionTile.getSampleInt(i, j) > 0) {
-                        pixelCount++;
-                    }
-                }
-
-            }
-        }
-        return (pixelCount>0 && pixelCount < sizeRectangle);
-    }
-
-
-
-
-    private boolean isMerisLandUpdatedInCoastalZone(int x, int y, boolean staticLand, Tile sourceFlagTile, Tile [] rBRRTiles){
-//        LAND_updated = (staticLand and not coastline) or (staticLand and coastline and NDVI>0.07 and not quality_flags.bright) or ((coastline and staticLand and quality_flags.bright))
-//        LAND from Water: (staticLand==0 and coastline and not quality_flags.bright) and NDVI>0.07
-//        Bright beach: (rBRR_05 - rBRR_03)/(560-490) > 0 and (rBRR_03 - rBRR_01)/(490-412) > 0  and ( coastline)
-//        and rBRR_05 > 0.1
-
-        Rectangle rectangle = sourceFlagTile.getRectangle();
-        if (rectangle.contains(x, y) && !sourceFlagTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_INVALID)){
-            float ndvi = (rBRRTiles[4].getSampleFloat(x, y)-rBRRTiles[3].getSampleFloat(x, y))/
-                    (rBRRTiles[4].getSampleFloat(x, y)+rBRRTiles[3].getSampleFloat(x, y));
-            boolean bright = sourceFlagTile.getSampleBit(x, y, IdepixMerisConstants.L1_F_BRIGHT) ;
-
-            boolean land_up = (staticLand && ndvi>0.07 && !bright) || (staticLand && bright);
-            boolean land_from_water = (!staticLand && !bright) && ndvi>0.07;
-            boolean brightBeach = (rBRRTiles[2].getSampleFloat(x, y) - rBRRTiles[1].getSampleFloat(x, y)) / (560 - 490.) > 0 &&
-                    (rBRRTiles[1].getSampleFloat(x, y) - rBRRTiles[0].getSampleFloat(x, y)) / (490 - 412) > 0 &&
-                    rBRRTiles[2].getSampleFloat(x, y) > 0.1 && ndvi > 0.;
-
-            return land_up || land_from_water || brightBeach;
-        } else {
-            return staticLand;
-        }
-    }
-
-    private double getMerisNNOutput(int x, int y, Tile[] rhoToaTiles) {
-        SchillerNeuralNetWrapper nnWrapper = merisAllNeuralNet.get();
+    private double[] getMerisNNOutputImpl(int x, int y, Tile[] rhoToaTiles, SchillerNeuralNetWrapper nnWrapper) {
         double[] nnInput = nnWrapper.getInputVector();
         for (int i = 0; i < nnInput.length; i++) {
             nnInput[i] = Math.sqrt(rhoToaTiles[i].getSampleFloat(x, y));
         }
-        return nnWrapper.getNeuralNet().calc(nnInput)[0];
+        return nnWrapper.getNeuralNet().calc(nnInput);
     }
 
     private boolean isGlintRisk(int x, int y, Tile[] rhoToaTiles, Tile winduTile, Tile windvTile,
