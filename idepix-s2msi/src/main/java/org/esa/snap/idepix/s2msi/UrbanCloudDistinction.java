@@ -163,17 +163,21 @@ public class UrbanCloudDistinction {
 
     }
 
+    public float getCdiValue(int x, int y) {
+        return cdiBand.getSampleFloat(x, y);
+    }
+
 
     /**
      * Adds debug band to the target product.
      */
-    public void addDebugBandsToTargetProduct() {
-        ucd_oldCloud_debug = s2ClassifProduct.addBand("__ucd_oldCloud__", ProductData.TYPE_INT8);
+    public void addDebugBandsToTargetProduct(Product targetProduct) {
+        ucd_oldCloud_debug = targetProduct.addBand("__ucd_oldCloud__", ProductData.TYPE_INT8);
         ucd_oldCloud_debug.ensureRasterData();
-        ucd_cdi_debug = s2ClassifProduct.addBand("__ucd_cdi__", ProductData.TYPE_FLOAT32);
+        ucd_cdi_debug = targetProduct.addBand("__ucd_cdi__", ProductData.TYPE_FLOAT32);
         ucd_cdi_debug.setNoDataValue(Float.NaN);
         ucd_cdi_debug.ensureRasterData();
-        ucd_cloudMean11_debug = s2ClassifProduct.addBand("__ucd_cloudMean11__", ProductData.TYPE_FLOAT32);
+        ucd_cloudMean11_debug = targetProduct.addBand("__ucd_cloudMean11__", ProductData.TYPE_FLOAT32);
         ucd_cloudMean11_debug.setNoDataValue(Float.NaN);
         ucd_cloudMean11_debug.ensureRasterData();
         debugBandsEnabled = true;

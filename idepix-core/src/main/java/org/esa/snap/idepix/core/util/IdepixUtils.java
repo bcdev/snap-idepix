@@ -147,6 +147,15 @@ public class IdepixUtils {
      * @return the azimuth difference [degree]
      */
     public static double computeAzimuthDifference(final double vaa, final double saa) {
+        final double delta = (720.0 + vaa - saa) % 360.0;
+        if (delta > 180.0) {
+            return 360.0 - delta;
+        } else {
+            return delta;
+        }
+    }
+
+    public static double computeAzimuthDifference1(final double vaa, final double saa) {
         return MathUtils.RTOD * Math.acos(Math.cos(MathUtils.DTOR * (vaa - saa)));
     }
 }

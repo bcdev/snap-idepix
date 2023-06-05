@@ -139,8 +139,11 @@ public class CtpOp extends BasisOp {
 
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        if (!"ctp".equals(targetBand.getName())) {
+            throw new OperatorException("Unexpected target band name: '" + targetBand.getName() + "' - exiting.");
+        }
+
         final Rectangle targetRectangle = targetTile.getRectangle();
-        final String targetBandName = targetBand.getName();
 
         final Tile szaTile = getSourceTile(szaBand, targetRectangle);
         final Tile ozaTile = getSourceTile(ozaBand, targetRectangle);
@@ -154,6 +157,8 @@ public class CtpOp extends BasisOp {
 
         final Tile l1FlagsTile = getSourceTile(sourceProduct.getRasterDataNode("quality_flags"), targetRectangle);
 
+        float[][] nnInputs = new float[targetRectangle.height * targetRectangle.width][];
+        float[] dummyNnInput = new float[7];
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
@@ -180,22 +185,33 @@ public class CtpOp extends BasisOp {
                     final float tra15 = tra15Tile.getSampleFloat(x, y);
                     final float mLogTra15 = (float) -Math.log(tra15);
 
-                    float[] nnInput = new float[]{cosSza, cosOza, aziDiff, refl12, mLogTra13, mLogTra14, mLogTra15};
-                    final float[][] nnResult = nnCalculator.calculate(nnInput);
-                    final float ctp = TensorflowNNCalculator.convertNNResultToCtp(nnResult[0][0]);
+                    float[] nnInput = new float[] {cosSza, cosOza, aziDiff, refl12, mLogTra13, mLogTra14, mLogTra15};
+                    //final float[][] nnResult = nnCalculator.calculate(nnInput);
+                    //final float ctp = TensorflowNNCalculator.convertNNResultToCtp(nnResult[0][0]);
+                    //targetTile.setSample(x, y, ctp);
+                    nnInputs[(y-targetRectangle.y) * targetRectangle.width + (x-targetRectangle.x)] = nnInput;
+                } else {
+                    //targetTile.setSample(x, y, Float.NaN);
+                    nnInputs[(y-targetRectangle.y) * targetRectangle.width + (x-targetRectangle.x)] = dummyNnInput;
+                }
+            }
+        }
 
-                    if (targetBandName.equals("ctp")) {
-                        targetTile.setSample(x, y, ctp);
-                    } else {
-                        throw new OperatorException("Unexpected target band name: '" +
-                                                            targetBandName + "' - exiting.");
-                    }
+        // call tensorflow once with the complete tile stack
+        final float[][] nnResult = nnCalculator.calculate1(nnInputs);
+
+        // convert output of tf into ctp and set value into target tile
+        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+            checkForCancellation();
+            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                final boolean pixelIsValid = !l1FlagsTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
+                if (pixelIsValid) {
+                    targetTile.setSample(x, y, TensorflowNNCalculator.convertNNResultToCtp(nnResult[(y-targetRectangle.y) * targetRectangle.width + (x-targetRectangle.x)][0]));
                 } else {
                     targetTile.setSample(x, y, Float.NaN);
                 }
             }
         }
-
     }
 
     private void preProcess() {

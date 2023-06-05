@@ -154,9 +154,9 @@ public class IdepixMerisSlopeAspectOrientationOp extends Operator {
                     final float vza = viewZenithAngleTile.getSampleFloat(x, y);
                     final float vaa = viewAzimuthAngleTile.getSampleFloat(x, y);
                     final float saa = sunAzimuthAngleTile.getSampleFloat(x, y);
-                    if (x == 2783 && y == 642) {
-                        System.out.println("x, y = " + x + ", " + y);  // small subset, shadow
-                    }
+//                    if (x == 2783 && y == 642) {
+//                        System.out.println("x, y = " + x + ", " + y);  // small subset, shadow
+//                    }
                     final float[] latitudeDataMacropixel =
                             SlopeAspectOrientationUtils.get3x3MacropixelData(latitudeTile, y, x);
                     final float[] longitudeDataMacropixel =
