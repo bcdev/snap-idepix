@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.olci;
 
+import com.bc.ceres.binding.ValueRange;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.snap.core.datamodel.Band;
@@ -24,19 +25,27 @@ import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.IdepixUtils;
 import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.watermask.operator.WatermaskClassifier;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
 import java.awt.Rectangle;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.util.Calendar;
 import java.util.Map;
 
 import static org.esa.snap.idepix.core.IdepixConstants.*;
+import static org.esa.snap.idepix.olci.IdepixOlciCloudNNInterpreter.NNThreshold;
 
 /**
  * OLCI pixel classification operator.
@@ -75,11 +84,15 @@ public class IdepixOlciClassificationOp extends Operator {
             label = " Alternative NN file")
     private File alternativeNNFile;
 
-    @Parameter(defaultValue = "false",
-            description = "Check for sea/lake ice also outside Sea Ice Climatology area.",
-            label = "Check for sea/lake ice also outside Sea Ice Climatology area"
-    )
-    private boolean ignoreSeaIceClimatology;
+    @Parameter(description = "Alternative NN thresholds file. " +
+            "If set, it MUST follow format as used in default '11x10x4x3x2_207.9-thresholds.json. ",
+            label = " Alternative NN thresholds file")
+    private File alternativeNNThresholdsFile;
+
+    @Parameter(defaultValue = "true",
+            description = "Restrict NN test for sea/lake ice to ice climatology area.",
+            label = "Use sea/lake ice climatology as filter")
+    private boolean useLakeAndSeaIceClimatology;
 
     @Parameter(defaultValue = "false",
             label = " Use SRTM Land/Water mask",
@@ -111,6 +124,7 @@ public class IdepixOlciClassificationOp extends Operator {
     private Band trans13Band;
 
     private static final String OLCI_ALL_NET_NAME = "11x10x4x3x2_207.9.net";
+    private static final String DEFAULT_NN_THRESHOLDS_FILE = "11x10x4x3x2_207.9-thresholds.json";
 
     private static final double THRESH_LAND_MINBRIGHT1 = 0.3;
     private static final double THRESH_LAND_MINBRIGHT2 = 0.25;  // test OD 20170411
@@ -134,8 +148,9 @@ public class IdepixOlciClassificationOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         setBands();
-        nnInterpreter = IdepixOlciCloudNNInterpreter.create();
         readSchillerNeuralNets();
+        readNNThresholds();
+        nnInterpreter = IdepixOlciCloudNNInterpreter.create();
         createTargetProduct();
         if (useSrtmLandWaterMask) {
             try {
@@ -168,6 +183,28 @@ public class IdepixOlciClassificationOp extends Operator {
             throw new OperatorException("Cannot read specified alternative Neural Net - please check!", e);
         }
         olciAllNeuralNet = SchillerNeuralNetWrapper.create(olciAllInputStream);
+    }
+
+    void readNNThresholds() {
+        try (Reader r = alternativeNNThresholdsFile != null
+                ? new FileReader(alternativeNNThresholdsFile)
+                : new InputStreamReader(getClass().getResourceAsStream(DEFAULT_NN_THRESHOLDS_FILE))) {
+            Map<String, Object> m = (JSONObject) JSONValue.parse(r);
+            for (NNThreshold t : NNThreshold.values()) {
+                if (m.containsKey(t.name())) {
+                    t.range = new ValueRange((Double) ((JSONArray) m.get(t.name())).get(0),
+                                             (Double) ((JSONArray) m.get(t.name())).get(1),
+                                             true,
+                                             false);
+                } else {
+                    t.range = new ValueRange(0.0, 0.0,true, false);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            throw new OperatorException("cannot find NN thresholds file " + alternativeNNThresholdsFile, e);
+        } catch (Exception e) {
+            throw new OperatorException("error reading NN thresholds file " + alternativeNNThresholdsFile, e);
+        }
     }
 
     private InputStream getNNInputStream() throws IOException {
@@ -308,7 +345,7 @@ public class IdepixOlciClassificationOp extends Operator {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, cloudAmbiguous || cloudSure);
 
             final GeoPos geoPos = IdepixUtils.getGeoPos(l1bProduct.getSceneGeoCoding(), x, y);
-            final boolean checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsLakeSeaIce(geoPos);
+            final boolean checkForSeaIce = !useLakeAndSeaIceClimatology || isPixelClassifiedAsLakeSeaIce(geoPos);
             if (checkForSeaIce && nnInterpreter.isSnowIce(nnOutput)) {
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);

@@ -85,6 +85,11 @@ public class IdepixOlciOp extends BasisOp {
             label = " Alternative NN file")
     private File alternativeNNFile;
 
+    @Parameter(description = "Alternative NN thresholds file. " +
+            "If set, it MUST follow format as used in default '11x10x4x3x2_207.9-thresholds.json. ",
+            label = " Alternative NN thresholds file")
+    private File alternativeNNThresholdsFile;
+
     @Parameter(defaultValue = "true", label = " Compute mountain shadow")
     private boolean computeMountainShadow;
 
@@ -100,7 +105,7 @@ public class IdepixOlciOp extends BasisOp {
     @Parameter(description = "Path to alternative tensorflow neuronal net directory for CTP retrieval " +
             "Use this to replace the standard neuronal net 'nn_training_20190131_I7x30x30x30xO1'.",
             label = "Path to alternative NN for CTP retrieval")
-    private String alternativeNNDirPath;
+    private String alternativeCtpNNDir;
 
     @Parameter(defaultValue = "false",
             label = " If cloud shadow is computed, write CTP value to the target product",
@@ -115,6 +120,11 @@ public class IdepixOlciOp extends BasisOp {
             label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
+    @Parameter(defaultValue = "true",
+            description = "Restrict NN test for sea/lake ice to ice climatology area.",
+            label = "Use sea/lake ice climatology as filter"
+    )
+    private boolean useLakeAndSeaIceClimatology;
 
     @Parameter(defaultValue = "false",
             label = " Use SRTM Land/Water mask",
@@ -239,7 +249,7 @@ public class IdepixOlciOp extends BasisOp {
         if (computeCloudShadow) {
             ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
                     o2CorrProduct,
-                    alternativeNNDirPath,
+                                                                        alternativeCtpNNDir,
                     outputCtp);
         }
 
@@ -250,7 +260,9 @@ public class IdepixOlciOp extends BasisOp {
         classificationParameters.put("copyAllTiePoints", true);
         classificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
         classificationParameters.put("alternativeNNFile", alternativeNNFile);
+        classificationParameters.put("alternativeNNThresholdsFile", alternativeNNThresholdsFile);
         classificationParameters.put("useSrtmLandWaterMask", useSrtmLandWaterMask);
+        classificationParameters.put("useLakeAndSeaIceClimatology", useLakeAndSeaIceClimatology);
     }
 
     private void computeCloudProduct() {

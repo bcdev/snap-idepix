@@ -61,7 +61,7 @@ public class CtpOp extends BasisOp {
     @Parameter(description = "Path to alternative tensorflow neuronal net directory. Use this to replace the standard " +
             "neuronal net 'nn_training_20190131_I7x30x30x30x10x2xO1'.",
             label = "Path to alternative NN to use")
-    private String alternativeNNDirPath;
+    private String alternativeCtpNNDir;
 
     static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x30x30x30x10x2xO1";
 
@@ -95,10 +95,10 @@ public class CtpOp extends BasisOp {
         }
 
         String modelDir = auxdataPath + File.separator + CtpOp.DEFAULT_TENSORFLOW_NN_DIR_NAME;
-        if (alternativeNNDirPath != null && !alternativeNNDirPath.isEmpty()) {
-            final File alternativeNNDir = new File(alternativeNNDirPath);
+        if (alternativeCtpNNDir != null && !alternativeCtpNNDir.isEmpty()) {
+            final File alternativeNNDir = new File(alternativeCtpNNDir);
             if (alternativeNNDir.isDirectory()) {
-                modelDir = alternativeNNDirPath;
+                modelDir = alternativeCtpNNDir;
             }
         }
 
