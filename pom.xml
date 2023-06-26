@@ -22,15 +22,14 @@
     <name>snap-idepix</name>
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-idepix</artifactId>
-<!--    <version>8.0.2-SNAPSHOT</version>-->
-    <version>8.0.2wvcci</version>
+    <version>8.0.10-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>SNAP IdePix Parent project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>8.0.6</snap.version>
+        <snap.version>8.0.10-SNAPSHOT</snap.version>
         <netbeans.version>RELEASE82</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
     </properties>

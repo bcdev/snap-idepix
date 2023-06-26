@@ -21,12 +21,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>8.0.2-SNAPSHOT</version>
+        <version>8.0.10-SNAPSHOT</version>
     </parent>
 
     <artifactId>idepix-core</artifactId>
-<!--    <version>8.0.2-SNAPSHOT</version>-->
-    <version>8.0.2wvcci</version>
+    <version>8.0.10-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
 

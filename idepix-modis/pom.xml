@@ -22,11 +22,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>8.0.2-SNAPSHOT</version>
+        <version>8.0.10-SNAPSHOT</version>
     </parent>
 
     <artifactId>idepix-modis</artifactId>
-    <version>8.0.2wvcci</version>
+    <version>8.0.10-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
 
@@ -34,16 +34,15 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from MODIS.</description>
 
     <properties>
-        <idepix.version>8.0.2-SNAPSHOT</idepix.version>
-        <idepix-core.version>8.0.2wvcci</idepix-core.version>
-        <s3tbx.version>8.0.6</s3tbx.version>
+        <idepix.version>8.0.10-SNAPSHOT</idepix.version>
+        <s3tbx.version>8.0.7-SNAPSHOT</s3tbx.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
-            <version>${idepix-core.version}</version>
+            <version>${idepix.version}</version>
         </dependency>
 
         <dependency>
