@@ -81,12 +81,16 @@ public class IdepixOlciOp extends BasisOp {
     private boolean outputSchillerNNValue;
 
     @Parameter(description = "Alternative NN file. " +
-            "If set, it MUST follow format and input/output as used in default '11x10x4x3x2_207.9.net. ",
+            "If set, it MUST follow format and input/output used in default " +
+            "'class-sequential-i21x42x8x4x2o1-5489.net'. " +
+            "('11x10x4x3x2_207.9.net' has been default until June 2023.)",
             label = " Alternative NN file")
     private File alternativeNNFile;
 
     @Parameter(description = "Alternative NN thresholds file. " +
-            "If set, it MUST follow format as used in default '11x10x4x3x2_207.9-thresholds.json. ",
+            "If set, it MUST follow format used in default " +
+            "'class-sequential-i21x42x8x4x2o1-5489-thresholds.json'. " +
+            "('11x10x4x3x2_207.9-thresholds.json' has been default until June 2023.)",
             label = " Alternative NN thresholds file")
     private File alternativeNNThresholdsFile;
 
@@ -120,8 +124,8 @@ public class IdepixOlciOp extends BasisOp {
             label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
-    @Parameter(defaultValue = "true",
-            description = "Restrict NN test for sea/lake ice to ice climatology area.",
+    @Parameter(defaultValue = "false",
+            description = "Restrict NN test for sea/lake ice to ice climatology area. This parameter has changed its default value!",
             label = "Use sea/lake ice climatology as filter"
     )
     private boolean useLakeAndSeaIceClimatology;
@@ -249,7 +253,7 @@ public class IdepixOlciOp extends BasisOp {
         if (computeCloudShadow) {
             ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
                     o2CorrProduct,
-                                                                        alternativeCtpNNDir,
+                    alternativeCtpNNDir,
                     outputCtp);
         }
 
