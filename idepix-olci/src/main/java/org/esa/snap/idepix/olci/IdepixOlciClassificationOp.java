@@ -80,12 +80,16 @@ public class IdepixOlciClassificationOp extends Operator {
     private boolean outputSchillerNNValue;
 
     @Parameter(description = "Alternative NN file. " +
-            "If set, it MUST follow format and input/output as used in default '11x10x4x3x2_207.9.net. ",
+            "If set, it MUST follow format and input/output used in default " +
+            "'class-sequential-i21x42x8x4x2o1-5489.net'. " +
+            "('11x10x4x3x2_207.9.net' has been default until June 2023.)",
             label = " Alternative NN file")
     private File alternativeNNFile;
 
     @Parameter(description = "Alternative NN thresholds file. " +
-            "If set, it MUST follow format as used in default '11x10x4x3x2_207.9-thresholds.json. ",
+            "If set, it MUST follow format used in default " +
+            "'class-sequential-i21x42x8x4x2o1-5489-thresholds.json'. " +
+            "('11x10x4x3x2_207.9-thresholds.json' has been default until June 2023.)",
             label = " Alternative NN thresholds file")
     private File alternativeNNThresholdsFile;
 
@@ -123,8 +127,10 @@ public class IdepixOlciClassificationOp extends Operator {
     private Band surface13Band;
     private Band trans13Band;
 
-    private static final String OLCI_ALL_NET_NAME = "11x10x4x3x2_207.9.net";
-    private static final String DEFAULT_NN_THRESHOLDS_FILE = "11x10x4x3x2_207.9-thresholds.json";
+    private static final String OLCI_2018_NET_NAME = "11x10x4x3x2_207.9.net";
+    private static final String OLCI_2018_NN_THRESHOLDS_FILE = "11x10x4x3x2_207.9-thresholds.json";
+    private static final String OLCI_202306_NET_NAME = "class-sequential-i21x42x8x4x2o1-5489.net";
+    private static final String OLCI_202306_NN_THRESHOLDS_FILE = "class-sequential-i21x42x8x4x2o1-5489-thresholds.json";
 
     private static final double THRESH_LAND_MINBRIGHT1 = 0.3;
     private static final double THRESH_LAND_MINBRIGHT2 = 0.25;  // test OD 20170411
@@ -186,9 +192,11 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     void readNNThresholds() {
-        try (Reader r = alternativeNNThresholdsFile != null
-                ? new FileReader(alternativeNNThresholdsFile)
-                : new InputStreamReader(getClass().getResourceAsStream(DEFAULT_NN_THRESHOLDS_FILE))) {
+        try (Reader r = alternativeNNThresholdsFile == null
+                ? new InputStreamReader(getClass().getResourceAsStream(OLCI_202306_NN_THRESHOLDS_FILE))
+                : OLCI_2018_NN_THRESHOLDS_FILE.equals(alternativeNNThresholdsFile.getName())
+                ? new InputStreamReader(getClass().getResourceAsStream(OLCI_2018_NN_THRESHOLDS_FILE))
+                : new FileReader(alternativeNNThresholdsFile)) {
             Map<String, Object> m = (JSONObject) JSONValue.parse(r);
             for (NNThreshold t : NNThreshold.values()) {
                 if (m.containsKey(t.name())) {
@@ -208,10 +216,12 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private InputStream getNNInputStream() throws IOException {
-        if (alternativeNNFile != null) {
-            return Files.newInputStream(alternativeNNFile.toPath());
+        if (alternativeNNFile == null) {
+            return getClass().getResourceAsStream(OLCI_202306_NET_NAME);
+        } else if (OLCI_2018_NET_NAME.equals(alternativeNNFile.getName())) {
+            return getClass().getResourceAsStream(OLCI_2018_NET_NAME);
         } else {
-            return getClass().getResourceAsStream(OLCI_ALL_NET_NAME);
+            return Files.newInputStream(alternativeNNFile.toPath());
         }
     }
 

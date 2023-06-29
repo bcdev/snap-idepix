@@ -14,6 +14,6 @@ public class IdepixOlciClassificationOpTest extends TestCase {
         final IdepixOlciClassificationOp operator = (IdepixOlciClassificationOp) new IdepixOlciClassificationOp.Spi().createOperator();
         operator.readNNThresholds();
         assertEquals(0.0, IdepixOlciCloudNNInterpreter.NNThreshold.CLEAR_SNOW_ICE_BOUNDS.range.getMin());
-        assertEquals(3.85, IdepixOlciCloudNNInterpreter.NNThreshold.SPATIAL_MIXED_BOUNDS_LAND.range.getMax());
+        assertEquals(4.79, IdepixOlciCloudNNInterpreter.NNThreshold.SPATIAL_MIXED_BOUNDS_LAND.range.getMax());
     }
 }
