@@ -79,14 +79,14 @@ public class IdepixOlciClassificationOp extends Operator {
             description = " If applied, write Schiller NN value to the target product ")
     private boolean outputSchillerNNValue;
 
-    @Parameter(description = "Alternative NN file. " +
+    @Parameter(description = "Alternative pixel classification NN file. " +
             "If set, it MUST follow format and input/output used in default " +
             "'class-sequential-i21x42x8x4x2o1-5489.net'. " +
             "('11x10x4x3x2_207.9.net' has been default until June 2023.)",
             label = " Alternative NN file")
     private File alternativeNNFile;
 
-    @Parameter(description = "Alternative NN thresholds file. " +
+    @Parameter(description = "Alternative pixel classification NN thresholds file. " +
             "If set, it MUST follow format used in default " +
             "'class-sequential-i21x42x8x4x2o1-5489-thresholds.json'. " +
             "('11x10x4x3x2_207.9-thresholds.json' has been default until June 2023.)",
@@ -192,7 +192,8 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     void readNNThresholds() {
-        try (Reader r = alternativeNNThresholdsFile == null
+        try (Reader r = alternativeNNThresholdsFile == null ||
+                OLCI_202306_NN_THRESHOLDS_FILE.equals(alternativeNNThresholdsFile.getName())
                 ? new InputStreamReader(getClass().getResourceAsStream(OLCI_202306_NN_THRESHOLDS_FILE))
                 : OLCI_2018_NN_THRESHOLDS_FILE.equals(alternativeNNThresholdsFile.getName())
                 ? new InputStreamReader(getClass().getResourceAsStream(OLCI_2018_NN_THRESHOLDS_FILE))
@@ -216,7 +217,7 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private InputStream getNNInputStream() throws IOException {
-        if (alternativeNNFile == null) {
+        if (alternativeNNFile == null || OLCI_202306_NET_NAME.equals(alternativeNNFile.getName())) {
             return getClass().getResourceAsStream(OLCI_202306_NET_NAME);
         } else if (OLCI_2018_NET_NAME.equals(alternativeNNFile.getName())) {
             return getClass().getResourceAsStream(OLCI_2018_NET_NAME);
