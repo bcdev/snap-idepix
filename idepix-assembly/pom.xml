@@ -5,13 +5,13 @@
     <parent>
         <artifactId>snap-idepix</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>9.0.6-SNAPSHOT</version>
+        <version>9.0.6</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>idepix-assembly</artifactId>
-    <version>9.0.6-SNAPSHOT</version>
+    <version>9.0.6</version>
     <packaging>nbm</packaging>
 
     <description>Collects NBM modules in one directory for uploading to SNAP repository</description>
@@ -21,81 +21,81 @@
         <!--                                <dependency>-->
         <!--                                    <groupId>org.esa.snap</groupId>-->
         <!--                                    <artifactId>idepix-avhrr</artifactId>-->
-        <!--                                    <version>9.0.6-SNAPSHOT</version>-->
+        <!--                                    <version>9.0.6</version>-->
         <!--                                    <type>nbm</type>-->
         <!--                                </dependency>-->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
-            <version>9.0.6-SNAPSHOT</version>
+            <version>9.0.6</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-landsat8</artifactId>
-            <version>9.0.6-SNAPSHOT</version>
+            <version>9.0.6</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-meris</artifactId>
-            <version>9.0.6-SNAPSHOT</version>
+            <version>9.0.6</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-modis</artifactId>
-            <version>9.0.6-SNAPSHOT</version>
+            <version>9.0.6</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-olci</artifactId>
-            <version>9.0.6-SNAPSHOT</version>
+            <version>9.0.6</version>
             <type>nbm</type>
         </dependency>
         <!-- mp: Shall not be released -->
         <!--                                <dependency>-->
         <!--                                    <groupId>org.esa.snap</groupId>-->
         <!--                                    <artifactId>idepix-olcislstr</artifactId>-->
-        <!--                                    <version>9.0.6-SNAPSHOT</version>-->
+        <!--                                    <version>9.0.6</version>-->
         <!--                                    <type>nbm</type>-->
         <!--                                </dependency>-->
         <!-- mp: Shall not be released -->
         <!--                                <dependency>-->
         <!--                                    <groupId>org.esa.snap</groupId>-->
         <!--                                    <artifactId>idepix-c3solcislstr</artifactId>-->
-        <!--                                    <version>9.0.6-SNAPSHOT</version>-->
+        <!--                                    <version>9.0.6</version>-->
         <!--                                    <type>nbm</type>-->
         <!--                                </dependency>-->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-probav</artifactId>
-            <version>9.0.6-SNAPSHOT</version>
+            <version>9.0.6</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-s2msi</artifactId>
-            <version>9.0.6-SNAPSHOT</version>
+            <version>9.0.6</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-seawifs</artifactId>
-            <version>9.0.6-SNAPSHOT</version>
+            <version>9.0.6</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-spotvgt</artifactId>
-            <version>9.0.6-SNAPSHOT</version>
+            <version>9.0.6</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-viirs</artifactId>
-            <version>9.0.6-SNAPSHOT</version>
+            <version>9.0.6</version>
             <type>nbm</type>
         </dependency>
     </dependencies>
@@ -134,74 +134,74 @@
                                 <!--                                <artifactItem>-->
                                 <!--                                    <groupId>org.esa.snap</groupId>-->
                                 <!--                                    <artifactId>idepix-avhrr</artifactId>-->
-                                <!--                                    <version>9.0.6-SNAPSHOT</version>-->
+                                <!--                                    <version>9.0.6</version>-->
                                 <!--                                    <type>nbm</type>-->
                                 <!--                                </artifactItem>-->
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-core</artifactId>
-                                    <version>9.0.6-SNAPSHOT</version>
+                                    <version>9.0.6</version>
                                     <type>nbm</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-landsat8</artifactId>
-                                    <version>9.0.6-SNAPSHOT</version>
+                                    <version>9.0.6</version>
                                     <type>nbm</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-meris</artifactId>
-                                    <version>9.0.6-SNAPSHOT</version>
+                                    <version>9.0.6</version>
                                     <type>nbm</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-modis</artifactId>
-                                    <version>9.0.6-SNAPSHOT</version>
+                                    <version>9.0.6</version>
                                     <type>nbm</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-olci</artifactId>
-                                    <version>9.0.6-SNAPSHOT</version>
+                                    <version>9.0.6</version>
                                     <type>nbm</type>
                                 </artifactItem>
                                 <!-- mp: Shall not be released yet -->
                                 <!--                                <artifactItem>-->
                                 <!--                                    <groupId>org.esa.snap</groupId>-->
                                 <!--                                    <artifactId>idepix-olcislstr</artifactId>-->
-                                <!--                                    <version>9.0.6-SNAPSHOT</version>-->
+                                <!--                                    <version>9.0.6</version>-->
                                 <!--                                    <type>nbm</type>-->
                                 <!--                                </artifactItem>-->
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-probav</artifactId>
-                                    <version>9.0.6-SNAPSHOT</version>
+                                    <version>9.0.6</version>
                                     <type>nbm</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-s2msi</artifactId>
-                                    <version>9.0.6-SNAPSHOT</version>
+                                    <version>9.0.6</version>
                                     <type>nbm</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-seawifs</artifactId>
-                                    <version>9.0.6-SNAPSHOT</version>
+                                    <version>9.0.6</version>
                                     <type>nbm</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-spotvgt</artifactId>
-                                    <version>9.0.6-SNAPSHOT</version>
+                                    <version>9.0.6</version>
                                     <type>nbm</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
                                     <artifactId>idepix-viirs</artifactId>
-                                    <version>9.0.6-SNAPSHOT</version>
+                                    <version>9.0.6</version>
                                     <type>nbm</type>
                                 </artifactItem>
                             </artifactItems>
