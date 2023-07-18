@@ -56,6 +56,11 @@ public class IdepixOlciPostProcessOp extends Operator {
             description = " Compute cloud shadow with latest 'fronts' algorithm. Requires CTP product.")
     private boolean computeCloudShadow;
 
+    @Parameter(defaultValue = "10", interval = "[1,1000]",
+            description = "The maximum distance in pixels of start and end point of cloud shadow search path.",
+            label = "Maximum distance in pixels of start and end point of cloud shadow search path")
+    private int endStartDiffXYMax;
+
     @SourceProduct(alias = "l1b")
     private Product l1bProduct;
 
@@ -201,7 +206,7 @@ public class IdepixOlciPostProcessOp extends Operator {
                     ctpTile, slpTile,
                     temperatureProfileTPGTiles,
                     altTile);
-            cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile);
+            cloudShadowFronts.computeCloudShadow(sourceFlagTile, targetTile, endStartDiffXYMax);
         }
 
         if (computeMountainShadow) {

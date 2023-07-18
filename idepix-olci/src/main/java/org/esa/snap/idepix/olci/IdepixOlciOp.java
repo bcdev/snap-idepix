@@ -106,6 +106,11 @@ public class IdepixOlciOp extends BasisOp {
             description = " Compute cloud shadow with the algorithm from 'Fronts' project")
     private boolean computeCloudShadow;
 
+    @Parameter(defaultValue = "10", interval = "[1,1000]",
+            description = "The maximum distance in pixels of start and end point of cloud shadow search path.",
+            label = "Maximum distance in pixels of start and end point of cloud shadow search path")
+    private int endStartDiffXYMax;
+
     @Parameter(description = "Path to alternative tensorflow neuronal net directory for CTP retrieval " +
             "Use this to replace the standard neuronal net 'nn_training_20190131_I7x30x30x30xO1'.",
             label = "Path to alternative NN for CTP retrieval")
@@ -294,6 +299,7 @@ public class IdepixOlciOp extends BasisOp {
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
         params.put("computeCloudShadow", computeCloudShadow);
+        params.put("endStartDiffXYMax", endStartDiffXYMax);
         params.put("computeMountainShadow", computeMountainShadow);
         params.put("mntShadowExtent", mntShadowExtent);
 

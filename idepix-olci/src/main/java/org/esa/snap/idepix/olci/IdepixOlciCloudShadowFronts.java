@@ -67,7 +67,7 @@ class IdepixOlciCloudShadowFronts {
         this.altTile = altTile;
     }
 
-    void computeCloudShadow(Tile sourceFlagTile, Tile targetTile) {
+    void computeCloudShadow(Tile sourceFlagTile, Tile targetTile, int endStartDiffXYMax) {
         final Rectangle targetRectangle = targetTile.getRectangle();
         final int h = targetRectangle.height;
         final int w = targetRectangle.width;
@@ -76,8 +76,11 @@ class IdepixOlciCloudShadowFronts {
         boolean[][] isCloudShadow = new boolean[w][h];
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
+                if (x == 100 && y == 460) {
+                    System.out.println("x,y = " + x + ", " + y);
+                }
                 if (isCloudFree(sourceFlagTile, x, y) && isNotInvalid(sourceFlagTile, x, y)) {
-                    isCloudShadow[x - x0][y - y0] = getCloudShadow(sourceFlagTile, targetTile, x, y);
+                    isCloudShadow[x - x0][y - y0] = getCloudShadow(sourceFlagTile, targetTile, x, y, endStartDiffXYMax);
                     if (isCloudShadow[x - x0][y - y0]) {
                         setCloudShadow(targetTile, x, y);
                     }
@@ -176,7 +179,7 @@ class IdepixOlciCloudShadowFronts {
         }
     }
 
-    private boolean getCloudShadow(Tile sourceFlagTile, Tile targetTile, int x, int y) {
+    private boolean getCloudShadow(Tile sourceFlagTile, Tile targetTile, int x, int y, int endStartDiffXYMax) {
 
         final Rectangle sourceRectangle = sourceFlagTile.getRectangle();
         final double sza = szaTile.getSampleDouble(x, y);
@@ -196,25 +199,45 @@ class IdepixOlciCloudShadowFronts {
         double tanSza = Math.tan(Math.toRadians(90.0 - sza));
         final double cloudHeightMax = 12_000;
         final double cloudDistanceMax = cloudHeightMax / tanSza;
+        final double cloudDistanceMin = 300.0 / tanSza;
 
         final double saaApparent = IdepixOlciUtils.computeApparentSaa(sza, saa, oza, oaa);
         final double saaRadApparent = Math.toRadians(saaApparent);
 
-
         final double azimuthAngleInRadiance = saaRadApparent + Math.PI;
         final GeoPos geoPos = geoCoding.getGeoPos(pixelPos, null);
+
+//        int endStartDiffX = 0;
+//        int endStartDiffY = 0;
+//        double cloudDistancePath = 0.0;
+//        PixelPos endPixPoint;
+//        do {
+//            cloudDistancePath += cloudDistanceMin;
+//            GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistancePath, azimuthAngleInRadiance);
+//            endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
+//            endStartDiffX = (int) Math.abs(endPixPoint.getX() - pixelPos.getX());
+//            endStartDiffY = (int) Math.abs(endPixPoint.getY() - pixelPos.getY());
+//        } while (cloudDistancePath <= cloudDistanceMax &&
+//                endStartDiffX <= endStartDiffXYMax && endStartDiffY <= endStartDiffXYMax);
+//
+//        if (!endPixPoint.isValid()) {
+//            return false;
+//        }
+
         GeoPos endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistanceMax, azimuthAngleInRadiance);
         PixelPos endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
-        int endPointX;
-        int endPointY;
-        if (!endPixPoint.isValid()) {
-            double cloudDistanceMin = 300.0 / tanSza;
+        int endStartDiffX = (int) Math.abs(endPixPoint.getX() - pixelPos.getX());
+        int endStartDiffY = (int) Math.abs(endPixPoint.getY() - pixelPos.getY());
+        if (!endPixPoint.isValid() || endStartDiffX > endStartDiffXYMax || endStartDiffY > endStartDiffXYMax) {
             double i = 1.0;
             double cloudDistancePath = cloudDistanceMax;
-            while (!endPixPoint.isValid() && cloudDistancePath > 2.0 * cloudDistanceMin) {
+            while ((!endPixPoint.isValid() && cloudDistancePath > 2.0 * cloudDistanceMin) ||
+                    endStartDiffX > endStartDiffXYMax || endStartDiffY > endStartDiffXYMax) {
                 cloudDistancePath = cloudDistanceMax - i * cloudDistanceMin;
                 endGeoPoint = CloudShadowFronts.lineWithAngle(geoPos, cloudDistancePath, azimuthAngleInRadiance);
                 endPixPoint = geoCoding.getPixelPos(endGeoPoint, null);
+                endStartDiffX = (int) Math.abs(endPixPoint.getX() - pixelPos.getX());
+                endStartDiffY = (int) Math.abs(endPixPoint.getY() - pixelPos.getY());
                 i += 1.0;
             }
 
@@ -223,8 +246,8 @@ class IdepixOlciCloudShadowFronts {
             }
         }
 
-        endPointX = (int) Math.round(endPixPoint.x);
-        endPointY = (int) Math.round(endPixPoint.y);
+        int endPointX = (int) Math.round(endPixPoint.x);
+        int endPointY = (int) Math.round(endPixPoint.y);
 
         List<PixelPos> pathPixels = Bresenham.getPathPixels(x, y, endPointX, endPointY, sourceRectangle);
 
