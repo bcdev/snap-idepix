@@ -42,6 +42,7 @@ public class IdepixConstants {
 
     public static final String NN_OUTPUT_BAND_NAME = "nn_value";
     public static final String CTP_OUTPUT_BAND_NAME = "ctp";
+    public static final String CTH_OUTPUT_BAND_NAME = "cth";
 
     private static final String VGT_RADIANCE_0_BAND_NAME = "B0";
     private static final String VGT_RADIANCE_2_BAND_NAME = "B2";

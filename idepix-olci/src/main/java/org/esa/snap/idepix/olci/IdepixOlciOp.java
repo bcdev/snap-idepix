@@ -121,6 +121,11 @@ public class IdepixOlciOp extends BasisOp {
             description = " If cloud shadow is computed, write CTP value to the target product ")
     private boolean outputCtp;
 
+    @Parameter(defaultValue = "false",
+            label = " If cloud shadow is computed, write CTH value to the target product",
+            description = " If cloud shadow is computed, write cloud top height value to the target product ")
+    private boolean outputCth;
+
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
 
@@ -199,6 +204,9 @@ public class IdepixOlciOp extends BasisOp {
         if (postProcessingProduct != null) {
             Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
             cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
+            if (computeCloudShadow && outputCth) {
+                ProductUtils.copyBand(IdepixConstants.CTH_OUTPUT_BAND_NAME, postProcessingProduct, targetProduct, true);
+            }
         }
         setTargetProduct(targetProduct);
     }
@@ -299,6 +307,7 @@ public class IdepixOlciOp extends BasisOp {
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
         params.put("computeCloudShadow", computeCloudShadow);
+        params.put("outputCth", outputCth);
         params.put("endStartDiffXYMax", endStartDiffXYMax);
         params.put("computeMountainShadow", computeMountainShadow);
         params.put("mntShadowExtent", mntShadowExtent);
