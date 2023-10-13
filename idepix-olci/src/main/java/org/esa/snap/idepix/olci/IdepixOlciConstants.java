@@ -30,6 +30,10 @@ public class IdepixOlciConstants {
     public static final String OLCI_VIEW_AZIMUTH_BAND_NAME = "OAA";
     public static final String OLCI_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME = "OAA_interp";
 
+    public static final String CSI_OUTPUT_BAND_NAME = "csi";
+    public static final String OCIMP_CSI_FINAL_BAND_NAME = "csi_ocimp_final";
+    public static final int CSI_FILTER_WINDOW_SIZE = 11;
+
     public static final double[] POLYNOM_FIT_INITIAL = new double[]{0., 0., 0.};
 
     static final String OLCI_QUALITY_FLAGS_BAND_NAME = "quality_flags";

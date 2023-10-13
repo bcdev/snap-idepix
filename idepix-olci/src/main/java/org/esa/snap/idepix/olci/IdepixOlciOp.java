@@ -76,6 +76,21 @@ public class IdepixOlciOp extends BasisOp {
     private String[] reflBandsToCopy;
 
     @Parameter(defaultValue = "false",
+            label = " Compute cloud shadow index.",
+            description = " If applied, compute cloud shadow index and write to the target product ")
+    private boolean computeCSI;
+
+    @Parameter(defaultValue = "false",
+            label = " Compute OCIMP cloud shadow.",
+            description = " If applied, compute OCIMP cloud shadow ")
+    private boolean computeOcimpCloudShadow;
+
+    @Parameter(defaultValue = "11",
+            label = " Window size for OCIMP cloud shadow computation.",
+            description = " The window size for OCIMP cloud shadow computation (must be positive and odd number ")
+    private int ocimpCloudShadowWindowSize;
+
+    @Parameter(defaultValue = "false",
             label = " Write NN value to the target product",
             description = " If applied, write NN value to the target product ")
     private boolean outputSchillerNNValue;
@@ -230,6 +245,15 @@ public class IdepixOlciOp extends BasisOp {
             ProductUtils.copyBand(IdepixConstants.CTP_OUTPUT_BAND_NAME, ctpProduct, targetProduct, true);
         }
 
+        if (computeCSI) {
+            ProductUtils.copyBand(IdepixOlciConstants.CSI_OUTPUT_BAND_NAME, postProcessingProduct, targetProduct, true);
+        }
+
+        if (computeOcimpCloudShadow) {
+//            ProductUtils.copyBand(IdepixOlciConstants.OCIMP_CLOUD_SHADOW_BAND_NAME, postProcessingProduct, targetProduct, true);
+            ProductUtils.copyBand(IdepixOlciConstants.OCIMP_CSI_FINAL_BAND_NAME, postProcessingProduct, targetProduct, true);
+        }
+
         return targetProduct;
     }
 
@@ -287,6 +311,7 @@ public class IdepixOlciOp extends BasisOp {
     private void postProcess(Product olciIdepixProduct) {
         HashMap<String, Product> input = new HashMap<>();
         input.put("l1b", sourceProduct);
+        input.put("rhotoa", rad2reflProduct);
         input.put("ctp", ctpProduct);
         input.put("olciCloud", olciIdepixProduct);
 
@@ -296,6 +321,9 @@ public class IdepixOlciOp extends BasisOp {
         params.put("computeCloudShadow", computeCloudShadow);
         params.put("computeMountainShadow", computeMountainShadow);
         params.put("mntShadowExtent", mntShadowExtent);
+        params.put("computeCSI", computeCSI);
+        params.put("computeOcimpCloudShadow", computeOcimpCloudShadow);
+        params.put("ocimpCloudShadowWindowSize", ocimpCloudShadowWindowSize);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciPostProcessOp.class),
                 params, input);
