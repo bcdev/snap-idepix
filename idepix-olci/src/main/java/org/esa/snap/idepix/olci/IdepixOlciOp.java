@@ -85,7 +85,7 @@ public class IdepixOlciOp extends BasisOp {
             description = " If applied, compute OCIMP cloud shadow ")
     private boolean computeOcimpCloudShadow;
 
-    @Parameter(defaultValue = "11",
+    @Parameter(defaultValue = "31",
             label = " Window size for OCIMP cloud shadow computation.",
             description = " The window size for OCIMP cloud shadow computation (must be positive and odd number ")
     private int ocimpCloudShadowWindowSize;
@@ -251,6 +251,7 @@ public class IdepixOlciOp extends BasisOp {
 
         if (computeOcimpCloudShadow) {
 //            ProductUtils.copyBand(IdepixOlciConstants.OCIMP_CLOUD_SHADOW_BAND_NAME, postProcessingProduct, targetProduct, true);
+            ProductUtils.copyBand(IdepixOlciConstants.OA01_MASKED_BAND_NAME, postProcessingProduct, targetProduct, true);
             ProductUtils.copyBand(IdepixOlciConstants.OCIMP_CSI_FINAL_BAND_NAME, postProcessingProduct, targetProduct, true);
         }
 

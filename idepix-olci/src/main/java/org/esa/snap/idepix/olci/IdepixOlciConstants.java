@@ -31,6 +31,7 @@ public class IdepixOlciConstants {
     public static final String OLCI_VIEW_AZIMUTH_INTERPOLATED_BAND_NAME = "OAA_interp";
 
     public static final String CSI_OUTPUT_BAND_NAME = "csi";
+    public static final String OA01_MASKED_BAND_NAME = "oa01_masked";
     public static final String OCIMP_CSI_FINAL_BAND_NAME = "csi_ocimp_final";
     public static final int CSI_FILTER_WINDOW_SIZE = 11;
 
