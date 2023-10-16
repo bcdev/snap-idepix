@@ -517,31 +517,67 @@ public class IdepixOlciPostProcessOp extends Operator {
         //                (WQSF_lsb_INVALID or  WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_SNOW_ICE)
         //                then Oa01_reflectance else NaN
         //
-        //        Loop over MxM window:
+        //        Loop over MxM window, array output for each pixel (i, j):
         //        double[][] oa01MaskedInitial = getMaskedRefl(i, j, extendedRectangle,
-        //                                       flagTile(i, j), oa01ReflTile(i, j), pca=0.0
+        //                                       flagTile(i, j), oa01ReflTile(i, j), pca=None)
 
         //        Step2: Use MxM mean filter:
         //        Oa01_filtered_initial = spatial_mean_filetring(Oa01_masked_initial)
         //
+        //        Mean over MxM window, scalar output for center pixel (x, y):
+        //        final double oa01MaskedInitialCentre = oa01MaskedInitial[csiFilterWindowSize / 2][csiFilterWindowSize / 2];
+        //        final double oa01FilteredInitial = Double.isNaN(oa01MaskedInitialCentre) ? Double.NaN :
+        //                getMean(LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER,
+        //                        extendedRectangle, cloudFlagTile, x, y, csiFilterWindowSize, oa01MaskedInitial);
 
         //        Step3: calculate CSI (Cloud and Shadow Index)
         //        CSI_initial = Oa01_masked_initial / Oa01_filtered_initial
+        //
+        //        Scalar output for center pixel (x, y):
+        //        final double csiInitial = oa01MaskedInitialCentre / oa01FilteredInitial;
 
         //        Step4: set PCA (Potential Cloud Area) using threshold
         //        PCA_mask = True if CSI_initial > 1.02 else False
+        //
+        //        Boolean output for center pixel (x, y):
+        //        final boolean isPca = csiInitial > 1.02;
+        ///////////////////
 
+
+
+        ///////////////////
         //        Step5: Mask using cloud, snow and land flags
         //                Oa01_masked = if (WQSF_lsb_WATER or WQSF_lsb_INLAND_WATER) and not
         //                (WQSF_lsb_INVALID or  WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS
         //                or WQSF_lsb_SNOW_ICE or PCA_mask)
         //                then Oa01_reflectance else NaN
+        //
+        //        Loop over MxM window, array output for each pixel (i, j):
+        //        double[][] oa01Masked = getMaskedRefl(i, j, extendedRectangle,
+        //                                       flagTile(i, j), oa01ReflTile(i, j), pca=pcaArr)
 
         //        Step6: Use MxM mean filter:
         //        Oa01_filtered = spatial_mean_filetring(Oa01_masked)
 
+        //        Mean over MxM window, scalar output for center pixel (x, y):
+        //        final double oa01MaskedCentre = oa01Masked[csiFilterWindowSize / 2][csiFilterWindowSize / 2];
+        //        final double oa01Filtered = Double.isNaN(oa01MaskedCentre) ? Double.NaN :
+        //                getMean(LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER,
+        //                        extendedRectangle, cloudFlagTile, x, y, csiFilterWindowSize, oa01Masked);
+
         //        Step7: calculate CSI (Cloud and Shadow Index)
         //        CSI = Oa01_masked / Oa01_filtered
+        //
+        //        Scalar output for center pixel (x, y):
+        //        final double csi = oa01MaskedCentre / oa01Filtered;
+        ////////////////////////
+
+        //// !!!!!!!!!! final setup:
+        ////      Extract Steps 1-3 into method computeCsi(..<signature as above>..) and call in x,y loops
+        ////      PCA is also needed for all (x, y) --> extract Step 4 into
+        ////                very simple method computePca(double csi) { return csiInitial > 1.02; } and call in x,y loops
+        ////      Then do Steps 5-7 also with computeCsi(..<signature as above>..) and call in x,y loops
+        //// !!!!!!!!!!
 
         return 0.0;
     }
