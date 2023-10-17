@@ -250,8 +250,6 @@ public class IdepixOlciOp extends BasisOp {
         }
 
         if (computeOcimpCloudShadow) {
-//            ProductUtils.copyBand(IdepixOlciConstants.OCIMP_CLOUD_SHADOW_BAND_NAME, postProcessingProduct, targetProduct, true);
-            ProductUtils.copyBand(IdepixOlciConstants.OA01_MASKED_BAND_NAME, postProcessingProduct, targetProduct, true);
             ProductUtils.copyBand(IdepixOlciConstants.OCIMP_CSI_FINAL_BAND_NAME, postProcessingProduct, targetProduct, true);
         }
 
