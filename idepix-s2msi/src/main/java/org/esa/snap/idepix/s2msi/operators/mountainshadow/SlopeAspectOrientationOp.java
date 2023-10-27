@@ -16,6 +16,7 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.idepix.s2msi.operators.cloudshadow.CloudShadowUtils;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.BorderExtender;
@@ -80,7 +81,7 @@ public class SlopeAspectOrientationOp extends Operator {
                 throw new OperatorException("Could not retrieve spatial resolution from Geo-coding");
             }
         } else {
-            throw new OperatorException("Could not retrieve spatial resolution from Geo-coding");
+            spatialResolution = S2IdepixUtils.determineResolution(sourceProduct);
         }
         elevationBand = sourceProduct.getBand(S2IdepixConstants.ELEVATION_BAND_NAME);
         if (elevationBand == null) {
@@ -114,6 +115,7 @@ public class SlopeAspectOrientationOp extends Operator {
         float[] elevationData = elevationTile.getDataBufferFloat();
         float[] sourceLatitudes = new float[(int) (sourceRectangle.getWidth() * sourceRectangle.getHeight())];
         float[] sourceLongitudes = new float[(int) (sourceRectangle.getWidth() * sourceRectangle.getHeight())];
+        if (getSourceProduct().getSceneGeoCoding() instanceof CrsGeoCoding) {
         ((CrsGeoCoding) getSourceProduct().getSceneGeoCoding()).
                 getPixels((int) sourceRectangle.getMinX(),
                         (int) sourceRectangle.getMinY(),
@@ -121,7 +123,16 @@ public class SlopeAspectOrientationOp extends Operator {
                         (int) sourceRectangle.getHeight(),
                         sourceLatitudes,
                         sourceLongitudes);
-
+        } else {
+            S2IdepixUtils.
+                    getPixels(getSourceProduct().getSceneGeoCoding(),
+                              (int) sourceRectangle.getMinX(),
+                              (int) sourceRectangle.getMinY(),
+                              (int) sourceRectangle.getWidth(),
+                              (int) sourceRectangle.getHeight(),
+                              sourceLatitudes,
+                              sourceLongitudes);
+        }
         // possible additional params for computeSlopeAndAspect
 //        final Tile saaTile = getSourceTile(saaBand, sourceRectangle, borderExtender);
 //        float[] saaData = saaTile.getDataBufferFloat();
