@@ -199,7 +199,7 @@ public class IdepixOlciOp extends BasisOp {
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
-        if (computeCloudBuffer || computeMountainShadow || computeCloudShadow) {
+        if (computeCloudBuffer || computeMountainShadow || computeCloudShadow || computeCSI || computeOcimpCloudShadow) {
             postProcess(olciIdepixProduct);
         }
 
