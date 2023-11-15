@@ -296,17 +296,6 @@ public class IdepixOlciPostProcessOp extends Operator {
                                     oa01ReflectanceTile, y, x);
                             targetTile.setSample(x, y, ocimpCsiFinalCentre);
 
-                            // instead, array-based csi and pca - perhaps this is what we want? todo: clarify with JW
-//                            final double[][] ocimpCsiFinal = getOcimpCsiFinal_2(srcExtRectangle, sourceFlagTile,
-//                                    oa01ReflectanceTile, y, x);
-//                            if (ocimpCsiFinal != null) {
-//                                final double ocimpCsiFinalCentre =
-//                                        ocimpCsiFinal[ocimpCloudShadowWindowSize / 2][ocimpCloudShadowWindowSize / 2];
-//                                targetTile.setSample(x, y, ocimpCsiFinalCentre);
-//                            } else {
-//                                targetTile.setSample(x, y, Double.NaN);
-//                            }
-
                             // We write cloud shadow index to target product. This allows further tuning in SNAP.
                             // Cloud shadow can be obtained from:
                             // isCloudShadowOcimp = (csi < CSI_THRESH)  with default CSI_THRESH = 0.98
@@ -320,8 +309,6 @@ public class IdepixOlciPostProcessOp extends Operator {
 //                            The function should return an integer (0: no CS | 1: CS)
 //
 //                            The cloud shadow code should also have a variable allowing to set the window size of the spatial-spectral method. By default this variable can be set to 33.
-
-
                         }
                     }
                 }
@@ -349,21 +336,6 @@ public class IdepixOlciPostProcessOp extends Operator {
         return computeCsi(x, y, srcExtRectangle,
                 pixelClassifFlagTile, oa01ReflectanceTile, isPca, ocimpCloudShadowWindowSize);
     }
-
-    private double[][] getOcimpCsiFinal_2(Rectangle srcExtRectangle, Tile pixelClassifFlagTile, Tile oa01ReflectanceTile, int y, int x) {
-        double[][] csi = computeCsi_2(x, y, srcExtRectangle,
-                pixelClassifFlagTile, oa01ReflectanceTile, null, ocimpCloudShadowWindowSize);
-//        return csi;
-        if (csi != null) {
-            final boolean[][] isPca = computePca_2(csi);
-//            final boolean[][] isPca = null;
-            return computeCsi_2(x, y, srcExtRectangle,
-                    pixelClassifFlagTile, oa01ReflectanceTile, isPca, ocimpCloudShadowWindowSize);
-        } else {
-            return null;
-        }
-    }
-
 
     /**
      * Provides cloud shadow index. For test purposes for cloud shadow implementation, using refl01-06.
@@ -445,6 +417,11 @@ public class IdepixOlciPostProcessOp extends Operator {
                              boolean isPca,
                              int csiFilterWindowSize) {
 
+//        if (x == 5 && y == 5) {
+        if (x == 2 && y == 9) {
+            System.out.println("x,y = " + x + ", " + y);
+        }
+
         // Do not further investigate invalid pixels
         boolean isInvalid = pixelClassifFlagTile.getSampleBit(x, y, IDEPIX_INVALID);
         if (isInvalid) {
@@ -480,63 +457,6 @@ public class IdepixOlciPostProcessOp extends Operator {
         return oa01Centre / oa01Filtered;
     }
 
-    static double[][] computeCsi_2(int x, int y,
-                                   Rectangle extendedRectangle,
-                                   Tile pixelClassifFlagTile,
-                                   Tile oa01ReflectanceTile,
-                                   boolean[][] isPca,
-                                   int csiFilterWindowSize) {
-
-        // todo: clarify if csi shall be array or scalar? This method provides array.
-        double[][] csiArr = new double[csiFilterWindowSize][csiFilterWindowSize];
-
-        // Do not further investigate invalid pixels
-        boolean isInvalid = pixelClassifFlagTile.getSampleBit(x, y, IDEPIX_INVALID);
-        if (isInvalid) {
-            return null;
-        }
-
-//        Step 1/5 : Mask using cloud, snow and land flags
-//                Oa01_masked = if (WQSF_lsb_WATER or WQSF_lsb_INLAND_WATER) and not
-//                (WQSF_lsb_INVALID or  WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_SNOW_ICE [or PCA_mask])
-//                then Oa01_reflectance else NaN
-
-        int LEFT_BORDER = Math.max(x - csiFilterWindowSize / 2, extendedRectangle.x);
-        int RIGHT_BORDER = Math.min(x + csiFilterWindowSize / 2, extendedRectangle.x + extendedRectangle.width - 1);
-        int TOP_BORDER = Math.max(y - csiFilterWindowSize / 2, extendedRectangle.y);
-        int BOTTOM_BORDER = Math.min(y + csiFilterWindowSize / 2, extendedRectangle.y + extendedRectangle.height - 1);
-
-        double[][] oa01Masked = getMaskedRefl_2(x, y,
-                LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER,
-                extendedRectangle,
-                pixelClassifFlagTile, oa01ReflectanceTile, isPca, csiFilterWindowSize);
-
-        //        Step2/6: Use MxM mean filter:
-        //        Oa01_filtered_initial = spatial_mean_filetring(Oa01_masked_initial)
-        //
-        double oa01Filtered = getMeanReflectance(x, y, LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER,
-                extendedRectangle, true,
-                pixelClassifFlagTile, csiFilterWindowSize, oa01Masked);
-
-        if (Double.isNaN(oa01Filtered)) {
-            return null;
-        }
-
-        //        Step3/7: calculate CSI (Cloud and Shadow Index)
-        //        CSI_initial = Oa01_masked_initial / Oa01_filtered_initial
-        for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
-            for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                if (extendedRectangle.contains(i, j)) {
-                    final int ix = i - x + csiFilterWindowSize / 2;
-                    final int iy = j - y + csiFilterWindowSize / 2;
-                    csiArr[ix][iy] = oa01Masked[ix][iy] / oa01Filtered;
-                }
-            }
-        }
-        return csiArr;
-    }
-
-
     /**
      * Provides potential cloud area from csi threshold
      *
@@ -545,20 +465,6 @@ public class IdepixOlciPostProcessOp extends Operator {
      */
     static boolean computePca(double csi) {
         return csi > 1.02;
-    }
-
-    static boolean[][] computePca_2(double[][] csi) {
-        if (csi != null) {
-            boolean[][] pca = new boolean[csi.length][csi[0].length];
-            for (int i = 0; i < csi.length; i++) {
-                for (int j = 0; j < csi[0].length; j++) {
-                    pca[i][j] = csi[i][j] > 1.02;
-                }
-            }
-            return pca;
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -583,6 +489,11 @@ public class IdepixOlciPostProcessOp extends Operator {
                                             Tile pixelClassifFlagTile,
                                             Tile reflectanceTile,
                                             boolean isPca, int csiFilterWindowSize) {
+//        if (x == 5 && y == 5) {
+//        if (x == 9 && y == 2) {
+        if (x == 2 && y == 9) {
+            System.out.println("x,y = " + x + ", " + y);
+        }
         double[][] oa01Masked = new double[csiFilterWindowSize][csiFilterWindowSize];
         for (int i = left_border; i <= right_border; i++) {
             for (int j = top_border; j <= bottom_border; j++) {
@@ -595,35 +506,6 @@ public class IdepixOlciPostProcessOp extends Operator {
                     final int ix = i - x + csiFilterWindowSize / 2;
                     final int jy = j - y + csiFilterWindowSize / 2;
                     if (isInvalid || isLand || isCloud || isCloudAmbiguous || isSnowIce || isPca) {
-                        oa01Masked[ix][jy] = Double.NaN;
-                    } else {
-                        oa01Masked[ix][jy] = reflectanceTile.getSampleDouble(i, j);
-                    }
-                }
-            }
-        }
-        return oa01Masked;
-    }
-
-    private static double[][] getMaskedRefl_2(int x, int y,
-                                              int left_border, int right_border, int top_border, int bottom_border,
-                                              Rectangle extendedRectangle,
-                                              Tile pixelClassifFlagTile,
-                                              Tile reflectanceTile,
-                                              boolean[][] isPca, int csiFilterWindowSize) {
-        double[][] oa01Masked = new double[csiFilterWindowSize][csiFilterWindowSize];
-        for (int i = left_border; i <= right_border; i++) {
-            for (int j = top_border; j <= bottom_border; j++) {
-                if (extendedRectangle.contains(i, j)) {
-                    final boolean isInvalid = pixelClassifFlagTile.getSampleBit(i, j, IDEPIX_INVALID);
-                    final boolean isLand = pixelClassifFlagTile.getSampleBit(i, j, IDEPIX_LAND);
-                    final boolean isCloud = pixelClassifFlagTile.getSampleBit(i, j, IDEPIX_CLOUD);
-                    final boolean isCloudAmbiguous = pixelClassifFlagTile.getSampleBit(i, j, IDEPIX_CLOUD_AMBIGUOUS);
-                    final boolean isSnowIce = pixelClassifFlagTile.getSampleBit(i, j, IDEPIX_SNOW_ICE);
-                    final int ix = i - x + csiFilterWindowSize / 2;
-                    final int jy = j - y + csiFilterWindowSize / 2;
-                    if (isInvalid || isLand || isCloud || isCloudAmbiguous || isSnowIce ||
-                            (isPca != null && isPca[ix][jy])) {
                         oa01Masked[ix][jy] = Double.NaN;
                     } else {
                         oa01Masked[ix][jy] = reflectanceTile.getSampleDouble(i, j);
@@ -658,6 +540,11 @@ public class IdepixOlciPostProcessOp extends Operator {
                                              double[][] reflArr) {
         double meanValue = 0.0;
         int validCount = 0;
+//        if (x == 5 && y == 5) {
+//        if (x == 9 && y == 2) {
+        if (x == 2 && y == 9) {
+            System.out.println("x,y = " + x + ", " + y);
+        }
         for (int i = left_border; i <= right_border; i++) {
             for (int j = top_border; j <= bottom_border; j++) {
                 if (extendedRectangle.contains(i, j)) {
