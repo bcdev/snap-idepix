@@ -292,7 +292,9 @@ public class IdepixOlciPostProcessOp extends Operator {
                     for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
                         checkForCancellation();
                         for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                            final double ocimpCsiFinalCentre = getOcimpCsiFinal(srcExtRectangle, sourceFlagTile,
+//                            final double ocimpCsiFinalCentre = getOcimpCsiFinal(srcExtRectangle, sourceFlagTile,
+//                                    oa01ReflectanceTile, y, x);
+                            final double ocimpCsiFinalCentre = getOcimpCsiFinal_2(srcExtRectangle, sourceFlagTile,
                                     oa01ReflectanceTile, y, x);
                             targetTile.setSample(x, y, ocimpCsiFinalCentre);
 
@@ -335,6 +337,19 @@ public class IdepixOlciPostProcessOp extends Operator {
 
         return computeCsi(x, y, srcExtRectangle,
                 pixelClassifFlagTile, oa01ReflectanceTile, isPca, ocimpCloudShadowWindowSize);
+    }
+
+    private double getOcimpCsiFinal_2(Rectangle srcExtRectangle, Tile pixelClassifFlagTile, Tile oa01ReflectanceTile, int y, int x) {
+        final double[][] csiArray = computeCsiArray(x, y, srcExtRectangle,
+                pixelClassifFlagTile, oa01ReflectanceTile, ocimpCloudShadowWindowSize);
+        if (csiArray != null) {
+            boolean[][] pcaMask = computePcaMask(csiArray);
+
+            return computeCsi_2(x, y, srcExtRectangle,
+                    pixelClassifFlagTile, oa01ReflectanceTile, pcaMask, ocimpCloudShadowWindowSize);
+        } else {
+            return 1.0;   // the 'neutral value', will result in no cloud shadow
+        }
     }
 
     /**
@@ -441,7 +456,7 @@ public class IdepixOlciPostProcessOp extends Operator {
         double[][] oa01Masked = getMaskedRefl(x, y,
                 LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER,
                 extendedRectangle,
-                pixelClassifFlagTile, oa01ReflectanceTile, isPca, csiFilterWindowSize);
+                pixelClassifFlagTile, oa01ReflectanceTile, null, csiFilterWindowSize);
 
         //        Step2/6: Use MxM mean filter:
         //        Oa01_filtered_initial = spatial_mean_filetring(Oa01_masked_initial)
@@ -457,6 +472,112 @@ public class IdepixOlciPostProcessOp extends Operator {
         return oa01Centre / oa01Filtered;
     }
 
+    static double computeCsi_2(int x, int y,
+                             Rectangle extendedRectangle,
+                             Tile pixelClassifFlagTile,
+                             Tile oa01ReflectanceTile,
+                             boolean[][] pcaMask,
+                             int csiFilterWindowSize) {
+
+//        if (x == 5 && y == 5) {
+        if (x == 2 && y == 9) {
+            System.out.println("x,y = " + x + ", " + y);
+        }
+
+        // Do not further investigate invalid pixels
+        boolean isInvalid = pixelClassifFlagTile.getSampleBit(x, y, IDEPIX_INVALID);
+        if (isInvalid) {
+            return Double.NaN;
+        }
+
+//        Step 1/5 : Mask using cloud, snow and land flags
+//                Oa01_masked = if (WQSF_lsb_WATER or WQSF_lsb_INLAND_WATER) and not
+//                (WQSF_lsb_INVALID or  WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_SNOW_ICE [or PCA_mask])
+//                then Oa01_reflectance else NaN
+
+        int LEFT_BORDER = Math.max(x - csiFilterWindowSize / 2, extendedRectangle.x);
+        int RIGHT_BORDER = Math.min(x + csiFilterWindowSize / 2, extendedRectangle.x + extendedRectangle.width - 1);
+        int TOP_BORDER = Math.max(y - csiFilterWindowSize / 2, extendedRectangle.y);
+        int BOTTOM_BORDER = Math.min(y + csiFilterWindowSize / 2, extendedRectangle.y + extendedRectangle.height - 1);
+
+        double[][] oa01Masked = getMaskedRefl(x, y,
+                LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER,
+                extendedRectangle,
+                pixelClassifFlagTile, oa01ReflectanceTile, pcaMask, csiFilterWindowSize);
+
+        //        Step2/6: Use MxM mean filter:
+        //        Oa01_filtered_initial = spatial_mean_filetring(Oa01_masked_initial)
+        //
+        final double oa01Centre = oa01Masked[csiFilterWindowSize / 2][csiFilterWindowSize / 2];
+        double oa01Filtered = Double.isNaN(oa01Centre) ? Double.NaN :
+                getMeanReflectance(x, y, LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER,
+                        extendedRectangle, true,
+                        pixelClassifFlagTile, csiFilterWindowSize, oa01Masked);
+
+        //        Step3/7: calculate CSI (Cloud and Shadow Index)
+        //        CSI_initial = Oa01_masked_initial / Oa01_filtered_initial
+        return oa01Centre / oa01Filtered;
+    }
+
+
+    static double[][] computeCsiArray(int x, int y,
+                                      Rectangle extendedRectangle,
+                                      Tile pixelClassifFlagTile,
+                                      Tile oa01ReflectanceTile,
+                                      int csiFilterWindowSize) {
+
+//        if (x == 5 && y == 5) {
+        if (x == 2 && y == 9) {
+            System.out.println("x,y = " + x + ", " + y);
+        }
+
+        // Do not further investigate invalid pixels
+        boolean isInvalid = pixelClassifFlagTile.getSampleBit(x, y, IDEPIX_INVALID);
+        if (isInvalid) {
+            return null;
+        }
+
+        double[][] csiArr = new double[csiFilterWindowSize][csiFilterWindowSize];
+
+//        Step 1/5 : Mask using cloud, snow and land flags
+//                Oa01_masked = if (WQSF_lsb_WATER or WQSF_lsb_INLAND_WATER) and not
+//                (WQSF_lsb_INVALID or  WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_SNOW_ICE [or PCA_mask])
+//                then Oa01_reflectance else NaN
+
+        int left_border = Math.max(x - csiFilterWindowSize / 2, extendedRectangle.x);
+        int right_border = Math.min(x + csiFilterWindowSize / 2, extendedRectangle.x + extendedRectangle.width - 1);
+        int top_border = Math.max(y - csiFilterWindowSize / 2, extendedRectangle.y);
+        int bottom_border = Math.min(y + csiFilterWindowSize / 2, extendedRectangle.y + extendedRectangle.height - 1);
+
+        double[][] oa01Masked = getMaskedRefl(x, y,
+                left_border, right_border, top_border, bottom_border,
+                extendedRectangle,
+                pixelClassifFlagTile, oa01ReflectanceTile, null, csiFilterWindowSize);
+
+        //        Step2/6: Use MxM mean filter:
+        //        Oa01_filtered_initial = spatial_mean_filetring(Oa01_masked_initial)
+        //
+        final double oa01Centre = oa01Masked[csiFilterWindowSize / 2][csiFilterWindowSize / 2];
+        double oa01Filtered = Double.isNaN(oa01Centre) ? Double.NaN :
+                getMeanReflectance(x, y, left_border, right_border, top_border, bottom_border,
+                        extendedRectangle, true,
+                        pixelClassifFlagTile, csiFilterWindowSize, oa01Masked);
+
+        for (int i = left_border; i <= right_border; i++) {
+            for (int j = top_border; j <= bottom_border; j++) {
+                if (extendedRectangle.contains(i, j)) {
+                    final int ix = i - x + csiFilterWindowSize / 2;
+                    final int jy = j - y + csiFilterWindowSize / 2;
+                    csiArr[ix][jy] = oa01Masked[ix][jy] / oa01Filtered;  // can be NaN
+                }
+            }
+        }
+
+        //        Step3/7: calculate CSI (Cloud and Shadow Index)
+        //        CSI_initial = Oa01_masked_initial / Oa01_filtered_initial
+        return csiArr;
+    }
+
     /**
      * Provides potential cloud area from csi threshold
      *
@@ -465,6 +586,16 @@ public class IdepixOlciPostProcessOp extends Operator {
      */
     static boolean computePca(double csi) {
         return csi > 1.02;
+    }
+
+    static boolean[][] computePcaMask(double[][] csiArray) {
+        boolean[][] pcaMask = new boolean[csiArray.length][csiArray[0].length];
+        for (int i = 0; i < csiArray.length; i++) {
+            for (int j = 0; j < csiArray[0].length; j++) {
+                pcaMask[i][j] = computePca(csiArray[i][j]);
+            }
+        }
+        return pcaMask;
     }
 
     /**
@@ -479,7 +610,7 @@ public class IdepixOlciPostProcessOp extends Operator {
      * @param extendedRectangle    - rectangle of extended source tile
      * @param reflectanceTile      - tile with given reflectance
      * @param pixelClassifFlagTile - tile with Idepix flag from main classification step
-     * @param isPca                - if true, pixel is potential cloud area
+     * @param pcaMask                - if true, pixel is potential cloud area
      * @param csiFilterWindowSize  - filter window size (must be sufficiently large, default 31, maximum accepted by Eumetsat)
      * @return double[][] masked refl
      */
@@ -488,7 +619,7 @@ public class IdepixOlciPostProcessOp extends Operator {
                                             Rectangle extendedRectangle,
                                             Tile pixelClassifFlagTile,
                                             Tile reflectanceTile,
-                                            boolean isPca, int csiFilterWindowSize) {
+                                            boolean[][] pcaMask, int csiFilterWindowSize) {
 //        if (x == 5 && y == 5) {
 //        if (x == 9 && y == 2) {
         if (x == 2 && y == 9) {
@@ -505,6 +636,7 @@ public class IdepixOlciPostProcessOp extends Operator {
                     final boolean isSnowIce = pixelClassifFlagTile.getSampleBit(i, j, IDEPIX_SNOW_ICE);
                     final int ix = i - x + csiFilterWindowSize / 2;
                     final int jy = j - y + csiFilterWindowSize / 2;
+                    final boolean isPca = (pcaMask != null && pcaMask[ix][jy]);
                     if (isInvalid || isLand || isCloud || isCloudAmbiguous || isSnowIce || isPca) {
                         oa01Masked[ix][jy] = Double.NaN;
                     } else {
