@@ -20,9 +20,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Objects;
 
+import static org.esa.snap.idepix.olci.IdepixOlciConstants.CTP_TF_NN_NAME_DM;
+import static org.esa.snap.idepix.olci.IdepixOlciConstants.CTP_TF_NN_NAME_RQ;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class TensorflowNNCalculatorTest {
 
@@ -36,8 +38,6 @@ public class TensorflowNNCalculatorTest {
     private final static float logTra14 = 0.96827781f;
     private final static float logTra15 = 0.15205044f;
 
-    private final static float[] input = new float[]{szaRad, ozaRad, aziDiff, refl12, logTra13, logTra14, logTra15};
-
     @Before
     public void setUp() throws Exception {
         auxdataPath = IdepixOlciUtils.installAuxdataNNCtp();
@@ -47,113 +47,91 @@ public class TensorflowNNCalculatorTest {
     public void testNNTensorflowApplyModel_fromAuxdataInstalled() {
         // the standard setup
         String modelDir = auxdataPath + File.separator + CtpOp.DEFAULT_TENSORFLOW_NN_DIR_NAME;
-        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none");
+        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none", CTP_TF_NN_NAME_DM);
 
+        float[] input = new float[]{szaRad, ozaRad, aziDiff, refl12, logTra13, logTra14, logTra15};
         float[][] result = nntest.calculate(input);
+        // from DM: static float[] EXPECTED_OUTPUT_1 = {1.2295055F};
         assertEquals(1.2295055f, result[0][0], 1.E-6);
-        float ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
-        System.out.println("ctp for I7x24x24x24xO1 = " + ctp);
+        float ctp = nntest.convertNNResultToCtp(result[0][0]);
+        assertEquals(870.37036, ctp, 1.E-3);
     }
 
     @Test
-    public void testNNTensorflowApplyModel() {
+    public void testNNTensorflowApplyModel_DM() {
         // testing results from various test NNs against DM results
         // These NNs are stored as test resources
-        String modelDir = new File(getClass().getResource("nn_training_20190131_I7x24x24x24xO1").getFile()).getAbsolutePath();
-        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none");
+        String modelDir = new File(Objects.requireNonNull(getClass().
+                getResource("nn_training_20190131_I7x30x30x30x10x2xO1")).getFile()).getAbsolutePath();
+        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none", CTP_TF_NN_NAME_DM);
 
-        float[][] result = nntest.calculate(input);
-        for (int i = 0; i< result[0].length; i++) {
-            System.out.println(result[0][i]);
-        }
-        // from DM: static float[] EXPECTED_OUTPUT_1 = {1.3985262F};
-        assertEquals(1.3985262f, result[0][0], 1.E-6);
-        float ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
-        System.out.println("ctp for I7x24x24x24xO1 = " + ctp);
+        // first pixel
+        float[] input1 = new float[]{szaRad, ozaRad, aziDiff, refl12, logTra13, logTra14, logTra15};
+        float[][] result = nntest.calculate(input1);
+        // from DM: static float[] EXPECTED_OUTPUT_1 = {1.2295055F};
+        assertEquals(1.2295055f, result[0][0], 1.E-6);
 
-        modelDir = new File(getClass().getResource("nn_training_20190131_I7x30x30x30xO1").getFile()).getAbsolutePath();
-        nntest = new TensorflowNNCalculator(modelDir, "none");
-        result = nntest.calculate(input);
-        assertEquals(1.60261976f, result[0][0], 1.E-6);
-        ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
-        System.out.println("ctp for I7x30x30x30xO1 = " + ctp);
+        float ctp = nntest.convertNNResultToCtp(result[0][0]);
+        assertEquals(870.37036, ctp, 1.E-3);
 
-        modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x10xO1").getFile()).getAbsolutePath();
-        nntest = new TensorflowNNCalculator(modelDir, "none");
-        result = nntest.calculate(input);
-        assertEquals(0.9555169f, result[0][0], 1.E-6);
-        ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
-        System.out.println("ctp for I7x32x64x64x10xO1 = " + ctp);
+        // a second pixel, a bit different:
+        float eps = 1.E-2f;
+        float[] input2 = new float[]{szaRad + eps, ozaRad - eps, aziDiff + eps, refl12 - eps,
+                logTra13 + eps, logTra14 - eps, logTra15 + eps};
+        float[][] result2 = nntest.calculate(input2);
+        assertEquals(1.28f, result2[0][0], 1.E-6);
 
-        modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x64xO1").getFile()).getAbsolutePath();
-        nntest = new TensorflowNNCalculator(modelDir, "none");
-        result = nntest.calculate(input);
-        assertEquals(1.2884411f, result[0][0], 1.E-6);
-        ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
-        System.out.println("ctp for I7x32x64x64x64xO1 = " + ctp);
+        // do both pixels at once, as in CtpOp:
+        float[][] input2D = new float[][]{input1, input2};
+        float[][] result2D = nntest.calculate(input2D);
+        assertEquals(1.2295055f, result2D[0][0], 1.E-6);
+        assertEquals(1.28f, result2D[1][0], 1.E-6);
     }
 
     @Test
-    public void testSetFirstAndLastNodeName() {
-        try {
-            String modelDir = new File(getClass().getResource("nn_training_20190131_I7x24x24x24xO1").getFile()).getAbsolutePath();
-            TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none");
-//            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
-            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
-            String firstNodeNameFromBinary = nntest.getFirstNodeName();
-            String lastNodeNameFromBinary = nntest.getLastNodeName();
-            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
-            String firstNodeNameFromText = nntest.getFirstNodeName();
-            String lastNodeNameFromText = nntest.getLastNodeName();
-            assertEquals("dense_33_input", firstNodeNameFromBinary);
-            assertEquals("dense_36/BiasAdd", lastNodeNameFromBinary);
-            assertEquals(firstNodeNameFromText, firstNodeNameFromBinary);
-            assertEquals(lastNodeNameFromText, lastNodeNameFromBinary);
+    public void testNNTensorflowApplyModel_RQ() {
+        // testing results from various test NNs against RQ results
+        // These NNs are stored as test resources
+        String modelDir = new File(Objects.requireNonNull(getClass().
+                getResource("ctp-i7x14x7o1-0011")).getFile()).getAbsolutePath();
+        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none", CTP_TF_NN_NAME_RQ);
 
-            modelDir = new File(getClass().getResource("nn_training_20190131_I7x30x30x30xO1").getFile()).getAbsolutePath();
-            nntest = new TensorflowNNCalculator(modelDir, "none");
-//            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
-            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
-            firstNodeNameFromBinary = nntest.getFirstNodeName();
-            lastNodeNameFromBinary = nntest.getLastNodeName();
-            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
-            firstNodeNameFromText = nntest.getFirstNodeName();
-            lastNodeNameFromText = nntest.getLastNodeName();
-            assertEquals("dense_29_input", firstNodeNameFromBinary);
-            assertEquals("dense_32/BiasAdd", lastNodeNameFromBinary);
-            assertEquals(firstNodeNameFromText, firstNodeNameFromBinary);
-            assertEquals(lastNodeNameFromText, lastNodeNameFromBinary);
+        float[] input1 =
+                new float[]{0.949078f, 0.968533f, 0.527856f, 0.115890f, 0.573868f, 0.318571f, 0.056420f};
+        float[][] input1_2D =
+                new float[][]{{0.949078f, 0.968533f, 0.527856f, 0.115890f, 0.573868f, 0.318571f, 0.056420f}};
+        float[][] result = nntest.calculate(input1);
+        float[][] result_2D = nntest.calculate(input1_2D);
 
-            modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x10xO1").getFile()).getAbsolutePath();
-            nntest = new TensorflowNNCalculator(modelDir, "none");
-//            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
-            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
-            firstNodeNameFromBinary = nntest.getFirstNodeName();
-            lastNodeNameFromBinary = nntest.getLastNodeName();
-            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
-            firstNodeNameFromText = nntest.getFirstNodeName();
-            lastNodeNameFromText = nntest.getLastNodeName();
-            assertEquals("dense_24_input", firstNodeNameFromBinary);
-            assertEquals("dense_28/BiasAdd", lastNodeNameFromBinary);
-            assertEquals(firstNodeNameFromText, firstNodeNameFromBinary);
-            assertEquals(lastNodeNameFromText, lastNodeNameFromBinary);
+        // from RQ:
+        float expected_ctp_1 = 110.577606f;
+        assertEquals(expected_ctp_1, result[0][0], 1.E-1);
+        assertEquals(expected_ctp_1, result_2D[0][0], 1.E-1);
 
-            modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x64xO1").getFile()).getAbsolutePath();
-            nntest = new TensorflowNNCalculator(modelDir, "none");
-//            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
-            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
-            firstNodeNameFromBinary = nntest.getFirstNodeName();
-            lastNodeNameFromBinary = nntest.getLastNodeName();
-            nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
-            firstNodeNameFromText = nntest.getFirstNodeName();
-            lastNodeNameFromText = nntest.getLastNodeName();
-            assertEquals("dense_19_input", firstNodeNameFromBinary);
-            assertEquals("dense_23/BiasAdd", lastNodeNameFromBinary);
-            assertEquals(firstNodeNameFromText, firstNodeNameFromBinary);
-            assertEquals(lastNodeNameFromText, lastNodeNameFromBinary);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+        float[] input2 =
+                new float[]{0.9453334f, 0.955802f, 0.222959f, 0.254912f, 1.179646f, 0.652283f, 0.113749f};
+        result = nntest.calculate(input2);
+        float expected_ctp_2 = 926.159302f;
+        assertEquals(expected_ctp_2, result[0][0], 1.E-2);
+
+        float[] input3 =
+                new float[]{0.893111f, 0.706519f, 0.787735f, 0.254498f, 1.117459f, 0.612721f, 0.104478f};
+        result = nntest.calculate(input3);
+        float expected_ctp_3 = 777.337524f;
+        assertEquals(expected_ctp_3, result[0][0], 1.E-2);
+
+        float[] input4 =
+                new float[]{0.787874f, 0.830178f, 0.431576f, 0.210399f, 0.472848f, 0.276827f, 0.055080f};
+        result = nntest.calculate(input4);
+        float expected_ctp_4 = 81.297630f;
+        assertEquals(expected_ctp_4, result[0][0], 1.E-3);
+
+        // do all 4 pixels at once, as in CtpOp:
+        float[][] input2D = new float[][]{input1, input2, input3, input4};
+        float[][] result2D = nntest.calculate(input2D);
+        assertEquals(expected_ctp_1, result2D[0][0], 1.E-1);
+        assertEquals(expected_ctp_2, result2D[1][0], 1.E-2);
+        assertEquals(expected_ctp_3, result2D[2][0], 1.E-2);
+        assertEquals(expected_ctp_4, result2D[3][0], 1.E-3);
     }
 }

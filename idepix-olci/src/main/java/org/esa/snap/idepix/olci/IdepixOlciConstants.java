@@ -108,4 +108,16 @@ public class IdepixOlciConstants {
     static final int[] OLCI_DEFAULT_RR_NX_VZA = new int[]{875, 895, 912, 932};
     static final int[] OLCI_DEFAULT_FR_NX_VAA = new int[]{2000, 3400, 3900, OLCI_FR_FULL_PRODUCT_WIDTH};
     static final int[] OLCI_DEFAULT_RR_NX_VAA = new int[]{500, 850, 975, OLCI_RR_FULL_PRODUCT_WIDTH};
+
+    // this should be preliminary! todo: DM/RQ to agree upon final NN or at least unique format
+    static final String CTP_TF_NN_NAME_RQ = "ctp-i7x14x7o1-0011";
+    // RQ NN first and last node (output from saved_model_cli, email OD --> RQ 20240124)
+    // todo: saved_model_cli run cannot be reproduced with latest NN and Python 3.9
+    static final String CTP_TF_NN__FIRST_NODE_NAME_RQ = "serving_default_inputs";
+    static final String CTP_TF_NN__LAST_NODE_NAME_RQ = "StatefulPartitionedCall";
+
+    static final String CTP_TF_NN_NAME_DM = "nn_training_20190131_I7x30x30x30x10x2xO1";
+    // DM NN first and last node (see nn_training_20190131_I7x30x30x30x10x2xO1.txt)
+    static final String CTP_TF_NN__FIRST_NODE_NAME_DM = "dense_13_input";
+    static final String CTP_TF_NN__LAST_NODE_NAME_DM = "dense_18/BiasAdd";
 }

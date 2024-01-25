@@ -5,10 +5,7 @@ import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.TensorFlow;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import static org.esa.snap.idepix.olci.IdepixOlciConstants.*;
 
 /**
  * Applies a tensorflow model and provides corresponding NN output for given input.
@@ -20,8 +17,9 @@ class TensorflowNNCalculator {
     private final String modelDir;
     private final String transformMethod;
 
-    private String firstNodeName;
-    private String lastNodeName;
+    private final String nnName;
+    private final String firstNodeName;
+    private final String lastNodeName;
     private SavedModelBundle model;
 
     /**
@@ -31,8 +29,10 @@ class TensorflowNNCalculator {
      *                        (e.g. 'nn_training_20190131_I7x24x24x24xO1')
      * @param transformMethod - the input transformation method. Supported values are 'sqrt' and 'log',
      *                        otherwise this is ignored.
+     * @param nnName          - name of NN.
      */
-    TensorflowNNCalculator(String modelDir, String transformMethod) {
+
+    TensorflowNNCalculator(String modelDir, String transformMethod, String nnName) {
         // init of TensorFlow can fail, so we should handle this and give appropriate error message
         try {
             TensorFlow.version(); // triggers init of TensorFlow
@@ -46,6 +46,18 @@ class TensorflowNNCalculator {
 
         this.transformMethod = transformMethod;
         this.modelDir = modelDir;
+        this.nnName = nnName;
+
+        if (nnName.equals(CTP_TF_NN_NAME_RQ)) {
+            this.firstNodeName = CTP_TF_NN__FIRST_NODE_NAME_RQ;
+            this.lastNodeName = CTP_TF_NN__LAST_NODE_NAME_RQ;
+        } else if (nnName.equals(CTP_TF_NN_NAME_DM)) {
+            this.firstNodeName = CTP_TF_NN__FIRST_NODE_NAME_DM;
+            this.lastNodeName = CTP_TF_NN__LAST_NODE_NAME_DM;
+        } else {
+            throw new IllegalArgumentException("NN '" + nnName + "' not supported.");
+        }
+
         try {
             loadModel();
         } catch (Exception e) {
@@ -53,15 +65,14 @@ class TensorflowNNCalculator {
         }
     }
 
-
     /**
      * Converts an element of NNResult to a CTP value. Taken from DM: CTP_for_OLCI_cloud_shadow.docx, 06 Feb 2019.
      *
      * @param nnResult - a raw result value from the NNResult float[][] array
      * @return - the value converted to CTP
      */
-    static float convertNNResultToCtp(float nnResult) {
-        return nnResult * 228.03508502f + 590.0f;
+    float convertNNResultToCtp(float nnResult) {
+        return nnName.equals(CTP_TF_NN_NAME_DM) ? nnResult * 228.03508502f + 590.0f : nnResult;
     }
 
     /**
@@ -91,59 +102,11 @@ class TensorflowNNCalculator {
         return lastNodeName;
     }
 
-
-    // package local for testing
-    void setFirstAndLastNodeNameFromTextProtocolBuffer() throws IOException {
-        // from DM:
-        // extract names of first and last relevant nodes (i.e. name contains 'dense') from text '*.pbtxt'
-        /* wie findet man die richtige Stelle im Modell mit den entsprechenden Namen?
-         aus dem .pbtxt File:
-         der input-Name sollte der des ersten Nodes im Modell sein.
-         der output-Name ist der letzte Node-Name, der mit 'dense' für den Modell-Typ beginnt.
-
-         In Python läßt sich diese Information zur den Namen auslesen!
-         from keras.models import load_model
-         model = load_model(nnpath_full)
-        	[ node.op.name for node in model.inputs]
-        	[ node.op.name for node in model.outputs]*/
-
-        final String pbtxtFileName = (new File(modelDir)).getName() + ".pbtxt";
-        File[] files = new File(modelDir).listFiles((dir, name) -> name.equalsIgnoreCase(pbtxtFileName));
-
-        boolean setFirstNodeName = false;
-
-        if (files != null) {
-            try (BufferedReader br = new BufferedReader(new FileReader(files[0]))) {
-                for (String line; (line = br.readLine()) != null; ) {
-                    if (line.equals("node {")) {
-                        line = br.readLine();
-                        final String denseSubstring = line.substring(line.indexOf("dense"), line.length() - 1);
-                        if (!setFirstNodeName) {
-                            if (line.contains("name") && line.contains("dense")) {
-                                firstNodeName = denseSubstring;
-                                setFirstNodeName = true;
-                            }
-                        } else {
-                            if (line.contains("name") && line.contains("dense")) {
-                                lastNodeName = denseSubstring;
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            throw new IllegalStateException("Cannot access Tensorflow text protocol buffer file in specified folder: "
-                                                    + modelDir);
-        }
-    }
-
     ////////////////// private methods ////////////////////////////////////////////
 
-    private void loadModel() throws Exception {
+    private void loadModel() {
         // Load a model previously saved by tensorflow Python package
         model = SavedModelBundle.load(modelDir, "serve");
-//        setFirstAndLastNodeNameFromBinaryProtocolBuffer(model);
-        setFirstAndLastNodeNameFromTextProtocolBuffer();
     }
 
     /**
@@ -153,7 +116,6 @@ class TensorflowNNCalculator {
      * Requires that loadModel() is run once before.
      *
      * @param nnInput - input vector for neural net
-     *
      * @return float[][] - the converted result array
      */
     float[][] calculate(float[] nnInput) {
@@ -184,6 +146,11 @@ class TensorflowNNCalculator {
             }
         }
         final Session.Runner runner = model.session().runner();
+
+        return nnName.equals(CTP_TF_NN_NAME_DM) ? calculateForNNDM(nnInput, runner) : calculateForNNRQ(nnInput, runner);
+    }
+
+    private float[][] calculateForNNDM(float[][] nnInput, Session.Runner runner) {
         try (
                 Tensor<?> inputTensor = Tensor.create(nnInput);
                 Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
@@ -193,9 +160,27 @@ class TensorflowNNCalculator {
             int numOutputVars = (int) ts[1];
             float[][] m = new float[numPixels][numOutputVars];
             outputTensor.copyTo(m);
+            inputTensor.close();
+            outputTensor.close();
+
             return m;
         }
     }
 
+    private float[][] calculateForNNRQ(float[][] nnInput, Session.Runner runner) {
+        try (
+                Tensor<?> inputTensor = Tensor.create(new float[][][]{nnInput});
+                Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
+        ) {
+            long[] ts = outputTensor.shape();
+            int numPixels = (int) ts[0];
+            int numOutputVars = (int) ts[1];
+            float[][][] m = new float[1][numOutputVars][numPixels];
+            outputTensor.copyTo(m);
+            inputTensor.close();
+            outputTensor.close();
 
+            return m[0];
+        }
+    }
 }

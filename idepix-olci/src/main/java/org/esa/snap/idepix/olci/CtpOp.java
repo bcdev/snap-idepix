@@ -15,7 +15,6 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
-
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.BasisOp;
@@ -27,8 +26,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.esa.snap.idepix.olci.IdepixOlciConstants.CTP_TF_NN_NAME_DM;
+import static org.esa.snap.idepix.olci.IdepixOlciConstants.CTP_TF_NN_NAME_RQ;
+
 /**
- *
  * CTP for OLCI based on Tensorflow neural nets.
  *
  * @author olafd
@@ -53,15 +54,14 @@ public class CtpOp extends BasisOp {
             description = "OLCI O2 Correction product.")
     private Product o2CorrProduct;
 
-
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
 
-
-    @Parameter(description = "Path to alternative tensorflow neuronal net directory. Use this to replace the standard " +
-            "neuronal net 'nn_training_20190131_I7x30x30x30x10x2xO1'.",
-            label = "Path to alternative NN to use")
-    private String alternativeCtpNNDir;
+    @Parameter(defaultValue = CTP_TF_NN_NAME_RQ,
+            valueSet = {CTP_TF_NN_NAME_RQ, CTP_TF_NN_NAME_DM},
+            label = " Tensorflow Neural Net for CTP computation",
+            description = "Directory of Tensorflow Neural Net, which is given in Saved Model Format.")
+    private String ctpNNDir;
 
     static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x30x30x30x10x2xO1";
 
@@ -94,15 +94,8 @@ public class CtpOp extends BasisOp {
             throw new OperatorException("Cannot install CTP NN auxdata:" + e.getMessage());
         }
 
-        String modelDir = auxdataPath + File.separator + CtpOp.DEFAULT_TENSORFLOW_NN_DIR_NAME;
-        if (alternativeCtpNNDir != null && !alternativeCtpNNDir.isEmpty()) {
-            final File alternativeNNDir = new File(alternativeCtpNNDir);
-            if (alternativeNNDir.isDirectory()) {
-                modelDir = alternativeCtpNNDir;
-            }
-        }
-
-        nnCalculator = new TensorflowNNCalculator(modelDir, "none");
+        String modelDir = auxdataPath + File.separator + ctpNNDir;
+        nnCalculator = new TensorflowNNCalculator(modelDir, "none", ctpNNDir);
 
         targetProduct = createTargetProduct();
     }
@@ -127,9 +120,12 @@ public class CtpOp extends BasisOp {
             rad12Band = sourceProduct.getBand("Oa12_radiance");
             solarFlux12Band = sourceProduct.getBand("solar_flux_band_12");
 
-            tra13Band = o2CorrProduct.getBand("trans_13");
-            tra14Band = o2CorrProduct.getBand("trans_14");
-            tra15Band = o2CorrProduct.getBand("trans_15");
+            tra13Band = ctpNNDir.equals(CTP_TF_NN_NAME_RQ) ? o2CorrProduct.getBand("transDesmiled_13") :
+                    o2CorrProduct.getBand("trans_13");
+            tra14Band = ctpNNDir.equals(CTP_TF_NN_NAME_RQ) ? o2CorrProduct.getBand("transDesmiled_14") :
+                    o2CorrProduct.getBand("trans_14");
+            tra15Band = ctpNNDir.equals(CTP_TF_NN_NAME_RQ) ? o2CorrProduct.getBand("transDesmiled_15") :
+                    o2CorrProduct.getBand("trans_15");
         } catch (Exception e) {
             throw new OperatorException(e.getMessage(), e);
         } finally {
@@ -140,7 +136,6 @@ public class CtpOp extends BasisOp {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Rectangle targetRectangle = targetTile.getRectangle();
-        final String targetBandName = targetBand.getName();
 
         final Tile szaTile = getSourceTile(szaBand, targetRectangle);
         final Tile ozaTile = getSourceTile(ozaBand, targetRectangle);
@@ -174,7 +169,7 @@ public class CtpOp extends BasisOp {
 
                     final float rad12 = rad12Tile.getSampleFloat(x, y);
                     final float solarFlux12 = solarFlux12Tile.getSampleFloat(x, y);
-                    final float refl12 = rad12/solarFlux12;
+                    final float refl12 = rad12 / solarFlux12;
                     final float tra13 = tra13Tile.getSampleFloat(x, y);
                     final float mLogTra13 = (float) -Math.log(tra13);
                     final float tra14 = tra14Tile.getSampleFloat(x, y);
@@ -182,10 +177,10 @@ public class CtpOp extends BasisOp {
                     final float tra15 = tra15Tile.getSampleFloat(x, y);
                     final float mLogTra15 = (float) -Math.log(tra15);
 
-                    float[] nnInput = new float[] {cosSza, cosOza, aziDiff, refl12, mLogTra13, mLogTra14, mLogTra15};
-                    nnInputs[(y-targetRectangle.y) * targetRectangle.width + (x-targetRectangle.x)] = nnInput;
+                    float[] nnInput = new float[]{cosSza, cosOza, aziDiff, refl12, mLogTra13, mLogTra14, mLogTra15};
+                    nnInputs[(y - targetRectangle.y) * targetRectangle.width + (x - targetRectangle.x)] = nnInput;
                 } else {
-                    nnInputs[(y-targetRectangle.y) * targetRectangle.width + (x-targetRectangle.x)] = dummyNnInput;
+                    nnInputs[(y - targetRectangle.y) * targetRectangle.width + (x - targetRectangle.x)] = dummyNnInput;
                 }
             }
         }
@@ -199,7 +194,9 @@ public class CtpOp extends BasisOp {
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                 final boolean pixelIsValid = !l1FlagsTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
                 if (pixelIsValid) {
-                    targetTile.setSample(x, y, TensorflowNNCalculator.convertNNResultToCtp(nnResult[(y-targetRectangle.y) * targetRectangle.width + (x-targetRectangle.x)][0]));
+                    final float nnResultPixel =
+                            nnResult[(y - targetRectangle.y) * targetRectangle.width + (x - targetRectangle.x)][0];
+                    targetTile.setSample(x, y, nnCalculator.convertNNResultToCtp(nnResultPixel));
                 } else {
                     targetTile.setSample(x, y, Float.NaN);
                 }
@@ -221,9 +218,9 @@ public class CtpOp extends BasisOp {
 
     private Product createTargetProduct() {
         Product targetProduct = new Product(sourceProduct.getName(),
-                                            sourceProduct.getProductType(),
-                                            sourceProduct.getSceneRasterWidth(),
-                                            sourceProduct.getSceneRasterHeight());
+                sourceProduct.getProductType(),
+                sourceProduct.getSceneRasterWidth(),
+                sourceProduct.getSceneRasterHeight());
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);

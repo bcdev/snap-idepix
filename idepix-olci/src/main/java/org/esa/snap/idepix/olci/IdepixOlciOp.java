@@ -20,6 +20,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.esa.snap.idepix.olci.IdepixOlciConstants.CTP_TF_NN_NAME_DM;
+import static org.esa.snap.idepix.olci.IdepixOlciConstants.CTP_TF_NN_NAME_RQ;
+
 /**
  * The IdePix pixel classification operator for OLCI products.
  * <p>
@@ -106,15 +109,16 @@ public class IdepixOlciOp extends BasisOp {
             description = " Compute cloud shadow with the algorithm from 'Fronts' project")
     private boolean computeCloudShadow;
 
-    @Parameter(description = "Path to alternative tensorflow neuronal net directory for CTP retrieval " +
-            "Use this to replace the standard neuronal net 'nn_training_20190131_I7x30x30x30xO1'.",
-            label = "Path to alternative NN for CTP retrieval")
-    private String alternativeCtpNNDir;
-
     @Parameter(defaultValue = "false",
             label = " If cloud shadow is computed, write CTP value to the target product",
             description = " If cloud shadow is computed, write CTP value to the target product ")
     private boolean outputCtp;
+
+    @Parameter(defaultValue = CTP_TF_NN_NAME_RQ,
+            valueSet = {CTP_TF_NN_NAME_RQ, CTP_TF_NN_NAME_DM},
+            label = " Tensorflow Neural Net for CTP computation",
+            description = "Directory of Tensorflow Neural Net, which is given in Saved Model Format.")
+    private String ctpNNDir;
 
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
@@ -253,8 +257,7 @@ public class IdepixOlciOp extends BasisOp {
         if (computeCloudShadow) {
             ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
                     o2CorrProduct,
-                    alternativeCtpNNDir,
-                    outputCtp);
+                    ctpNNDir);
         }
 
     }
