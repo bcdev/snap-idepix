@@ -63,8 +63,6 @@ public class CtpOp extends BasisOp {
             description = "Directory of Tensorflow Neural Net, which is given in Saved Model Format.")
     private String ctpNNDir;
 
-    static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x30x30x30x10x2xO1";
-
     private TiePointGrid szaBand;
     private TiePointGrid ozaBand;
     private TiePointGrid saaBand;

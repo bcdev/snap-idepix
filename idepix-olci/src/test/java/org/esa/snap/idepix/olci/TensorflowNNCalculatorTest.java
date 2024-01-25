@@ -44,9 +44,9 @@ public class TensorflowNNCalculatorTest {
     }
 
     @Test
-    public void testNNTensorflowApplyModel_fromAuxdataInstalled() {
+    public void testNNTensorflowApplyModel_DM_fromAuxdataInstalled() {
         // the standard setup
-        String modelDir = auxdataPath + File.separator + CtpOp.DEFAULT_TENSORFLOW_NN_DIR_NAME;
+        String modelDir = auxdataPath + File.separator + CTP_TF_NN_NAME_DM;
         TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none", CTP_TF_NN_NAME_DM);
 
         float[] input = new float[]{szaRad, ozaRad, aziDiff, refl12, logTra13, logTra14, logTra15};
@@ -59,7 +59,7 @@ public class TensorflowNNCalculatorTest {
 
     @Test
     public void testNNTensorflowApplyModel_DM() {
-        // testing results from various test NNs against DM results
+        // testing results from DM NN against DM results
         // These NNs are stored as test resources
         String modelDir = new File(Objects.requireNonNull(getClass().
                 getResource("nn_training_20190131_I7x30x30x30x10x2xO1")).getFile()).getAbsolutePath();

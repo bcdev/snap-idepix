@@ -84,24 +84,6 @@ class TensorflowNNCalculator {
         return model;
     }
 
-    /**
-     * Getter for the first node name
-     *
-     * @return firstNodeName
-     */
-    String getFirstNodeName() {
-        return firstNodeName;
-    }
-
-    /**
-     * Getter for the last node name
-     *
-     * @return lastNodeName
-     */
-    String getLastNodeName() {
-        return lastNodeName;
-    }
-
     ////////////////// private methods ////////////////////////////////////////////
 
     private void loadModel() {
