@@ -67,6 +67,7 @@ class TensorflowNNCalculator {
 
     /**
      * Converts an element of NNResult to a CTP value. Taken from DM: CTP_for_OLCI_cloud_shadow.docx, 06 Feb 2019.
+     * No conversion required for RQ NN (Jan 2024)
      *
      * @param nnResult - a raw result value from the NNResult float[][] array
      * @return - the value converted to CTP
