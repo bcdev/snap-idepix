@@ -1,9 +1,9 @@
 package org.esa.snap.idepix.meris;
 
 import org.apache.commons.math3.fitting.PolynomialFitter;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
-import org.esa.s3tbx.processor.rad2refl.Sensor;
+import eu.esa.opt.processor.rad2refl.Rad2ReflConstants;
+import eu.esa.opt.processor.rad2refl.Rad2ReflOp;
+import eu.esa.opt.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Mask;

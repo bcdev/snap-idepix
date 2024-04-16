@@ -1,12 +1,12 @@
 package org.esa.snap.idepix.meris;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.meris.l2auxdata.L2AuxData;
-import org.esa.s3tbx.meris.l2auxdata.L2AuxDataException;
-import org.esa.s3tbx.meris.l2auxdata.L2AuxDataProvider;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
-import org.esa.s3tbx.util.math.FractIndex;
-import org.esa.s3tbx.util.math.Interp;
+import eu.esa.opt.meris.l2auxdata.L2AuxData;
+import eu.esa.opt.meris.l2auxdata.L2AuxDataException;
+import eu.esa.opt.meris.l2auxdata.L2AuxDataProvider;
+import eu.esa.opt.processor.rad2refl.Rad2ReflConstants;
+import eu.esa.opt.util.math.FractIndex;
+import eu.esa.opt.util.math.Interp;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;

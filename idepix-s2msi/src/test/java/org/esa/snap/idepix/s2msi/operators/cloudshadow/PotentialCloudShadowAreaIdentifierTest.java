@@ -1,6 +1,6 @@
 package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.junit.Test;
 

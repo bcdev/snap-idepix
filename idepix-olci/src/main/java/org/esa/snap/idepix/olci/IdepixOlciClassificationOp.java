@@ -2,7 +2,7 @@ package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.binding.ValueRange;
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
+import eu.esa.opt.processor.rad2refl.Rad2ReflConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;

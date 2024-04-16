@@ -4,7 +4,7 @@ import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.operators.BasisOp;
-import org.esa.s3tbx.processor.rad2refl.Sensor;
+import eu.esa.opt.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;

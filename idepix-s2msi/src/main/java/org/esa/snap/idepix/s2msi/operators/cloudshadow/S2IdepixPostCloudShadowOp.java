@@ -1,7 +1,7 @@
 package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.FlagCoding;

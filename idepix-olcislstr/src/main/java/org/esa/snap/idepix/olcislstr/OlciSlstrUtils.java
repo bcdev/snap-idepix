@@ -1,8 +1,8 @@
 package org.esa.snap.idepix.olcislstr;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
-import org.esa.s3tbx.processor.rad2refl.Sensor;
+import eu.esa.opt.processor.rad2refl.Rad2ReflOp;
+import eu.esa.opt.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
