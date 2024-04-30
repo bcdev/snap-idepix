@@ -58,11 +58,6 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-envisat-reader</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.bc.jnn</groupId>
-            <artifactId>jnn</artifactId>
-            <version>1.7</version>
-        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
