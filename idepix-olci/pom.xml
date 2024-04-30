@@ -22,11 +22,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>10.0.0</version>
+        <version>10.0.1</version>
     </parent>
 
     <artifactId>idepix-olci</artifactId>
-    <version>10.0.0</version>
+    <version>10.0.1</version>
 
     <packaging>nbm</packaging>
     
@@ -34,7 +34,7 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from OLCI.</description>
 
     <properties>
-        <idepix-core.version>10.0.0</idepix-core.version>
+        <idepix-core.version>10.0.1</idepix-core.version>
         <opttbx.version>10.0.1</opttbx.version>
     </properties>
 
