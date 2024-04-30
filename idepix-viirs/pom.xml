@@ -21,11 +21,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>10.0.0</version>
+        <version>11.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>idepix-viirs</artifactId>
-    <version>10.0.0</version>
+    <version>11.0.0-SNAPSHOT</version>
 
     <packaging>nbm</packaging>
 
@@ -34,7 +34,7 @@
     </description>
 
     <properties>
-        <idepix-core.version>10.0.0</idepix-core.version>
+        <idepix-core.version>11.0.0-SNAPSHOT</idepix-core.version>
     </properties>
 
     <dependencies>
