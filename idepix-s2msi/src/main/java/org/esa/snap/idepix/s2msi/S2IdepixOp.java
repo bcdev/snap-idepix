@@ -10,7 +10,9 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dem.gpf.AddElevationOp;
+import org.esa.snap.idepix.s2msi.operators.TensorflowNNOp;
 import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudPostProcessOp;
 import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
@@ -65,6 +67,10 @@ public class S2IdepixOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(description = "Path to tensorflow neuronal net directory for additional classification, experimental. " +
+               "Adds band nnOutput if set.",
+               label = "Path to NN for classification")
+    private String nnDir;
 
     @SourceProduct(alias = "l1cProduct",
             label = "Sentinel-2 MSI L1C product",
@@ -125,6 +131,14 @@ public class S2IdepixOp extends Operator {
 
         // new bit masks:
         S2IdepixUtils.setupIdepixCloudscreeningBitmasks(targetProduct);
+
+        if (nnDir != null) {
+            Map<String, Object> parameters = new HashMap<>(4);
+            parameters.put("nnDir", nnDir);
+            parameters.put("sourceBandNames", S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES);
+            Product nnProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(TensorflowNNOp.class), parameters, sourceProduct);
+            ProductUtils.copyBand("nnOutput", nnProduct, targetProduct, true);
+        }
     }
 
     private static void removeReflectances(Product product) {
@@ -177,9 +191,7 @@ public class S2IdepixOp extends Operator {
         } else {
             return cloudBufferProduct;
         }
-
     }
-
 
     /**
      * The Service Provider Interface (SPI) for the operator.
