@@ -12,6 +12,8 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.SystemUtils;
 
 import java.awt.Rectangle;
 
@@ -77,6 +79,7 @@ public class TensorflowNNOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
+        SystemUtils.LOG.info("Executing NN classification operator");
         if ("sqrt".equals(inputTransformer)) {
             transformer = TRANSFORMER.SQRT_TRANSFORMER;
         } else if ("log".equals(inputTransformer)) {
@@ -85,11 +88,20 @@ public class TensorflowNNOp extends Operator {
             transformer = TRANSFORMER.NO_TRANSFORMER;
         }
         setBands();
-        nnBand = targetProduct.addBand("nnOutput", ProductData.TYPE_FLOAT32);
+        final int sceneWidth = sourceProduct.getSceneRasterWidth();
+        final int sceneHeight = sourceProduct.getSceneRasterHeight();
+        Product nnProduct = new Product(sourceProduct.getName(), "NNOutput", sceneWidth, sceneHeight);
+        ProductUtils.copyGeoCoding(sourceProduct, nnProduct);
+        nnProduct.setStartTime(sourceProduct.getStartTime());
+        nnProduct.setEndTime(sourceProduct.getEndTime());
+
+        nnBand = nnProduct.addBand("nnOutput", ProductData.TYPE_FLOAT32);
         nnBand.setNoDataValue(Float.NaN);
         nnBand.setNoDataValueUsed(true);
         nnBand.setDescription("output of classification NN");
         nnCalculator = new TensorflowNNCalculator(nnDir);
+
+        setTargetProduct(nnProduct);
     }
 
     @Override
@@ -134,7 +146,7 @@ public class TensorflowNNOp extends Operator {
         // call tensorflow once with the complete tile stack
         final float[][] nnResult = nnCalculator.calculate(nnInputs);
 
-        // convert output of tf into ctp and set value into target tile
+        // convert output and set value into target tile
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {

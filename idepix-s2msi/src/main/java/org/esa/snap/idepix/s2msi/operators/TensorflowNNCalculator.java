@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Applies a tensorflow model and provides corresponding NN output for given input.
@@ -88,18 +89,27 @@ public class TensorflowNNCalculator {
      * @return float[][] - image vector of output band vector (length 1)
      */
     public float[][] calculate(float[][] nnInput) {
-        final Session.Runner runner = model.session().runner();
-        try (
-                Tensor<?> inputTensor = Tensor.create(nnInput);
-                Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
-        ) {
-            long[] ts = outputTensor.shape();
-            int numPixels = (int) ts[0];
-            int numOutputVars = (int) ts[1];
-            float[][] m = new float[numPixels][numOutputVars];
-            outputTensor.copyTo(m);
-            return m;
-        }
+        //try {
+            final Session.Runner runner = model.session().runner();
+            try (
+                    Tensor<?> inputTensor = Tensor.create(nnInput);
+                    Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
+            ) {
+                long[] ts = outputTensor.shape();
+                int numPixels = (int) ts[0];
+                int numOutputVars = (int) ts[1];
+                float[][] m = new float[numPixels][numOutputVars];
+                outputTensor.copyTo(m);
+                return m;
+            }
+        //} catch (Exception e) {
+        //    e.printStackTrace();
+        //    float[][] m = new float[nnInput.length][1];
+        //    for (int mm = 0; mm < m.length; ++mm) {
+        //        Arrays.fill(m[mm], 7.0f);
+        //    }
+        //    return m;
+        //}
     }
 
     // package local for testing
