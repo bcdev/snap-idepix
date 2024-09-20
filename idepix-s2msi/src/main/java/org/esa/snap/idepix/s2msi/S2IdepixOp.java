@@ -12,12 +12,14 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dem.gpf.AddElevationOp;
+import org.esa.snap.idepix.s2msi.operators.SchillerNNOp;
 import org.esa.snap.idepix.s2msi.operators.TensorflowNNOp;
 import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudPostProcessOp;
 import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,6 +73,15 @@ public class S2IdepixOp extends Operator {
                "Adds band nnOutput if set.",
                label = "Path to NN for classification")
     private String nnDir;
+
+    @Parameter(description = "Path to 'Schiller' neuronal net file for additional classification, experimental. " +
+               "Adds band nnOutput if set.",
+               label = "Path to NN for classification")
+    private File schillerNNFile;
+
+    @Parameter(description = "Transormer to be applied to the input values before NN calculation, sqrt or log, optional.",
+               label = "Transformer")
+    private String inputTransformer;
 
     @SourceProduct(alias = "l1cProduct",
             label = "Sentinel-2 MSI L1C product",
@@ -136,7 +147,19 @@ public class S2IdepixOp extends Operator {
             Map<String, Object> parameters = new HashMap<>(4);
             parameters.put("nnDir", nnDir);
             parameters.put("sourceBandNames", S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES);
+            if (inputTransformer != null) {
+                parameters.put("inputTransformer", inputTransformer);
+            }
             Product nnProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(TensorflowNNOp.class), parameters, sourceProduct);
+            ProductUtils.copyBand("nnOutput", nnProduct, targetProduct, true);
+        } else if (schillerNNFile != null) {
+            Map<String, Object> parameters = new HashMap<>(4);
+            parameters.put("nnFile", schillerNNFile);
+            parameters.put("sourceBandNames", S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES);
+            if (inputTransformer != null) {
+                parameters.put("inputTransformer", inputTransformer);
+            }
+            Product nnProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(SchillerNNOp.class), parameters, sourceProduct);
             ProductUtils.copyBand("nnOutput", nnProduct, targetProduct, true);
         }
     }
