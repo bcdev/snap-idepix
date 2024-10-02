@@ -33,11 +33,11 @@ public class TensorflowNNOp extends Operator {
                label = "NN path")
     private String nnDir;
     @Parameter(description = "Names of the source bands for the NN.",
-               label = "Band names")
+               label = "Band names (required, comma-separated)")
     private String[] sourceBandNames;  // e.g. S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES
 
     @Parameter(description = "Transormer to be applied to the input values, sqrt or log, optional.",
-               label = "Transformer")
+               label = "Transformer (empty or sqrt or log)")
     private String inputTransformer;
     @Parameter(description = "Scale factor to be applied to the output values, optional.",
                label = "Scale factor",

@@ -71,16 +71,20 @@ public class S2IdepixOp extends Operator {
 
     @Parameter(description = "Path to tensorflow neuronal net directory for additional classification, experimental. " +
                "Adds band nnOutput if set.",
-               label = "Path to NN for classification")
+               label = "Path to Tensorflow NN for classification")
     private String nnDir;
 
     @Parameter(description = "Path to 'Schiller' neuronal net file for additional classification, experimental. " +
                "Adds band nnOutput if set.",
-               label = "Path to NN for classification")
+               label = "Path to 'Schiller' NN for classification")
     private File schillerNNFile;
 
+    @Parameter(description = "Names of the source bands for the NN.",
+               label = "NN input bands (comma-separated, default all B1,...)")
+    private String[] sourceBandNames;  // e.g. S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES
+
     @Parameter(description = "Transormer to be applied to the input values before NN calculation, sqrt or log, optional.",
-               label = "Transformer")
+               label = "NN input band transformer (empty or sqrt or log)")
     private String inputTransformer;
 
     @SourceProduct(alias = "l1cProduct",
@@ -146,7 +150,7 @@ public class S2IdepixOp extends Operator {
         if (nnDir != null) {
             Map<String, Object> parameters = new HashMap<>(4);
             parameters.put("nnDir", nnDir);
-            parameters.put("sourceBandNames", S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES);
+            parameters.put("sourceBandNames", (sourceBandNames == null || sourceBandNames.length == 0) ? S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES : sourceBandNames);
             if (inputTransformer != null) {
                 parameters.put("inputTransformer", inputTransformer);
             }
@@ -155,7 +159,7 @@ public class S2IdepixOp extends Operator {
         } else if (schillerNNFile != null) {
             Map<String, Object> parameters = new HashMap<>(4);
             parameters.put("nnFile", schillerNNFile);
-            parameters.put("sourceBandNames", S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES);
+            parameters.put("sourceBandNames", (sourceBandNames == null || sourceBandNames.length == 0) ? S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES : sourceBandNames);
             if (inputTransformer != null) {
                 parameters.put("inputTransformer", inputTransformer);
             }
