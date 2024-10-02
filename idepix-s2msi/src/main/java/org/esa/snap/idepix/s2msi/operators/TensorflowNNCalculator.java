@@ -127,25 +127,29 @@ public class TensorflowNNCalculator {
         	[ node.op.name for node in model.inputs]
         	[ node.op.name for node in model.outputs]*/
 
-        final String pbtxtFileName = (new File(modelDir)).getName() + ".pbtxt";
-        File[] files = new File(modelDir).listFiles((dir, name) -> name.equalsIgnoreCase(pbtxtFileName));
+        //final String pbtxtFileName = (new File(modelDir)).getName() + ".pbtxt";
+        //File[] files = new File(modelDir).listFiles((dir, name) -> name.equalsIgnoreCase(pbtxtFileName));
+        File[] files = new File(modelDir).listFiles((dir, name) -> name.endsWith(".pbtxt"));
 
         boolean setFirstNodeName = false;
 
         if (files != null) {
             try (BufferedReader br = new BufferedReader(new FileReader(files[0]))) {
                 for (String line; (line = br.readLine()) != null; ) {
-                    if (line.equals("node {")) {
+                    if (line.contains("node {")) {
                         line = br.readLine();
-                        final String denseSubstring = line.substring(line.indexOf("dense"), line.length() - 1);
-                        if (!setFirstNodeName) {
-                            if (line.contains("name") && line.contains("dense")) {
-                                firstNodeName = denseSubstring;
-                                setFirstNodeName = true;
-                            }
-                        } else {
-                            if (line.contains("name") && line.contains("dense")) {
-                                lastNodeName = denseSubstring;
+                        if (line.contains("dense")) {
+                            //final String denseSubstring = line.substring(line.indexOf("dense"), line.length() - 1);
+                            final String denseSubstring = line.substring(line.indexOf("name: ") + "name: '".length(), line.length() - 1);
+                            if (!setFirstNodeName) {
+                                if (line.contains("name") && line.contains("dense")) {
+                                    firstNodeName = denseSubstring;
+                                    setFirstNodeName = true;
+                                }
+                            } else {
+                                if (line.contains("name") && line.contains("dense")) {
+                                    lastNodeName = denseSubstring;
+                                }
                             }
                         }
                     }
