@@ -39,7 +39,7 @@ import java.util.Map;
         category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
         version = "3.1.0",
         authors = "Olaf Danne",
-        copyright = "(c) 2018 by Brockmann Consult",
+        copyright = "(c) 2018 - 2024 by Brockmann Consult",
         description = "Pixel identification and classification for OLCI.")
 public class IdepixOlciOp extends BasisOp {
 

@@ -30,7 +30,7 @@ import java.util.logging.Logger;
         version = "3.0",
         authors = "Olaf Danne, Marco Zuehlke",
 //        autoWriteDisabled = true,
-        copyright = "(c) 2016 by Brockmann Consult",
+        copyright = "(c) 2016 - 2024 by Brockmann Consult",
         description = "Pixel identification and classification for MODIS.")
 public class IdepixModisOp extends BasisOp {
 

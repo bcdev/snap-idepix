@@ -30,7 +30,7 @@ import java.util.Map;
         category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
         version = "3.0",
         authors = "Olaf Danne",
-        copyright = "(c) 2016 by Brockmann Consult",
+        copyright = "(c) 2016 - 2024 by Brockmann Consult",
         description = "Pixel identification and classification for MERIS.")
 public class IdepixMerisOp extends BasisOp {
 
