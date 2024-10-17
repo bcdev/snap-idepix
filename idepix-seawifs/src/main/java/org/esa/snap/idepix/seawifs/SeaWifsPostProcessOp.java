@@ -246,7 +246,7 @@ public class SeaWifsPostProcessOp extends BasisOp {
     }
 
     private void createTargetProduct() throws OperatorException {
-        targetProduct = createCompatibleProduct(classifProduct, classifProduct.getName(), classifProduct.getProductType());
+        targetProduct = createCompatibleProduct(reflProduct, classifProduct.getName(), classifProduct.getProductType());
         ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, classifProduct, targetProduct, false);
 
         ProductUtils.copyFlagBands(reflProduct, targetProduct, true);
