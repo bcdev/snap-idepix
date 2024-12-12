@@ -250,14 +250,14 @@ class IdepixOlciUtils {
 
     static boolean isReducedResolution(Product sourceProduct) {
 //        return sourceProduct.getName().matches("S3.?_OL_1_.*RR_.*.SEN3");
-        // less strict to allow subsets:
-        return sourceProduct.getProductType().endsWith("RR");
+        // less strict to allow subsets, adapted to definition in ProductUtils::
+        return sourceProduct.getProductType().contains("OL_1_ERR");
     }
 
     static boolean isFullResolution(Product sourceProduct) {
 //        return sourceProduct.getName().matches("S3.?_OL_1_.*FR_.*.SEN3");
-        // less strict to allow subsets:
-        return sourceProduct.getProductType().endsWith("FR");
+        // less strict to allow subsets, adapted to definition in ProductUtils:
+        return sourceProduct.getProductType().contains("OL_1_EFR");
     }
 
     static float[] interpolateViewAngles(PolynomialFitter curveFitter1, PolynomialFitter curveFitter2,
