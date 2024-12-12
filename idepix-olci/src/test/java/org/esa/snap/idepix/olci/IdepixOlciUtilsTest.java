@@ -252,19 +252,19 @@ public class IdepixOlciUtilsTest {
 
     @Test
     public void testIsReducedResolution() {
-        Product testProduct = new Product("S3B_OL_1_EFR____blabla.SEN3", "test_FR", 1, 1);
+        Product testProduct = new Product("S3B_OL_1_EFR____blabla.SEN3", "OL_1_EFR", 1, 1);
         assertFalse(IdepixOlciUtils.isReducedResolution(testProduct));
 
-        testProduct = new Product("S3B_OL_1_ERR____blabla.SEN3", "test_RR", 1, 1);
+        testProduct = new Product("S3B_OL_1_ERR____blabla.SEN3", "OL_1_ERR", 1, 1);
         assertTrue(IdepixOlciUtils.isReducedResolution(testProduct));
     }
 
     @Test
     public void testIsFullResolution() {
-        Product testProduct = new Product("S3B_OL_1_EFR____blabla.SEN3", "test_FR", 1, 1);
+        Product testProduct = new Product("S3B_OL_1_EFR____blabla.SEN3", "Derived from (OL_1_EFR)", 1, 1);
         assertTrue(IdepixOlciUtils.isFullResolution(testProduct));
 
-        testProduct = new Product("S3B_OL_1_ERR____blabla.SEN3", "test_RR", 1, 1);
+        testProduct = new Product("S3B_OL_1_ERR____blabla.SEN3", "Derived from (OL_1_ERR)", 1, 1);
         assertFalse(IdepixOlciUtils.isFullResolution(testProduct));
     }
 }
