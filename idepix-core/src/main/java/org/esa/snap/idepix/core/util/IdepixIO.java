@@ -251,22 +251,58 @@ public class IdepixIO {
     }
 
     private static boolean isValidViirsProduct(Product product) {
-        String[] expectedBandNames = new String[]{"rhot_410", "rhot_443", "rhot_486", "rhot_551", "rhot_671",
-                "rhot_745", "rhot_862", "rhot_1238", "rhot_1601", "rhot_2257"};
-        for (String expectedBandName : expectedBandNames) {
+        return isValidViirsSNPPProduct(product) ||
+                isValidViirsNOAA20Product(product) ||
+                isValidViirsNOAA21Product(product);
+    }
+
+    private static boolean isValidViirsNOAA21Product(Product product) {
+        for (String expectedBandName : IdepixConstants.VIRRS_NOAA21_BAND_NAMES) {
             if (!product.containsBand(expectedBandName)) {
                 return false;
             }
         }
-        // e.g. V2012024230521.L1C
-        // 20181005: PML requested L1C_SNPP.nc as valid extension
-        return (product.getName().matches("V[0-9]{13}.(?i)(L1C)") ||
-                product.getName().matches("V[0-9]{13}.(?i)(L1C.nc)") ||
-                product.getName().matches("V[0-9]{13}.(?i)(L1C_SNPP.nc)") ||
-                product.getName().matches("V[0-9]{13}.(?i)(L2)") ||
-                product.getName().matches("V[0-9]{13}.(?i)(L2.nc)"));
+        // Update 20250108: PML requests support for products like JPSS2_VIIRS.20190613T070000.L1C
+        return product.getName().matches("JPSS2_VIIRS.[0-9]{8}T[0-9]{6}.(?i)(L1C)");
     }
 
+    private static boolean isValidViirsNOAA20Product(Product product) {
+        for (String expectedBandName : IdepixConstants.VIRRS_NOAA20_BAND_NAMES) {
+            if (!product.containsBand(expectedBandName)) {
+                return false;
+            }
+        }
+        // Update 20250108: PML requests support for products like JPSS2_VIIRS.20190613T070000.L1C
+        return product.getName().matches("JPSS1_VIIRS.[0-9]{8}T[0-9]{6}.(?i)(L1C)");
+    }
+
+    private static boolean isValidViirsSNPPProduct(Product product) {
+        for (String expectedBandName : IdepixConstants.VIRRS_SNPP_BAND_NAMES) {
+            if (!product.containsBand(expectedBandName)) {
+                return false;
+            }
+        }
+        // Update 20250108: PML requests support for products like SNPP_VIIRS.20190613T070000.L1C
+        return product.getName().matches("SNPP_VIIRS.[0-9]{8}T[0-9]{6}.(?i)(L1C)");
+    }
+
+    /**
+     * Provides VIIRS spectral band names, depending on product type (SNPP, NOAA20 or NOAA21)
+     *
+     * @param productName -
+     * @return String[]
+     */
+    public static String[] getViirsSpectralBandNames(String productName) {
+        if (productName.startsWith("SNPP_VIIRS")) {
+            return IdepixConstants.VIRRS_SNPP_BAND_NAMES;
+        } else if (productName.startsWith("JPSS1_VIIRS")) {
+            return IdepixConstants.VIRRS_NOAA20_BAND_NAMES;
+        } else if (productName.startsWith("JPSS2_VIIRS")) {
+            return IdepixConstants.VIRRS_NOAA21_BAND_NAMES;
+        } else {
+            return null;
+        }
+    }
 
     private static boolean isValidProbavProduct(Product product) {
         return product.getProductType().startsWith(IdepixConstants.PROBAV_PRODUCT_TYPE_PREFIX);

@@ -34,7 +34,7 @@
     </description>
 
     <properties>
-        <idepix-core.version>11.0.0</idepix-core.version>
+        <idepix-core.version>11.0.1</idepix-core.version>
     </properties>
 
     <dependencies>

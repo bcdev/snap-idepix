@@ -24,10 +24,10 @@ import java.util.Map;
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "Idepix.Viirs",
         category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
-        version = "3.0",
+        version = "3.1",
         authors = "Olaf Danne, Marco Zuehlke",
         copyright = "(c) 2016 - 2024 by Brockmann Consult",
-        description = "Pixel identification and classification for VIIRS.")
+        description = "Pixel identification and classification for VIIRS. Supports Suomi NPP, NOAA20, NOAA21 products.")
 public class ViirsOp extends Operator{
 
     @Parameter(defaultValue = "false",
@@ -49,7 +49,8 @@ public class ViirsOp extends Operator{
     private int waterMaskResolution;
 
 
-    @SourceProduct(alias = "sourceProduct", label = "Name (VIIRS L1b product)", description = "The source product.")
+    @SourceProduct(alias = "sourceProduct", label = "Name (VIIRS L1C product)",
+            description = "The L1C source product (SNPP, NOAA20, or NOAA21)")
     private Product sourceProduct;
 
     private Product classifProduct;

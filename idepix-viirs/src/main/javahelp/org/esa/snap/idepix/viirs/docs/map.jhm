@@ -20,8 +20,8 @@
         "http://java.sun.com/products/javahelp/map_2_0.dtd">
 
 <map version="2.0">
-    <mapID target="viirsAlgorithmSpec" url="viirs/SuomiNppViirsAlgorithmSpecification.html"/>
-    <mapID target="viirsProcessorDesc" url="viirs/SuomiNppViirsProcessorDescription.html"/>
-    <mapID target="viirsCommandLine" url="viirs/SuomiNppViirsCommandLine.html"/>
-    <mapID target="snapIdepixViirsTool" url="viirs/SuomiNppViirsTool.html"/>
+    <mapID target="viirsAlgorithmSpec" url="viirs/ViirsAlgorithmSpecification.html"/>
+    <mapID target="viirsProcessorDesc" url="viirs/ViirsProcessorDescription.html"/>
+    <mapID target="viirsCommandLine" url="viirs/ViirsCommandLine.html"/>
+    <mapID target="snapIdepixViirsTool" url="viirs/ViirsTool.html"/>
 </map>
