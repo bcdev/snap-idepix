@@ -16,7 +16,7 @@
 
 <html>
 <head>
-    <title>SNAP Data Processors - IdePix Suomi NPP VIIRS Processor Description</title>
+    <title>SNAP Data Processors - IdePix VIIRS Processor Description</title>
     <link rel="stylesheet" href="../style.css">
 </head>
 
@@ -25,7 +25,7 @@
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            SNAP Data Processors - IdePix Suomi NPP VIIRS Processor Description
+            SNAP Data Processors - IdePix VIIRS Processor Description
         </td>
         <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
                                                                                                                                                        border=0></a>
@@ -48,12 +48,20 @@
     open a data product currently not opened in the Sentinel Toolbox.
 </p>
 
-<h5>Supported Suomi NPP VIIRS Source Products</h5>
-The following Suomi NPP VIIRS source products are supported for IdePix classification:
+<h5>Supported VIIRS Source Products</h5>
+The following VIIRS source products are supported for IdePix classification:
 <ul>
     <li>
-        S*.L1C:<br>
-        VIIRS L1C product
+        SNPP*.L1C:<br>
+        VIIRS L1C product from Suomi NPP
+    </li>
+    <li>
+        JPSS1*.L1C:<br>
+        VIIRS L1C product from NOAA20
+    </li>
+    <li>
+        JPSS2*.L1C:<br>
+        VIIRS L1C product from NOAA21
     </li>
 </ul>
 For more detailed information on data product definitions and format specifications see the relevant OceanColour
@@ -104,7 +112,7 @@ https://oceancolor.gsfc.nasa.gov/docs/products/ and https://oceancolor.gsfc.nasa
 
 <h3>The Processing Result</h3>
 The IdePix classification result is written into the target product as a flag band named 'pixel_classif_flags'.
-This band holds integer values which for Suomi NPP VIIRS follow the flag coding shown below.
+This band holds integer values which for VIIRS follow the flag coding shown below.
 
 <p align="center">
     <img src="images/ViirsFlagCoding.png" border="0">

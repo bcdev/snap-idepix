@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>SNAP Data Processors - IdePix Suomi NPP VIIRS Algorithm Specification</title>
+    <title>SNAP Data Processors - IdePix VIIRS Algorithm Specification</title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
     <link rel="stylesheet" href="../style.css">
 </head>
@@ -9,7 +9,7 @@
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            SNAP Data Processors - IdePix Suomi NPP VIIRS Algorithm Specification
+            SNAP Data Processors - IdePix VIIRS Algorithm Specification
         </td>
         <td class="header" align="right"><a
                 href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
@@ -24,10 +24,13 @@
 <h4>Neural network classification</h4>
 
 <p>
-    The IdePix classification algorithm for Suomi NPP VIIRS is based on a neural network approach.
+    The IdePix classification algorithm for VIIRS is based on a neural network approach.
+    The algorithm is applicable for input from the instruments on Suomi NPP, NOAA20 and NOAA21.
     A common neural net is used for both land and water pixels.
-    As input for the neural net, the square roots of the SeaWiFS TOA reflectances in the 4 bands
-    at 412nm, 443nm, 490nm, 510nm, 555nm, 670nm, 765nm and 865nm are used. <br> <br>
+    As input for the neural net, the square roots of the TOA reflectances in the 10 VIIRS bands are used.
+    The wavelengths are 410nm, 443nm, 486nm, 551nm, 671nm, 745nm, 862nm, 1238nm, 1601nm and 2257nm
+    for Suomi NPP, and 411nm, 445nm, 489nm, 556nm, 667nm, 746nm, 868nm, 1238nm, 1604nm and 2258nm
+    for NOAA20 and NOAA21. <br> <br>
 
     As output, the neural net finally provides one of the properties 'cloud sure',
     'cloud ambiguous', 'cloud' (which means sure OR ambiguous), and 'snow/ice'.
@@ -48,7 +51,7 @@
     <li>
         'bright': A bright spectrum means that the intensity of the spectral curve (related to the albedo)
         should present relatively
-        high values. However, just a simple reflectance threshold test is applied for Suomi NPP VIIRS:
+        high values. However, just a simple reflectance threshold test is applied for VIIRS:
         A pixel is 'bright' if rhoTOA(670nm) > 0.15.
     </li>
 
@@ -80,7 +83,7 @@ This is a fractional mask:
 <h4>Final classification flags</h4>
 <p>
     In summary, from the algorithm steps outlined above, the following final classification flags are provided for
-    Suomi NPP VIIRS:
+    VIIRS:
 <ul>
     <li>
         'INVALID' (input invalid or no classification possible)
@@ -113,7 +116,7 @@ This is a fractional mask:
 
 <h4>Known issues</h4>
 <p>
-    The following pixel properties are currently NOT provided for Suomi NPP VIIRS:
+    The following pixel properties are currently NOT provided for VIIRS:
 <ul>
     <li>
         'CLOUD_SHADOW'

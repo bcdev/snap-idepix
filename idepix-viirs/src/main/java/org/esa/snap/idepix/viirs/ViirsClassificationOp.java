@@ -1,6 +1,7 @@
 package org.esa.snap.idepix.viirs;
 
 import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.util.IdepixIO;
 import org.esa.snap.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
@@ -19,9 +20,10 @@ import java.io.InputStream;
  * @author olafd
  */
 @OperatorMetadata(alias = "Idepix.Viirs.Classification",
-        version = "3.0",
-        copyright = "(c) 2016 by Brockmann Consult",
-        description = "VIIRS pixel classification operator.",
+        version = "3.1",
+        authors = "Olaf Danne, Marco Zuehlke",
+        copyright = "(c) 2016 - 2024 by Brockmann Consult",
+        description = "VIIRS pixel classification operator. Supports Suomi NPP, NOAA20, NOAA21 products.",
         internal = true)
 public class ViirsClassificationOp extends PixelOperator {
 
@@ -38,7 +40,7 @@ public class ViirsClassificationOp extends PixelOperator {
     private int waterMaskResolution;
 
 
-    @SourceProduct(alias = "refl", description = "MODIS L1b reflectance product")
+    @SourceProduct(alias = "refl", description = "VIIRS L1C reflectance product")
     private Product reflProduct;
 
     @SourceProduct(alias = "waterMask")
@@ -47,15 +49,12 @@ public class ViirsClassificationOp extends PixelOperator {
     private static final String VIIRS_NET_NAME = "6x5x4x3x2_204.8.net";
     private ThreadLocal<SchillerNeuralNetWrapper> viirsNeuralNet;
 
+    private String[] viirsSpectralBandNames;
 
-    @Override
-    public Product getSourceProduct() {
-        // this is the source product for the ProductConfigurer
-        return reflProduct;
-    }
 
     @Override
     protected void prepareInputs() throws OperatorException {
+        viirsSpectralBandNames = IdepixIO.getViirsSpectralBandNames(reflProduct.getName());
         readSchillerNet();
     }
 
@@ -67,16 +66,21 @@ public class ViirsClassificationOp extends PixelOperator {
 
     @Override
     protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurer) throws OperatorException {
-        for (int i = 0; i < ViirsConstants.VIIRS_L1B_NUM_SPECTRAL_BANDS; i++) {
-            if (getSourceProduct().containsBand(ViirsConstants.VIIRS_SPECTRAL_BAND_NAMES[i])) {
-                sampleConfigurer.defineSample(i, ViirsConstants.VIIRS_SPECTRAL_BAND_NAMES[i], getSourceProduct());
-            } else {
-                sampleConfigurer.defineSample(i, ViirsConstants.VIIRS_SPECTRAL_BAND_NAMES[i].replace(".", "_"),
-                                              getSourceProduct());
+        if (viirsSpectralBandNames != null) {
+            for (int i = 0; i < viirsSpectralBandNames.length; i++) {
+                if (getSourceProduct().containsBand(viirsSpectralBandNames[i])) {
+                    sampleConfigurer.defineSample(i, viirsSpectralBandNames[i], getSourceProduct());
+                } else {
+                    sampleConfigurer.defineSample(i, viirsSpectralBandNames[i].replace(".", "_"),
+                            getSourceProduct());
+                }
             }
+        } else {
+            // should never happen
+            throw new OperatorException("Source product has no valid VIIRS spectral bands - please check.");
         }
 
-        sampleConfigurer.defineSample(ViirsConstants.VIIRS_L1B_NUM_SPECTRAL_BANDS+1,
+        sampleConfigurer.defineSample(viirsSpectralBandNames.length+1,
                                       IdepixConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
     }
 
@@ -153,20 +157,20 @@ public class ViirsClassificationOp extends PixelOperator {
     }
 
     private ViirsAlgorithm createViirsAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        final double[] reflectance = new double[ViirsConstants.VIIRS_L1B_NUM_SPECTRAL_BANDS];
+        final double[] reflectance = new double[viirsSpectralBandNames.length];
         double[] neuralNetOutput;
 
         float waterFraction = Float.NaN;
 
         ViirsAlgorithm viirsAlgorithm = new ViirsAlgorithm();
-        for (int i = 0; i < ViirsConstants.VIIRS_L1B_NUM_SPECTRAL_BANDS; i++) {
+        for (int i = 0; i < viirsSpectralBandNames.length; i++) {
             reflectance[i] = sourceSamples[i].getFloat();
         }
         viirsAlgorithm.setRefl(reflectance);
         // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
         if (getGeoPos(x, y).lat > -58f) {
             waterFraction =
-                    sourceSamples[ViirsConstants.VIIRS_L1B_NUM_SPECTRAL_BANDS + 1].getFloat();
+                    sourceSamples[viirsSpectralBandNames.length + 1].getFloat();
         }
         viirsAlgorithm.setWaterFraction(waterFraction);
 

@@ -92,6 +92,20 @@ public class IdepixConstants {
 
     public static final float[] PROBAV_WAVELENGTHS = {462.0f, 655.5f, 843.0f, 1599.0f};
 
+    public static final String[] VIRRS_SNPP_BAND_NAMES =
+            new String[]{"rhot_410", "rhot_443", "rhot_486", "rhot_551", "rhot_671",
+                    "rhot_745", "rhot_862", "rhot_1238", "rhot_1601", "rhot_2257"};
+
+    public static final String[] VIRRS_NOAA20_BAND_NAMES =
+            new String[]{"rhot_411", "rhot_445", "rhot_489", "rhot_556", "rhot_667",
+                    "rhot_746", "rhot_868", "rhot_1238", "rhot_1604", "rhot_2258"};
+
+    // todo: check these
+    public static final String[] VIRRS_NOAA21_BAND_NAMES =
+            new String[]{"rhot_411", "rhot_445", "rhot_489", "rhot_556", "rhot_667",
+                    "rhot_746", "rhot_868", "rhot_1238", "rhot_1604", "rhot_2258"};
+
+
     public static final String INPUT_INCONSISTENCY_ERROR_MESSAGE =
             "Selected cloud screening algorithm cannot be used with given input product. \n\n" +
                     "Supported sensors are: MERIS, SPOT VGT, MODIS, Landsat-8, SeaWiFS, Sentinel-2 MSI, " +
