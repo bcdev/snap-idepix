@@ -142,10 +142,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.11.0</version>
                     <configuration>
-                        <source>11</source>
-                        <target>11</target>
+                        <source>21</source>
+                        <target>21</target>
                     </configuration>
                 </plugin>
 
@@ -179,7 +179,7 @@
 
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.0.2</version>
+                    <version>3.4.0</version>
                     <configuration>
                         <archive>
                             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
@@ -189,7 +189,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M4</version>
+                    <version>3.2.5</version>
                     <configuration>
                         <enableAssertions>false</enableAssertions>
                         <!--<skip>true</skip>-->
