@@ -16,17 +16,19 @@
 
 package org.esa.snap.idepix.olci;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.tensorflow.ndarray.FloatNdArray;
+import org.tensorflow.ndarray.NdArrays;
 import org.tensorflow.ndarray.StdArrays;
-import org.tensorflow.proto.DataType;
 import org.tensorflow.types.TFloat32;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.tensorflow.ndarray.StdArrays.copyTo;
+import static org.tensorflow.ndarray.StdArrays.shapeOf;
 
 public class TensorflowNNCalculatorTest {
 
@@ -57,6 +59,23 @@ public class TensorflowNNCalculatorTest {
         assertEquals(1.2295055f, result[0][0], 1.E-6);
         float ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
         System.out.println("ctp for I7x24x24x24xO1 = " + ctp);
+    }
+
+    @Test
+    public void testNNTensorflowApplyModel_fromAuxdataInstalled_performance() {
+        final long startTime = System.currentTimeMillis();
+
+        // the standard setup
+        String modelDir = auxdataPath + File.separator + CtpOp.DEFAULT_TENSORFLOW_NN_DIR_NAME;
+        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none");
+
+        float[][] result = nntest.calculate(input);
+        assertEquals(1.2295055f, result[0][0], 1.E-6);
+        float ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
+        System.out.println("ctp for I7x24x24x24xO1 = " + ctp);
+
+        final long endTime = System.currentTimeMillis();
+        System.out.println("total time = " + (endTime - startTime)/1000.);
     }
 
     @Test
@@ -130,7 +149,6 @@ public class TensorflowNNCalculatorTest {
 
             modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x10xO1").getFile()).getAbsolutePath();
             nntest = new TensorflowNNCalculator(modelDir, "none");
-//            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
             nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
             firstNodeNameFromBinary = nntest.getFirstNodeName();
             lastNodeNameFromBinary = nntest.getLastNodeName();
@@ -144,7 +162,6 @@ public class TensorflowNNCalculatorTest {
 
             modelDir = new File(getClass().getResource("nn_training_20190131_I7x32x64x64x64xO1").getFile()).getAbsolutePath();
             nntest = new TensorflowNNCalculator(modelDir, "none");
-//            nntest.setFirstAndLastNodeNameFromBinaryProtocolBuffer(nntest.getModel());
             nntest.setFirstAndLastNodeNameFromTextProtocolBuffer();
             firstNodeNameFromBinary = nntest.getFirstNodeName();
             lastNodeNameFromBinary = nntest.getLastNodeName();
@@ -174,36 +191,38 @@ public class TensorflowNNCalculatorTest {
         // https://github.com/tensorflow/java/blob/master/tensorflow-core/tensorflow-core-api/src/test/java/org/tensorflow/TensorTest.java
         // https://github.com/tensorflow/java/blob/master/tensorflow-core/tensorflow-core-api/src/test/java/org/tensorflow/SessionTest.java
 
-        float[][] inputF = new float[][]{
-                {1.0f, 2.0f, 3.0f},
-                {9.0f, 8.0f, 7.0f}
-        };
-
-        // set up input tensor for TF run:
-        FloatNdArray fMatrix = StdArrays.ndCopyOf(inputF);
-
-        try (TFloat32 inputTensor = TFloat32.tensorOf(fMatrix)) {
-            assertEquals(TFloat32.class, inputTensor.type());
-            assertEquals(DataType.DT_FLOAT, inputTensor.dataType());
-            assertEquals(2, inputTensor.shape().numDimensions());
-            assertEquals(2, inputTensor.shape().size(0));
-            assertEquals(fMatrix, inputTensor);
-
-            // no TF run here, just set output tensor to input tensor. For runs see the *ApplyModel* tests.
-            TFloat32 outputTensor = inputTensor;
-
-            // extract result from output tensor:
-            int numPixels = (int) outputTensor.shape().get(0);
-            int numOutputVars = (int) outputTensor.shape().get(1);
-
-            float[][] m = new float[numPixels][numOutputVars];
-            for (int i = 0; i < numPixels; i++) {
-                for (int j = 0; j <numOutputVars; j++) {
-                    m[i][j] = outputTensor.getFloat(i, j);
-                }
+        float[][] inputF = new float[512*512][7];
+        for (int i = 0; i < inputF.length; i++) {
+            for (int j = 0; j < inputF[0].length; j++) {
+                inputF[i][j] = (i + j) *1.0f;
             }
-            Assert.assertArrayEquals(m, inputF);
         }
 
+        final long startTime = System.currentTimeMillis();
+        // set up input tensor for TF run:
+//        FloatNdArray fMatrix = StdArrays.ndCopyOf(inputF);
+        long intermediateTime = System.currentTimeMillis();
+        System.out.println("intermediateTime (1) testTensorflowUpdate = " + (intermediateTime - startTime)/1000.);
+
+        try (TFloat32 inputTensor1 = myNdCopyOf(inputF)) {
+            intermediateTime = System.currentTimeMillis();
+            System.out.println("intermediateTime (4) testTensorflowUpdate = " + (intermediateTime - startTime)/1000.);
+        }
+        intermediateTime = System.currentTimeMillis();
+        System.out.println("intermediateTime (5) testTensorflowUpdate = " + (intermediateTime - startTime)/1000.);
+
+        final long endTime = System.currentTimeMillis();
+        System.out.println("total time testTensorflowUpdate = " + (endTime - startTime)/1000.);
+
     }
+
+    private static TFloat32 myNdCopyOf(float[][] array) {
+        // does this make sense?
+        // see https://discuss.ai.google.dev/t/use-of-jvm-tensorflow-tensors-and-ndarrays/31058/7
+        FloatNdArray ndArray = NdArrays.ofFloats(shapeOf(array));
+        copyTo(array, ndArray);
+
+        return TFloat32.tensorOf(shapeOf(array));
+    }
+
 }

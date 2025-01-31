@@ -24,6 +24,8 @@ class TensorflowNNCalculator {
     private String lastNodeName;
     private SavedModelBundle model;
 
+    private TFloat32 inputTensorGlobal;
+
     /**
      * Provides NN result for given input, applying a neural net which is based on a tensorflow model .
      *
@@ -187,12 +189,14 @@ class TensorflowNNCalculator {
 
         FloatNdArray fMatrix = StdArrays.ndCopyOf(nnInput);
 
-        try (Session s = model.session()) {
-            try (
-                    final TFloat32 inputTensor = TFloat32.tensorOf(fMatrix);
-                    final Result result = s.runner().feed(firstNodeName, inputTensor).fetch(lastNodeName).run()
-            ) {
-                TFloat32 outputTensor = ((TFloat32) result.get(0));
+        final Session s = model.session();
+        final Session.Runner runner = s.runner();
+
+        try (
+                final TFloat32 inputTensor = TFloat32.tensorOf(fMatrix);
+                final Result result = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run()
+        ) {
+            TFloat32 outputTensor = ((TFloat32) result.get(0));
 
                 int numPixels = (int) outputTensor.shape().get(0);
                 int numOutputVars = (int) outputTensor.shape().get(1);
@@ -204,9 +208,6 @@ class TensorflowNNCalculator {
                     }
                 }
                 return m;
-            }
         }
     }
-
-
 }
