@@ -16,8 +16,15 @@
 
 package org.esa.snap.idepix.olci;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.tensorflow.Graph;
+import org.tensorflow.Output;
+import org.tensorflow.Session;
+import org.tensorflow.Tensor;
+import org.tensorflow.op.Ops;
+import org.tensorflow.op.linalg.MatMul;
 
 import java.io.File;
 
@@ -54,6 +61,24 @@ public class TensorflowNNCalculatorTest {
         float ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
         System.out.println("ctp for I7x24x24x24xO1 = " + ctp);
     }
+
+    @Test
+    public void testNNTensorflowApplyModel_fromAuxdataInstalled_performance() {
+        final long startTime = System.currentTimeMillis();
+
+        // the standard setup
+        String modelDir = auxdataPath + File.separator + CtpOp.DEFAULT_TENSORFLOW_NN_DIR_NAME;
+        TensorflowNNCalculator nntest = new TensorflowNNCalculator(modelDir, "none");
+
+        float[][] result = nntest.calculate(input);
+        assertEquals(1.2295055f, result[0][0], 1.E-6);
+        float ctp = TensorflowNNCalculator.convertNNResultToCtp(result[0][0]);
+        System.out.println("ctp for I7x24x24x24xO1 = " + ctp);
+
+        final long endTime = System.currentTimeMillis();
+        System.out.println("total time = " + (endTime - startTime)/1000.);
+    }
+
 
     @Test
     public void testNNTensorflowApplyModel() {
@@ -156,4 +181,48 @@ public class TensorflowNNCalculatorTest {
             fail();
         }
     }
+
+    @Test
+    public void testTensorflowCompute() {
+        float[][] inputF = new float[][]{
+                {1.0f, 2.0f, 3.0f},
+                {9.0f, 8.0f, 7.0f}
+        };
+
+        final long startTime = System.currentTimeMillis();
+        try (Tensor<?> inputTensor = Tensor.create(inputF);) {
+            assertEquals(2, inputTensor.shape().length);
+
+            // no TF run here, just set output tensor to input tensor. For runs see the *ApplyModel* tests.
+            Tensor outputTensor = inputTensor;
+
+            // extract result from output tensor:
+            long[] ts = outputTensor.shape();
+            int numPixels = (int) ts[0];
+            int numOutputVars = (int) ts[1];
+            float[][] m = new float[numPixels][numOutputVars];
+            outputTensor.copyTo(m);
+            Assert.assertArrayEquals(m, inputF);
+        }
+        final long endTime = System.currentTimeMillis();
+        System.out.println("total time testTensorflowCompute = " + (endTime - startTime)/1000.);
+
+    }
+
+    @Test
+    public void testTensorCreate() {
+        float[][] inputF = new float[512*512][7];
+        for (int i = 0; i < inputF.length; i++) {
+            for (int j = 0; j < inputF[0].length; j++) {
+                inputF[i][j] = (i + j) *1.0f;
+            }
+        }
+
+        final long startTime = System.currentTimeMillis();
+
+        final Tensor<?> inputTensor = Tensor.create(inputF);
+        long intermediateTime = System.currentTimeMillis();
+        System.out.println("intermediateTime (2) testTensorOf = " + (intermediateTime - startTime)/1000.);
+    }
+
 }
