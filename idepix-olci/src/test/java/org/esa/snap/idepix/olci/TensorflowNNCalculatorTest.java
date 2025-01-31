@@ -16,13 +16,17 @@
 
 package org.esa.snap.idepix.olci;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.tensorflow.ndarray.FloatNdArray;
+import org.tensorflow.ndarray.StdArrays;
+import org.tensorflow.proto.DataType;
+import org.tensorflow.types.TFloat32;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class TensorflowNNCalculatorTest {
 
@@ -155,5 +159,51 @@ public class TensorflowNNCalculatorTest {
             e.printStackTrace();
             fail();
         }
+    }
+
+    @Test
+    public void testTensorflowUpdate() {
+        // switch to new Java API:
+        // https://github.com/tensorflow/java/tree/master
+        // release 1.0.0, Dec 2024
+
+        // from the old API (deprecated):
+        // https://www.tensorflow.org/versions/r1.15/api_docs/java/reference/org/tensorflow/package-summary
+
+        // see relevant unit tests at:
+        // https://github.com/tensorflow/java/blob/master/tensorflow-core/tensorflow-core-api/src/test/java/org/tensorflow/TensorTest.java
+        // https://github.com/tensorflow/java/blob/master/tensorflow-core/tensorflow-core-api/src/test/java/org/tensorflow/SessionTest.java
+
+        float[][] inputF = new float[][]{
+                {1.0f, 2.0f, 3.0f},
+                {9.0f, 8.0f, 7.0f}
+        };
+
+        // set up input tensor for TF run:
+        FloatNdArray fMatrix = StdArrays.ndCopyOf(inputF);
+
+        try (TFloat32 inputTensor = TFloat32.tensorOf(fMatrix)) {
+            assertEquals(TFloat32.class, inputTensor.type());
+            assertEquals(DataType.DT_FLOAT, inputTensor.dataType());
+            assertEquals(2, inputTensor.shape().numDimensions());
+            assertEquals(2, inputTensor.shape().size(0));
+            assertEquals(fMatrix, inputTensor);
+
+            // no TF run here, just set output tensor to input tensor. For runs see the *ApplyModel* tests.
+            TFloat32 outputTensor = inputTensor;
+
+            // extract result from output tensor:
+            int numPixels = (int) outputTensor.shape().get(0);
+            int numOutputVars = (int) outputTensor.shape().get(1);
+
+            float[][] m = new float[numPixels][numOutputVars];
+            for (int i = 0; i < numPixels; i++) {
+                for (int j = 0; j <numOutputVars; j++) {
+                    m[i][j] = outputTensor.getFloat(i, j);
+                }
+            }
+            Assert.assertArrayEquals(m, inputF);
+        }
+
     }
 }

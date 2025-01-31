@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>idepix-olci</artifactId>
-    <version>11.0.1</version>
+    <version>11.0.2</version>
 
     <packaging>nbm</packaging>
     
@@ -118,8 +118,26 @@
 
         <dependency>
             <groupId>org.tensorflow</groupId>
-            <artifactId>tensorflow</artifactId>
-            <version>1.15.0</version>
+            <artifactId>tensorflow-core-api</artifactId>
+            <version>1.0.0-rc.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow-core-native</artifactId>
+            <version>1.0.0-rc.2</version>
+            <classifier>linux-x86_64-gpu</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow-core-native</artifactId>
+            <version>1.0.0-rc.2</version>
+            <classifier>macosx-arm64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow-core-native</artifactId>
+            <version>1.0.0-rc.2</version>
+            <classifier>windows-x86_64</classifier>
         </dependency>
 
         <dependency>
@@ -133,21 +151,6 @@
             <artifactId>junit</artifactId>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.tensorflow</groupId>-->
-            <!--<artifactId>proto</artifactId>-->
-            <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
-            <!--<version>1.9.0-rc1</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>com.google.protobuf</groupId>-->
-            <!--<artifactId>protobuf-java</artifactId>-->
-            <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
-            <!--<version>3.5.1</version>-->
-            <!--&lt;!&ndash;<version>2.6.1</version>&ndash;&gt;-->
-        <!--</dependency>-->
-
     </dependencies>
 
     <build>
@@ -155,6 +158,14 @@
             <plugin>
                 <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>9</source>
+                    <target>9</target>
+                </configuration>
             </plugin>
 
         </plugins>

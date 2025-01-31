@@ -1,9 +1,9 @@
 package org.esa.snap.idepix.olci;
 
-import org.tensorflow.SavedModelBundle;
-import org.tensorflow.Session;
-import org.tensorflow.Tensor;
-import org.tensorflow.TensorFlow;
+import org.tensorflow.*;
+import org.tensorflow.ndarray.FloatNdArray;
+import org.tensorflow.ndarray.StdArrays;
+import org.tensorflow.types.TFloat32;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -133,7 +133,7 @@ class TensorflowNNCalculator {
             }
         } else {
             throw new IllegalStateException("Cannot access Tensorflow text protocol buffer file in specified folder: "
-                                                    + modelDir);
+                    + modelDir);
         }
     }
 
@@ -147,13 +147,10 @@ class TensorflowNNCalculator {
     }
 
     /**
-     * Applies NN to vector and returns converted array.
-     * Functional implementation of setNnTensorInput(.) plus getNNResult().
-     * Makes sure the Tensors are closed after use.
+     * Wrapper for TF computation
      * Requires that loadModel() is run once before.
      *
-     * @param nnInput - input vector for neural net
-     *
+     * @param nnInput - 1D input vector for neural net, converted to 2D
      * @return float[][] - the converted result array
      */
     float[][] calculate(float[] nnInput) {
@@ -164,7 +161,11 @@ class TensorflowNNCalculator {
      * Applies NN to vector of pixel band stacks and returns converted array.
      * Functional implementation of setNnTensorInput(.) plus getNNResult().
      * Makes sure the Tensors are closed after use.
-     * Requires that loadModel() is run once before.
+     * NOTE: switched to new Java API:
+     *       https://github.com/tensorflow/java/tree/master
+     *       release 1.0.0, Dec 2024
+     *       from the old API (deprecated):
+     *       https://www.tensorflow.org/versions/r1.15/api_docs/java/reference/org/tensorflow/package-summary
      *
      * @param nnInput - image vector of band vectors, band vectors are input for neural net
      * @return float[][] - image vector of output band vector (length 1)
@@ -183,17 +184,27 @@ class TensorflowNNCalculator {
                 }
             }
         }
-        final Session.Runner runner = model.session().runner();
-        try (
-                Tensor<?> inputTensor = Tensor.create(nnInput);
-                Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
-        ) {
-            long[] ts = outputTensor.shape();
-            int numPixels = (int) ts[0];
-            int numOutputVars = (int) ts[1];
-            float[][] m = new float[numPixels][numOutputVars];
-            outputTensor.copyTo(m);
-            return m;
+
+        FloatNdArray fMatrix = StdArrays.ndCopyOf(nnInput);
+
+        try (Session s = model.session()) {
+            try (
+                    final TFloat32 inputTensor = TFloat32.tensorOf(fMatrix);
+                    final Result result = s.runner().feed(firstNodeName, inputTensor).fetch(lastNodeName).run()
+            ) {
+                TFloat32 outputTensor = ((TFloat32) result.get(0));
+
+                int numPixels = (int) outputTensor.shape().get(0);
+                int numOutputVars = (int) outputTensor.shape().get(1);
+
+                float[][] m = new float[numPixels][numOutputVars];
+                for (int i = 0; i < numPixels; i++) {
+                    for (int j = 0; j < numOutputVars; j++) {
+                        m[i][j] = outputTensor.getFloat(i, j);
+                    }
+                }
+                return m;
+            }
         }
     }
 
