@@ -38,6 +38,16 @@
         <opttbx.version>12.0.0-SNAPSHOT</opttbx.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>tensorflow-snapshots</id>
+            <url>https://repo1.mvn.org.com/maven2/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -120,10 +130,34 @@
             <version>1.1.1</version>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>org.tensorflow</groupId>-->
+<!--            <artifactId>tensorflow</artifactId>-->
+<!--            <version>1.15.0</version>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>org.tensorflow</groupId>
-            <artifactId>tensorflow</artifactId>
-            <version>1.15.0</version>
+            <artifactId>tensorflow-core-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow-core-native</artifactId>
+            <version>1.0.0</version>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow-core-native</artifactId>
+            <version>1.0.0</version>
+            <classifier>macosx-arm64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow-core-native</artifactId>
+            <version>1.0.0</version>
+            <classifier>windows-x86_64</classifier>
         </dependency>
 
         <dependency>
@@ -144,13 +178,15 @@
             <!--<version>1.9.0-rc1</version>-->
         <!--</dependency>-->
 
-        <!--<dependency>-->
-            <!--<groupId>com.google.protobuf</groupId>-->
-            <!--<artifactId>protobuf-java</artifactId>-->
-            <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
-            <!--<version>3.5.1</version>-->
-            <!--&lt;!&ndash;<version>2.6.1</version>&ndash;&gt;-->
-        <!--</dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.google.protobuf</groupId>-->
+<!--            <artifactId>protobuf-java</artifactId>-->
+<!--            &lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+<!--&lt;!&ndash;            <version>3.5.1</version>&ndash;&gt;-->
+<!--&lt;!&ndash;            <version>3.21.9</version>&ndash;&gt;-->
+<!--            <version>4.29.3</version>-->
+<!--            &lt;!&ndash;<version>2.6.1</version>&ndash;&gt;-->
+<!--        </dependency>-->
 
     </dependencies>
 

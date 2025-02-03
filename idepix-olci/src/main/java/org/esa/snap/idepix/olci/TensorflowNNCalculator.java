@@ -1,9 +1,9 @@
 package org.esa.snap.idepix.olci;
 
-import org.tensorflow.SavedModelBundle;
-import org.tensorflow.Session;
-import org.tensorflow.Tensor;
-import org.tensorflow.TensorFlow;
+import org.tensorflow.*;
+import org.tensorflow.ndarray.FloatNdArray;
+import org.tensorflow.ndarray.StdArrays;
+import org.tensorflow.types.TFloat32;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,15 +34,15 @@ class TensorflowNNCalculator {
      */
     TensorflowNNCalculator(String modelDir, String transformMethod) {
         // init of TensorFlow can fail, so we should handle this and give appropriate error message
-        try {
-            TensorFlow.version(); // triggers init of TensorFlow
-        } catch (LinkageError e) {
-            throw new IllegalStateException(
-                    "TensorFlow could not be initialised. " +
-                            "Make sure that your CPU supports 64Bit and AVX instruction set " +
-                            "(Are you using a VM?) and that you have installed the Microsoft Visual C++ 2015 " +
-                            "Redistributable when you are on windows.", e);
-        }
+//        try {
+//            TensorFlow.version(); // triggers init of TensorFlow
+//        } catch (LinkageError e) {
+//            throw new IllegalStateException(
+//                    "TensorFlow could not be initialised. " +
+//                            "Make sure that your CPU supports 64Bit and AVX instruction set " +
+//                            "(Are you using a VM?) and that you have installed the Microsoft Visual C++ 2015 " +
+//                            "Redistributable when you are on windows.", e);
+//        }
 
         this.transformMethod = transformMethod;
         this.modelDir = modelDir;
@@ -183,19 +183,29 @@ class TensorflowNNCalculator {
                 }
             }
         }
-        final Session.Runner runner = model.session().runner();
+
+        FloatNdArray fMatrix = StdArrays.ndCopyOf(nnInput);
+
+        final Session s = model.session();
+        final Session.Runner runner = s.runner();
+
         try (
-                Tensor<?> inputTensor = Tensor.create(nnInput);
-                Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
+                final TFloat32 inputTensor = TFloat32.tensorOf(fMatrix);
+                final Result result = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run()
         ) {
-            long[] ts = outputTensor.shape();
-            int numPixels = (int) ts[0];
-            int numOutputVars = (int) ts[1];
+            TFloat32 outputTensor = ((TFloat32) result.get(0));
+
+            int numPixels = (int) outputTensor.shape().get(0);
+            int numOutputVars = (int) outputTensor.shape().get(1);
+
             float[][] m = new float[numPixels][numOutputVars];
-            outputTensor.copyTo(m);
+            for (int i = 0; i < numPixels; i++) {
+                for (int j = 0; j < numOutputVars; j++) {
+                    m[i][j] = outputTensor.getFloat(i, j);
+                }
+            }
             return m;
         }
     }
-
 
 }

@@ -18,11 +18,16 @@ package org.esa.snap.idepix.olci;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.tensorflow.ndarray.FloatNdArray;
+import org.tensorflow.ndarray.NdArrays;
+import org.tensorflow.types.TFloat32;
 
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.tensorflow.ndarray.StdArrays.copyTo;
+import static org.tensorflow.ndarray.StdArrays.shapeOf;
 
 public class TensorflowNNCalculatorTest {
 
@@ -156,4 +161,52 @@ public class TensorflowNNCalculatorTest {
             fail();
         }
     }
+
+    @Test
+    public void testTensorflowUpdate() {
+        // switch to new Java API:
+        // https://github.com/tensorflow/java/tree/master
+        // release 1.0.0, Dec 2024
+
+        // from the old API (deprecated):
+        // https://www.tensorflow.org/versions/r1.15/api_docs/java/reference/org/tensorflow/package-summary
+
+        // see relevant unit tests at:
+        // https://github.com/tensorflow/java/blob/master/tensorflow-core/tensorflow-core-api/src/test/java/org/tensorflow/TensorTest.java
+        // https://github.com/tensorflow/java/blob/master/tensorflow-core/tensorflow-core-api/src/test/java/org/tensorflow/SessionTest.java
+
+        float[][] inputF = new float[512*512][7];
+        for (int i = 0; i < inputF.length; i++) {
+            for (int j = 0; j < inputF[0].length; j++) {
+                inputF[i][j] = (i + j) *1.0f;
+            }
+        }
+
+        final long startTime = System.currentTimeMillis();
+        // set up input tensor for TF run:
+//        FloatNdArray fMatrix = StdArrays.ndCopyOf(inputF);
+        long intermediateTime = System.currentTimeMillis();
+        System.out.println("intermediateTime (1) testTensorflowUpdate = " + (intermediateTime - startTime)/1000.);
+
+        try (TFloat32 inputTensor1 = myNdCopyOf(inputF)) {
+            intermediateTime = System.currentTimeMillis();
+            System.out.println("intermediateTime (4) testTensorflowUpdate = " + (intermediateTime - startTime)/1000.);
+        }
+        intermediateTime = System.currentTimeMillis();
+        System.out.println("intermediateTime (5) testTensorflowUpdate = " + (intermediateTime - startTime)/1000.);
+
+        final long endTime = System.currentTimeMillis();
+        System.out.println("total time testTensorflowUpdate = " + (endTime - startTime)/1000.);
+
+    }
+
+    private static TFloat32 myNdCopyOf(float[][] array) {
+        // does this make sense?
+        // see https://discuss.ai.google.dev/t/use-of-jvm-tensorflow-tensors-and-ndarrays/31058/7
+        FloatNdArray ndArray = NdArrays.ofFloats(shapeOf(array));
+        copyTo(array, ndArray);
+
+        return TFloat32.tensorOf(shapeOf(array));
+    }
+
 }
