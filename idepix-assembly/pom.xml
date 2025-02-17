@@ -27,7 +27,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
-            <version>11.0.0</version>
+            <version>11.0.1</version>
             <type>nbm</type>
         </dependency>
         <dependency>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-olci</artifactId>
-            <version>11.0.0</version>
+            <version>11.0.1</version>
             <type>nbm</type>
         </dependency>
         <!-- mp: Shall not be released -->
@@ -95,7 +95,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-viirs</artifactId>
-            <version>11.0.0</version>
+            <version>11.0.1</version>
             <type>nbm</type>
         </dependency>
     </dependencies>

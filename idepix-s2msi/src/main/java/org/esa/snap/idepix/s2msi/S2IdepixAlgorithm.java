@@ -16,7 +16,8 @@ public class S2IdepixAlgorithm {
     static final float WATER_THRESH = 0.9f;
 
     static final float BRIGHTWHITE_THRESH = 1.5f;
-    static final float NDSI_THRESH = 0.6f;
+//    static final float NDSI_THRESH = 0.6f;
+    static final float NDSI_THRESH = 0.15f;  // JW, 20250217
     //    static final float BRIGHT_THRESH = 0.25f;
     static final float BRIGHT_THRESH = 0.45f;      // JW, GK 20220825
     static final float BRIGHT_FOR_WHITE_THRESH = 0.8f;
@@ -40,7 +41,8 @@ public class S2IdepixAlgorithm {
     private double clThresh;
     private boolean isInvalid;
 
-    static final float TC1_THRESH = 0.36f;
+//    static final float TC1_THRESH = 0.36f;
+    static final float TC1_THRESH = 0.2f;  // JW, 20250217
 
     private double lat;
     static final float ELEVATION_SNOW_THRESH = 3000.0f;
