@@ -63,6 +63,12 @@ public class CtpOp extends BasisOp {
             label = "Path to alternative NN to use")
     private String alternativeCtpNNDir;
 
+    @Parameter(defaultValue = "true",
+            label = " If selected, harmonized radiances are taken from O2 product and used in NN input",
+            description = " If selected, harmonized radiances are taken from O2 product and used in NN input ")
+    private boolean useO2HarmonizedRadiancesForNN;
+
+
     static final String DEFAULT_TENSORFLOW_NN_DIR_NAME = "nn_training_20190131_I7x30x30x30x10x2xO1";
 
     private TiePointGrid szaBand;
@@ -212,7 +218,7 @@ public class CtpOp extends BasisOp {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
             Map<String, Object> o2corrParms = new HashMap<>();
             o2corrParms.put("processOnlyBand13", false);
-            o2corrParms.put("writeHarmonisedRadiances", false);
+            o2corrParms.put("writeHarmonisedRadiances", useO2HarmonizedRadiancesForNN);
             o2corrSourceProducts.put("l1bProduct", sourceProduct);
             final String o2CorrOpName = "OlciO2aHarmonisation";
             o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
