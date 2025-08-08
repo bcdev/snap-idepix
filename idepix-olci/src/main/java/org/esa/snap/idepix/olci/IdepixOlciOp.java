@@ -141,6 +141,7 @@ public class IdepixOlciOp extends BasisOp {
                     "Slower, but in general more precise.")
     private boolean useSrtmLandWaterMask;
 
+    private Product l1bProductToProcess;
 
     private Product classificationProduct;
     private Product postProcessingProduct;
@@ -221,7 +222,7 @@ public class IdepixOlciOp extends BasisOp {
         IdepixOlciUtils.setupOlciClassifBitmask(targetProduct);
 
         if (outputRadiance) {
-            IdepixIO.addRadianceBands(sourceProduct, targetProduct, radianceBandsToCopy);
+            IdepixIO.addRadianceBands(l1bProductToProcess, targetProduct, radianceBandsToCopy);
         }
         if (outputRad2Refl) {
             IdepixOlciUtils.addOlciRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
@@ -259,7 +260,17 @@ public class IdepixOlciOp extends BasisOp {
             }
         }
 
-        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
+        if (useO2HarmonizedRadiancesForNN) {
+            Map<String, Product> l1bO2MergeSourceProducts = new HashMap<>();
+            Map<String, Object> emptyParms = new HashMap<>();
+            l1bO2MergeSourceProducts.put("l1bProduct", sourceProduct);
+            l1bO2MergeSourceProducts.put("o2harmoProduct", o2CorrProduct);
+            l1bProductToProcess = GPF.createProduct("IdepixOlciMergeO2Harmonize", emptyParms, l1bO2MergeSourceProducts);
+        } else {
+            l1bProductToProcess = sourceProduct;
+        }
+
+        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(l1bProductToProcess);
     }
 
     private void setClassificationParameters() {
@@ -281,7 +292,7 @@ public class IdepixOlciOp extends BasisOp {
 
     private void setClassificationInputProducts() {
         classificationInputProducts = new HashMap<>();
-        classificationInputProducts.put("l1b", sourceProduct);
+        classificationInputProducts.put("l1b", l1bProductToProcess);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
         if (considerCloudsOverSnow) {
             classificationInputProducts.put("o2Corr", o2CorrProduct);
@@ -290,7 +301,7 @@ public class IdepixOlciOp extends BasisOp {
 
     private void postProcess(Product olciIdepixProduct) {
         HashMap<String, Product> input = new HashMap<>();
-        input.put("l1b", sourceProduct);
+        input.put("l1b", l1bProductToProcess);
         input.put("ctp", ctpProduct);
         input.put("olciCloud", olciIdepixProduct);
 

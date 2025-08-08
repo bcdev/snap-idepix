@@ -125,16 +125,6 @@ public class IdepixOlciClassificationOp extends Operator {
 
     private Band[] olciReflBands;
 
-    private Band solarFlux13Band;
-    private Band solarFlux14Band;
-    private Band solarFlux15Band;
-
-    private RasterDataNode szaBand;
-
-    private Band harmoRad13Band;
-    private Band harmoRad14Band;
-    private Band harmoRad15Band;
-
     private Band surface13Band;
     private Band trans13Band;
 
@@ -188,15 +178,6 @@ public class IdepixOlciClassificationOp extends Operator {
         initLakeSeaIceClassification();
 
         if (o2CorrProduct != null) {
-            szaBand = l1bProduct.getRasterDataNode("SZA");
-
-            solarFlux13Band = l1bProduct.getBand("solar_flux_band_13");
-            solarFlux14Band = l1bProduct.getBand("solar_flux_band_14");
-            solarFlux15Band = l1bProduct.getBand("solar_flux_band_15");
-
-            harmoRad13Band = l1bProduct.getBand("radiance_13");
-            harmoRad14Band = l1bProduct.getBand("radiance_14");
-            harmoRad15Band = l1bProduct.getBand("radiance_15");
             surface13Band = o2CorrProduct.getBand("surface_13");
             trans13Band = o2CorrProduct.getBand("trans_13");
             gf = new GeometryFactory();
@@ -300,39 +281,6 @@ public class IdepixOlciClassificationOp extends Operator {
             trans13Tile = getSourceTile(trans13Band, rectangle);
         }
 
-        Tile szaTile = null;
-        if (szaBand != null) {
-            szaTile = getSourceTile(szaBand, rectangle);
-        }
-
-        Tile solarFlux13Tile = null;
-        if (solarFlux13Band != null) {
-            solarFlux13Tile = getSourceTile(solarFlux13Band, rectangle);
-        }
-        Tile solarFlux14Tile = null;
-        if (solarFlux14Band != null) {
-            solarFlux14Tile = getSourceTile(solarFlux14Band, rectangle);
-        }
-        Tile solarFlux15Tile = null;
-        if (solarFlux15Band != null) {
-            solarFlux15Tile = getSourceTile(solarFlux15Band, rectangle);
-        }
-
-        Tile harmoRad13Tile = null;
-        if (harmoRad13Band != null) {
-            harmoRad13Tile = getSourceTile(harmoRad13Band, rectangle);
-        }
-
-        Tile harmoRad14Tile = null;
-        if (harmoRad14Band != null) {
-            harmoRad14Tile = getSourceTile(harmoRad14Band, rectangle);
-        }
-
-        Tile harmoRad15Tile = null;
-        if (harmoRad15Band != null) {
-            harmoRad15Tile = getSourceTile(harmoRad15Band, rectangle);
-        }
-
         final Band olciQualityFlagBand = l1bProduct.getBand(IdepixOlciConstants.OLCI_QUALITY_FLAGS_BAND_NAME);
         final Tile olciQualityFlagTile = getSourceTile(olciQualityFlagBand, rectangle);
 
@@ -374,16 +322,10 @@ public class IdepixOlciClassificationOp extends Operator {
                     // todo: for cglops, coastlines are treated as LAND
                     if ((isLandFromAppliedMask && !isInlandWaterFromAppliedMask) || isCoastlineFromAppliedMask) {
                         classifyOverLand(olciReflectanceTiles, cloudFlagTargetTile, nnTargetTile,
-                                surface13Tile, trans13Tile,
-                                solarFlux13Tile, solarFlux14Tile, solarFlux15Tile,
-                                harmoRad13Tile, harmoRad14Tile, harmoRad15Tile,
-                                szaTile, x, y);
+                                surface13Tile, trans13Tile, x, y);
                     } else {
                         classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
-                                cloudFlagTargetTile, nnTargetTile,
-                                solarFlux13Tile, solarFlux14Tile, solarFlux15Tile,
-                                harmoRad13Tile, harmoRad14Tile, harmoRad15Tile,
-                                szaTile, x, y, isInlandWaterFromAppliedMask);
+                                cloudFlagTargetTile, nnTargetTile, x, y, isInlandWaterFromAppliedMask);
                     }
                 }
             }
@@ -399,16 +341,10 @@ public class IdepixOlciClassificationOp extends Operator {
     }
 
     private void classifyOverWater(Tile olciQualityFlagTile, Tile[] olciReflectanceTiles,
-                                   Tile cloudFlagTargetTile, Tile nnTargetTile,
-                                   Tile solarFlux13Tile, Tile solarFlux14Tile, Tile solarFlux15Tile,
-                                   Tile harmoRad13Tile, Tile harmoRad14Tile, Tile harmoRad15Tile,
-                                   Tile szaTile, int x, int y, boolean isInlandWater) {
+                                   Tile cloudFlagTargetTile, Tile nnTargetTile, int x, int y, boolean isInlandWater) {
 
-        final double[] o2HarmoRefls = getO2HarmoReflectances(solarFlux13Tile, solarFlux14Tile, solarFlux15Tile,
-                harmoRad13Tile, harmoRad14Tile, harmoRad15Tile, szaTile, x, y);
 
-        final double nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles, o2HarmoRefls);
-
+        double nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles);
         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
@@ -458,14 +394,9 @@ public class IdepixOlciClassificationOp extends Operator {
     private void classifyOverLand(Tile[] olciReflectanceTiles,
                                   Tile cloudFlagTargetTile, Tile nnTargetTile,
                                   Tile surface13Tile, Tile trans13Tile,
-                                  Tile solarFlux13Tile, Tile solarFlux14Tile, Tile solarFlux15Tile,
-                                  Tile harmoRad13Tile, Tile harmoRad14Tile, Tile harmoRad15Tile,
-                                  Tile szaTile, int x, int y) {
+                                  int x, int y) {
 
-        final double[] o2HarmoRefls = getO2HarmoReflectances(solarFlux13Tile, solarFlux14Tile, solarFlux15Tile,
-                harmoRad13Tile, harmoRad14Tile, harmoRad15Tile, szaTile, x, y);
-
-        final double nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles, o2HarmoRefls);
+        final double nnOutput = getOlciNNOutput(x, y, olciReflectanceTiles);
 
         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
@@ -524,32 +455,6 @@ public class IdepixOlciClassificationOp extends Operator {
         }
     }
 
-    private static double[] getO2HarmoReflectances(Tile solarFlux13Tile, Tile solarFlux14Tile, Tile solarFlux15Tile, Tile harmoRad13Tile, Tile harmoRad14Tile, Tile harmoRad15Tile, Tile szaTile, int x, int y) {
-        float sza;
-        float sf13;
-        float sf14;
-        float sf15;
-        float harmoRad13;
-        float harmoRad14;
-        float harmoRad15;
-        if (szaTile != null && solarFlux13Tile != null && solarFlux14Tile != null && solarFlux15Tile != null &&
-                harmoRad13Tile != null && harmoRad14Tile != null && harmoRad15Tile != null) {
-            sza = szaTile.getSampleFloat(x, y);
-            sf13 = solarFlux13Tile.getSampleFloat(x, y);
-            sf14 = solarFlux14Tile.getSampleFloat(x, y);
-            sf15 = solarFlux15Tile.getSampleFloat(x, y);
-            harmoRad13 = harmoRad13Tile.getSampleFloat(x, y);
-            harmoRad14 = harmoRad14Tile.getSampleFloat(x, y);
-            harmoRad15 = harmoRad15Tile.getSampleFloat(x, y);
-
-            final double harmoRefl13 = RsMathUtils.radianceToReflectance(harmoRad13, sza, sf13);
-            final double harmoRefl14 = RsMathUtils.radianceToReflectance(harmoRad14, sza, sf14);
-            final double harmoRefl15 = RsMathUtils.radianceToReflectance(harmoRad15, sza, sf15);
-            return new double[]{harmoRefl13, harmoRefl14, harmoRefl15};
-        }
-        return null;
-    }
-
     private boolean isOlciLandPixel(int x, int y, Tile olciL1bFlagTile, int waterFraction) {
         if (waterFraction < 0) {
             boolean landFlag = olciL1bFlagTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_LAND);
@@ -597,7 +502,7 @@ public class IdepixOlciClassificationOp extends Operator {
         }
     }
 
-    private double getOlciNNOutput(int x, int y, Tile[] rhoToaTiles, double[] o2HarmoRefls) {
+    private double getOlciNNOutput(int x, int y, Tile[] rhoToaTiles) {
         SchillerNeuralNetWrapper nnWrapper;
         try {
             nnWrapper = olciAllNeuralNet.get();
@@ -607,11 +512,6 @@ public class IdepixOlciClassificationOp extends Operator {
         double[] nnInput = nnWrapper.getInputVector();
         for (int i = 0; i < nnInput.length; i++) {
             nnInput[i] = Math.sqrt(rhoToaTiles[i].getSampleFloat(x, y));
-        }
-        if (o2HarmoRefls != null) {
-            for (int i = 0; i < 3; i++) {
-                nnInput[i + 12] = Math.sqrt(o2HarmoRefls[i]);
-            }
         }
         return nnWrapper.getNeuralNet().calc(nnInput)[0];
     }
