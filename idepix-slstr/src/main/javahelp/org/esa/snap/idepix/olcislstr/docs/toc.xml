@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='ISO-8859-1'  ?>
+<!DOCTYPE toc
+        PUBLIC
+        "-//Sun Microsystems Inc.//DTD
+     JavaHelp TOC Version 2.0//EN"
+        "http://java.sun.com/products/javahelp/toc_2_0.dtd">
+
+<toc version="2.0" categoryclosedimage="folder" categoryopenimage="folder" topicimage="doc">
+
+    <tocitem text="Sentinel Toolbox Application">
+        <tocitem text="Optical">
+            <tocitem text="Preprocessing">
+                <tocitem text="Masking">
+                    <tocitem text="IdePix (Sentinel-3 SLSTR)" target="snapIdepixSlstrTool">
+                        <tocitem text="SLSTR Processor Description" target="snapIdepixSlstrProcessorDescription"/>
+                        <tocitem text="SLSTR Algorithm Specification" target="snapIdepixSlstrAlgorithmSpecification"/>
+                        <tocitem text="SLSTR Command Line Processing" target="snapIdepixSlstrCommandLine"/>
+                    </tocitem>
+                </tocitem>
+            </tocitem>
+        </tocitem>
+    </tocitem>
+</toc>

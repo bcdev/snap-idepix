@@ -37,24 +37,6 @@
     <!-- AVHRR and OLCI/SLSTR currently deactivated, 20190621 -->
     <!-- AATSR is also still experimental, 20220630 -->
     <!-- c3solcislstr is also only for project internal use, 20221215 -->
-    <modules>
-        <module>idepix-core</module>
-        <!--        <module>idepix-aatsr</module>-->
-        <!--        <module>idepix-avhrr</module>-->
-        <module>idepix-landsat8</module>
-        <module>idepix-meris</module>
-        <module>idepix-modis</module>
-        <module>idepix-olci</module>
-        <!--        <module>idepix-olcislstr</module>-->
-        <!--        <module>idepix-c3solcislstr</module>-->
-        <module>idepix-probav</module>
-        <module>idepix-s2msi</module>
-        <module>idepix-seawifs</module>
-        <module>idepix-spotvgt</module>
-        <module>idepix-viirs</module>
-<!--        <module>idepix-assembly</module>-->
-    </modules>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -208,6 +190,25 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <modules>
+        <module>idepix-core</module>
+        <!--        <module>idepix-aatsr</module>-->
+        <!--        <module>idepix-avhrr</module>-->
+        <module>idepix-landsat8</module>
+        <module>idepix-meris</module>
+        <module>idepix-modis</module>
+        <module>idepix-olci</module>
+        <!--        <module>idepix-olcislstr</module>-->
+        <!--        <module>idepix-c3solcislstr</module>-->
+        <module>idepix-slstr</module>
+        <module>idepix-probav</module>
+        <module>idepix-s2msi</module>
+        <module>idepix-seawifs</module>
+        <module>idepix-spotvgt</module>
+        <module>idepix-viirs</module>
+        <!--        <module>idepix-assembly</module>-->
+    </modules>
 
     <reporting>
         <plugins>
