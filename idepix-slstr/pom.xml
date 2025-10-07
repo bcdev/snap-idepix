@@ -1,0 +1,168 @@
+<!--
+  ~ Copyright (C) 2019 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.esa.snap</groupId>
+        <artifactId>snap-idepix</artifactId>
+        <version>12.0.0</version>
+    </parent>
+
+    <artifactId>idepix-slstr</artifactId>
+    <version>12.0.0</version>
+
+    <packaging>nbm</packaging>
+
+    <name>IdePix Slstr</name>
+    <description>
+        Classification of pixels (cloud, snow, ice, land, water) originating from SLSTR L1b products.
+    </description>
+
+    <properties>
+        <idepix-core.version>12.0.0</idepix-core.version>
+        <opttbx.version>12.0.0</opttbx.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>idepix-core</artifactId>
+            <version>${idepix-core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-binding</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-glayer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-jai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gpf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-netcdf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-envisat-reader</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-watermask</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-csv-dataio</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-raster</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-rad2refl</artifactId>
+            <version>${opttbx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-olci-preprocessing</artifactId>
+            <version>${opttbx.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow</artifactId>
+            <version>1.15.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.haifengl</groupId>
+            <artifactId>smile-core</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+
+        <!--<dependency>-->
+        <!--<groupId>org.tensorflow</groupId>-->
+        <!--<artifactId>proto</artifactId>-->
+        <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+        <!--<version>1.9.0-rc1</version>-->
+        <!--</dependency>-->
+
+        <!--<dependency>-->
+        <!--<groupId>com.google.protobuf</groupId>-->
+        <!--<artifactId>protobuf-java</artifactId>-->
+        <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+        <!--<version>3.5.1</version>-->
+        <!--&lt;!&ndash;<version>2.6.1</version>&ndash;&gt;-->
+        <!--</dependency>-->
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.netbeans.utilities</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
