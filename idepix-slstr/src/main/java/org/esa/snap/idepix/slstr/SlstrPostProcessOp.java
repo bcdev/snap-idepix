@@ -85,10 +85,10 @@ public class SlstrPostProcessOp extends Operator {
         oaaTPG = l1bProduct.getRasterDataNode("OAA");
         slpTPG = l1bProduct.getRasterDataNode("sea_level_pressure");
 
-        altBand = l1bProduct.getBand(SlstrConstants.OLCI_ALTITUDE_BAND_NAME);
+        altBand = l1bProduct.getBand(IdepixSlstrConstants.OLCI_ALTITUDE_BAND_NAME);
 
-        temperatureProfileTPGs = new RasterDataNode[SlstrConstants.referencePressureLevels.length];
-        for (int i = 0; i < SlstrConstants.referencePressureLevels.length; i++) {
+        temperatureProfileTPGs = new RasterDataNode[IdepixSlstrConstants.referencePressureLevels.length];
+        for (int i = 0; i < IdepixSlstrConstants.referencePressureLevels.length; i++) {
             temperatureProfileTPGs[i] =
                     l1bProduct.getRasterDataNode("atmospheric_temperature_profile_pressure_level_" + (i + 1));
         }

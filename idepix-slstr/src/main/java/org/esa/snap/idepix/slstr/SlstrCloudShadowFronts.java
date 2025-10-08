@@ -201,7 +201,7 @@ class SlstrCloudShadowFronts {
         final double cloudHeightMax = 12_000;
         final double cloudDistanceMax = cloudHeightMax / tanSza;
 
-        final double saaApparent = SlstrUtils.computeApparentSaa(sza, saa, oza, oaa);
+        final double saaApparent = IdepixSlstrUtils.computeApparentSaa(sza, saa, oza, oaa);
         final double saaRadApparent = Math.toRadians(saaApparent);
 
 
@@ -249,7 +249,7 @@ class SlstrCloudShadowFronts {
                     for (int i = 0; i < temperature.length; i++) {
                         temperature[i] = temperatureProfileTPGTiles[i].getSampleDouble(xCurrent, yCurrent);
                     }
-                    final float cloudHeight = (float) SlstrUtils.getRefinedHeightFromCtp(ctp, slp, temperature);
+                    final float cloudHeight = (float) IdepixSlstrUtils.getRefinedHeightFromCtp(ctp, slp, temperature);
                     if (cloudSearchHeight <= cloudHeight + 300) {
                         // cloud thickness should also be at least 300m (OD, 2012/08/02)
                         float cloudBase = cloudHeight - 300.0f;

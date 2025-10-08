@@ -5,7 +5,7 @@ package org.esa.snap.idepix.slstr;
  *
  * @author olafd
  */
-class SlstrConstants {
+class IdepixSlstrConstants {
 
     /* Level 1 Quality Flags Positions */
     static final int L1_F_LAND = 31;
@@ -19,7 +19,6 @@ class SlstrConstants {
     static final String OLCI_QUALITY_FLAGS_BAND_NAME = "quality_flags";
     static final String SLSTR_CLOUD_AN_FLAG_BAND_NAME = "cloud_an";
 
-    // todo: RENOVATION: code duplication, move to core
     static final double[] referencePressureLevels = {
             1000., 950., 925., 900., 850., 800., 700.,
             600., 500., 400., 300., 250., 200., 150.,

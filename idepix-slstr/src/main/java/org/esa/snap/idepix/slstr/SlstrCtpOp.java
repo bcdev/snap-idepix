@@ -83,7 +83,7 @@ public class SlstrCtpOp extends BasisOp {
 
         String auxdataPath;
         try {
-            auxdataPath = SlstrUtils.installAuxdataNNCtp();
+            auxdataPath = IdepixSlstrUtils.installAuxdataNNCtp();
         } catch (IOException e) {
             e.printStackTrace();
             throw new OperatorException("Cannot install CTP NN auxdata:" + e.getMessage());
@@ -152,7 +152,7 @@ public class SlstrCtpOp extends BasisOp {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
 
-                final boolean pixelIsValid = !l1FlagsTile.getSampleBit(x, y, SlstrConstants.L1_F_INVALID);
+                final boolean pixelIsValid = !l1FlagsTile.getSampleBit(x, y, IdepixSlstrConstants.L1_F_INVALID);
                 if (pixelIsValid) {
                     // Preparing input data...
                     final float sza = szaTile.getSampleFloat(x, y);
