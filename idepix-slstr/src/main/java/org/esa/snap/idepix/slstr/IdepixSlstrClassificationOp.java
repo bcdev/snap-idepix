@@ -67,9 +67,6 @@ public class IdepixSlstrClassificationOp extends Operator {
     @SourceProduct(alias = "reflSlstr")
     private Product slstrRad2reflProduct;
 
-    @SourceProduct(alias = "waterMask")
-    private Product waterMaskProduct;
-
 
     @TargetProduct(description = "The target product.")
     Product targetProduct;

@@ -19,7 +19,7 @@ import java.io.IOException;
  *
  * @author olafd
  */
-class SlstrTensorflowNNCalculator {
+class IdepixSlstrTensorflowNNCalculator {
 
     private final String modelDir;
     private final String transformMethod;
@@ -36,7 +36,7 @@ class SlstrTensorflowNNCalculator {
      * @param transformMethod - the input transformation method. Supported values are 'sqrt' and 'log',
      *                        otherwise this is ignored.
      */
-    SlstrTensorflowNNCalculator(String modelDir, String transformMethod) {
+    IdepixSlstrTensorflowNNCalculator(String modelDir, String transformMethod) {
         // init of TensorFlow can fail, so we should handle this and give appropriate error message
         try {
             TensorFlow.version(); // triggers init of TensorFlow

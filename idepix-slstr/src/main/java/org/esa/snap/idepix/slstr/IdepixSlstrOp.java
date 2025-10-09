@@ -41,7 +41,7 @@ public class IdepixSlstrOp extends BasisOp {
     private Product sourceProduct;
 
     private boolean outputRadiance;
-    private boolean outputRad2Refl;
+    private boolean outputRad2Refl = false;  // todo: discuss
 
     @Parameter(description = "The list of SLSTR radiance bands to write to target product.",
             label = "Select SLSTR TOA radiances to write to the target product",
@@ -77,7 +77,7 @@ public class IdepixSlstrOp extends BasisOp {
 //            label = " Use SRTM Land/Water mask",
 //            description = "If selected, SRTM Land/Water mask is used instead of L1b land flag. " +
 //                    "Slower, but in general more precise.")
-    private boolean useSrtmLandWaterMask = true;
+//    private boolean useSrtmLandWaterMask = true;
 
     private Product l1bProductToProcess;
 
@@ -89,8 +89,6 @@ public class IdepixSlstrOp extends BasisOp {
     private Map<String, Product> classificationInputProducts;
     private Map<String, Object> classificationParameters;
 
-    private boolean considerCloudsOverSnow;
-
     @Override
     public void initialize() throws OperatorException {
 
@@ -99,21 +97,7 @@ public class IdepixSlstrOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
 
-        final Geometry productGeometry = IdepixSlstrUtils.computeProductGeometry(sourceProduct);
-        if (productGeometry != null) {
-            final Polygon arcticPolygon =
-                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ARCTIC_POLYGON_COORDS);
-            final Polygon antarcticaPolygon =
-                    IdepixOlciUtils.createPolygonFromCoordinateArray(IdepixOlciConstants.ANTARCTICA_POLYGON_COORDS);
-            considerCloudsOverSnow =
-                    productGeometry.intersects(arcticPolygon) || productGeometry.intersects(antarcticaPolygon);
-            arcticPolygon.contains(productGeometry);
-        } else {
-            throw new OperatorException("Product geometry is null - cannot proceed.");
-        }
-
-        outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
-        outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
+        outputRadiance = slstrRadianceBandsToCopy != null && slstrRadianceBandsToCopy.length > 0;
 
         preProcess();
 
@@ -126,7 +110,7 @@ public class IdepixSlstrOp extends BasisOp {
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
-        if (computeCloudBuffer || computeMountainShadow || computeCloudShadow) {
+        if (computeCloudBuffer) {
             postProcess(olciIdepixProduct);
         }
 
@@ -155,21 +139,14 @@ public class IdepixSlstrOp extends BasisOp {
         targetProduct.setStartTime(idepixProduct.getStartTime());
         targetProduct.setEndTime(idepixProduct.getEndTime());
 
-        IdepixOlciUtils.setupOlciClassifBitmask(targetProduct);
+        IdepixSlstrUtils.setupSlstrClassifBitmask(targetProduct);
 
         if (outputRadiance) {
-            IdepixIO.addRadianceBands(l1bProductToProcess, targetProduct, radianceBandsToCopy);
-        }
-        if (outputRad2Refl) {
-            IdepixOlciUtils.addOlciRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
+            IdepixIO.addRadianceBands(l1bProductToProcess, targetProduct, slstrRadianceBandsToCopy);
         }
 
         if (outputSchillerNNValue) {
             ProductUtils.copyBand(IdepixConstants.NN_OUTPUT_BAND_NAME, idepixProduct, targetProduct, true);
-        }
-
-        if (computeCloudShadow && outputCtp) {
-            ProductUtils.copyBand(IdepixConstants.CTP_OUTPUT_BAND_NAME, ctpProduct, targetProduct, true);
         }
 
         return targetProduct;
@@ -177,78 +154,38 @@ public class IdepixSlstrOp extends BasisOp {
 
 
     private void preProcess() {
-
-        if (considerCloudsOverSnow || computeCloudShadow || useO2HarmonizedRadiancesForNN) {
-            Map<String, Product> o2corrSourceProducts = new HashMap<>();
-            Map<String, Object> o2corrParms = new HashMap<>();
-            o2corrParms.put("processOnlyBand13", false);
-            o2corrParms.put("writeHarmonisedRadiances", useO2HarmonizedRadiancesForNN);
-            o2corrSourceProducts.put("l1bProduct", sourceProduct);
-            final String o2CorrOpName = "OlciO2aHarmonisation";
-            o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
-
-            if (computeCloudShadow) {
-                ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
-                        o2CorrProduct,
-                        alternativeCtpNNDir,
-                        outputCtp,
-                        useO2HarmonizedRadiancesForNN);
-            }
-        }
-
-        if (useO2HarmonizedRadiancesForNN) {
-            Map<String, Product> l1bO2MergeSourceProducts = new HashMap<>();
-            Map<String, Object> emptyParms = new HashMap<>();
-            l1bO2MergeSourceProducts.put("l1bProduct", sourceProduct);
-            l1bO2MergeSourceProducts.put("o2harmoProduct", o2CorrProduct);
-            l1bProductToProcess = GPF.createProduct("IdepixOlciMergeO2Harmonize", emptyParms, l1bO2MergeSourceProducts);
-        } else {
-            l1bProductToProcess = sourceProduct;
-        }
-
-        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(l1bProductToProcess);
+        l1bProductToProcess = sourceProduct;
+        rad2reflProduct = IdepixSlstrUtils.computeRadiance2ReflectanceProduct(l1bProductToProcess);
     }
 
     private void setClassificationParameters() {
         classificationParameters = new HashMap<>();
-        classificationParameters.put("copyAllTiePoints", true);
         classificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
-        classificationParameters.put("alternativeNNFile", alternativeNNFile);
-        classificationParameters.put("alternativeNNThresholdsFile", alternativeNNThresholdsFile);
-        classificationParameters.put("useSrtmLandWaterMask", useSrtmLandWaterMask);
         classificationParameters.put("useLakeAndSeaIceClimatology", useLakeAndSeaIceClimatology);
-        classificationParameters.put("useO2HarmonizedRadiancesForNN", useO2HarmonizedRadiancesForNN);
     }
 
     private void computeCloudProduct() {
         setClassificationParameters();
-        classificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciClassificationOp.class),
+        classificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixSlstrClassificationOp.class),
                 classificationParameters, classificationInputProducts);
     }
 
     private void setClassificationInputProducts() {
         classificationInputProducts = new HashMap<>();
         classificationInputProducts.put("l1b", l1bProductToProcess);
-        classificationInputProducts.put("rhotoa", rad2reflProduct);
-        if (considerCloudsOverSnow) {
-            classificationInputProducts.put("o2Corr", o2CorrProduct);
-        }
+        classificationInputProducts.put("reflSlstr", rad2reflProduct);
     }
 
-    private void postProcess(Product olciIdepixProduct) {
+    private void postProcess(Product slstrIdepixProduct) {
         HashMap<String, Product> input = new HashMap<>();
         input.put("l1b", l1bProductToProcess);
-        input.put("ctp", ctpProduct);
-        input.put("olciCloud", olciIdepixProduct);
+        input.put("slstrCloud", slstrIdepixProduct);
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
-        params.put("computeCloudShadow", computeCloudShadow);
-        params.put("computeMountainShadow", computeMountainShadow);
-        params.put("mntShadowExtent", mntShadowExtent);
 
-        postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixOlciPostProcessOp.class),
+        postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(IdepixSlstrPostProcessOp.class),
                 params, input);
     }
 
