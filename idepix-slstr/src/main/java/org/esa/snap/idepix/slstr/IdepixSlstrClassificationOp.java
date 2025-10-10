@@ -155,7 +155,7 @@ public class IdepixSlstrClassificationOp extends Operator {
         for (int i = 0; i < Rad2ReflConstants.SLSTR_REFL_BAND_NAMES.length; i++) {
             final int suffixStart = Rad2ReflConstants.SLSTR_REFL_BAND_NAMES[i].indexOf("_");
             final String reflBandname = Rad2ReflConstants.SLSTR_REFL_BAND_NAMES[i].substring(0, suffixStart);
-            slstrReflBands[i] = slstrRad2reflProduct.getBand(reflBandname + "_reflectance");
+            slstrReflBands[i] = slstrRad2reflProduct.getBand(reflBandname + "_reflectance_an");
         }
     }
 
@@ -249,11 +249,11 @@ public class IdepixSlstrClassificationOp extends Operator {
         }
     }
 
-    private double classifyOverLand(Tile[] olciReflectanceTiles,
+    private double classifyOverLand(Tile[] slstrReflectanceTiles,
                                   Tile cloudFlagTargetTile, Tile nnTargetTile,
                                   int x, int y) {
 
-        final double nnOutput = getSlstrNNOutput(x, y, olciReflectanceTiles);
+        final double nnOutput = getSlstrNNOutput(x, y, slstrReflectanceTiles);
 
         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);

@@ -41,18 +41,31 @@ public class IdepixSlstrOp extends BasisOp {
     private Product sourceProduct;
 
     private boolean outputRadiance;
-    private boolean outputRad2Refl = false;  // todo: discuss
+    private boolean outputRad2Refl;
 
     @Parameter(description = "The list of SLSTR radiance bands to write to target product.",
             label = "Select SLSTR TOA radiances to write to the target product",
             valueSet = {
                     "S1_radiance_an", "S2_radiance_an", "S3_radiance_an",
-                    "S4_radiance_an", "S5_radiance_an", "S6_radiance_an",
-                    "S4_radiance_bn", "S5_radiance_bn", "S6_radiance_bn",
-                    "S4_radiance_cn", "S5_radiance_cn", "S6_radiance_cn"
+                    "S4_radiance_an", "S5_radiance_an", "S6_radiance_an"
             },
             defaultValue = "")
     private String[] slstrRadianceBandsToCopy;
+
+    @Parameter(description = "The list of SLSTR reflectance bands to write to target product.",
+            label = "Select SLSTR TOA radiances to write to the target product",
+            valueSet = {
+                    "s1_reflectance_an", "s2_reflectance_an", "s3_reflectance_an",
+                    "s4_reflectance_an", "s5_reflectance_an", "s6_reflectance_an"
+            },
+            defaultValue = "")
+    private String[] slstrReflectanceBandsToCopy;
+
+    // bands for NN input (make configurable):
+//    's1_reflectance_an','s2_reflectance_an',
+//            's3_reflectance_an','s4_reflectance_an',
+//            's5_reflectance_an','s6_reflectance_an',
+//            's7_bt_in','s8_bt_in','s9_bt_in'
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product",
@@ -98,6 +111,7 @@ public class IdepixSlstrOp extends BasisOp {
         }
 
         outputRadiance = slstrRadianceBandsToCopy != null && slstrRadianceBandsToCopy.length > 0;
+        outputRad2Refl = slstrReflectanceBandsToCopy != null && slstrReflectanceBandsToCopy.length > 0;
 
         preProcess();
 
@@ -106,7 +120,7 @@ public class IdepixSlstrOp extends BasisOp {
 
         Product olciIdepixProduct = classificationProduct;
         olciIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
-        olciIdepixProduct.setAutoGrouping("Oa*_radiance:Oa*_reflectance");
+        olciIdepixProduct.setAutoGrouping("s*_radiance:s*_reflectance");
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
@@ -143,6 +157,10 @@ public class IdepixSlstrOp extends BasisOp {
 
         if (outputRadiance) {
             IdepixIO.addRadianceBands(l1bProductToProcess, targetProduct, slstrRadianceBandsToCopy);
+        }
+
+        if (outputRad2Refl) {
+            IdepixSlstrUtils.addSlstrRadiance2ReflectanceBands(rad2reflProduct, targetProduct, slstrReflectanceBandsToCopy);
         }
 
         if (outputSchillerNNValue) {
