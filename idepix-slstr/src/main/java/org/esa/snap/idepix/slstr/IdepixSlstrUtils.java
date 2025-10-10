@@ -44,7 +44,7 @@ class IdepixSlstrUtils {
         for (int i = 1; i <= Rad2ReflConstants.SLSTR_REFL_BAND_NAMES.length; i++) {
             for (String bandname : reflBandsToCopy) {
                 // e.g. s1_reflectance_an
-                if (!targetProduct.containsBand(bandname) && bandname.startsWith("s" + String.format("%01d", i) + "_reflectance")) {
+                if (!targetProduct.containsBand(bandname) && bandname.startsWith("S" + String.format("%01d", i) + "_reflectance")) {
                     ProductUtils.copyBand(bandname, rad2reflProduct, targetProduct, true);
                     targetProduct.getBand(bandname).setUnit("dl");
                 }

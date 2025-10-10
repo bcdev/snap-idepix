@@ -55,17 +55,17 @@ public class IdepixSlstrOp extends BasisOp {
     @Parameter(description = "The list of SLSTR reflectance bands to write to target product.",
             label = "Select SLSTR TOA radiances to write to the target product",
             valueSet = {
-                    "s1_reflectance_an", "s2_reflectance_an", "s3_reflectance_an",
-                    "s4_reflectance_an", "s5_reflectance_an", "s6_reflectance_an"
+                    "S1_reflectance_an", "S2_reflectance_an", "S3_reflectance_an",
+                    "S4_reflectance_an", "S5_reflectance_an", "S6_reflectance_an"
             },
             defaultValue = "")
     private String[] slstrReflectanceBandsToCopy;
 
     // bands for NN input (make configurable):
-//    's1_reflectance_an','s2_reflectance_an',
-//            's3_reflectance_an','s4_reflectance_an',
-//            's5_reflectance_an','s6_reflectance_an',
-//            's7_bt_in','s8_bt_in','s9_bt_in'
+//    'S1_reflectance_an','S2_reflectance_an',
+//            'S3_reflectance_an','S4_reflectance_an',
+//            'S5_reflectance_an','S6_reflectance_an',
+//            'S7_bt_in','S8_bt_in','S9_bt_in'
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product",
@@ -120,7 +120,7 @@ public class IdepixSlstrOp extends BasisOp {
 
         Product olciIdepixProduct = classificationProduct;
         olciIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
-        olciIdepixProduct.setAutoGrouping("s*_radiance:s*_reflectance");
+        olciIdepixProduct.setAutoGrouping("S*_radiance:s*_reflectance");
 
         ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
 
