@@ -3,6 +3,7 @@ package org.esa.snap.idepix.slstr;
 import eu.esa.opt.processor.rad2refl.Rad2ReflConstants;
 import eu.esa.opt.processor.rad2refl.Rad2ReflOp;
 import eu.esa.opt.processor.rad2refl.Sensor;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -11,11 +12,16 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 
+import javax.media.jai.Interpolation;
+import javax.media.jai.operator.ScaleDescriptor;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * Utility class for IdePix OLCI
+ * Utility class for IdePix SLSTR
  *
  * @author olafd
  */
@@ -57,6 +63,44 @@ class IdepixSlstrUtils {
         params.put("sensor", Sensor.SLSTR_500m);
         params.put("copyNonSpectralBands", false);
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
+    }
+
+    static Band[] getL1bBandsForClassification(String[] slstrBandsForNN,
+                                               Product l1bRadProduct,
+                                               Product l1bReflProduct) {
+
+        List<Band> l1bBandsForClassificationList = new ArrayList<>();
+        for (String s : slstrBandsForNN) {
+            final String bandNameForNN = s.toLowerCase();
+            if (bandNameForNN.contains("_bt_")) {
+                // get BT from radiance product
+                for (Band band : l1bRadProduct.getBands()) {
+                    if (bandNameForNN.equals(band.getName().toLowerCase())) {
+                        // upscale BT band by factor 2 to get same size as refl images
+                        BufferedImage upscaledImage = resizeSlstrBtImage(band.getSourceImage().getAsBufferedImage(),
+                                2.0f, 2.0f,
+                                Interpolation.getInstance(Interpolation.INTERP_BICUBIC));
+                        Band upscaledBand = new Band(band.getName().toLowerCase(), band.getDataType(),
+                                band.getRasterWidth() * 2, band.getRasterHeight() * 2);
+                        upscaledBand.setSourceImage(upscaledImage);
+                        l1bBandsForClassificationList.add(upscaledBand);
+                    }
+                }
+            } else {
+                // get reflectance from rad2refl product
+                for (Band band : l1bReflProduct.getBands()) {
+                    if (bandNameForNN.equals(band.getName().toLowerCase())) {
+                        l1bBandsForClassificationList.add(band);
+                    }
+                }
+            }
+        }
+
+        return l1bBandsForClassificationList.toArray(new Band[0]);
+    }
+
+    static BufferedImage resizeSlstrBtImage(BufferedImage sourceImage, float rescaleXfactor, float rescaleYfactor, Interpolation interp) {
+        return ScaleDescriptor.create(sourceImage, rescaleXfactor, rescaleYfactor, 0.0f, 0.0f, interp, null).getAsBufferedImage();
     }
 
 }

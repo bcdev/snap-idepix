@@ -35,29 +35,28 @@ class IdepixSlstrCloudNNInterpreter {
         return new IdepixSlstrCloudNNInterpreter();
     }
 
-    boolean isCloudAmbiguous(double nnValue) {
-        return SEMI_TRANS_CLOUD_BOUNDS.contains(nnValue) || SPATIAL_MIXED_BOUNDS_LAND.contains(nnValue);
+    boolean isCloudAmbiguous(double nnValue, boolean isLand, boolean considerGlint) {
+        if (isLand) {
+            return NNThreshold.SEMI_TRANS_CLOUD_BOUNDS.range.contains(nnValue) ||
+                    NNThreshold.SPATIAL_MIXED_BOUNDS_LAND.range.contains(nnValue);
+        } else {
+            if (considerGlint) {
+                return NNThreshold.SEMI_TRANS_CLOUD_BOUNDS.range.contains(nnValue) ||
+                        NNThreshold.SPATIAL_MIXED_BOUNDS_WATER_GLINT.range.contains(nnValue);
+            } else {
+                return NNThreshold.SEMI_TRANS_CLOUD_BOUNDS.range.contains(nnValue) ||
+                        NNThreshold.SPATIAL_MIXED_BOUNDS_WATER_NOGLINT.range.contains(nnValue);
+            }
+        }
     }
 
     boolean isCloudSure(double nnValue) {
-        return OPAQUE_CLOUD_BOUNDS.contains(nnValue);
+        return NNThreshold.OPAQUE_CLOUD_BOUNDS.range.contains(nnValue);
     }
 
     boolean isSnowIce(double nnValue) {
-        return CLEAR_SNOW_ICE_BOUNDS.contains(nnValue);
-    }
+        return NNThreshold.CLEAR_SNOW_ICE_BOUNDS.range.contains(nnValue);
 
-    boolean isGlint(double nnValue) {
-        // always false with boundaries above. todo: discuss
-        return SPATIAL_MIXED_BOUNDS_WATER_GLINT.contains(nnValue);
-    }
-
-    boolean isClearLand(double nnValue) {
-        return CLEAR_LAND_BOUNDS.contains(nnValue);
-    }
-
-    boolean isClearWater(double nnValue) {
-        return CLEAR_WATER_BOUNDS.contains(nnValue);
     }
 
     public enum NNThreshold {

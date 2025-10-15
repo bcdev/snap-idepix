@@ -2,7 +2,6 @@ package org.esa.snap.idepix.slstr;
 
 import com.bc.ceres.binding.ValueRange;
 import com.bc.ceres.core.ProgressMonitor;
-import eu.esa.opt.processor.rad2refl.Rad2ReflConstants;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -46,6 +45,21 @@ import static org.esa.snap.idepix.slstr.IdepixSlstrCloudNNInterpreter.NNThreshol
         description = "IdePix pixel classification operator for SLSTR synergy.")
 public class IdepixSlstrClassificationOp extends Operator {
 
+    @Parameter(description = "The list of SLSTR bands to use as input for the classification NN.",
+            label = "Select SLSTR bands for the classification NN",
+            valueSet = {
+                    "S1_reflectance_an", "S2_reflectance_an", "S3_reflectance_an",
+                    "S4_reflectance_an", "S5_reflectance_an", "S6_reflectance_an",
+                    "S1_reflectance_ao", "S2_reflectance_ao", "S3_reflectance_ao",
+                    "S4_reflectance_ao", "S5_reflectance_ao", "S6_reflectance_ao",
+                    "S4_reflectance_bn", "S5_reflectance_bn", "S6_reflectance_bn",
+                    "S4_reflectance_bo", "S5_reflectance_bo", "S6_reflectance_bo",
+                    "S7_bt_in", "S8_bt_in", "S9_bt_in",
+                    "S7_bt_io", "S8_bt_io", "S9_bt_io"
+            },
+            defaultValue = "")
+    private String[] slstrBandsForNN;
+
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product.",
             description = " If applied, write Schiller NN value to the target product ")
@@ -71,11 +85,11 @@ public class IdepixSlstrClassificationOp extends Operator {
     @TargetProduct(description = "The target product.")
     Product targetProduct;
 
-    private Band[] slstrReflBands;
+    private Band[] slstrL1bBands;
 
     private final boolean useSrtmLandWaterMask = true;
 
-    private ThreadLocal<SchillerNeuralNetWrapper> olciAllNeuralNet;
+    private ThreadLocal<SchillerNeuralNetWrapper> slstrNeuralNet;
 
     private IdepixSlstrCloudNNInterpreter nnInterpreter;
 
@@ -108,17 +122,17 @@ public class IdepixSlstrClassificationOp extends Operator {
     }
 
     private void readSchillerNeuralNets() {
-        InputStream olciAllInputStream;
+        InputStream slstrInputStream;
         try {
-            olciAllInputStream = getNNInputStream();
+            slstrInputStream = getNNInputStream();
         } catch (IOException e) {
             throw new OperatorException("Cannot read specified alternative Neural Net - please check!", e);
         }
-        olciAllNeuralNet = SchillerNeuralNetWrapper.create(olciAllInputStream);
+        slstrNeuralNet = SchillerNeuralNetWrapper.create(slstrInputStream);
     }
 
     void readNNThresholds() {
-        String SLSTR_NN_THRESHOLDS_FILE = "class-sequential-i21x42x8x4x2o1-5489-thresholds.json";
+        String SLSTR_NN_THRESHOLDS_FILE = "class-sequential-i9x32x16x8x4x2o1-5489-thresholds.json";
         try (Reader r = new InputStreamReader(Objects.requireNonNull(getClass().getResourceAsStream(SLSTR_NN_THRESHOLDS_FILE)))) {
             JSONObject m = (JSONObject) JSONValue.parse(r);
             for (NNThreshold t : NNThreshold.values()) {
@@ -139,7 +153,7 @@ public class IdepixSlstrClassificationOp extends Operator {
     }
 
     private InputStream getNNInputStream() throws IOException {
-        String SLSTR_NET_NAME = "class-sequential-i21x42x8x4x2o1-5489.net";
+        String SLSTR_NET_NAME = "class-sequential-i9x32x16x8x4x2o1-5489.net.md";
         return getClass().getResourceAsStream(SLSTR_NET_NAME);
     }
 
@@ -150,13 +164,7 @@ public class IdepixSlstrClassificationOp extends Operator {
     }
 
     private void setBands() {
-        // todo: clarify with JW which bands to use, then adapt
-        slstrReflBands = new Band[Rad2ReflConstants.SLSTR_REFL_BAND_NAMES.length];
-        for (int i = 0; i < Rad2ReflConstants.SLSTR_REFL_BAND_NAMES.length; i++) {
-            final int suffixStart = Rad2ReflConstants.SLSTR_REFL_BAND_NAMES[i].indexOf("_");
-            final String reflBandname = Rad2ReflConstants.SLSTR_REFL_BAND_NAMES[i].substring(0, suffixStart);
-            slstrReflBands[i] = slstrRad2reflProduct.getBand(reflBandname + "_reflectance_an");
-        }
+        slstrL1bBands = IdepixSlstrUtils.getL1bBandsForClassification(slstrBandsForNN, l1bProduct, slstrRad2reflProduct);
     }
 
     private void createTargetProduct() throws OperatorException {
@@ -185,9 +193,9 @@ public class IdepixSlstrClassificationOp extends Operator {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle rectangle, ProgressMonitor pm) throws OperatorException {
 
-        Tile[] slstrReflectanceTiles = new Tile[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
-        for (int i = 0; i < Rad2ReflConstants.SLSTR_REFL_BAND_NAMES.length; i++) {
-            slstrReflectanceTiles[i] = getSourceTile(slstrReflBands[i], rectangle);
+        Tile[] slstrL1bTiles = new Tile[slstrL1bBands.length];
+        for (int i = 0; i < slstrL1bBands.length; i++) {
+            slstrL1bTiles[i] = getSourceTile(slstrL1bBands[i], rectangle);
         }
 
         final Band cloudFlagTargetBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
@@ -207,7 +215,7 @@ public class IdepixSlstrClassificationOp extends Operator {
                         waterFraction = watermaskClassifier.getWaterMaskFraction(geoCoding, x, y);
                     }
 
-                    initCloudFlag(targetTiles.get(cloudFlagTargetBand), slstrReflectanceTiles, y, x);
+                    initCloudFlag(targetTiles.get(cloudFlagTargetBand), slstrL1bTiles, y, x);
                     final boolean isBright = false;  // todo: find a criterion
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, isBright);
                     final boolean isCoastlineFromAppliedMask = classifyCoastline(x, y, waterFraction);
@@ -218,9 +226,9 @@ public class IdepixSlstrClassificationOp extends Operator {
                             isCoastlineFromAppliedMask);
 
                     if (isLandFromAppliedMask || isCoastlineFromAppliedMask) {
-                        classifyOverLand(slstrReflectanceTiles, cloudFlagTargetTile, nnTargetTile, x, y);
+                        classifyOverLand(slstrL1bTiles, cloudFlagTargetTile, nnTargetTile, x, y);
                     } else {
-                        classifyOverWater(slstrReflectanceTiles, cloudFlagTargetTile, nnTargetTile, x, y);
+                        classifyOverWater(slstrL1bTiles, cloudFlagTargetTile, nnTargetTile, x, y);
                     }
                 }
             }
@@ -233,11 +241,11 @@ public class IdepixSlstrClassificationOp extends Operator {
         return waterFraction >= 0 && isCoastlinePixel(x, y, waterFraction);
     }
 
-    private void classifyOverWater(Tile[] slstrReflectanceTiles,
+    private void classifyOverWater(Tile[] slstrL1bTiles,
                                    Tile cloudFlagTargetTile, Tile nnTargetTile, int x, int y) {
 
         // basically the same as over land
-        final double nnOutput = classifyOverLand(slstrReflectanceTiles, cloudFlagTargetTile, nnTargetTile, x, y);
+        final double nnOutput = classifyOverLand(slstrL1bTiles, cloudFlagTargetTile, nnTargetTile, x, y);
 
         // additional check for ice
         final GeoPos geoPos = IdepixUtils.getGeoPos(l1bProduct.getSceneGeoCoding(), x, y);
@@ -249,11 +257,11 @@ public class IdepixSlstrClassificationOp extends Operator {
         }
     }
 
-    private double classifyOverLand(Tile[] slstrReflectanceTiles,
+    private double classifyOverLand(Tile[] slstrL1bTiles,
                                   Tile cloudFlagTargetTile, Tile nnTargetTile,
                                   int x, int y) {
 
-        final double nnOutput = getSlstrNNOutput(x, y, slstrReflectanceTiles);
+        final double nnOutput = getSlstrNNOutput(x, y, slstrL1bTiles);
 
         if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
@@ -262,7 +270,7 @@ public class IdepixSlstrClassificationOp extends Operator {
             cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
 
             boolean isCloudSure =  nnInterpreter.isCloudSure(nnOutput);
-            boolean isCloudAmbiguous = nnInterpreter.isCloudAmbiguous(nnOutput);
+            boolean isCloudAmbiguous = nnInterpreter.isCloudAmbiguous(nnOutput, true, false);
             boolean isCloud = isCloudAmbiguous || isCloudSure;
             boolean isSnowIce = nnInterpreter.isSnowIce(nnOutput);
 
@@ -299,16 +307,23 @@ public class IdepixSlstrClassificationOp extends Operator {
         }
     }
 
-    private double getSlstrNNOutput(int x, int y, Tile[] rhoToaTiles) {
+    private double getSlstrNNOutput(int x, int y, Tile[] l1bTiles) {
         SchillerNeuralNetWrapper nnWrapper;
         try {
-            nnWrapper = olciAllNeuralNet.get();
+            nnWrapper = slstrNeuralNet.get();
         } catch (Exception e) {
             throw new OperatorException("Cannot get values from Neural Net file - check format! " + e.getMessage());
         }
         double[] nnInput = nnWrapper.getInputVector();
         for (int i = 0; i < nnInput.length; i++) {
-            nnInput[i] = Math.sqrt(rhoToaTiles[i].getSampleFloat(x, y));
+            final float l1bValue = l1bTiles[i].getSampleFloat(x, y);
+            if (l1bValue > 100.0) {
+                // certainly a BT
+                nnInput[i] = l1bValue;
+            } else {
+                // certainly a reflectance
+                nnInput[i] = Math.sqrt(l1bValue);
+            }
         }
         return nnWrapper.getNeuralNet().calc(nnInput)[0];
     }
@@ -329,17 +344,19 @@ public class IdepixSlstrClassificationOp extends Operator {
                 waterFraction < 100 && waterFraction > 0;
     }
 
-    private void initCloudFlag(Tile targetTile, Tile[] slstrReflectanceTiles, int y, int x) {
+    private void initCloudFlag(Tile targetTile, Tile[] slstrl1bTiles, int y, int x) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
-        float[] slstrReflectances = new float[Rad2ReflConstants.SLSTR_REFL_BAND_NAMES.length];
-        for (int i = 0; i < Rad2ReflConstants.SLSTR_REFL_BAND_NAMES.length; i++) {
-            slstrReflectances[i] = slstrReflectanceTiles[i].getSampleFloat(x, y);
+        float[] slstrL1bValues = new float[slstrl1bTiles.length];
+        for (int i = 0; i < slstrl1bTiles.length; i++) {
+            slstrL1bValues[i] = slstrl1bTiles[i].getSampleFloat(x, y);
         }
 
         final boolean l1Invalid = false;  // todo: define how to set this
-        final boolean reflectancesValid = IdepixIO.areAllReflectancesValid(slstrReflectances);
+        // can be applied to both refls or BTs
+        final boolean reflectancesValid = IdepixIO.areAllReflectancesValid(slstrL1bValues);
 
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l1Invalid || !reflectancesValid);
+//        targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l1Invalid || !reflectancesValid);
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l1Invalid);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);

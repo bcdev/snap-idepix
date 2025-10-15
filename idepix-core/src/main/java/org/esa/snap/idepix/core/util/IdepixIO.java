@@ -180,10 +180,11 @@ public class IdepixIO {
                 !isValidViirsProduct(inputProduct) &&
                 !isValidMerisProduct(inputProduct) &&
                 !isValidOlciProduct(inputProduct) &&
+                !isValidSlstrProduct(inputProduct) &&
                 !isValidOlciSlstrSynergyProduct(inputProduct) &&
                 !isValidVgtProduct(inputProduct)) {
             IdepixUtils.logErrorMessage("Input sensor must be either Landsat-8, MERIS, AATSR, AVHRR, " +
-                    "OLCI, colocated OLCI/SLSTR, " +
+                    "OLCI, SLSTR, colocated OLCI/SLSTR, " +
                     "MODIS/SeaWiFS, PROBA-V or VGT!");
         }
         return true;
@@ -204,6 +205,11 @@ public class IdepixIO {
     private static boolean isValidOlciProduct(Product product) {
 //        return product.getProductType().startsWith("S3A_OL_");  // todo: clarify
         return product.getProductType().contains("OL_1");  // new products have product type 'OL_1_ERR'
+    }
+
+    private static boolean isValidSlstrProduct(Product product) {
+        // todo: clarify
+        return product.getProductType().startsWith("SL_1_");  // e.g. 'SL_1_RBT'
     }
 
     private static boolean isValidOlciSlstrSynergyProduct(Product product) {
@@ -331,6 +337,8 @@ public class IdepixIO {
                 return (isValidMerisProduct(sourceProduct));
             case OLCI:
                 return (isValidOlciProduct(sourceProduct));
+            case SLSTR:
+                return (isValidSlstrProduct(sourceProduct));
             case OLCISLSTR:
                 return (isValidOlciSlstrSynergyProduct(sourceProduct));
             case VGT:

@@ -109,7 +109,7 @@ public class IdepixConstants {
     public static final String INPUT_INCONSISTENCY_ERROR_MESSAGE =
             "Selected cloud screening algorithm cannot be used with given input product. \n\n" +
                     "Supported sensors are: MERIS, SPOT VGT, MODIS, Landsat-8, SeaWiFS, Sentinel-2 MSI, " +
-                    "Sentinel-3 OLCI, PROBA-V, VIIRS.";
+                    "Sentinel-3 OLCI, Sentinel-3 SLSTR, PROBA-V, VIIRS.";
 
     /**
      * A pattern which matches MERIS CC L1P product types

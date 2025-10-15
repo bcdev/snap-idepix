@@ -36,7 +36,7 @@
 
     <properties>
         <idepix-core.version>12.0.0</idepix-core.version>
-        <opttbx.version>12.0.0</opttbx.version>
+        <opttbx.version>12.0.1</opttbx.version>
     </properties>
 
     <dependencies>
@@ -105,6 +105,12 @@
         <dependency>
             <groupId>eu.esa.opt</groupId>
             <artifactId>opttbx-olci-preprocessing</artifactId>
+            <version>${opttbx.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-coregistration</artifactId>
             <version>${opttbx.version}</version>
         </dependency>
 

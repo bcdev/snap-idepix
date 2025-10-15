@@ -61,6 +61,21 @@ public class IdepixSlstrOp extends BasisOp {
             defaultValue = "")
     private String[] slstrReflectanceBandsToCopy;
 
+    @Parameter(description = "The list of SLSTR bands to use as input for the classification NN.",
+            label = "Select SLSTR bands for the classification NN",
+            valueSet = {
+                    "S1_reflectance_an", "S2_reflectance_an", "S3_reflectance_an",
+                    "S4_reflectance_an", "S5_reflectance_an", "S6_reflectance_an",
+                    "S1_reflectance_ao", "S2_reflectance_ao", "S3_reflectance_ao",
+                    "S4_reflectance_ao", "S5_reflectance_ao", "S6_reflectance_ao",
+                    "S4_reflectance_bn", "S5_reflectance_bn", "S6_reflectance_bn",
+                    "S4_reflectance_bo", "S5_reflectance_bo", "S6_reflectance_bo",
+                    "S7_bt_in", "S8_bt_in", "S9_bt_in",
+                    "S7_bt_io", "S8_bt_io", "S9_bt_io"
+            },
+            defaultValue = "")
+    private String[] slstrBandsForNN;
+
     // bands for NN input (make configurable):
 //    'S1_reflectance_an','S2_reflectance_an',
 //            'S3_reflectance_an','S4_reflectance_an',
@@ -105,9 +120,17 @@ public class IdepixSlstrOp extends BasisOp {
     @Override
     public void initialize() throws OperatorException {
 
-        final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.OLCI);
+        final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.SLSTR);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
+        }
+
+        if (slstrBandsForNN == null || slstrBandsForNN.length <= 0) {
+            slstrBandsForNN = new String[]{
+                    "S1_reflectance_an", "S2_reflectance_an", "S3_reflectance_an",
+                    "S4_reflectance_an", "S5_reflectance_an", "S6_reflectance_an",
+                    "S7_bt_in", "S8_bt_in", "S9_bt_in",
+            };
         }
 
         outputRadiance = slstrRadianceBandsToCopy != null && slstrRadianceBandsToCopy.length > 0;
@@ -118,18 +141,18 @@ public class IdepixSlstrOp extends BasisOp {
         setClassificationInputProducts();
         computeCloudProduct();
 
-        Product olciIdepixProduct = classificationProduct;
-        olciIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
-        olciIdepixProduct.setAutoGrouping("S*_radiance:s*_reflectance");
+        Product slstrIdepixProduct = classificationProduct;
+        slstrIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
+        slstrIdepixProduct.setAutoGrouping("S*_radiance:s*_reflectance");
 
-        ProductUtils.copyFlagBands(sourceProduct, olciIdepixProduct, true);
+//        ProductUtils.copyFlagBands(sourceProduct, slstrIdepixProduct, true);
 
         if (computeCloudBuffer) {
-            postProcess(olciIdepixProduct);
+            postProcess(slstrIdepixProduct);
         }
 
-        Product targetProduct = createTargetProduct(olciIdepixProduct);
-        targetProduct.setAutoGrouping(olciIdepixProduct.getAutoGrouping());
+        Product targetProduct = createTargetProduct(slstrIdepixProduct);
+        targetProduct.setAutoGrouping(slstrIdepixProduct.getAutoGrouping());
 
         if (postProcessingProduct != null) {
             Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
@@ -178,6 +201,7 @@ public class IdepixSlstrOp extends BasisOp {
 
     private void setClassificationParameters() {
         classificationParameters = new HashMap<>();
+        classificationParameters.put("slstrBandsForNN", slstrBandsForNN);
         classificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
         classificationParameters.put("useLakeAndSeaIceClimatology", useLakeAndSeaIceClimatology);
     }

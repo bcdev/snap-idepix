@@ -16,5 +16,6 @@ public enum AlgorithmSelector {
     MERIS,
     OLCI,
     OLCISLSTR,
+    SLSTR,
     VGT
 }
