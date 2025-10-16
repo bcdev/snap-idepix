@@ -41,16 +41,26 @@ public class IdepixSlstrOp extends BasisOp {
     private Product sourceProduct;
 
     private boolean outputRadiance;
+    private boolean outputBT;
     private boolean outputRad2Refl;
 
-    @Parameter(description = "The list of SLSTR radiance bands to write to target product.",
-            label = "Select SLSTR TOA radiances to write to the target product",
+//    @Parameter(description = "The list of SLSTR radiance bands to write to target product.",
+//            label = "Select SLSTR TOA radiances to write to the target product",
+//            valueSet = {
+//                    "S1_radiance_an", "S2_radiance_an", "S3_radiance_an",
+//                    "S4_radiance_an", "S5_radiance_an", "S6_radiance_an"
+//            },
+//            defaultValue = "")
+//    private String[] slstrRadianceBandsToCopy;
+
+    @Parameter(description = "The list of SLSTR BT bands to write to target product.",
+            label = "Select SLSTR BT to write to the target product",
             valueSet = {
-                    "S1_radiance_an", "S2_radiance_an", "S3_radiance_an",
-                    "S4_radiance_an", "S5_radiance_an", "S6_radiance_an"
+                    "S7_bt_in", "S8_bt_in", "S9_bt_in",
+                    "S7_bt_io", "S8_bt_io", "S9_bt_io"
             },
             defaultValue = "")
-    private String[] slstrRadianceBandsToCopy;
+    private String[] slstrBTBandsToCopy;
 
     @Parameter(description = "The list of SLSTR reflectance bands to write to target product.",
             label = "Select SLSTR TOA radiances to write to the target product",
@@ -133,7 +143,7 @@ public class IdepixSlstrOp extends BasisOp {
             };
         }
 
-        outputRadiance = slstrRadianceBandsToCopy != null && slstrRadianceBandsToCopy.length > 0;
+        outputBT = slstrBTBandsToCopy != null && slstrBTBandsToCopy.length > 0;
         outputRad2Refl = slstrReflectanceBandsToCopy != null && slstrReflectanceBandsToCopy.length > 0;
 
         preProcess();
@@ -178,8 +188,12 @@ public class IdepixSlstrOp extends BasisOp {
 
         IdepixSlstrUtils.setupSlstrClassifBitmask(targetProduct);
 
-        if (outputRadiance) {
-            IdepixIO.addRadianceBands(l1bProductToProcess, targetProduct, slstrRadianceBandsToCopy);
+//        if (outputRadiance) {
+//            IdepixIO.addRadianceBands(l1bProductToProcess, targetProduct, slstrRadianceBandsToCopy);
+//        }
+
+        if (outputBT) {
+            IdepixSlstrUtils.addSlstrBTBands(l1bProductToProcess, targetProduct, slstrBTBandsToCopy);
         }
 
         if (outputRad2Refl) {

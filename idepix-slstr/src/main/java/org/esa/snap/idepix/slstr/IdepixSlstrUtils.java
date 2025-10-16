@@ -13,8 +13,9 @@ import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.IdepixFlagCoding;
 
 import javax.media.jai.Interpolation;
+import javax.media.jai.PlanarImage;
 import javax.media.jai.operator.ScaleDescriptor;
-import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,9 +51,26 @@ class IdepixSlstrUtils {
         for (int i = 1; i <= Rad2ReflConstants.SLSTR_REFL_BAND_NAMES.length; i++) {
             for (String bandname : reflBandsToCopy) {
                 // e.g. s1_reflectance_an
-                if (!targetProduct.containsBand(bandname) && bandname.startsWith("S" + String.format("%01d", i) + "_reflectance")) {
+                if (!targetProduct.containsBand(bandname) && bandname.toLowerCase().contains("_reflectance")) {
                     ProductUtils.copyBand(bandname, rad2reflProduct, targetProduct, true);
                     targetProduct.getBand(bandname).setUnit("dl");
+                }
+            }
+        }
+    }
+
+    static void addSlstrBTBands(Product l1bRadProduct, Product targetProduct, String[] namesOfBTBandsToCopy) {
+        // S7_bt_in, S7_bt_io, ...
+        for (int i = 1; i <= IdepixSlstrConstants.SLSTR_BT_BAND_NAMES.length; i++) {
+            for (String nameOfBandToCopy : namesOfBTBandsToCopy) {
+                // e.g. S7_bt_in
+                if (!targetProduct.containsBand(nameOfBandToCopy) && nameOfBandToCopy.toLowerCase().contains("_bt")) {
+//                    ProductUtils.copyBand(nameOfBandToCopy, l1bRadProduct, targetProduct, true);
+                    final Band l1bBTBand = l1bRadProduct.getBand(nameOfBandToCopy);
+                    Band rescaledBand = getRescaledBTBand(l1bBTBand);
+                    if (!targetProduct.containsBand(rescaledBand.getName())) {
+                        targetProduct.addBand(rescaledBand);
+                    }
                 }
             }
         }
@@ -74,16 +92,11 @@ class IdepixSlstrUtils {
             final String bandNameForNN = s.toLowerCase();
             if (bandNameForNN.contains("_bt_")) {
                 // get BT from radiance product
-                for (Band band : l1bRadProduct.getBands()) {
-                    if (bandNameForNN.equals(band.getName().toLowerCase())) {
-                        // upscale BT band by factor 2 to get same size as refl images
-                        BufferedImage upscaledImage = resizeSlstrBtImage(band.getSourceImage().getAsBufferedImage(),
-                                2.0f, 2.0f,
-                                Interpolation.getInstance(Interpolation.INTERP_BICUBIC));
-                        Band upscaledBand = new Band(band.getName().toLowerCase(), band.getDataType(),
-                                band.getRasterWidth() * 2, band.getRasterHeight() * 2);
-                        upscaledBand.setSourceImage(upscaledImage);
-                        l1bBandsForClassificationList.add(upscaledBand);
+                for (Band l1bBand : l1bRadProduct.getBands()) {
+                    if (bandNameForNN.equals(l1bBand.getName().toLowerCase())) {
+                        // upscale BT l1bBand by factor 2 to get same size as refl images
+                        Band rescaledBTBand = getRescaledBTBand(l1bBand);
+                        l1bBandsForClassificationList.add(rescaledBTBand);
                     }
                 }
             } else {
@@ -99,8 +112,17 @@ class IdepixSlstrUtils {
         return l1bBandsForClassificationList.toArray(new Band[0]);
     }
 
-    static BufferedImage resizeSlstrBtImage(BufferedImage sourceImage, float rescaleXfactor, float rescaleYfactor, Interpolation interp) {
-        return ScaleDescriptor.create(sourceImage, rescaleXfactor, rescaleYfactor, 0.0f, 0.0f, interp, null).getAsBufferedImage();
+    private static Band getRescaledBTBand(Band band1) {
+        Band rescaledBTBand = new Band(band1.getName() + "_rescaled", band1.getDataType(),
+                band1.getRasterWidth() * 2, band1.getRasterHeight() * 2);
+        ProductUtils.copySpectralBandProperties(band1, rescaledBTBand);
+        rescaledBTBand.setScalingFactor(band1.getScalingFactor());
+        rescaledBTBand.setScalingOffset(band1.getScalingOffset());
+        rescaledBTBand.setUnit("dl");
+        RenderedImage rescaledBTImage = ScaleDescriptor.create(band1.getSourceImage(),
+                2.0f, 2.0f, 0.0f, 0.0f, Interpolation.getInstance(Interpolation.INTERP_NEAREST), null);
+        rescaledBTBand.setSourceImage(rescaledBTImage);
+        return rescaledBTBand;
     }
 
 }

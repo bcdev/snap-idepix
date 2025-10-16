@@ -315,6 +315,7 @@ public class IdepixSlstrClassificationOp extends Operator {
             throw new OperatorException("Cannot get values from Neural Net file - check format! " + e.getMessage());
         }
         double[] nnInput = nnWrapper.getInputVector();
+
         for (int i = 0; i < nnInput.length; i++) {
             final float l1bValue = l1bTiles[i].getSampleFloat(x, y);
             if (l1bValue > 100.0) {
@@ -325,7 +326,43 @@ public class IdepixSlstrClassificationOp extends Operator {
                 nnInput[i] = Math.sqrt(l1bValue);
             }
         }
-        return nnWrapper.getNeuralNet().calc(nnInput)[0];
+
+        final double nnResult = nnWrapper.getNeuralNet().calc(nnInput)[0];
+        if (x == 2222 && y == 625) {
+            // cloud over land
+            System.out.println("Cloud over land: x,y = " + x + "," + y);
+            System.out.println("nnResult = " + nnResult);
+            for (int i = 0; i < nnInput.length; i++) {
+                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
+            }
+        }
+        if (x == 300 && y == 2323) {
+            // cloud over water
+            System.out.println("Cloud over water: x,y = " + x + "," + y);
+            System.out.println("nnResult = " + nnResult);
+            for (int i = 0; i < nnInput.length; i++) {
+                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
+            }
+        }
+        if (x == 1350 && y == 2200) {
+            // no cloud over land
+            System.out.println("NO cloud over land: x,y = " + x + "," + y);
+            System.out.println("nnResult = " + nnResult);
+            for (int i = 0; i < nnInput.length; i++) {
+                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
+            }
+        }
+        if (x == 1500 && y == 1800) {
+            // no cloud over water
+            System.out.println("NO cloud over water: x,y = " + x + "," + y);
+            System.out.println("nnResult = " + nnResult);
+            for (int i = 0; i < nnInput.length; i++) {
+                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
+            }
+        }
+
+        return nnResult;
+
     }
 
     private boolean isPixelClassifiedAsLakeSeaIce(GeoPos geoPos) {
@@ -355,7 +392,7 @@ public class IdepixSlstrClassificationOp extends Operator {
         // can be applied to both refls or BTs
         final boolean reflectancesValid = IdepixIO.areAllReflectancesValid(slstrL1bValues);
 
-//        targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l1Invalid || !reflectancesValid);
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l1Invalid || !reflectancesValid);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l1Invalid);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);

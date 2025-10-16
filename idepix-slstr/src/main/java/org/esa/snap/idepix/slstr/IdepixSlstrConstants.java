@@ -20,4 +20,7 @@ class IdepixSlstrConstants {
 
     static final String SLSTR_CLOUD_AN_FLAG_BAND_NAME = "cloud_an";
 
+    static final String[] SLSTR_BT_BAND_NAMES = new String[]{"S7_bt_in", "S8_bt_in", "S9_bt_in",
+            "S7_bt_io", "S8_bt_io", "S9_bt_io"};
+
 }
