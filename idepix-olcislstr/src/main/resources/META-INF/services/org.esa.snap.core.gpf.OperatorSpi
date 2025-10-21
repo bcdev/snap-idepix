@@ -1,4 +1,4 @@
-org.esa.snap.idepix.olcislstr.OlciSlstrOp$Spi
-org.esa.snap.idepix.olcislstr.OlciSlstrCtpOp$Spi
-org.esa.snap.idepix.olcislstr.OlciSlstrClassificationOp$Spi
-org.esa.snap.idepix.olcislstr.OlciSlstrPostProcessOp$Spi
+org.esa.snap.idepix.olcislstr.SlstrOp$Spi
+org.esa.snap.idepix.olcislstr.SlstrCtpOp$Spi
+org.esa.snap.idepix.olcislstr.SlstrClassificationOp$Spi
+org.esa.snap.idepix.olcislstr.SlstrPostProcessOp$Spi

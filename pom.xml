@@ -22,14 +22,14 @@
     <name>SNAP IdePix</name>
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-idepix</artifactId>
-    <version>12.0.0</version>
+    <version>13.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>SNAP IdePix Parent project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>12.0.0</snap.version>
+        <snap.version>13.0.0-SNAPSHOT</snap.version>
         <netbeans.version>RELEASE210</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
     </properties>
@@ -45,7 +45,7 @@
         <module>idepix-meris</module>
         <module>idepix-modis</module>
         <module>idepix-olci</module>
-        <!--        <module>idepix-olcislstr</module>-->
+        <!--        <module>idepix-slstr</module>-->
         <!--        <module>idepix-c3solcislstr</module>-->
         <module>idepix-probav</module>
         <module>idepix-s2msi</module>
