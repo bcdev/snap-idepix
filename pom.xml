@@ -52,7 +52,7 @@
         <module>idepix-seawifs</module>
         <module>idepix-spotvgt</module>
         <module>idepix-viirs</module>
-        <module>idepix-assembly</module>
+<!--        <module>idepix-assembly</module>-->
     </modules>
 
     <dependencyManagement>

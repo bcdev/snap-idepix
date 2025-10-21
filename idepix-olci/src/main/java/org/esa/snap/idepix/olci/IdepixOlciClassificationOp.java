@@ -3,12 +3,7 @@ package org.esa.snap.idepix.olci;
 import com.bc.ceres.binding.ValueRange;
 import com.bc.ceres.core.ProgressMonitor;
 import eu.esa.opt.processor.rad2refl.Rad2ReflConstants;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -18,6 +13,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.math.RsMathUtils;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.seaice.LakeSeaIceAuxdata;
 import org.esa.snap.idepix.core.seaice.LakeSeaIceClassification;
@@ -104,6 +100,11 @@ public class IdepixOlciClassificationOp extends Operator {
                     "Slower, but in general more precise.")
     private boolean useSrtmLandWaterMask;
 
+    @Parameter(defaultValue = "true",
+            label = " If selected, harmonized radiances are taken from O2 product and used in NN input",
+            description = " If selected, harmonized radiances are taken from O2 product and used in NN input ")
+    private boolean useO2HarmonizedRadiancesForNN;
+
 
     @SourceProduct(alias = "l1b", description = "The L1b product.")
     private Product l1bProduct;
@@ -129,8 +130,8 @@ public class IdepixOlciClassificationOp extends Operator {
 
     private static final String OLCI_2018_NET_NAME = "11x10x4x3x2_207.9.net";
     private static final String OLCI_2018_NN_THRESHOLDS_FILE = "11x10x4x3x2_207.9-thresholds.json";
-    private static final String OLCI_202306_NET_NAME = "class-sequential-i21x42x8x4x2o1-5489.net";
-    private static final String OLCI_202306_NN_THRESHOLDS_FILE = "class-sequential-i21x42x8x4x2o1-5489-thresholds.json";
+    private String OLCI_202306_NET_NAME = "class-sequential-i21x42x8x4x2o1-5489.net";
+    private String OLCI_202306_NN_THRESHOLDS_FILE = "class-sequential-i21x42x8x4x2o1-5489-thresholds.json";
 
     private static final double THRESH_LAND_MINBRIGHT1 = 0.3;
     private static final double THRESH_LAND_MINBRIGHT2 = 0.25;  // test OD 20170411
@@ -154,6 +155,12 @@ public class IdepixOlciClassificationOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         setBands();
+
+        OLCI_202306_NET_NAME = useO2HarmonizedRadiancesForNN ? "class-sequential-i21x42x8x4x2o1-5489-new-lake-ice-o2harm.net" :
+                "class-sequential-i21x42x8x4x2o1-5489.net";
+        OLCI_202306_NN_THRESHOLDS_FILE =
+                useO2HarmonizedRadiancesForNN ? "class-sequential-i21x42x8x4x2o1-5489-new-lake-ice-o2harm-thresholds.json" :
+                        "class-sequential-i21x42x8x4x2o1-5489-thresholds.json";
         readSchillerNeuralNets();
         readNNThresholds();
         nnInterpreter = IdepixOlciCloudNNInterpreter.create();
@@ -202,11 +209,11 @@ public class IdepixOlciClassificationOp extends Operator {
             for (NNThreshold t : NNThreshold.values()) {
                 if (m.containsKey(t.name())) {
                     t.range = new ValueRange((Double) ((JSONArray) m.get(t.name())).get(0),
-                                             (Double) ((JSONArray) m.get(t.name())).get(1),
-                                             true,
-                                             false);
+                            (Double) ((JSONArray) m.get(t.name())).get(1),
+                            true,
+                            false);
                 } else {
-                    t.range = new ValueRange(0.0, 0.0,true, false);
+                    t.range = new ValueRange(0.0, 0.0, true, false);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -318,7 +325,7 @@ public class IdepixOlciClassificationOp extends Operator {
                                 surface13Tile, trans13Tile, x, y);
                     } else {
                         classifyOverWater(olciQualityFlagTile, olciReflectanceTiles,
-                                          cloudFlagTargetTile, nnTargetTile, x, y, isInlandWaterFromAppliedMask);
+                                cloudFlagTargetTile, nnTargetTile, x, y, isInlandWaterFromAppliedMask);
                     }
                 }
             }

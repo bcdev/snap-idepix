@@ -116,6 +116,11 @@ public class IdepixOlciOp extends BasisOp {
             description = " If cloud shadow is computed, write CTP value to the target product ")
     private boolean outputCtp;
 
+    @Parameter(defaultValue = "true",
+            label = " Use O2 harmonized radiances 13-15 for pixel classification",
+            description = " If selected, harmonized radiances are taken from O2 product and used in NN input ")
+    private boolean useO2HarmonizedRadiancesForNN;
+
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
 
@@ -136,6 +141,7 @@ public class IdepixOlciOp extends BasisOp {
                     "Slower, but in general more precise.")
     private boolean useSrtmLandWaterMask;
 
+    private Product l1bProductToProcess;
 
     private Product classificationProduct;
     private Product postProcessingProduct;
@@ -216,7 +222,7 @@ public class IdepixOlciOp extends BasisOp {
         IdepixOlciUtils.setupOlciClassifBitmask(targetProduct);
 
         if (outputRadiance) {
-            IdepixIO.addRadianceBands(sourceProduct, targetProduct, radianceBandsToCopy);
+            IdepixIO.addRadianceBands(l1bProductToProcess, targetProduct, radianceBandsToCopy);
         }
         if (outputRad2Refl) {
             IdepixOlciUtils.addOlciRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
@@ -235,28 +241,36 @@ public class IdepixOlciOp extends BasisOp {
 
 
     private void preProcess() {
-        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(sourceProduct);
 
-        if (considerCloudsOverSnow) {
+        if (considerCloudsOverSnow || computeCloudShadow || useO2HarmonizedRadiancesForNN) {
             Map<String, Product> o2corrSourceProducts = new HashMap<>();
+            Map<String, Object> o2corrParms = new HashMap<>();
+            o2corrParms.put("processOnlyBand13", false);
+            o2corrParms.put("writeHarmonisedRadiances", useO2HarmonizedRadiancesForNN);
             o2corrSourceProducts.put("l1bProduct", sourceProduct);
             final String o2CorrOpName = "OlciO2aHarmonisation";
-            Map<String, Object> o2corrParms = new HashMap<>();
-            o2corrParms.put("writeHarmonisedRadiances", false);
-            if (computeCloudShadow) {
-                o2corrParms.put("processOnlyBand13", false);
-            }
-            o2corrParms.put("processOnlyBand13", false); // test!
             o2CorrProduct = GPF.createProduct(o2CorrOpName, o2corrParms, o2corrSourceProducts);
+
+            if (computeCloudShadow) {
+                ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
+                        o2CorrProduct,
+                        alternativeCtpNNDir,
+                        outputCtp,
+                        useO2HarmonizedRadiancesForNN);
+            }
         }
 
-        if (computeCloudShadow) {
-            ctpProduct = IdepixOlciUtils.computeCloudTopPressureProduct(sourceProduct,
-                    o2CorrProduct,
-                    alternativeCtpNNDir,
-                    outputCtp);
+        if (useO2HarmonizedRadiancesForNN) {
+            Map<String, Product> l1bO2MergeSourceProducts = new HashMap<>();
+            Map<String, Object> emptyParms = new HashMap<>();
+            l1bO2MergeSourceProducts.put("l1bProduct", sourceProduct);
+            l1bO2MergeSourceProducts.put("o2harmoProduct", o2CorrProduct);
+            l1bProductToProcess = GPF.createProduct("IdepixOlciMergeO2Harmonize", emptyParms, l1bO2MergeSourceProducts);
+        } else {
+            l1bProductToProcess = sourceProduct;
         }
 
+        rad2reflProduct = IdepixOlciUtils.computeRadiance2ReflectanceProduct(l1bProductToProcess);
     }
 
     private void setClassificationParameters() {
@@ -267,6 +281,7 @@ public class IdepixOlciOp extends BasisOp {
         classificationParameters.put("alternativeNNThresholdsFile", alternativeNNThresholdsFile);
         classificationParameters.put("useSrtmLandWaterMask", useSrtmLandWaterMask);
         classificationParameters.put("useLakeAndSeaIceClimatology", useLakeAndSeaIceClimatology);
+        classificationParameters.put("useO2HarmonizedRadiancesForNN", useO2HarmonizedRadiancesForNN);
     }
 
     private void computeCloudProduct() {
@@ -277,7 +292,7 @@ public class IdepixOlciOp extends BasisOp {
 
     private void setClassificationInputProducts() {
         classificationInputProducts = new HashMap<>();
-        classificationInputProducts.put("l1b", sourceProduct);
+        classificationInputProducts.put("l1b", l1bProductToProcess);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
         if (considerCloudsOverSnow) {
             classificationInputProducts.put("o2Corr", o2CorrProduct);
@@ -286,7 +301,7 @@ public class IdepixOlciOp extends BasisOp {
 
     private void postProcess(Product olciIdepixProduct) {
         HashMap<String, Product> input = new HashMap<>();
-        input.put("l1b", sourceProduct);
+        input.put("l1b", l1bProductToProcess);
         input.put("ctp", ctpProduct);
         input.put("olciCloud", olciIdepixProduct);
 
