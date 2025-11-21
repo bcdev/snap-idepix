@@ -25,7 +25,7 @@
     </parent>
 
     <artifactId>idepix-slstr</artifactId>
-    <version>13.0.0</version>
+    <version>13.0.1</version>
 
     <packaging>nbm</packaging>
 
@@ -35,7 +35,7 @@
     </description>
 
     <properties>
-        <idepix-core.version>13.0.0</idepix-core.version>
+        <idepix-core.version>13.0.1</idepix-core.version>
         <opttbx.version>13.0.0</opttbx.version>
     </properties>
 

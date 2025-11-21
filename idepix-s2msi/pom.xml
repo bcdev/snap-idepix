@@ -34,7 +34,7 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from S2-MSI.</description>
 
     <properties>
-        <idepix-core.version>13.0.0</idepix-core.version>
+        <idepix-core.version>13.0.1</idepix-core.version>
     </properties>
 
     <dependencies>

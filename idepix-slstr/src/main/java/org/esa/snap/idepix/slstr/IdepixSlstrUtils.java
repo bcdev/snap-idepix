@@ -112,14 +112,14 @@ class IdepixSlstrUtils {
         return l1bBandsForClassificationList.toArray(new Band[0]);
     }
 
-    private static Band getRescaledBTBand(Band band1) {
-        Band rescaledBTBand = new Band(band1.getName() + "_rescaled", band1.getDataType(),
-                band1.getRasterWidth() * 2, band1.getRasterHeight() * 2);
-        ProductUtils.copySpectralBandProperties(band1, rescaledBTBand);
-        rescaledBTBand.setScalingFactor(band1.getScalingFactor());
-        rescaledBTBand.setScalingOffset(band1.getScalingOffset());
+    private static Band getRescaledBTBand(Band btBand) {
+        Band rescaledBTBand = new Band(btBand.getName() + "_rescaled", btBand.getDataType(),
+                btBand.getRasterWidth() * 2, btBand.getRasterHeight() * 2);
+        ProductUtils.copySpectralBandProperties(btBand, rescaledBTBand);
+        rescaledBTBand.setScalingFactor(btBand.getScalingFactor());
+        rescaledBTBand.setScalingOffset(btBand.getScalingOffset());
         rescaledBTBand.setUnit("dl");
-        RenderedImage rescaledBTImage = ScaleDescriptor.create(band1.getSourceImage(),
+        RenderedImage rescaledBTImage = ScaleDescriptor.create(btBand.getSourceImage(),
                 2.0f, 2.0f, 0.0f, 0.0f, Interpolation.getInstance(Interpolation.INTERP_NEAREST), null);
         rescaledBTBand.setSourceImage(rescaledBTImage);
         return rescaledBTBand;
