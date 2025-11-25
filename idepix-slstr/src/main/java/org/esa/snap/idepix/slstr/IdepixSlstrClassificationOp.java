@@ -25,6 +25,7 @@ import org.json.simple.JSONValue;
 
 import java.awt.*;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Objects;
@@ -65,6 +66,18 @@ public class IdepixSlstrClassificationOp extends Operator {
             description = " If applied, write Schiller NN value to the target product ")
     private boolean outputSchillerNNValue;
 
+    @Parameter(description = "Alternative pixel classification NN file. " +
+            "If set, it MUST follow format and input/output used in default " +
+            "'class-sequential-i9x32x16x8x4x2o1-5489.net.md'.",
+            label = " Alternative NN file")
+    private File alternativeNNFile;
+
+    @Parameter(description = "Alternative pixel classification NN thresholds file. " +
+            "If set, it MUST follow format used in default " +
+            "'class-sequential-i9x32x16x8x4x2o1-5489-thresholds'.",
+            label = " Alternative NN thresholds file")
+    private File alternativeNNThresholdsFile;
+
     @Parameter(defaultValue = "true",
             description = "Restrict NN test for sea/lake ice to ice climatology area.",
             label = "Use sea/lake ice climatology as filter")
@@ -85,6 +98,9 @@ public class IdepixSlstrClassificationOp extends Operator {
     @TargetProduct(description = "The target product.")
     Product targetProduct;
 
+    private static final String SLSTR_NET_NAME = "class-sequential-i9x32x16x8x4x2o1-5489.net.md";
+    private static final String SLSTR_NN_THRESHOLDS_FILE = "class-sequential-i9x32x16x8x4x2o1-5489-thresholds.json";
+
     private Band[] slstrL1bBands;
 
     private final boolean useSrtmLandWaterMask = true;
@@ -97,6 +113,8 @@ public class IdepixSlstrClassificationOp extends Operator {
     private WatermaskClassifier watermaskClassifier;
 
     private LakeSeaIceClassification lakeSeaIceClassification;
+
+    private File nnToUse;
 
 
     @Override
@@ -118,7 +136,6 @@ public class IdepixSlstrClassificationOp extends Operator {
         }
 
         initLakeSeaIceClassification();
-
     }
 
     private void readSchillerNeuralNets() {
@@ -132,29 +149,41 @@ public class IdepixSlstrClassificationOp extends Operator {
     }
 
     void readNNThresholds() {
-        String SLSTR_NN_THRESHOLDS_FILE = "class-sequential-i9x32x16x8x4x2o1-5489-thresholds.json";
-        try (Reader r = new InputStreamReader(Objects.requireNonNull(getClass().getResourceAsStream(SLSTR_NN_THRESHOLDS_FILE)))) {
-            JSONObject m = (JSONObject) JSONValue.parse(r);
+        try (Reader r = alternativeNNThresholdsFile == null ||
+                SLSTR_NN_THRESHOLDS_FILE.equals(alternativeNNThresholdsFile.getName())
+                ? new InputStreamReader(getClass().getResourceAsStream(SLSTR_NN_THRESHOLDS_FILE))
+                : SLSTR_NN_THRESHOLDS_FILE.equals(alternativeNNThresholdsFile.getName())
+                ? new InputStreamReader(getClass().getResourceAsStream(SLSTR_NN_THRESHOLDS_FILE))
+                : new FileReader(alternativeNNThresholdsFile)) {
+            Map<String, Object> m = (JSONObject) JSONValue.parse(r);
             for (NNThreshold t : NNThreshold.values()) {
                 if (m.containsKey(t.name())) {
                     t.range = new ValueRange((Double) ((JSONArray) m.get(t.name())).get(0),
-                            (Double) ((JSONArray) m.get(t.name())).get(1),
-                            true,
-                            false);
+                                             (Double) ((JSONArray) m.get(t.name())).get(1),
+                                             true,
+                                             false);
                 } else {
                     t.range = new ValueRange(0.0, 0.0, true, false);
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new OperatorException("cannot find NN thresholds file " + SLSTR_NN_THRESHOLDS_FILE, e);
+            throw new OperatorException("cannot find NN thresholds file " + alternativeNNThresholdsFile, e);
         } catch (Exception e) {
-            throw new OperatorException("error reading NN thresholds file " + SLSTR_NN_THRESHOLDS_FILE, e);
+            throw new OperatorException("error reading NN thresholds file " + alternativeNNThresholdsFile, e);
         }
     }
 
     private InputStream getNNInputStream() throws IOException {
-        String SLSTR_NET_NAME = "class-sequential-i9x32x16x8x4x2o1-5489.net.md";
-        return getClass().getResourceAsStream(SLSTR_NET_NAME);
+        if (alternativeNNFile == null || SLSTR_NET_NAME.equals(alternativeNNFile.getName())) {
+            nnToUse = new File(SLSTR_NET_NAME);
+            return getClass().getResourceAsStream(nnToUse.getName());
+        } else if (SLSTR_NET_NAME.equals(alternativeNNFile.getName())) {
+            nnToUse = new File(SLSTR_NET_NAME);
+            return getClass().getResourceAsStream(nnToUse.getName());
+        } else {
+            nnToUse = alternativeNNFile;
+            return Files.newInputStream(nnToUse.toPath());
+        }
     }
 
     private void initLakeSeaIceClassification() {
@@ -233,7 +262,7 @@ public class IdepixSlstrClassificationOp extends Operator {
                 }
             }
         } catch (Exception e) {
-            throw new OperatorException("Failed to provide GA cloud screening:\n" + e.getMessage(), e);
+            throw new OperatorException("Failed to provide Idepix SLSTR pixel classification:\n" + e.getMessage(), e);
         }
     }
 
@@ -316,6 +345,13 @@ public class IdepixSlstrClassificationOp extends Operator {
         }
         double[] nnInput = nnWrapper.getInputVector();
 
+        if (nnInput.length != l1bTiles.length) {
+            final String message = "Invalid selection of bands for NN classifiation: " +
+                    "Selected Neural Net '" + nnToUse + "' expects " +
+                    nnInput.length + " input bands, but only " + l1bTiles.length + " were selected. Please check!";
+            throw new OperatorException(message);
+        }
+
         for (int i = 0; i < nnInput.length; i++) {
             final float l1bValue = l1bTiles[i].getSampleFloat(x, y);
             if (l1bValue > 100.0) {
@@ -328,38 +364,38 @@ public class IdepixSlstrClassificationOp extends Operator {
         }
 
         final double nnResult = nnWrapper.getNeuralNet().calc(nnInput)[0];
-        if (x == 2222 && y == 625) {
-            // cloud over land
-            System.out.println("Cloud over land: x,y = " + x + "," + y);
-            System.out.println("nnResult = " + nnResult);
-            for (int i = 0; i < nnInput.length; i++) {
-                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
-            }
-        }
-        if (x == 300 && y == 2323) {
-            // cloud over water
-            System.out.println("Cloud over water: x,y = " + x + "," + y);
-            System.out.println("nnResult = " + nnResult);
-            for (int i = 0; i < nnInput.length; i++) {
-                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
-            }
-        }
-        if (x == 1350 && y == 2200) {
-            // no cloud over land
-            System.out.println("NO cloud over land: x,y = " + x + "," + y);
-            System.out.println("nnResult = " + nnResult);
-            for (int i = 0; i < nnInput.length; i++) {
-                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
-            }
-        }
-        if (x == 1500 && y == 1800) {
-            // no cloud over water
-            System.out.println("NO cloud over water: x,y = " + x + "," + y);
-            System.out.println("nnResult = " + nnResult);
-            for (int i = 0; i < nnInput.length; i++) {
-                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
-            }
-        }
+//        if (x == 2222 && y == 625) {
+//            // cloud over land
+//            System.out.println("Cloud over land: x,y = " + x + "," + y);
+//            System.out.println("nnResult = " + nnResult);
+//            for (int i = 0; i < nnInput.length; i++) {
+//                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
+//            }
+//        }
+//        if (x == 300 && y == 2323) {
+//            // cloud over water
+//            System.out.println("Cloud over water: x,y = " + x + "," + y);
+//            System.out.println("nnResult = " + nnResult);
+//            for (int i = 0; i < nnInput.length; i++) {
+//                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
+//            }
+//        }
+//        if (x == 1350 && y == 2200) {
+//            // no cloud over land
+//            System.out.println("NO cloud over land: x,y = " + x + "," + y);
+//            System.out.println("nnResult = " + nnResult);
+//            for (int i = 0; i < nnInput.length; i++) {
+//                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
+//            }
+//        }
+//        if (x == 1500 && y == 1800) {
+//            // no cloud over water
+//            System.out.println("NO cloud over water: x,y = " + x + "," + y);
+//            System.out.println("nnResult = " + nnResult);
+//            for (int i = 0; i < nnInput.length; i++) {
+//                System.out.println("nnInput[" + i + "] = " + nnInput[i]);
+//            }
+//        }
 
         return nnResult;
 

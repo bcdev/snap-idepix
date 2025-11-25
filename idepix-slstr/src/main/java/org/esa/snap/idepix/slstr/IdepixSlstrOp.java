@@ -97,6 +97,19 @@ public class IdepixSlstrOp extends BasisOp {
             description = " If applied, write NN value to the target product ")
     private boolean outputSchillerNNValue;
 
+    @Parameter(description = "Alternative pixel classification NN file. " +
+            "If set, it MUST follow format and input/output used in default " +
+            "'class-sequential-i9x32x16x8x4x2o1-5489.net.md'.",
+            label = " Alternative NN file")
+    private File alternativeNNFile;
+
+    @Parameter(description = "Alternative pixel classification NN thresholds file. " +
+            "If set, it MUST follow format used in default " +
+            "'class-sequential-i9x32x16x8x4x2o1-5489-thresholds'.",
+            label = " Alternative NN thresholds file")
+    private File alternativeNNThresholdsFile;
+
+
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
 
@@ -217,6 +230,8 @@ public class IdepixSlstrOp extends BasisOp {
         classificationParameters = new HashMap<>();
         classificationParameters.put("slstrBandsForNN", slstrBandsForNN);
         classificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
+        classificationParameters.put("alternativeNNFile", alternativeNNFile);
+        classificationParameters.put("alternativeNNThresholdsFile", alternativeNNThresholdsFile);
         classificationParameters.put("useLakeAndSeaIceClimatology", useLakeAndSeaIceClimatology);
     }
 
