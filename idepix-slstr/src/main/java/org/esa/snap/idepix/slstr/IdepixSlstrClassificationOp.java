@@ -359,7 +359,8 @@ public class IdepixSlstrClassificationOp extends Operator {
                 nnInput[i] = l1bValue;
             } else {
                 // certainly a reflectance
-                nnInput[i] = Math.sqrt(l1bValue);
+//                nnInput[i] = Math.sqrt(l1bValue);
+                nnInput[i] = Float.isNaN(l1bValue) || l1bValue <= 0.0f ? 0.0 : Math.sqrt(l1bValue);
             }
         }
 
