@@ -1,14 +1,18 @@
 package org.esa.snap.idepix.olci;
 
-import org.tensorflow.SavedModelBundle;
-import org.tensorflow.Session;
-import org.tensorflow.Tensor;
-import org.tensorflow.TensorFlow;
+import org.tensorflow.*;
+import org.tensorflow.ndarray.FloatNdArray;
+import org.tensorflow.ndarray.Shape;
+import org.tensorflow.ndarray.StdArrays;
+import org.tensorflow.types.TFloat32;
+import org.tensorflow.types.family.TType;
 
+import java.awt.image.DataBufferFloat;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.FloatBuffer;
 
 /**
  * Applies a tensorflow model and provides corresponding NN output for given input.
@@ -184,7 +188,31 @@ class TensorflowNNCalculator {
             }
         }
         final Session.Runner runner = model.session().runner();
+//        try (
+//                Tensor<?> inputTensor = Tensor.create(nnInput);
+//                Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
+//        ) {
+//            long[] ts = outputTensor.shape();
+//            int numPixels = (int) ts[0];
+//            int numOutputVars = (int) ts[1];
+//            float[][] m = new float[numPixels][numOutputVars];
+//            outputTensor.copyTo(m);
+//            return m;
+//        }
+
+        FloatNdArray ndArray = StdArrays.ndCopyOf(nnInput);
+        try (TFloat32 inputTensor = TFloat32.tensorOf(ndArray)) {
+            final SparseTensor outputTensor = (SparseTensor) runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0);
+            final Shape ts = outputTensor.shape();
+            final int numPixels = (int) ts.get(0);
+            int numOutputVars = (int) ts.get(1);
+            float[][] m = new float[numPixels][numOutputVars];
+            final TType values = outputTensor.values();
+            FloatBuffer fb = FloatBuffer.allocate(numPixels*numOutputVars);
+            values.asRawTensor().data().asFloats().copyTo(fb);
+        }
         try (
+
                 Tensor<?> inputTensor = Tensor.create(nnInput);
                 Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
         ) {
