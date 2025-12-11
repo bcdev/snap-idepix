@@ -28,11 +28,10 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Idepix.Sentinel3.Slstr",
         category = "Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)",
-        version = "3.0",
+        version = "1.0",
         authors = "Olaf Danne",
-        internal = true,
         copyright = "(c) 2025 by Brockmann Consult",
-        description = "Pixel identification and classification for SLSTR synergy products.")
+        description = "Pixel identification and classification for SLSTR L1b products.")
 public class IdepixSlstrOp extends BasisOp {
 
     @SourceProduct(alias = "l1bProduct",
