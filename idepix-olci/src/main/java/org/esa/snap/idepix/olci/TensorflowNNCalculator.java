@@ -2,8 +2,12 @@ package org.esa.snap.idepix.olci;
 
 import org.tensorflow.*;
 import org.tensorflow.ndarray.FloatNdArray;
+import org.tensorflow.ndarray.NdArrays;
 import org.tensorflow.ndarray.Shape;
 import org.tensorflow.ndarray.StdArrays;
+import org.tensorflow.ndarray.buffer.DataBuffer;
+import org.tensorflow.ndarray.buffer.DataBuffers;
+import org.tensorflow.ndarray.buffer.FloatDataBuffer;
 import org.tensorflow.types.TFloat32;
 import org.tensorflow.types.family.TType;
 
@@ -137,7 +141,7 @@ class TensorflowNNCalculator {
             }
         } else {
             throw new IllegalStateException("Cannot access Tensorflow text protocol buffer file in specified folder: "
-                                                    + modelDir);
+                    + modelDir);
         }
     }
 
@@ -146,6 +150,7 @@ class TensorflowNNCalculator {
     private void loadModel() throws Exception {
         // Load a model previously saved by tensorflow Python package
         model = SavedModelBundle.load(modelDir, "serve");
+//        model = SavedModelBundle.load();
 //        setFirstAndLastNodeNameFromBinaryProtocolBuffer(model);
         setFirstAndLastNodeNameFromTextProtocolBuffer();
     }
@@ -157,7 +162,6 @@ class TensorflowNNCalculator {
      * Requires that loadModel() is run once before.
      *
      * @param nnInput - input vector for neural net
-     *
      * @return float[][] - the converted result array
      */
     float[][] calculate(float[] nnInput) {
@@ -188,39 +192,27 @@ class TensorflowNNCalculator {
             }
         }
         final Session.Runner runner = model.session().runner();
-//        try (
-//                Tensor<?> inputTensor = Tensor.create(nnInput);
-//                Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
-//        ) {
-//            long[] ts = outputTensor.shape();
-//            int numPixels = (int) ts[0];
-//            int numOutputVars = (int) ts[1];
-//            float[][] m = new float[numPixels][numOutputVars];
-//            outputTensor.copyTo(m);
-//            return m;
-//        }
 
         FloatNdArray ndArray = StdArrays.ndCopyOf(nnInput);
-        try (TFloat32 inputTensor = TFloat32.tensorOf(ndArray)) {
-            final SparseTensor outputTensor = (SparseTensor) runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0);
+        try (
+                TFloat32 inputTensor = TFloat32.tensorOf(ndArray);
+                final Tensor outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0);
+        ) {
             final Shape ts = outputTensor.shape();
             final int numPixels = (int) ts.get(0);
             int numOutputVars = (int) ts.get(1);
             float[][] m = new float[numPixels][numOutputVars];
-            final TType values = outputTensor.values();
-            FloatBuffer fb = FloatBuffer.allocate(numPixels*numOutputVars);
-            values.asRawTensor().data().asFloats().copyTo(fb);
-        }
-        try (
 
-                Tensor<?> inputTensor = Tensor.create(nnInput);
-                Tensor<?> outputTensor = runner.feed(firstNodeName, inputTensor).fetch(lastNodeName).run().get(0)
-        ) {
-            long[] ts = outputTensor.shape();
-            int numPixels = (int) ts[0];
-            int numOutputVars = (int) ts[1];
-            float[][] m = new float[numPixels][numOutputVars];
-            outputTensor.copyTo(m);
+            final RawTensor rawOutputTensor = outputTensor.asRawTensor();
+            final FloatDataBuffer rawOutputTensorData = rawOutputTensor.data().asFloats();
+
+            int index = 0;
+            for (int i = 0; i < numPixels; i++) {
+                for (int j = 0; j < numOutputVars; j++) {
+                    m[i][j] = rawOutputTensorData.getFloat(index++);
+                }
+            }
+
             return m;
         }
     }

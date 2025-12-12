@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>idepix-olci</artifactId>
-    <version>13.0.0</version>
+    <version>13.0.1</version>
 
     <packaging>nbm</packaging>
     
@@ -129,7 +129,7 @@
         <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow-core-api</artifactId>
-            <version>1.1.0</version>
+            <version>1.0.0</version>
         </dependency>
         <!--        <dependency>-->
         <!--            <groupId>org.tensorflow</groupId>-->
@@ -146,7 +146,7 @@
         <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow-core-native</artifactId>
-            <version>1.1.0</version>
+            <version>1.0.0</version>
             <classifier>windows-x86_64</classifier>
         </dependency>
         <!--        <dependency>-->

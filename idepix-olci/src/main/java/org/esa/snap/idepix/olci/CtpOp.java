@@ -205,7 +205,8 @@ public class CtpOp extends BasisOp {
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                 final boolean pixelIsValid = !l1FlagsTile.getSampleBit(x, y, IdepixOlciConstants.L1_F_INVALID);
                 if (pixelIsValid) {
-                    targetTile.setSample(x, y, TensorflowNNCalculator.convertNNResultToCtp(nnResult[(y-targetRectangle.y) * targetRectangle.width + (x-targetRectangle.x)][0]));
+                    final float nnValue = nnResult[(y - targetRectangle.y) * targetRectangle.width + (x - targetRectangle.x)][0];
+                    targetTile.setSample(x, y, TensorflowNNCalculator.convertNNResultToCtp(nnValue));
                 } else {
                     targetTile.setSample(x, y, Float.NaN);
                 }
