@@ -9,16 +9,22 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
 import org.esa.snap.idepix.core.operators.BasisOp;
 import org.esa.snap.idepix.core.util.IdepixIO;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
+import org.tensorflow.SavedModelBundle;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * The IdePix pixel classification operator for OLCI products.
@@ -155,6 +161,12 @@ public class IdepixOlciOp extends BasisOp {
 
     private boolean considerCloudsOverSnow;
 
+    private static final Logger logger;
+
+    static {
+        logger = Logger.getLogger(IdepixOlciOp.class.getName());
+    }
+
     @Override
     public void initialize() throws OperatorException {
 
@@ -178,6 +190,25 @@ public class IdepixOlciOp extends BasisOp {
 
         outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
         outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
+
+        // test:
+//        try {
+//            String auxdataPath = IdepixOlciUtils.installAuxdataNNCtp();
+//            String modelDir = auxdataPath + File.separator + CtpOp.DEFAULT_TENSORFLOW_NN_DIR_NAME;
+//            System.out.println("start time: " + System.currentTimeMillis());
+//            final long startTime = System.currentTimeMillis();
+//            logger.info("start time: " + startTime);
+//            try (final SavedModelBundle modelBundle = SavedModelBundle.load(modelDir)) {
+//                System.out.println("end time: " + System.currentTimeMillis());
+//                final long endTime = System.currentTimeMillis();
+//                logger.info("end time: " + endTime);
+//                logger.info("time needed to load model (ms): " + (endTime - startTime));
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            throw new OperatorException("Cannot install CTP NN auxdata:" + e.getMessage());
+//        }
+        // end test
 
         preProcess();
 
