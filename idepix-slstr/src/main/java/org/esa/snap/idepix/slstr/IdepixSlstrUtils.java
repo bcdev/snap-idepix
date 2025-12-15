@@ -95,15 +95,16 @@ class IdepixSlstrUtils {
                 for (Band l1bBand : l1bRadProduct.getBands()) {
                     if (bandNameForNN.equals(l1bBand.getName().toLowerCase())) {
                         // upscale BT l1bBand by factor 2 to get same size as refl images
-                        Band rescaledBTBand = getRescaledBTBand(l1bBand);
-                        l1bBandsForClassificationList.add(rescaledBTBand);
+//                        Band rescaledBTBand = getRescaledBTBand(l1bBand);
+//                        l1bBandsForClassificationList.add(rescaledBTBand);
+                        l1bBandsForClassificationList.add(l1bBand);
                     }
                 }
             } else {
                 // get reflectance from rad2refl product
-                for (Band band : l1bReflProduct.getBands()) {
-                    if (bandNameForNN.equals(band.getName().toLowerCase())) {
-                        l1bBandsForClassificationList.add(band);
+                for (Band l1bBand : l1bReflProduct.getBands()) {
+                    if (bandNameForNN.equals(l1bBand.getName().toLowerCase())) {
+                        l1bBandsForClassificationList.add(l1bBand);
                     }
                 }
             }
