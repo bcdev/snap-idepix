@@ -10,7 +10,9 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.gpf.common.SubsetOp;
 import org.esa.snap.dem.gpf.AddElevationOp;
+import org.esa.snap.idepix.core.util.BreakpointOutput;
 import org.esa.snap.idepix.s2msi.operators.S2IdepixCloudPostProcessOp;
 import org.esa.snap.idepix.s2msi.util.AlgorithmSelector;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
@@ -65,6 +67,9 @@ public class S2IdepixOp extends Operator {
     @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
     private String demName = "SRTM 3Sec";
 
+    @Parameter(description = "Name of intermediate to write instead of the usual output, one of elevation, slope_aspect_orientation, idepix_classification, idepix_filter_buffer, idepix_mountain_shadow, idepix_cloud_statistics, idepix_shadow_clustering, idepix_cloud_shadow, idepix_combine_flags.", label = "Breakpoint")
+    private String breakpoint = null;
+
 
     @SourceProduct(alias = "l1cProduct",
             label = "Sentinel-2 MSI L1C product",
@@ -76,6 +81,9 @@ public class S2IdepixOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
+        if (breakpoint != null) {
+            BreakpointOutput.getInstance().setName(breakpoint);
+        }
         final boolean inputProductIsValid = S2IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.MSI);
         if (!inputProductIsValid) {
             throw new OperatorException(S2IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
@@ -84,6 +92,10 @@ public class S2IdepixOp extends Operator {
         if (S2IdepixUtils.isValidSentinel2(sourceProduct)) {
             processSentinel2();
         }
+        if (BreakpointOutput.getInstance().getProduct() != null) {
+            targetProduct = BreakpointOutput.getInstance().getProduct();
+        }
+
     }
 
     private void processSentinel2() {
@@ -98,6 +110,14 @@ public class S2IdepixOp extends Operator {
             elevationOp.setSourceProduct(sourceProduct);
             elevationProduct = elevationOp.getTargetProduct();
         }
+        if ("idepix_elevation".equals(BreakpointOutput.getInstance().getName())) {
+            final Operator subset = new SubsetOp();
+            subset.setParameterDefaultValues();
+            subset.setSourceProduct(elevationProduct);
+            subset.setParameter("bandNames", "elevation");
+            subset.setParameter("tiePointGridNames", "z");
+            BreakpointOutput.getInstance().setProduct(subset.getTargetProduct());
+        }
 
         Map<String, Product> inputProducts = new HashMap<>(4);
         inputProducts.put("l1c", sourceProduct);
@@ -107,10 +127,14 @@ public class S2IdepixOp extends Operator {
 
         int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600"));
         s2ClassifProduct = S2IdepixUtils.computeTileCacheProduct(s2ClassifProduct, cacheSize);
-
-        // breakpoint output to generate input for cloud post-processing
-        //targetProduct = s2ClassifProduct;
-        //if (true) return;
+        if ("idepix_classification".equals(BreakpointOutput.getInstance().getName())) {
+            final Operator subset = new SubsetOp();
+            subset.setParameterDefaultValues();
+            subset.setSourceProduct(s2ClassifProduct);
+            subset.setParameter("bandNames", "pixel_classif_flags");
+            subset.setParameter("tiePointGridNames", "z");
+            BreakpointOutput.getInstance().setProduct(subset.getTargetProduct());
+        }
 
         // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
         Product postProcessingProduct = computePostProcessProduct(sourceProduct, s2ClassifProduct);
@@ -158,7 +182,11 @@ public class S2IdepixOp extends Operator {
 
         int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600")) / 4;
         cloudBufferProduct = S2IdepixUtils.computeTileCacheProduct(cloudBufferProduct, cacheSize);
+        if ("idepix_filter_buffer".equals(BreakpointOutput.getInstance().getName())) {
+            BreakpointOutput.getInstance().setProduct(cloudBufferProduct);
+        }
 
+        Product combinedProduct;
         if (computeCloudShadow || computeMountainShadow || computeCloudBuffer) {
             HashMap<String, Product> inputShadow = new HashMap<>();
             inputShadow.put("l1c", l1cProduct);
@@ -172,12 +200,15 @@ public class S2IdepixOp extends Operator {
             params.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
             params.put("mode", "LandWater");
             params.put("demName", demName);
-            return GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixPostProcessOp.class),
+            combinedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixPostProcessOp.class),
                                                       params, inputShadow);
         } else {
-            return cloudBufferProduct;
+            combinedProduct = cloudBufferProduct;
         }
-
+        if ("idepix_combine_flags".equals(BreakpointOutput.getInstance().getName())) {
+            BreakpointOutput.getInstance().setProduct(combinedProduct);
+        }
+        return combinedProduct;
     }
 
 

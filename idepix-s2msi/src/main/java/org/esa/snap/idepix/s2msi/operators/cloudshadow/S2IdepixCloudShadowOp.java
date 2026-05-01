@@ -3,6 +3,8 @@ package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.jai.util.SunTileCache;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.StxFactory;
 import org.esa.snap.core.gpf.GPF;
@@ -17,6 +19,7 @@ import org.esa.snap.core.gpf.internal.OperatorExecutor;
 import org.esa.snap.core.image.VectorDataMaskOpImage;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.idepix.core.util.BreakpointOutput;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
@@ -167,6 +170,16 @@ public class S2IdepixCloudShadowOp extends Operator {
         LOGGER.fine("bestOffset water " + bestOffsets[2]);
         LOGGER.fine("chosen Offset " + bestOffset);
 
+        if ("idepix_cloud_statistics".equals(BreakpointOutput.getInstance().getName())) {
+            Product statisticsProduct = cloudShadowPreProcessingOperator.getTargetProduct();
+            statisticsProduct.getMetadataRoot().addAttribute(new MetadataAttribute("NCloudCoverLand", new ProductData.Int(NCloudOverLand.values().stream().mapToInt(Integer::intValue).toArray()), true));
+            statisticsProduct.getMetadataRoot().addAttribute(new MetadataAttribute("NCloudCoverWater", new ProductData.Int(NCloudOverWater.values().stream().mapToInt(Integer::intValue).toArray()), true));
+            //TODO serialise complete array, not only first element
+            statisticsProduct.getMetadataRoot().addAttribute(new MetadataAttribute("meanReflPerTile", new ProductData.Double(meanReflPerTile.values().stream().flatMap(Arrays::stream).mapToDouble(v -> v[0]).toArray()), true));
+            statisticsProduct.getMetadataRoot().addAttribute(new MetadataAttribute("bestOffset_all_land_water", new ProductData.Int(bestOffsets), true));
+            statisticsProduct.getMetadataRoot().addAttribute(new MetadataAttribute("bestOffset_chosen", new ProductData.Int(bestOffset), true));
+            BreakpointOutput.getInstance().setProduct(statisticsProduct);
+        }
 
         HashMap<String, Product> postInput = new HashMap<>();
         postInput.put("s2ClassifProduct", classificationProduct);
@@ -187,6 +200,9 @@ public class S2IdepixCloudShadowOp extends Operator {
         Product postProduct = GPF.createProduct("Idepix.S2.CloudShadow.Postprocess", postParams, postInput);
 
         setTargetProduct(prepareTargetProduct(sourceResolution, postProduct));
+        if ("idepix_shadow_clustering".equals(BreakpointOutput.getInstance().getName())) {
+            BreakpointOutput.getInstance().setProduct(getTargetProduct());
+        }
     }
 
     private float getGeometryMean(Product classificationProduct, String rdnName) {

@@ -12,6 +12,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.idepix.core.util.BreakpointOutput;
 import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixCloudShadowOp;
 import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixPreCloudShadowOp;
 import org.esa.snap.idepix.s2msi.operators.mountainshadow.S2IdepixMountainShadowOp;
@@ -110,6 +111,9 @@ public class S2IdepixPostProcessOp extends Operator {
                     OperatorSpi.getOperatorAlias(S2IdepixMountainShadowOp.class), GPF.NO_PARAMS, s2ClassifProduct);
             mountainShadowFlagBand = mountainShadowProduct.getBand(
                     S2IdepixMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
+            if ("idepix_mountain_shadow".equals(BreakpointOutput.getInstance().getName())) {
+                BreakpointOutput.getInstance().setProduct(mountainShadowProduct);
+            }
         }
 
         cloudShadowFlagBand = null;
@@ -136,6 +140,9 @@ public class S2IdepixPostProcessOp extends Operator {
             final Product cloudShadowProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudShadowOp.class),
                     params, input);
             cloudShadowFlagBand = cloudShadowProduct.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW);
+            if ("idepix_cloud_shadow".equals(BreakpointOutput.getInstance().getName())) {
+                BreakpointOutput.getInstance().setProduct(cloudShadowProduct);
+            }
         }
 
         ProductUtils.copyBand(IDEPIX_CLASSIF_FLAGS, s2ClassifProduct, postProcessedCloudProduct, false);

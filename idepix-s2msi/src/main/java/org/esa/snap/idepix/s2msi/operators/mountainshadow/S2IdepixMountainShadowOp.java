@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.s2msi.operators.mountainshadow;
 
+import org.esa.snap.idepix.core.util.BreakpointOutput;
 import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -57,6 +58,9 @@ public class S2IdepixMountainShadowOp extends PixelOperator {
                                            GPF.NO_PARAMS, sourceProduct);
             int cacheSize = Integer.parseInt(System.getProperty(S2IdepixUtils.TILECACHE_PROPERTY, "1600")) / 2;
             saoProduct = S2IdepixUtils.computeTileCacheProduct(saoProduct, cacheSize);
+            if ("idepix_slope_aspect_orientation".equals(BreakpointOutput.getInstance().getName())) {
+                BreakpointOutput.getInstance().setProduct(saoProduct);
+            }
         }
     }
 
