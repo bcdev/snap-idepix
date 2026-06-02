@@ -225,7 +225,7 @@ public class C3SOlciSlstrClassificationOp extends Operator {
                     }
 
                     final boolean l1Invalid = olciQualityFlagTile.getSampleBit(x, y, C3SOlciSlstrConstants.L1_F_INVALID);
-                    boolean reflectancesValid = IdepixIO.areAllReflectancesValid(olciReflectance);
+                    boolean reflectancesValid = C3SOlciSlstrUtils.areAllOlciSlstrReflectancesValid(olciReflectance);
                     cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l1Invalid || !reflectancesValid);
 
                     final boolean isSlstrCloudAn137Thresh =

@@ -222,10 +222,18 @@ class C3SOlciSlstrUtils {
         return GPF.createProduct(OperatorSpi.getOperatorAlias(C3SOlciSlstrCtpOp.class), params, ctpSourceProducts);
     }
 
+    static boolean areAllOlciSlstrReflectancesValid(double[] reflectance) {
+        for (double aReflectance : reflectance) {
+            if (Double.isNaN(aReflectance) || aReflectance <= 0.0f) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static double spectralSlope(double ch1, double ch2, double wl1, double wl2) {
         return (ch2 - ch1) / (wl2 - wl1);
     }
-
 
     public static double calcScatteringCos(double sza, double vza, double saa, double vaa) {
         final double sins = Math.sin(sza * MathUtils.DTOR);

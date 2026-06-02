@@ -32,6 +32,11 @@ public class Rad2ReflConstants {
             "S4_reflectance_co", "S5_reflectance_co", "S6_reflectance_co"
     };
 
+    public final static String[] SLSTR_REFL_AN_BAND_NAMES = new String[]{
+            "S1_reflectance_an", "S2_reflectance_an", "S3_reflectance_an",
+            "S4_reflectance_an", "S5_reflectance_an", "S6_reflectance_an"
+    };
+
     public final static String MERIS_AUTOGROUPING_REFL_STRING = "reflectance";
 
     public final static String[] OLCI_RAD_BAND_NAMES = new String[]{

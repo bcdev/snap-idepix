@@ -1,5 +1,6 @@
 package org.esa.snap.idepix.c3solcislstr;
 
+import org.esa.snap.idepix.c3solcislstr.rad2refl.Rad2ReflConstants;
 import org.esa.snap.idepix.c3solcislstr.rad2refl.Sensor;
 import org.esa.snap.idepix.core.AlgorithmSelector;
 import org.esa.snap.idepix.core.IdepixConstants;
@@ -60,7 +61,7 @@ public class C3SOlciSlstrOp extends BasisOp {
 
     @Parameter(description = "The list of reflectance bands to write to target product.",
             label = "Select OLCI TOA reflectances to write to the target product",
-            valueSet = {
+            valueSet = {"all",
                     "Oa01_reflectance", "Oa02_reflectance", "Oa03_reflectance", "Oa04_reflectance", "Oa05_reflectance",
                     "Oa06_reflectance", "Oa07_reflectance", "Oa08_reflectance", "Oa09_reflectance", "Oa10_reflectance",
                     "Oa11_reflectance", "Oa12_reflectance", "Oa13_reflectance", "Oa14_reflectance", "Oa15_reflectance",
@@ -82,7 +83,7 @@ public class C3SOlciSlstrOp extends BasisOp {
 
     @Parameter(description = "The list of SLSTR radiance bands to write to target product.",
             label = "Select SLSTR TOA radiances to write to the target product",
-            valueSet = {
+            valueSet = {"all",
                     "S1_reflectance_an", "S2_reflectance_an", "S3_reflectance_an",
                     "S4_reflectance_an", "S5_reflectance_an", "S6_reflectance_an"
             },
@@ -134,6 +135,16 @@ public class C3SOlciSlstrOp extends BasisOp {
         outputOlciReflectance = olciReflectanceBandsToCopy != null && olciReflectanceBandsToCopy.length > 0;
 
         outputSlstrReflectance = slstrReflectanceBandsToCopy != null && slstrReflectanceBandsToCopy.length > 0;
+
+        if (olciReflectanceBandsToCopy != null && olciReflectanceBandsToCopy.length > 0 &&
+                olciReflectanceBandsToCopy[0].equalsIgnoreCase("all")) {
+            olciReflectanceBandsToCopy = Rad2ReflConstants.OLCI_REFL_BAND_NAMES;
+        }
+
+        if (slstrReflectanceBandsToCopy != null && slstrReflectanceBandsToCopy.length > 0 &&
+                slstrReflectanceBandsToCopy[0].equalsIgnoreCase("all")) {
+            slstrReflectanceBandsToCopy = Rad2ReflConstants.SLSTR_REFL_AN_BAND_NAMES;
+        }
 
         preProcess();
 
