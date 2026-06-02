@@ -101,12 +101,12 @@ class C3SOlciSlstrUtils {
 
         for(int i = 0; i < sourceMaskGroup.getNodeCount(); ++i) {
             Mask mask = sourceMaskGroup.get(i);
-            System.out.println("mask: " + mask.getName());
+//            System.out.println("mask: " + mask.getName());
             // SLSTR 'cloud_an' and 'cloud_ao' flag band only, 20220113
             final boolean isSlstrCloudAnMask = mask.getName().startsWith("cloud_an");
 
             if (isSlstrCloudAnMask) {
-                System.out.println("true");
+//                System.out.println("true");
             }
             if (isSlstrCloudAnMask && !targetProduct.getMaskGroup().contains(mask.getName()) && mask.getImageType().canTransferMask(mask, targetProduct)) {
                 mask.getImageType().transferMask(mask, targetProduct);
