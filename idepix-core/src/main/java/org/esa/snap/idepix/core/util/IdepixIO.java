@@ -9,6 +9,9 @@ import org.esa.snap.idepix.core.IdepixConstants;
 
 import java.util.regex.Pattern;
 
+import static org.esa.snap.idepix.core.IdepixConstants.OLCI_TOA_RAD_BAND_NAMES;
+import static org.esa.snap.idepix.core.IdepixConstants.SLSTR_TOA_RAD_BAND_NAMES;
+
 /**
  * @author Olaf Danne
  * @version $Revision: $ $Date:  $
@@ -207,8 +210,22 @@ public class IdepixIO {
     }
 
     private static boolean isValidOlciSlstrSynergyProduct(Product product) {
-        return (product.getName().contains("S3A_SY_1")||
-                product.getName().contains("S3B_SY_1"));  // todo: clarify
+        for (int i = 0; i < OLCI_TOA_RAD_BAND_NAMES.length; i++) {
+            if (!product.containsBand(OLCI_TOA_RAD_BAND_NAMES[i])) {
+                IdepixUtils.logErrorMessage(String.format("OLCI band '%s' missing in collocation product '%s'.",
+                        OLCI_TOA_RAD_BAND_NAMES[i], product.getName()));
+                return false;
+            }
+        }
+
+        for (int i = 0; i < SLSTR_TOA_RAD_BAND_NAMES.length; i++) {
+            if (!product.containsBand(SLSTR_TOA_RAD_BAND_NAMES[i])) {
+                IdepixUtils.logErrorMessage(String.format("SLSTR band '%s' missing in collocation product '%s'.",
+                        SLSTR_TOA_RAD_BAND_NAMES[i], product.getName()));
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean isValidMerisIcolL1NProduct(Product product) {

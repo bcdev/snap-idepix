@@ -100,7 +100,7 @@
         </dependency>
         <dependency>
             <groupId>eu.esa.opt</groupId>
-            <artifactId>opttbx-olci-o2aharmonisation</artifactId>
+            <artifactId>opttbx-olci-preprocessing</artifactId>
             <version>${opttbx.version}</version>
         </dependency>
 

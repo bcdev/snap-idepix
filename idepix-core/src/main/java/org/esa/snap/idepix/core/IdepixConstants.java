@@ -111,6 +111,17 @@ public class IdepixConstants {
                     "Supported sensors are: MERIS, SPOT VGT, MODIS, Landsat-8, SeaWiFS, Sentinel-2 MSI, " +
                     "Sentinel-3 OLCI, PROBA-V, VIIRS.";
 
+    public static final String[] OLCI_TOA_RAD_BAND_NAMES = new String[]{
+            "Oa01_radiance", "Oa02_radiance", "Oa03_radiance", "Oa04_radiance", "Oa05_radiance", "Oa06_radiance",
+            "Oa07_radiance", "Oa08_radiance", "Oa09_radiance", "Oa10_radiance", "Oa11_radiance", "Oa12_radiance",
+            "Oa13_radiance", "Oa14_radiance", "Oa15_radiance", "Oa16_radiance", "Oa17_radiance", "Oa18_radiance",
+            "Oa19_radiance", "Oa20_radiance", "Oa21_radiance"
+    };
+
+    public static final String[] SLSTR_TOA_RAD_BAND_NAMES = new String[]{
+            "S1_radiance_an", "S2_radiance_an", "S3_radiance_an",
+            "S4_radiance_an", "S5_radiance_an", "S6_radiance_an"};
+
     /**
      * A pattern which matches MERIS CC L1P product types
      *

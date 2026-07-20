@@ -69,8 +69,7 @@ class C3SOlciSlstrConstants {
     };
 
 
-
-    public final static String[] OLCI_REFL_BAND_NAMES = new String[]{
+    public static final String[] OLCI_REFL_BAND_NAMES = new String[]{
             "Oa01_reflectance", "Oa02_reflectance", "Oa03_reflectance", "Oa04_reflectance", "Oa05_reflectance",
             "Oa06_reflectance", "Oa07_reflectance", "Oa08_reflectance", "Oa09_reflectance", "Oa10_reflectance",
             "Oa11_reflectance", "Oa12_reflectance", "Oa13_reflectance", "Oa14_reflectance", "Oa15_reflectance",
