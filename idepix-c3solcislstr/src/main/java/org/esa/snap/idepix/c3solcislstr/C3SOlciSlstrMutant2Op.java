@@ -1,11 +1,5 @@
 package org.esa.snap.idepix.c3solcislstr;
 
-import org.esa.snap.idepix.c3solcislstr.rad2refl.Rad2ReflConstants;
-import org.esa.snap.idepix.c3solcislstr.rad2refl.Sensor;
-import org.esa.snap.idepix.core.AlgorithmSelector;
-import org.esa.snap.idepix.core.IdepixConstants;
-import org.esa.snap.idepix.core.util.IdepixIO;
-import org.esa.snap.idepix.core.operators.BasisOp;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -16,6 +10,22 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.idepix.c3solcislstr.mc.Multivariate;
+import org.esa.snap.idepix.c3solcislstr.mc.UniformVariate;
+import org.esa.snap.idepix.c3solcislstr.mc.generators.LatinHypercube;
+import org.esa.snap.idepix.c3solcislstr.mc.generators.Melg;
+import org.esa.snap.idepix.c3solcislstr.mc.generators.Pcg;
+import org.esa.snap.idepix.c3solcislstr.mc.generators.Sobol;
+import org.esa.snap.idepix.c3solcislstr.mc.operators.CloudMaskMutationOp;
+import org.esa.snap.idepix.c3solcislstr.mc.operators.InterpolationFunctionFactory;
+import org.esa.snap.idepix.c3solcislstr.mc.variates.EmpiricVariate;
+import org.esa.snap.idepix.c3solcislstr.rad2refl.Rad2ReflConstants;
+import org.esa.snap.idepix.c3solcislstr.rad2refl.Sensor;
+import org.esa.snap.idepix.core.AlgorithmSelector;
+import org.esa.snap.idepix.core.IdepixConstants;
+import org.esa.snap.idepix.core.operators.BasisOp;
+import org.esa.snap.idepix.core.util.IdepixIO;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,14 +35,14 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Sentinel3.C3SOlciSlstr",
+@OperatorMetadata(alias = "Idepix.Sentinel3.C3SOlciSlstrMutant2",
         category = "Optical/Preprocessing/Masking",
         version = "3.0",
         authors = "Olaf Danne",
         internal = true,
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for C3S OLCI/SLSTR synergy products.")
-public class C3SOlciSlstrOp extends BasisOp {
+public class C3SOlciSlstrMutant2Op extends BasisOp {
 
     @SourceProduct(alias = "sourceProduct",
             label = "C3S OLCI/SLSTR Synergy product",
@@ -109,6 +119,42 @@ public class C3SOlciSlstrOp extends BasisOp {
     private boolean computeCloudShadow;
 
 
+    @Parameter(label = "Seed number",
+            description = "A numeric value to seed the random number generator",
+            defaultValue = "42")
+    private long seed;
+
+    @Parameter(label = "Selector",
+            description = "A numeric value to select the random stream. If zero, no randomization is performed at all.",
+            defaultValue = "0")
+    private long selector;
+
+    @Parameter(label = "Sampling type",
+            description = "The sampling type.",
+            defaultValue = "Sobol", valueSet = {"Latin hypercube", "Random", "Sobol"})
+    private String samplingType;
+
+    @Parameter(label = "Simulation count",
+            description = "The number of simulations (only used for Latin hypercube sampling).",
+            defaultValue = "10")
+    private int simulationCount;
+
+    @Parameter(label = "Cloud-to-clear NN threshold over land",
+            description = "The NN value threshold to separate clouds from cloud-free land surface. If zero, a threshold value is generated randomly.",
+            defaultValue = "0.0")
+    private double cloudyClearThresholdLnd;
+
+    @Parameter(label = "Cloud-to-clear NN threshold over water",
+            description = "The NN value threshold to separate clouds from cloud-free water surface. If zero, a threshold value is generated randomly.",
+            defaultValue = "0.0")
+    private double cloudyClearThresholdWtr;
+
+    @Parameter(label = "Randomly mutant cloud-clear",
+            description = "If checked, the cloud mask is mutated randomly.",
+            defaultValue = "true")
+    private boolean randomlyMutantCloudyClear;
+
+
     private Product postProcessingProduct;
 
     private Product olciRad2reflProduct;
@@ -119,6 +165,12 @@ public class C3SOlciSlstrOp extends BasisOp {
 
     private Map<String, Product> classificationInputProducts;
     private Map<String, Object> classificationParameters;
+
+    private static final String DATE_AND_TIME_OF_SOURCE = "";
+    private static final String MELG = "MELG";
+
+    private Pcg pcg;
+    private Multivariate mv;
 
     @Override
     public void initialize() throws OperatorException {
@@ -151,17 +203,44 @@ public class C3SOlciSlstrOp extends BasisOp {
         setClassificationInputProducts();
         Product olciSlstrIdepixProduct = computeClassificationProduct();
 
-        olciSlstrIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
-        olciSlstrIdepixProduct.setAutoGrouping("Oa*_radiance:Oa*_reflectance:S*_radiance_*:S*_reflectance_*");
+        // mutation part
+        Product olciSlstrMutatedIdepixProduct;
+        if (isMutant()) {
+            pcg = new Pcg(seed, selector);
+            mv = multivariate(samplingType);
 
-        C3SOlciSlstrUtils.copySlstrCloudFlagBands(sourceProduct, olciSlstrIdepixProduct);
+            if (cloudyClearThresholdLnd == 0.0) {
+                cloudyClearThresholdLnd = randomCloudyClearThreshold(mv.get(4), "threshold_pdf_lnd.dat");
+            }
+            if (cloudyClearThresholdWtr == 0.0) {
+                cloudyClearThresholdWtr = randomCloudyClearThreshold(mv.get(5), "threshold_pdf_wtr.dat");
+            }
 
-        if (computeCloudBuffer || computeCloudShadow) {
-            postProcess(olciSlstrIdepixProduct);
+            if (!olciSlstrIdepixProduct.containsBand(Rad2ReflConstants.OLCI_REFL_BAND_NAMES[2])) {
+                ProductUtils.copyBand(Rad2ReflConstants.OLCI_REFL_BAND_NAMES[2],
+                        olciRad2reflProduct, olciSlstrIdepixProduct, true);
+            }
+            if (!olciSlstrIdepixProduct.containsBand(Rad2ReflConstants.OLCI_REFL_BAND_NAMES[16])) {
+                ProductUtils.copyBand(Rad2ReflConstants.OLCI_REFL_BAND_NAMES[16],
+                        olciRad2reflProduct, olciSlstrIdepixProduct, true);
+            }
+
+            olciSlstrMutatedIdepixProduct = mutateCloudMask(olciSlstrIdepixProduct);
+            computeCloudShadow = true;
+        } else {
+            olciSlstrMutatedIdepixProduct = olciSlstrIdepixProduct;
         }
 
-        targetProduct = createTargetProduct(olciSlstrIdepixProduct);
-        targetProduct.setAutoGrouping(olciSlstrIdepixProduct.getAutoGrouping());
+        olciSlstrMutatedIdepixProduct.setName(sourceProduct.getName() + "_IDEPIX");
+        olciSlstrMutatedIdepixProduct.setAutoGrouping("Oa*_radiance:Oa*_reflectance:S*_radiance_*:S*_reflectance_*");
+
+        C3SOlciSlstrUtils.copySlstrCloudFlagBands(sourceProduct, olciSlstrMutatedIdepixProduct);
+
+        // cloud buffer and shadow
+        postProcess(olciSlstrMutatedIdepixProduct);
+
+        targetProduct = createTargetProduct(olciSlstrMutatedIdepixProduct);
+        targetProduct.setAutoGrouping(olciSlstrMutatedIdepixProduct.getAutoGrouping());
 
         if (postProcessingProduct != null) {
             Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
@@ -193,9 +272,11 @@ public class C3SOlciSlstrOp extends BasisOp {
         ProductUtils.copyBand("sat_azimuth_tn", idepixProduct, targetProduct, true);
 
         ProductUtils.copyBand("total_column_ozone_tx", idepixProduct, targetProduct, true);
-        ProductUtils.copyBand("total_column_water_vapour_tx", idepixProduct, targetProduct, true);;
+        ProductUtils.copyBand("total_column_water_vapour_tx", idepixProduct, targetProduct, true);
+        ;
         ProductUtils.copyBand("surface_pressure_tx", idepixProduct, targetProduct, true);
-        ProductUtils.copyBand("elevation_an", idepixProduct, targetProduct, true);;
+        ProductUtils.copyBand("elevation_an", idepixProduct, targetProduct, true);
+        ;
 
         targetProduct.setStartTime(idepixProduct.getStartTime());
         targetProduct.setEndTime(idepixProduct.getEndTime());
@@ -248,8 +329,7 @@ public class C3SOlciSlstrOp extends BasisOp {
     private void setClassificationParameters() {
         classificationParameters = new HashMap<>();
         classificationParameters.put("copyAllTiePoints", true);
-        classificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
-        classificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
+        classificationParameters.put("outputSchillerNNValue", isMutant() ? true : outputSchillerNNValue);
     }
 
     private void setClassificationInputProducts() {
@@ -275,10 +355,45 @@ public class C3SOlciSlstrOp extends BasisOp {
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudBuffer", computeCloudBuffer);
         params.put("cloudBufferWidth", cloudBufferWidth);
-        params.put("computeCloudShadow", computeCloudShadow);
+        params.put("computeCloudShadow", true);
 
         postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(C3SOlciSlstrPostProcessOp.class),
                 params, input);
+    }
+
+    private Product mutateCloudMask(Product product) {
+        return GPF.createProduct(OperatorSpi.getOperatorAlias(CloudMaskMutationOp.class), cloudMaskMutationParameterMap(), product);
+    }
+
+    @NotNull
+    private Map<String, Object> cloudMaskMutationParameterMap() {
+        final Map<String, Object> map = new HashMap<>();
+        map.put("rngType", MELG);
+        map.put("seedNumber", pcg.nextLong());
+        map.put("seedString", DATE_AND_TIME_OF_SOURCE);
+        map.put("cloudyClearThresholdLnd", cloudyClearThresholdLnd);
+        map.put("cloudyClearThresholdWtr", cloudyClearThresholdWtr);
+        map.put("randomlyMutant", randomlyMutantCloudyClear);
+        return map;
+    }
+
+    private Multivariate multivariate(String samplingType) {
+        switch (samplingType) {
+            case "Latin hypercube":
+                return new LatinHypercube(6, simulationCount, selector, new Melg(seed));
+            case "Sobol":
+                return new Sobol(6).start(6 + selector + seed);
+            default:
+                return pcg;
+        }
+    }
+
+    private static double randomCloudyClearThreshold(UniformVariate u, String resource) {
+        return new EmpiricVariate(InterpolationFunctionFactory.create("InversePrimitiveStep", resource), u).nextDouble();
+    }
+
+    private boolean isMutant() {
+        return selector > 0;
     }
 
     /**
@@ -288,7 +403,7 @@ public class C3SOlciSlstrOp extends BasisOp {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(C3SOlciSlstrOp.class);
+            super(C3SOlciSlstrMutant2Op.class);
         }
     }
 }

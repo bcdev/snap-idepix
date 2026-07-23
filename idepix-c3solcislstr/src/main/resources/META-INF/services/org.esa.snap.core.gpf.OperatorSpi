@@ -1,5 +1,8 @@
 org.esa.snap.idepix.c3solcislstr.C3SOlciSlstrOp$Spi
+org.esa.snap.idepix.c3solcislstr.C3SOlciSlstrMutantOp$Spi
+org.esa.snap.idepix.c3solcislstr.C3SOlciSlstrMutant2Op$Spi
 org.esa.snap.idepix.c3solcislstr.C3SOlciSlstrCtpOp$Spi
 org.esa.snap.idepix.c3solcislstr.C3SOlciSlstrClassificationOp$Spi
 org.esa.snap.idepix.c3solcislstr.C3SOlciSlstrPostProcessOp$Spi
+org.esa.snap.idepix.c3solcislstr.mc.operators.CloudMaskMutationOp$Spi
 org.esa.snap.idepix.c3solcislstr.rad2refl.C3SOlciSlstrRad2ReflOp$Spi
