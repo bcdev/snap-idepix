@@ -36,7 +36,7 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Sentinel3.C3SOlciSlstrMutant",
+@OperatorMetadata(alias = "Idepix.Sentinel3.C3SOlciSlstrMutation",
         category = "Optical/Preprocessing/Masking",
         version = "3.0",
         authors = "Olaf Danne",
@@ -153,7 +153,7 @@ public class C3SOlciSlstrMutantOp extends BasisOp {
 
     @Parameter(label = "Randomly mutant cloud-clear",
             description = "If checked, the cloud mask is mutated randomly.",
-            defaultValue = "true")
+            defaultValue = "false")
     private boolean randomlyMutantCloudyClear;
 
 
