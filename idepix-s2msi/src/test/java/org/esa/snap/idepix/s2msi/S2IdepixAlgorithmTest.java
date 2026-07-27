@@ -33,30 +33,44 @@ public class S2IdepixAlgorithmTest {
     S2IdepixAlgorithm algo;
 
     float[] reflInvalid;
-    float[] reflClear;
-    float[] reflCloud;
+    float[] reflClearLand;
+    float[] reflClearWater;
     float[] reflCloudAmbiguous;
+    float[] reflCirrusAmbiguous;
     float[] reflCloudSure;
+    float[] reflCirrusSure;
     float[] reflSnowIce;
     float[] reflBright;
     float[] reflWhite;
+    float[] reflBrightwhite;
 
     @Before
     public void setUp() throws Exception {
         algo = new S2IdepixAlgorithm();
 
-        reflClear = new float[]{0.1413f, 0.1207f, 0.1191f, 0.1114f, 0.1559f, 0.2464f, 0.2963f, 0.2941f, 0.3436f, 0.0717f, 0.0062f, 0.2498f, 0.1356f};
-        reflCloud = new float[]{0.8183f, 0.7886f, 0.753f, 0.7907f, 0.7965f, 0.8381f, 0.884f, 0.8293f, 0.8935f, 0.3962f, 0.0467f, 0.3719f, 0.265f};
+        algo.setElevation(32.0);  // sufficient precision
+        algo.setLat(60.0);  // sufficient precision
+
+        // default threshs:
+        algo.setCwThresh(0.007);
+        algo.setGclThresh(-0.11);
+        algo.setClThresh(0.007);
+
+        reflClearLand = new float[]{0.1413f, 0.1207f, 0.1191f, 0.1114f, 0.1559f, 0.2464f, 0.2963f, 0.2941f, 0.3436f, 0.0717f, 0.0062f, 0.2498f, 0.1356f};
+        reflClearWater = new float[]{0.1562f, 0.1304f, 0.1174f, 0.1032f, 0.1002f, 0.0752f, 0.0784f, 0.0618f, 0.0612f, 0.0145f, 0.0021f, 0.011f, 0.0149f};
         reflCloudAmbiguous = new float[]{0.164f, 0.1426f, 0.1383f, 0.1012f, 0.1483f, 0.3298f, 0.4005f, 0.3869f, 0.4387f, 0.095f, 0.0235f, 0.215f, 0.1025f};
+        reflCirrusAmbiguous = new float[]{0.164f, 0.1426f, 0.1383f, 0.1012f, 0.1483f, 0.3298f, 0.4005f, 0.3869f, 0.4387f, 0.095f, 0.0235f, 0.215f, 0.1025f};
         reflCloudSure = new float[]{0.8183f, 0.7886f, 0.753f,	0.7907f, 0.7965f, 0.8381f, 0.884f,	0.8293f, 0.8935f, 0.3962f, 0.0467f, 0.3719f, 0.265f};
+        reflCirrusSure = new float[]{0.8183f, 0.7886f, 0.753f,	0.7907f, 0.7965f, 0.8381f, 0.884f,	0.8293f, 0.8935f, 0.3962f, 0.0467f, 0.3719f, 0.265f};
         reflSnowIce = new float[]{}; // TODO find suitable product
         reflBright = new float[]{0.1853f, 0.1552f, 0.1491f, 0.1311f, 0.1786f, 0.3053f, 0.3741f, 0.3645f, 0.4304f, 0.0867f, 0.0054f, 0.2773f, 0.142f};
         reflWhite = new float[]{0.4539f, 0.4276f, 0.3962f, 0.4012f, 0.3964f, 0.4153f, 0.4372f, 0.4101f, 0.4431f, 0.1784f, 0.0207f, 0.2427f, 0.21f};
+        reflBrightwhite = new float[]{0.8183f, 0.7886f, 0.753f,	0.7907f, 0.7965f, 0.8381f, 0.884f,	0.8293f, 0.8935f, 0.3962f, 0.0467f, 0.3719f, 0.265f};
     }
 
     @Test
     public void testTc4CirrusValue() {
-        algo.setRefl(reflClear);
+        algo.setRefl(reflClearLand);
         assertEquals(-0.0538f, algo.tc4CirrusValue(), eps);
         algo.setRefl(reflCloudSure);
         assertEquals(-0.3353f, algo.tc4CirrusValue(), eps);
@@ -70,7 +84,7 @@ public class S2IdepixAlgorithmTest {
 
     @Test
     public void testTc4Value() {
-        algo.setRefl(reflClear);
+        algo.setRefl(reflClearLand);
         assertEquals(-0.0476f, algo.tc4Value(), eps);
         algo.setRefl(reflCloudSure);
         assertEquals(-0.2886f, algo.tc4Value(), eps);
@@ -84,7 +98,7 @@ public class S2IdepixAlgorithmTest {
 
     @Test
     public void testNdwiValue() {
-        algo.setRefl(reflClear);
+        algo.setRefl(reflClearLand);
         assertEquals(0.1581f, algo.ndwiValue(), eps);
         algo.setRefl(reflCloudSure);
         assertEquals(0.4122f, algo.ndwiValue(), eps);
@@ -98,49 +112,120 @@ public class S2IdepixAlgorithmTest {
 
     @Test
     public void testB3B11Value() {
-
+        algo.setRefl(reflClearLand);
+        assertEquals(0.4768f, algo.b3b11Value(), eps);
+        algo.setRefl(reflCloudSure);
+        assertEquals(2.0247, algo.b3b11Value(), eps);
+        algo.setRefl(reflCloudAmbiguous);
+        assertEquals(0.6432f, algo.b3b11Value(), eps);
+        algo.setRefl(reflBright);
+        assertEquals(0.5377f, algo.b3b11Value(), eps);
+        algo.setRefl(reflWhite);
+        assertEquals(1.6324f, algo.b3b11Value(), eps);
     }
 
     @Test
     public void testVisBrightValue() {
-
+        algo.setRefl(reflClearLand);
+        assertEquals(0.1170f, algo.visbrightValue(), eps);
+        algo.setRefl(reflCloudSure);
+        assertEquals(0.7774f, algo.visbrightValue(), eps);
+        algo.setRefl(reflCloudAmbiguous);
+        assertEquals(0.1273f, algo.visbrightValue(), eps);
+        algo.setRefl(reflBright);
+        assertEquals(0.1451f, algo.visbrightValue(), eps);
+        algo.setRefl(reflWhite);
+        assertEquals(0.4083f, algo.visbrightValue(), eps);
     }
 
     @Test
     public void testIsCloudSure() {
-
+        algo.setRefl(reflClearLand);
+        assertFalse(algo.isCloudSure());
+        algo.setRefl(reflCloudSure);
+        assertTrue(algo.isCloudSure());
+        algo.setRefl(reflCloudAmbiguous);
+        assertFalse(algo.isCloudSure());
     }
 
     @Test
     public void testIsCloudAmbiguous() {
-
+        algo.setRefl(reflClearLand);
+        assertFalse(algo.isCloudAmbiguous());
+        algo.setRefl(reflCloudSure);
+        assertFalse(algo.isCloudAmbiguous());
+        algo.setRefl(reflCloudAmbiguous);
+        assertTrue(algo.isCloudAmbiguous());
     }
 
     @Test
     public void testIsCloud() {
-
+        algo.setRefl(reflClearLand);
+        assertFalse(algo.isCloud());
+        algo.setRefl(reflCloudSure);
+        assertTrue(algo.isCloud());
+        algo.setRefl(reflCloudAmbiguous);
+        assertTrue(algo.isCloud());
     }
 
     @Test
-    public void testIsClear() {
+    public void testIsClearLand() {
+        algo.setRefl(reflClearLand);
+        assertTrue(algo.isClearLand());
+        algo.setRefl(reflClearWater);
+        assertFalse(algo.isClearLand());
+        algo.setRefl(reflCloudSure);
+        assertFalse(algo.isClearLand());
+        algo.setRefl(reflCloudAmbiguous);
+        assertFalse(algo.isClearLand());
+    }
 
+    public void testIsClearWater() {
+        algo.setRefl(reflClearWater);
+        assertTrue(algo.isClearWater());
+        algo.setRefl(reflClearLand);
+        assertFalse(algo.isClearWater());
+        algo.setRefl(reflCloudSure);
+        assertFalse(algo.isClearWater());
+        algo.setRefl(reflCloudAmbiguous);
+        assertFalse(algo.isClearWater());
     }
 
     @Test
     public void testIsBright() {
-
+        algo.setRefl(reflBright);
+        assertTrue(algo.isBright());
     }
 
     @Test
     public void testIsWhite() {
+        algo.setRefl(reflWhite);
+        assertTrue(algo.isWhite());
+    }
 
+    public void testIsBrightWhite() {
+        algo.setRefl(reflBrightwhite);
+        assertTrue(algo.isBrightWhite());
     }
 
     @Test
     public void testIsSnowIce() {
-
+        // TODO find test product with snow pixels
+        //        algo.setRefl(reflSnowIce);
+//        assertFalse(algo.isCloudSure());
     }
 
+    @Test
+    public void testIsCirrusSure() {
+        algo.setRefl(reflCirrusSure);
+        assertTrue(algo.isCirrus());
+    }
+
+    @Test
+    public void testIsCirrusAmbiguous() {
+        algo.setRefl(reflCirrusAmbiguous);
+        assertTrue(algo.isCirrusAmbiguous());
+    }
 
 
     @Test
