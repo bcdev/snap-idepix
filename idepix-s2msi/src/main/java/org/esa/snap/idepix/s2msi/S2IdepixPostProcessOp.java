@@ -93,11 +93,30 @@ public class S2IdepixPostProcessOp extends Operator {
 
     private Band cloudBufferFlagBand;
     private Band mountainShadowFlagBand;
-    private Band cloudShadowFlagBand;
+    private Product cloudShadowProduct;
+    private Operator cloudShadowOp;
+
+    @Override
+    public void dispose() {
+        if (cloudBufferFlagBand != null) {
+            cloudBufferFlagBand.dispose();
+            cloudBufferFlagBand = null;
+        }
+        if (mountainShadowFlagBand != null) {
+            mountainShadowFlagBand.dispose();
+            mountainShadowFlagBand = null;
+        }
+        if (cloudShadowOp != null) {
+            cloudShadowOp.dispose();
+            cloudShadowOp = null;
+            cloudShadowProduct = null; // is disposed with operator.dispose()
+        }
+        super.dispose();
+    }
+
 
     @Override
     public void initialize() throws OperatorException {
-
         Product postProcessedCloudProduct = createTargetProduct(s2ClassifProduct.getName(),
                                                                 s2ClassifProduct.getProductType());
 
@@ -112,7 +131,6 @@ public class S2IdepixPostProcessOp extends Operator {
                     S2IdepixMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
         }
 
-        cloudShadowFlagBand = null;
         if (computeCloudShadow) {
             HashMap<String, Product> input = new HashMap<>();
             input.put("l1cProduct", l1cProduct);
@@ -133,9 +151,13 @@ public class S2IdepixPostProcessOp extends Operator {
             params.put("gclThresh", gclThresh);
             params.put("clThresh", clThresh);
             params.put("demName", demName);
-            final Product cloudShadowProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixCloudShadowOp.class),
-                    params, input);
-            cloudShadowFlagBand = cloudShadowProduct.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW);
+
+            final GPF gpf = GPF.getDefaultInstance();
+            cloudShadowOp = gpf.createOperator(OperatorSpi.getOperatorAlias(S2IdepixCloudShadowOp.class),
+                    params, input, null);
+
+            cloudShadowProduct = cloudShadowOp.getTargetProduct();
+            gpf.executeOperator(cloudShadowOp);
         }
 
         ProductUtils.copyBand(IDEPIX_CLASSIF_FLAGS, s2ClassifProduct, postProcessedCloudProduct, false);
@@ -185,7 +207,9 @@ public class S2IdepixPostProcessOp extends Operator {
             }
         }
         if (computeCloudShadow) {
-            final Tile flagTile = getSourceTile(cloudShadowFlagBand, targetRectangle);
+            Band band = cloudShadowProduct.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW);
+            //final Tile flagTile = getSourceTile(cloudShadowFlagBand, targetRectangle);
+            final Tile flagTile = getSourceTile(band, targetRectangle);
             int clusteredCloudShadowFlag = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_CLOUD_SHADOW); //clustering algorithm
             int cloudBufferFlag = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_CLOUD_BUFFER);
             int potentialShadowFlag = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_POTENTIAL_CLOUD_SHADOW);
