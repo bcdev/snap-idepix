@@ -1,219 +1,264 @@
 <html>
 <head>
     <title>IdePix S2 MSI Algorithm Specification</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="../style.css">
 </head>
 
 <body>
+
 <table class="header">
     <tr class="header">
-        <td class="header">&nbsp;
-            IdePix S2 MSI Algorithm Specification
-        </td>
-        <td class="header" align="right"><a
-                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
-                src="../images/snap_header.jpg"
-                border=0></a>
+        <td class="header">&nbsp;IdePix S2 MSI Algorithm Specification</td>
+        <td class="header" align="right">
+            <a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html">
+                <img src="../images/snap_header.jpg" border="0">
+            </a>
         </td>
     </tr>
 </table>
 
-<h3>Algorithm Specification</h3>
+<h3>Algorithm Description</h3>
 
-<h4>Neural network classification</h4>
-
-<p>
-    The IdePix classification algorithm for MODIS is based on a neural network approach. The following
-    MODIS bands are used as input for the neural net:
-
-<ul>
-    <li>EV_250_Aggr1km_RefSB.1</li>
-    <li>EV_500_Aggr1km_RefSB.3</li>
-    <li>EV_500_Aggr1km_RefSB.4</li>
-    <li>EV_500_Aggr1km_RefSB.5</li>
-    <li>EV_500_Aggr1km_RefSB.7</li>
-    <li>EV_1KM_Emissive.23</li>
-    <li>EV_1KM_Emissive.25</li>
-    <li>EV_1KM_RefSB.26</li>
-    <li>EV_250_Aggr1km_RefSB.1</li>
-    <li>EV_250_Aggr1km_RefSB.1</li>
-    <li>EV_250_Aggr1km_RefSB.1</li>
-</ul>
-
-As output, the neural net finally provides per pixel one of the properties 'clear', 'cloud sure',
-'cloud ambiguous' or 'snow/ice'.
-
-<h4>Brightness and whiteness</h4>
+<h4>Overview</h4>
 
 <p>
-    In a second step, two additional quantities, the 'whiteness' and
-    the 'brightness', are introduced to derive a 'bright' flag as well as additional cloud indicators:
-<ul>
-    <li>
-        'cloudSureFromWhiteness'
-    </li>
-    <li>
-        'cloudSureFromBrightness'
-    </li>
-    <li>
-        'cloudAmbiguousFromWhiteness'
-    </li>
-    <li>
-        'cloudAmbiguousFromBrightness'
-    </li>
-</ul>
-
-<p>
-    A bright spectrum means that the intensity of the spectral curve (related to the albedo) should present relatively
-    high values. Therefore, cloud brightness is calculated for each pixel as the integral of spectrum, and differs from
-    the average of the spectral channels since it takes into account the distribution of the energy along the spectrum.
-</p>
-<p>
-    A white spectrum means that the spectral signature must be flat along the spectrum. The first derivative of the
-    spectral curve should present low values, but noise and calibration errors may reduce the accuracy in the estimation
-    of the spectrum flatness when computing the spectral derivative in channels with similar wavelengths.
-</p>
-<p>
-    This retrieval mainly follows the approach described in more detail in [1].
+    Sentinel-2 MSI IdePix performs mono-temporal pixel identification and classification for
+    Sentinel-2 MSI Level-1C products. IdePix stands for <i>Identification of Pixel Properties</i>.
+    The processor identifies atmospheric and surface conditions that may affect subsequent
+    processing, such as cloud screening, atmospheric correction, land-surface analysis, or
+    time-series generation.
 </p>
 
-<h4>Cloud flagging modes</h4>
-
 <p>
-    The final cloud flagging can be performed in two 'strengths', depending on the combination of the three indicators
-    'cloudFromNeuralNet (cNN)', 'cloudFromWhiteness (cWhi)' and 'cloudFromBrightness (cBri)':
-<ul>
-    <li>
-        'CLEAR_SKY_CONSERVATIVE': 'cloud' if 'cNN' OR ('cWhi' AND 'cBri')
-    </li>
-    <li>
-        'CLOUD_SKY_CONSERVATIVE': 'cloud' if 'cNN' OR 'cWhi' OR 'cBri'
-    </li>
-</ul>
-Consequently, the 'CLEAR_SKY_CONSERVATIVE' usually results in overall 'less clouds', and the 'CLOUD_SKY_CONSERVATIVE'
-results in 'more clouds'.
-
-<h4>Additional properties</h4>
-<p>
-    The following additional pixel properties are provided from the classification:
-<ul>
-    <li>
-        'cloud_buffer': The pixel is located in a 'safety buffer' around an area classified as cloud. The width of
-        the buffer is given in pixels.
-    </li>
-    <li>
-        'land': the pixel is located over land
-    </li>
-    <li>
-        'coastline': the pixel is a coastline pixel
-    </li>
-</ul>
-
-The 'land' and 'coastline' pixels are identified from an SRTM land/water mask [2].
-
-<h4>Final classification flags</h4>
-<p>
-    From the algorithm steps outlined above, the following final classification flags are provided for MODIS:
-<ul>
-    <li>
-        'INVALID' (input invalid or no classification possible)
-    </li>
-    <li>
-        'CLOUD_AMBIGUOUS'
-    </li>
-    <li>
-        'CLOUD_SURE'
-    </li>
-    <li>
-        'CLOUD' (which means either CLOUD_AMBIGUOUS or CLOUD_SURE)
-    </li>
-    <li>
-        'CLOUD_BUFFER'
-    </li>
-    <li>
-        'SNOW_ICE'
-    </li>
-    <li>
-        'COASTLINE'
-    </li>
-    <li>
-        'LAND'
-    </li>
-    <li>
-        'BRIGHT'
-    </li>
-</ul>
-
-<h4>Known issues</h4>
-<p>
-    The pixel classification algorithm for MODIS has been developed and optimized mainly for ocean applications,
-    e.g. the OceanColour project, [3].
-    Therefore, the classification results may be poor under certain conditions over land.
+    The processor analyses top-of-atmosphere (TOA) reflectances together with scene geometry and,
+    where required, auxiliary elevation information. It produces a bit-coded pixel classification
+    containing cloud, cirrus, cloud-shadow, mountain-shadow, snow/ice, land/water, brightness,
+    and related quality flags. The classification is not intended as a thematic land-cover
+    product; it provides information that helps users decide whether a pixel is suitable for a
+    particular application.
 </p>
+
+<h4>Input Product and Preprocessing</h4>
+
 <p>
-The following pixel properties are currently NOT provided for MODIS:
+    Sentinel-2 MSI IdePix requires a Sentinel-2 MSI Level-1C product that has first been prepared
+    with SNAP's <b>S2 Resampling</b> tool, available under <b>Optical &gt; Geometric &gt;
+    S2 Resampling</b>.
+</p>
+
+<p>
+    The input product must be resampled to a common spatial resolution of <b>10 m, 20 m, or
+    60 m</b>. Resampling places the MSI bands required by IdePix on a common pixel grid and
+    provides the input representation expected by the processor.
+</p>
+
+<p>
+    A <b>20 m</b> input product is recommended for most applications. It offers a practical
+    balance between spatial detail, classification quality, memory demand, and processing time.
+    A 10 m input can provide more detailed classification masks, but is substantially more
+    computationally demanding, particularly when cloud-shadow detection is enabled. A 60 m input
+    reduces processing cost, but produces correspondingly coarser classification and shadow masks.
+</p>
+
+<p>
+    The resampled Level-1C product supplies the TOA reflectance bands, acquisition metadata, and
+    solar and viewing geometry used by the algorithm. Depending on the selected options, IdePix
+    also uses a digital elevation model (DEM) to derive elevation and terrain-shadow information.
+</p>
+
+<h4>Pixel Classification</h4>
+
+<p>
+    The core classification evaluates spectral properties for each pixel. It combines information
+    on brightness, whiteness, spectral shape and slope, normalized-difference indices,
+    cirrus-sensitive spectral information, and land/water-related characteristics. These tests
+    are combined to distinguish clear-sky, cloud, snow/ice, bright-surface, land, and water
+    conditions.
+</p>
+
+<p>
+    Water-droplet clouds are provided at two confidence levels:
+</p>
+
 <ul>
     <li>
-        'CLOUD_SHADOW'
+        <b>IDEPIX_CLOUD_SURE</b> identifies pixels classified as opaque cloud with high
+        confidence.
     </li>
     <li>
-        'MIXED_PIXEL'
+        <b>IDEPIX_CLOUD_AMBIGUOUS</b> identifies semi-transparent clouds or pixels for which the
+        cloud decision is uncertain.
     </li>
     <li>
-        'GLINT_RISK'
+        <b>IDEPIX_CLOUD</b> is the combined cloud flag and is set when either
+        <code>IDEPIX_CLOUD_SURE</code> or <code>IDEPIX_CLOUD_AMBIGUOUS</code> is set.
     </li>
 </ul>
 
-<h3>References</h3>
-
-<p class="i1">
-    <b>[1]</b>
-    Ackerman, S. A., Strabala, K. I., Menzel, W. P., Frey, R. A.,Moeller, C. C., Gumley, L. E., Baum, B.,
-    Wetzel-Seeman, S., and Zhang, H.:
-    Discriminating clear sky from clouds with MODIS. Algorithm Theoritical Basis Document (MOD35).
-    Version 6.1, October 2010<br>
-    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
-        <param name="content" value="https://eospso.nasa.gov/sites/default/files/atbd/atbd_mod06.pdf">
-        <param name="text" value="<html><u>Discriminating clear sky from clouds with MODIS</u></html>">
-        <param name="textFontSize" value="bigger">
-    </object>
-    <br><br>
-
-    <b>[2]</b>
-    Farr, T. G., et al., The Shuttle Radar Topography Mission, Rev. Geophys., 45, RG2004,
-    doi:10.1029/2005RG000183. (2007)<br>
-    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
-        <param name="content" value="https://doi.org/10.1029/2005RG000183">
-        <param name="text" value="<html><u>The Shuttle Radar Topography Mission</u></html>">
-        <param name="textFontSize" value="bigger">
-    </object>
-
-    <br><br>
-
-    <b>[3]</b>
-    ESA CCI OceanColour Project Web Site:<br>
-    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
-        <param name="content" value="http://www.esa-oceancolour-cci.org">
-        <param name="text" value="<html><u>www.esa-oceancolour-cci.org</u></html>">
-        <param name="textFontSize" value="bigger">
-    </object>
-
-    <br><br>
-
-    <b>[4]</b>
-    J. Wevers, D. Müller, J. Scholze, G. Kirches, R. Quast, & C. Brockmann. (2021). IdePix for Sentinel-2 MSI Algorithm Theoretical Basis Document (Version 1.0). <br>
-    Zenodo. doi:10.5281/zenodo.5788067<br>
-    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
-        <param name="content" value="https://doi.org/10.5281/zenodo.5788067">
-        <param name="text" value="<html><u>IdePix for Sentinel-2 MSI Algorithm Theoretical Basis Document</u></html>">
-        <param name="textFontSize" value="bigger">
-    </object>
-
-    <br><br>
+<p>
+    Cirrus clouds are identified separately:
 </p>
-<br>
 
+<ul>
+    <li>
+        <b>IDEPIX_CIRRUS_SURE</b> identifies cirrus clouds detected with high confidence.
+    </li>
+    <li>
+        <b>IDEPIX_CIRRUS_AMBIGUOUS</b> identifies uncertain cirrus detections.
+    </li>
+</ul>
+
+<p>
+    Additional flags identify bright and white surfaces. These flags are useful because some
+    bright land surfaces, urban materials, sand, snow, and ice can resemble clouds in individual
+    spectral tests. The processor further provides flags for snow/ice, land, water, coastline,
+    clear land, and clear water.
+</p>
+
+<h4>Cloud Buffer</h4>
+
+<p>
+    Cloud boundaries are uncertain because clouds may be smaller than a pixel, semi-transparent,
+    or displaced relative to the ground due to viewing geometry. IdePix can therefore optionally
+    create a cloud buffer around detected cloud pixels.
+</p>
+
+<p>
+    The buffer is written to the <b>IDEPIX_CLOUD_BUFFER</b> flag. It marks otherwise clear pixels
+    surrounding detected clouds and can be used as a conservative exclusion zone for applications
+    that are sensitive to cloud-edge contamination. The buffer width is configurable in pixels.
+    Users can also choose whether ambiguous cloud pixels contribute to the cloud buffer.
+</p>
+
+<p>
+    The cloud buffer is an advisory quality flag. A buffered pixel is not necessarily cloudy, but
+    lies close to a pixel identified as cloud.
+</p>
+
+<h4>Cloud-Shadow Detection</h4>
+
+<p>
+    Cloud-shadow detection is optional and is disabled by default. When enabled, the cloud-shadow
+    algorithm combines geometric and spectral information.
+</p>
+
+<p>
+    First, detected cloud locations are displaced in the expected shadow direction using the solar
+    and viewing geometry. This produces a potential cloud-shadow region. The cloud-shadow workflow 
+    operates on a 60 m working grid, where the cloud classification and supporting information are 
+    prepared for shadow analysis.
+</p>
+
+<p>
+    Second, the algorithm searches within the potential-shadow region for spectrally dark areas
+    that are consistent with cloud shadow. Spatial clustering groups candidate shadow pixels. The
+    geometrically projected cloud-shadow region and the spectrally detected dark clusters are then
+    combined to derive the final <b>IDEPIX_CLOUD_SHADOW</b> flag.
+</p>
+
+<p>
+    The following flags can support diagnostic interpretation of the cloud-shadow result:
+</p>
+
+<ul>
+    <li>
+        <b>IDEPIX_POTENTIAL_SHADOW</b> marks locations that are geometrically plausible cloud
+        shadow positions.
+    </li>
+    <li>
+        <b>IDEPIX_CLUSTERED_CLOUD_SHADOW</b> marks spectrally dark candidate shadows identified
+        by the clustering stage.
+    </li>
+    <li>
+        <b>IDEPIX_CLOUD_SHADOW</b> is the final cloud-shadow classification.
+    </li>
+</ul>
+
+<p>
+    Cloud-shadow detection is more computationally demanding than the basic pixel classification.
+    A 20 m resampled input is generally recommended for routine processing. A 10 m input should
+    be used where the additional spatial detail is required and sufficient processing resources
+    are available.
+</p>
+
+<p>
+    The cloud-shadow result is a quality mask and should be interpreted accordingly. Omissions can
+    occur where shadows are weak, obscured, or spectrally similar to their surroundings. Commission
+    errors are possible over naturally dark surfaces, terrain shadows, water, and complex
+    land-cover patterns.
+</p>
+
+<h4>Mountain-Shadow Detection</h4>
+
+<p>
+    Mountain shadows are derived independently from cloud shadows. When enabled, IdePix uses the
+    selected DEM together with solar illumination geometry to identify terrain areas that are not
+    directly illuminated by the sun.
+</p>
+
+<p>
+    The result is written to <b>IDEPIX_MOUNTAIN_SHADOW</b>. Its reliability depends on the quality,
+    resolution, coverage, and geolocation of the selected DEM. It represents terrain-cast shadow
+    and should not be confused with cloud shadow.
+</p>
+
+<h4>Output Product</h4>
+
+<p>
+    The classification result is written to the bit-coded band
+    <b>pixel_classif_flags</b>. Multiple flags can be set for a single pixel; the flags are not
+    mutually exclusive. For example, a pixel may be classified as water and cloud ambiguous, or
+    as land and bright.
+</p>
+
+<p>
+    The principal output flags are:
+</p>
+
+<ul>
+    <li>IDEPIX_INVALID</li>
+    <li>IDEPIX_CLOUD, IDEPIX_CLOUD_SURE, IDEPIX_CLOUD_AMBIGUOUS</li>
+    <li>IDEPIX_CIRRUS_SURE, IDEPIX_CIRRUS_AMBIGUOUS</li>
+    <li>IDEPIX_CLOUD_BUFFER</li>
+    <li>IDEPIX_CLOUD_SHADOW</li>
+    <li>IDEPIX_MOUNTAIN_SHADOW</li>
+    <li>IDEPIX_SNOW_ICE</li>
+    <li>IDEPIX_BRIGHT, IDEPIX_WHITE, IDEPIX_BRIGHTWHITE</li>
+    <li>IDEPIX_LAND, IDEPIX_WATER, IDEPIX_COASTLINE</li>
+    <li>IDEPIX_CLEAR_LAND, IDEPIX_CLEAR_WATER</li>
+</ul>
+
+<p>
+    TOA reflectances are copied to the target product by default. Optionally, the processor can
+    write diagnostic feature values, such as brightness, whiteness, normalized-difference indices,
+    and selected spectral-test values. These additional bands are primarily intended for algorithm
+    diagnosis, validation, and scientific analysis.
+</p>
+
+<h4>Limitations and Recommended Use</h4>
+
+<p>
+    IdePix is a mono-temporal method: it uses information from the individual input scene and does
+    not use observations from earlier or later acquisitions. Results can therefore be affected by
+    unusual surface reflectance, cloud type and height, illumination and viewing geometry, snow,
+    terrain, coastal adjacency, and atmospheric conditions.
+</p>
+
+<p>
+    The cloud, cloud-shadow, and mountain-shadow flags should be interpreted as quality indicators,
+    not as absolute truth. Users should select flags according to the required balance between
+    conservative masking and data retention, and should validate results for new regions, seasons,
+    or surface types.
+</p>
+
+<h4>Reference</h4>
+
+<p>
+    Wevers, J., MÃ¼ller, D., Scholze, J., Kirches, G., Quast, R., and Brockmann, C.:
+    <i>IdePix for Sentinel-2 MSI Algorithm Theoretical Basis Document</i>, Version 1.1, 2025.
+    <a href="https://doi.org/10.5281/zenodo.14808767">https://doi.org/10.5281/zenodo.14808767</a>
+</p>
 
 <hr>
 </body>
