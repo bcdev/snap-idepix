@@ -2,9 +2,9 @@ package org.esa.snap.idepix.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.apache.commons.math3.fitting.PolynomialFitter;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
-import org.esa.s3tbx.processor.rad2refl.Sensor;
+import eu.esa.opt.processor.rad2refl.Rad2ReflConstants;
+import eu.esa.opt.processor.rad2refl.Rad2ReflOp;
+import eu.esa.opt.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;

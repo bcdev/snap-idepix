@@ -22,27 +22,27 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>8.0.10-SNAPSHOT</version>
+        <version>14.0.0</version>
     </parent>
 
     <artifactId>idepix-olci</artifactId>
-    <version>8.0.10-SNAPSHOT</version>
+    <version>14.0.0</version>
 
     <packaging>nbm</packaging>
-
+    
     <name>IdePix OLCI</name>
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from OLCI.</description>
 
     <properties>
-        <idepix.version>8.0.10-SNAPSHOT</idepix.version>
-        <s3tbx.version>8.0.7-SNAPSHOT</s3tbx.version>
+        <idepix-core.version>14.0.0</idepix-core.version>
+        <opttbx.version>14.0.0</opttbx.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
-            <version>${idepix.version}</version>
+            <version>${idepix-core.version}</version>
         </dependency>
 
         <dependency>
@@ -55,27 +55,31 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-glayer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>ceres-jai</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-runtime</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf</artifactId>
-            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-netcdf</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-envisat-reader</artifactId>
-            <version>${snap.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -93,14 +97,14 @@
         </dependency>
 
         <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-rad2refl</artifactId>
-            <version>${s3tbx.version}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-rad2refl</artifactId>
+            <version>${opttbx.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-o2a-harmonisation</artifactId>
-            <version>${s3tbx.version}</version>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-olci-preprocessing</artifactId>
+            <version>${opttbx.version}</version>
         </dependency>
 
         <dependency>
@@ -117,14 +121,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow</artifactId>
-            <version>1.9.0-rc1</version>
+            <version>1.15.0</version>
         </dependency>
 
         <dependency>
@@ -139,18 +138,18 @@
         </dependency>
 
         <!--<dependency>-->
-        <!--<groupId>org.tensorflow</groupId>-->
-        <!--<artifactId>proto</artifactId>-->
-        <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
-        <!--<version>1.9.0-rc1</version>-->
+            <!--<groupId>org.tensorflow</groupId>-->
+            <!--<artifactId>proto</artifactId>-->
+            <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+            <!--<version>1.9.0-rc1</version>-->
         <!--</dependency>-->
 
         <!--<dependency>-->
-        <!--<groupId>com.google.protobuf</groupId>-->
-        <!--<artifactId>protobuf-java</artifactId>-->
-        <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
-        <!--<version>3.5.1</version>-->
-        <!--&lt;!&ndash;<version>2.6.1</version>&ndash;&gt;-->
+            <!--<groupId>com.google.protobuf</groupId>-->
+            <!--<artifactId>protobuf-java</artifactId>-->
+            <!--&lt;!&ndash;<version>1.13.0-rc0</version>&ndash;&gt;-->
+            <!--<version>3.5.1</version>-->
+            <!--&lt;!&ndash;<version>2.6.1</version>&ndash;&gt;-->
         <!--</dependency>-->
 
     </dependencies>
@@ -158,11 +157,11 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
 
         </plugins>
     </build>
-
+    
 </project>

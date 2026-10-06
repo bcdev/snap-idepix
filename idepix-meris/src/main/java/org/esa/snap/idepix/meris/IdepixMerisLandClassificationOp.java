@@ -1,7 +1,7 @@
 package org.esa.snap.idepix.meris;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
+import eu.esa.opt.processor.rad2refl.Rad2ReflConstants;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;

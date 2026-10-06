@@ -21,11 +21,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>8.0.10-SNAPSHOT</version>
+        <version>14.0.0</version>
     </parent>
 
     <artifactId>idepix-core</artifactId>
-    <version>8.0.10-SNAPSHOT</version>
+    <version>14.0.0</version>
 
     <packaging>nbm</packaging>
 
@@ -51,9 +51,12 @@
             <artifactId>snap-gpf</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.bc.jnn</groupId>
-            <artifactId>jnn</artifactId>
-            <version>1.7</version>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-netcdf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-envisat-reader</artifactId>
         </dependency>
 
         <dependency>
@@ -65,7 +68,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
         </plugins>

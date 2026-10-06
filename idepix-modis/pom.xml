@@ -22,11 +22,11 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-idepix</artifactId>
-        <version>8.0.10-SNAPSHOT</version>
+        <version>14.0.0</version>
     </parent>
 
     <artifactId>idepix-modis</artifactId>
-    <version>8.0.10-SNAPSHOT</version>
+    <version>14.0.0</version>
 
     <packaging>nbm</packaging>
 
@@ -34,15 +34,15 @@
     <description>Classification of pixels (cloud, snow, ice, land, water) originating from MODIS.</description>
 
     <properties>
-        <idepix.version>8.0.10-SNAPSHOT</idepix.version>
-        <s3tbx.version>8.0.7-SNAPSHOT</s3tbx.version>
+        <idepix-core.version>14.0.0</idepix-core.version>
+        <opttbx.version>14.0.0</opttbx.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>idepix-core</artifactId>
-            <version>${idepix.version}</version>
+            <version>${idepix-core.version}</version>
         </dependency>
 
         <dependency>
@@ -65,13 +65,24 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-envisat-reader</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-rad2refl</artifactId>
-            <version>${s3tbx.version}</version>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-csv-dataio</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-raster</artifactId>
+            <version>${snap.version}</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>eu.esa.opt</groupId>
+            <artifactId>opttbx-rad2refl</artifactId>
+            <version>${opttbx.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -90,17 +101,12 @@
             <version>1.1.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
         </plugins>

@@ -1,12 +1,13 @@
 package org.esa.snap.idepix.meris.reprocessing;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.multilevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
+import javax.media.jai.ROI;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.MeanDescriptor;
 import java.awt.*;
@@ -104,18 +105,15 @@ public class Meris3rd4thReprocessingAdapter implements ReprocessingAdapter {
 
     /* package local for testing */
     static float getMeanSolarFluxFrom4thReprocessing(Band solarFluxBand) {
-        final MultiLevelImage sourceImage = solarFluxBand.getSourceImage();
+        MultiLevelImage sourceImage = solarFluxBand.getSourceImage();
         ParameterBlock pb = new ParameterBlock();
-        pb.addSource(sourceImage);// The source image
-        pb.add(null);    // null ROI means whole image
-        pb.add(1);       // check every pixel horizontally
-        pb.add(1);       // check every pixel vertically
-
-        // Perform the mean operation on the source image.
-        final RenderedOp meanImage = MeanDescriptor.create(sourceImage, null, 1, 1, null);
-        double[] mean = (double[]) meanImage.getProperty("mean");
-
-        return (float) mean[0];
+        pb.addSource(sourceImage);
+        pb.add((Object)null);
+        pb.add(1);
+        pb.add(1);
+        RenderedOp meanImage = MeanDescriptor.create(sourceImage, (ROI)null, 1, 1, (RenderingHints)null);
+        double[] mean = (double[])meanImage.getProperty("mean");
+        return (float)mean[0];
     }
 
     private void adaptProductInformationToThirdRepro(Product inputProduct, Product thirdReproProduct) {
