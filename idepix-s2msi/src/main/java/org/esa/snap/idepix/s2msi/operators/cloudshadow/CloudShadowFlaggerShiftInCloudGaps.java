@@ -18,8 +18,8 @@ class CloudShadowFlaggerShiftInCloudGaps {
 
     private int[] flagArray;
 
-    void setShiftedCloudInCloudGaps(Rectangle sourceRectangle, int[] flagArray, Map<Integer, List<Integer>> cloudList,
-                                           double[] cloudTestArray, double spatialResolution) {
+    double[] setShiftedCloudInCloudGaps(Rectangle sourceRectangle, int[] flagArray,
+                                        Map<Integer, List<Integer>> cloudList, double spatialResolution) {
         int sourceWidth = sourceRectangle.width;
         int sourceHeight = sourceRectangle.height;
         this.flagArray = flagArray;
@@ -47,8 +47,6 @@ class CloudShadowFlaggerShiftInCloudGaps {
             DoubleMatrix cloudTestMatrix = CloudCoverage.convolutionSimpleGapFinder();
             double[] test = cloudTestMatrix.toArray();
 
-            System.arraycopy(test, 0, cloudTestArray, 0, cloudTestMatrix.length);
-
             logger.fine("Gap finder finished.");
 
             //Find continuous areas in shifted cloud shadow.
@@ -63,10 +61,11 @@ class CloudShadowFlaggerShiftInCloudGaps {
             Map<Integer, List<Integer>> shiftedShadowTileID =
                     testContinuousShadow.computeAreaID(sourceWidth, sourceHeight, shadowIDArray, false);
 
-            setCoincidingShiftedCloudShadowWithCloudGaps(shiftedShadowTileID, cloudTestArray);
+            setCoincidingShiftedCloudShadowWithCloudGaps(shiftedShadowTileID, test);
+            return test;
 
         }
-
+        return null;
     }
 
 

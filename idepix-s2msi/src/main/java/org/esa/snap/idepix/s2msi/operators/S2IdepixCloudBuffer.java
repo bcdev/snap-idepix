@@ -32,17 +32,30 @@ public class S2IdepixCloudBuffer {
                                                 int cloudBufferWidth,
                                                 int cloudBufferFlagBit) {
         Rectangle rectangle = targetTile.getRectangle();
-        int LEFT_BORDER = Math.max(x - cloudBufferWidth, extendedRectangle.x);
-        int RIGHT_BORDER = Math.min(x + cloudBufferWidth, extendedRectangle.x + extendedRectangle.width - 1);
         int TOP_BORDER = Math.max(y - cloudBufferWidth, extendedRectangle.y);
         int BOTTOM_BORDER = Math.min(y + cloudBufferWidth, extendedRectangle.y + extendedRectangle.height - 1);
 
-        for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
-            for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
+        for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
+            final int horizontalExtent = getHorizontalExtent(j - y, cloudBufferWidth);
+            final int leftBorder = Math.max(x - horizontalExtent, extendedRectangle.x);
+            final int rightBorder = Math.min(x + horizontalExtent,
+                                             extendedRectangle.x + extendedRectangle.width - 1);
+            for (int i = leftBorder; i <= rightBorder; i++) {
                 if (rectangle.contains(i, j) && extendedRectangle.contains(i, j)) {
                     targetTile.setSample(i, j, cloudBufferFlagBit, true);
                 }
             }
         }
+    }
+
+    static int getHorizontalExtent(int yOffset, int radius) {
+        if (radius < 0) {
+            throw new IllegalArgumentException("Radius must not be negative: " + radius);
+        }
+        final int absoluteYOffset = Math.abs(yOffset);
+        if (absoluteYOffset > radius) {
+            throw new IllegalArgumentException("Y offset exceeds radius: " + yOffset);
+        }
+        return radius - absoluteYOffset;
     }
 }

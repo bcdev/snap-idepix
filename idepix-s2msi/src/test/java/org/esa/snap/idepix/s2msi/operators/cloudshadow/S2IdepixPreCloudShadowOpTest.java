@@ -1,6 +1,7 @@
 package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -8,6 +9,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 
 
 /**
@@ -113,6 +115,38 @@ public class S2IdepixPreCloudShadowOpTest {
         Rectangle sourceRectangle = CloudShadowUtils.getSourceRectangle(cloudShadowOp.getSourceProduct(), targetRectangle, relativePath);
         Rectangle expectedSourceRectangle = new Rectangle(0, 0, 10, 10);
         assertEquals(expectedSourceRectangle, sourceRectangle);
+    }
+
+    @Test
+    public void materializedClassificationFlagsPreserveAllSamples() throws Exception {
+        Product source = new Product("classification", "classification", 3, 2);
+        int[] expected = {0, 1, 4, 7, 16, 31};
+        source.addBand("pixel_classif_flags", ProductData.TYPE_INT32);
+        source.getBand("pixel_classif_flags").setRasterData(ProductData.createInstance(expected));
+
+        Product materialized = S2IdepixCloudShadowOp.materializeCloudShadowClassificationProduct(source);
+
+        assertEquals(3, materialized.getSceneRasterWidth());
+        assertEquals(2, materialized.getSceneRasterHeight());
+        assertArrayEquals(expected, materialized.getBand("pixel_classif_flags")
+                .readPixels(0, 0, 3, 2, new int[expected.length]));
+    }
+
+
+    @Test
+    public void materializedPostFlagsPreserveAllSamples() throws Exception {
+        Product source = new Product("post", "post", 3, 2);
+        int[] expected = {0, 16, 32, 64, 128, 256};
+        source.addBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW, ProductData.TYPE_INT32);
+        source.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW)
+                .setRasterData(ProductData.createInstance(expected));
+
+        Product materialized = S2IdepixCloudShadowOp.materializeCloudShadowPostFlags(source);
+
+        assertEquals(3, materialized.getSceneRasterWidth());
+        assertEquals(2, materialized.getSceneRasterHeight());
+        assertArrayEquals(expected, materialized.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW)
+                .readPixels(0, 0, 3, 2, new int[expected.length]));
     }
 
 }

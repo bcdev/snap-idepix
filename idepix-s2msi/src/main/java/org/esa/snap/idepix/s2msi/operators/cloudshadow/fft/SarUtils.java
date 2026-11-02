@@ -44,8 +44,8 @@ public class SarUtils {
         }
 
         if (factorRow == 1 && factorCol == 1) {
-            logger.info("oversample: both azimuth and range oversampling factors equal to 1!");
-            logger.info("oversample: returning inputMatrix!");
+            logger.fine("oversample: both azimuth and range oversampling factors equal to 1!");
+            logger.fine("oversample: returning inputMatrix!");
             return inputMatrix;
         }
 
@@ -162,7 +162,7 @@ public class SarUtils {
     public static DoubleMatrix coherence(final ComplexDoubleMatrix inputMatrix, final ComplexDoubleMatrix normsMatrix,
                                          final int winL, final int winP) {
 
-        logger.info("coherence ver #2");
+        logger.fine("coherence ver #2");
         if (!(winL >= winP)) {
             logger.warning("coherence: estimator window size L<P not very efficiently programmed.");
         }
@@ -211,7 +211,7 @@ public class SarUtils {
     public static DoubleMatrix coherence2(final ComplexDoubleMatrix input, final ComplexDoubleMatrix norms,
                                           final int winL, final int winP) {
 
-        logger.info("coherence ver #2");
+        logger.fine("coherence ver #2");
         if (!(winL >= winP)) {
             logger.warning("coherence: estimator window size L<P not very efficiently programmed.");
         }
@@ -280,11 +280,11 @@ public class SarUtils {
             return inputMatrix;
         }
 
-        logger.info("multilook input [inputMatrix] size: " +
+        logger.fine("multilook input [inputMatrix] size: " +
                 inputMatrix.length + " lines: " + inputMatrix.rows + " pixels: " + inputMatrix.columns);
 
         if (inputMatrix.rows / factorRow == 0 || inputMatrix.columns / factorColumn == 0) {
-            logger.info("Multilooking was not necessary for this inputMatrix: inputMatrix.rows < mlR or buffer.columns < mlC");
+            logger.fine("Multilooking was not necessary for this inputMatrix: inputMatrix.rows < mlR or buffer.columns < mlC");
             return inputMatrix;
         }
 

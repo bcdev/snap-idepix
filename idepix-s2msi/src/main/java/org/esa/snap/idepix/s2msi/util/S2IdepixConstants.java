@@ -27,7 +27,7 @@ public class S2IdepixConstants {
 
     public static final int IDEPIX_CLOUD_BUFFER = 4;
     public static final String IDEPIX_CLOUD_BUFFER_NAME = "IDEPIX_CLOUD_BUFFER";
-    public static final String IDEPIX_CLOUD_BUFFER_DESCR_TEXT = "A buffer of n pixels around a cloud. n is a user supplied parameter. Applied to pixels masked as 'cloud'";
+    public static final String IDEPIX_CLOUD_BUFFER_DESCR_TEXT = "A diamond-shaped buffer with a user-supplied Manhattan radius of n pixels around a cloud";
 
     public static final int IDEPIX_CLOUD_SHADOW = 5;
     public static final String IDEPIX_CLOUD_SHADOW_NAME = "IDEPIX_CLOUD_SHADOW";
@@ -83,16 +83,7 @@ public class S2IdepixConstants {
 
     public static final int IDEPIX_MOUNTAIN_SHADOW = 18;
     public static final String IDEPIX_MOUNTAIN_SHADOW_NAME = "IDEPIX_MOUNTAIN_SHADOW";
-    public static final String IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT = "Pixel is affected by mountain shadow";
-
-    public static final int IDEPIX_POTENTIAL_SHADOW = 19;
-    public static final String IDEPIX_POTENTIAL_SHADOW_NAME = "IDEPIX_POTENTIAL_SHADOW";
-    public static final String IDEPIX_POTENTIAL_SHADOW_DESCR_TEXT = "Potentially a cloud shadow pixel";
-
-    public static final int IDEPIX_CLUSTERED_CLOUD_SHADOW = 20;
-    public static final String IDEPIX_CLUSTERED_CLOUD_SHADOW_NAME = "IDEPIX_CLUSTERED_CLOUD_SHADOW";
-    public static final String IDEPIX_CLUSTERED_CLOUD_SHADOW_DESCR_TEXT= "Cloud shadow identified by clustering algorithm";
-
+    public static final String IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT = "Direct solar illumination is blocked by terrain";
 
     public static final int NO_DATA_VALUE = -1;
 

@@ -11,6 +11,12 @@ import java.awt.Rectangle;
 import java.net.URL;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_BUFFER;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_SURE;
 
 /**
  * @author Tonio Fincke
@@ -50,6 +56,21 @@ public class PreparationMaskBandTest {
         PreparationMaskBand.prepareMaskBand(21, 17, sourceRectangle, flagArray, flagDetector);
 
         assertArrayEquals(EXPECTED_FLAG_ARRAY, flagArray);
+    }
+
+    @Test
+    public void sureAmbiguousAndCombinedCloudAreAlwaysShadowCasting() {
+        assertTrue(FlagDetector.isCloudSample(1 << IDEPIX_CLOUD_SURE, false));
+        assertTrue(FlagDetector.isCloudSample(1 << IDEPIX_CLOUD_AMBIGUOUS, false));
+        assertTrue(FlagDetector.isCloudSample(1 << IDEPIX_CLOUD, false));
+    }
+
+    @Test
+    public void cloudBufferIsShadowCastingOnlyWhenEnabled() {
+        final int bufferOnly = 1 << IDEPIX_CLOUD_BUFFER;
+
+        assertFalse(FlagDetector.isCloudSample(bufferOnly, false));
+        assertTrue(FlagDetector.isCloudSample(bufferOnly, true));
     }
 
 }

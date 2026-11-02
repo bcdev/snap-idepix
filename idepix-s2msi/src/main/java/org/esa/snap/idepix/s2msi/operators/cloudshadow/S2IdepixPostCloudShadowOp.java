@@ -1,7 +1,6 @@
 package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.apache.commons.lang3.ArrayUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.FlagCoding;
@@ -29,10 +28,10 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * @author Tonio Fincke, Dagmar Müller
@@ -46,6 +45,22 @@ import java.util.Map;
         description = "Post-processing for algorithm detecting cloud shadow...")
 
 public class S2IdepixPostCloudShadowOp extends Operator {
+
+    private static final boolean PROFILE = Boolean.getBoolean("snap.idepix.s2msi.cloudshadow.profile");
+    private static final int PROFILE_INTERVAL = Math.max(1,
+            Integer.getInteger("snap.idepix.s2msi.cloudshadow.profile.interval", 10));
+
+    private final AtomicInteger profileTiles = new AtomicInteger();
+    private final LongAdder profileGeometryNanos = new LongAdder();
+    private final LongAdder profilePreparationNanos = new LongAdder();
+    private final LongAdder profileComponentsNanos = new LongAdder();
+    private final LongAdder profilePotentialShadowNanos = new LongAdder();
+    private final LongAdder profileClusteringNanos = new LongAdder();
+    private final LongAdder profileGapFinderNanos = new LongAdder();
+    private final LongAdder profileOutputNanos = new LongAdder();
+    private final LongAdder profileTotalNanos = new LongAdder();
+    private final LongAdder profileLocalMatches = new LongAdder();
+    private final LongAdder profileLocallyPromotedPixels = new LongAdder();
 
     @SourceProduct(description = "The classification product from which to take the classification band.")
     private Product s2ClassifProduct;
@@ -62,6 +77,13 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
     @Parameter(description = "Whether to also compute mountain shadow", defaultValue = "true")
     private boolean computeMountainShadow;
+
+    @Parameter(description = "Whether to search a local cloud-shadow offset for each connected cloud",
+            defaultValue = "true")
+    private boolean usePerCloudShadowMatching;
+
+    @Parameter(description = "Whether cloud-buffer pixels cast cloud shadows", defaultValue = "false")
+    private boolean includeCloudBufferForShadow;
 
     @Parameter(description = "Offset along cloud path to minimum reflectance (over all tiles)", defaultValue = "0")
     private int bestOffset;
@@ -282,17 +304,22 @@ public class S2IdepixPostCloudShadowOp extends Operator {
 
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+        final long totalStart = profileStart();
+        long stageStart = profileStart();
         final float[] targetAltitude = getSamples(sourceAltitude, targetRectangle);
-        final List<Float> altitudes = Arrays.asList(ArrayUtils.toObject(targetAltitude));
         final Point2D[] cloudShadowRelativePath = CloudShadowUtils.getRelativePath(
                 minAltitude, sunZenithMean * MathUtils.DTOR, sunAzimuthMean * MathUtils.DTOR, maxcloudTop,
                 targetRectangle, targetRectangle, getSourceProduct().getSceneRasterHeight(),
                 getSourceProduct().getSceneRasterWidth(), spatialResolution, true, false);
         final Rectangle sourceRectangle = CloudShadowUtils.getSourceRectangle(getSourceProduct(), targetRectangle, cloudShadowRelativePath);
+        profileAdd(profileGeometryNanos, stageStart);
+        stageStart = profileStart();
 
         Tile sourceTileFlag1 = getSourceTile(sourceBandFlag1, sourceRectangle,
                 new BorderExtenderConstant(new double[]{Double.NaN}));
         if (skipInvalidTiles && CloudShadowUtils.isCompletelyInvalid(sourceTileFlag1)) {
+            profileAdd(profileTotalNanos, totalStart);
+            profileTileCompleted(targetRectangle);
             return;
         }
         int sourceWidth = sourceRectangle.width;
@@ -305,7 +332,7 @@ public class S2IdepixPostCloudShadowOp extends Operator {
         //will be filled in SegmentationCloudClass Arrays.fill(cloudIdArray, ....);
         final int[] cloudIDArray = new int[sourceLength];
         final int[] shadowIDArray = new int[sourceLength];
-        final double[] cloudTestArray = new double[sourceLength];
+        double[] cloudTestArray = null;
 
         final float[] altitude = getSamples(sourceAltitude, sourceRectangle);
         final float[][] clusterData = {getSamples(sourceBandClusterA, sourceRectangle),
@@ -332,24 +359,27 @@ public class S2IdepixPostCloudShadowOp extends Operator {
                             sourceLongitudes);
         }
 
-        FlagDetector flagDetector = new FlagDetector(sourceTileFlag1, sourceRectangle);
+        FlagDetector flagDetector = new FlagDetector(
+                sourceTileFlag1, sourceRectangle, includeCloudBufferForShadow);
 
         PreparationMaskBand.prepareMaskBand(targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight(),
                 sourceRectangle, flagArray, flagDetector);
 
         if (computeMountainShadow) {
-            float maxAltitude =
-                    Collections.max(altitudes, new S2IdepixPostCloudShadowOp.MountainShadowMaxFloatComparator());
+            float maxAltitude = maximumIgnoringNaN(targetAltitude);
             if (Float.isNaN(maxAltitude)) {
                 maxAltitude = 0;
             }
             MountainShadowFlagger.flagMountainShadowArea(sourceRectangle, sunZenithMean, altitude, flagArray,
                     minAltitude, maxAltitude, cloudShadowRelativePath);
         }
+        profileAdd(profilePreparationNanos, stageStart);
+        stageStart = profileStart();
 
         final FindContinuousAreas cloudIdentifier = new FindContinuousAreas(flagArray);
         Map<Integer, List<Integer>> cloudList =
                 cloudIdentifier.computeAreaID(sourceWidth, sourceHeight, cloudIDArray, true);
+        profileAdd(profileComponentsNanos, stageStart);
 
         if (cloudList.size() > 0) {
             /*
@@ -357,11 +387,16 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             /   potentialShadowPositions: Collection of List of integers, which hold the index of potential cloud shadow pixels for each cloudID.
             /   offsetAtPotentialShadowPositions: Collection of List of integers, holding the step along the cloud shadow path in the potential cloud shadow. Useful to determine distances of clusters.
             */
+            stageStart = profileStart();
             final IdentifiedPcs identifiedPcs = PotentialCloudShadowAreaIdentifier.identifyPotentialCloudShadowsPLUS(
                     sourceRectangle, targetRectangle, sunZenithMean, sunAzimuthMean, sourceLatitudes, sourceLongitudes,
                     altitude, flagArray, cloudIDArray, cloudShadowRelativePath);
+            profileAdd(profilePotentialShadowNanos, stageStart);
             final Map<Integer, List<Integer>> potentialShadowPositions = identifiedPcs.indexToPositions;
             final Map<Integer, List<Integer>> offsetAtPotentialShadow = identifiedPcs.offsetAtPositions;
+            final List<CloudShadowObject> cloudObjects = CloudShadowObject.fromLegacyMaps(
+                    cloudList, potentialShadowPositions, offsetAtPotentialShadow);
+            final CloudShadowMatcher cloudShadowMatcher = new SceneBestOffsetCloudShadowMatcher(bestOffset);
 
             getLogger().fine("potential shadow is ready");
             // shifting by offset, but looking into water, land and all pixel.
@@ -373,22 +408,30 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             }
             //combining information. clustered shadow is analysed for continuous areas.
             // shifting the shadow is done before and a correction is included, if bestOffset > 0
+            stageStart = profileStart();
             final CloudShadowFlaggerCombination cloudShadowFlagger = new CloudShadowFlaggerCombination();
-            cloudShadowFlagger.flagCloudShadowAreas(clusterData, flagArray, potentialShadowPositions,
-                    offsetAtPotentialShadow, cloudList, bestOffset, analysisMode, sourceWidth, sourceHeight,
+            cloudShadowFlagger.flagCloudShadowAreas(clusterData, flagArray, cloudObjects,
+                    cloudShadowMatcher, bestOffset, usePerCloudShadowMatching, analysisMode, sourceWidth, sourceHeight,
                     shadowIDArray, cloudShadowRelativePath);
+            profileLocalMatches.add(cloudShadowFlagger.getLocalMatchCount());
+            profileLocallyPromotedPixels.add(cloudShadowFlagger.getLocallyPromotedPixelCount());
+            profileAdd(profileClusteringNanos, stageStart);
 
             // shifted cloud mask in cloud gaps.
             // the sourceRectangle has to be large enough, larger than the spatial filter with 1000m radius!
             double kernelRadius = 1000.;
             int blockSize = 2 * (int) Math.ceil(kernelRadius / spatialResolution) + 1;
             if (bestOffset > 0 && blockSize < Math.min(sourceHeight, sourceWidth)) {
+                stageStart = profileStart();
                 final CloudShadowFlaggerShiftInCloudGaps test = new CloudShadowFlaggerShiftInCloudGaps();
-                test.setShiftedCloudInCloudGaps(sourceRectangle, flagArray, cloudList, cloudTestArray, spatialResolution);
+                cloudTestArray = test.setShiftedCloudInCloudGaps(sourceRectangle, flagArray, cloudList,
+                        spatialResolution);
+                profileAdd(profileGapFinderNanos, stageStart);
 
             }
             RecommendedCloudShadowFlagger.setRecommendedCloudShadowFlag(bestOffset, flagArray, sourceRectangle);
         }
+        stageStart = profileStart();
         fillTile(flagArray, targetRectangle, sourceRectangle, targetTileCloudShadow);
         if (debug) {
             Tile targetTileCloudID = targetTiles.get(targetBandCloudID);
@@ -400,27 +443,69 @@ public class S2IdepixPostCloudShadowOp extends Operator {
             fillTile(cloudIDArray, targetRectangle, sourceRectangle, targetTileCloudID);
             fillTile(tileIDArray, targetRectangle, sourceRectangle, targetTileTileID);
             fillTile(shadowIDArray, targetRectangle, sourceRectangle, targetTileShadowID);
+            if (cloudTestArray == null) {
+                cloudTestArray = new double[sourceLength];
+            }
             fillTile(cloudTestArray, targetRectangle, sourceRectangle, targetTileCloudTest);
+        }
+        profileAdd(profileOutputNanos, stageStart);
+        profileAdd(profileTotalNanos, totalStart);
+        profileTileCompleted(targetRectangle);
+    }
+
+    @Override
+    public void dispose() {
+        if (PROFILE) {
+            getLogger().fine(String.format(
+                    "IdePix S2 cloud-shadow post profile: tiles=%d, geometry=%.3fs, preparation=%.3fs, " +
+                            "components=%.3fs, potentialShadow=%.3fs, clustering=%.3fs, gapFinder=%.3fs, " +
+                            "output=%.3fs, total=%.3fs, localMatches=%d, locallyPromotedPixels=%d",
+                    profileTiles.get(), seconds(profileGeometryNanos), seconds(profilePreparationNanos),
+                    seconds(profileComponentsNanos), seconds(profilePotentialShadowNanos),
+                    seconds(profileClusteringNanos), seconds(profileGapFinderNanos), seconds(profileOutputNanos),
+                    seconds(profileTotalNanos), profileLocalMatches.sum(), profileLocallyPromotedPixels.sum()));
+        }
+        super.dispose();
+    }
+
+    private static long profileStart() {
+        return PROFILE ? System.nanoTime() : 0L;
+    }
+
+    private static void profileAdd(LongAdder accumulator, long start) {
+        if (PROFILE) {
+            accumulator.add(System.nanoTime() - start);
         }
     }
 
-    private static class MountainShadowMaxFloatComparator implements Comparator<Float> {
+    private static double seconds(LongAdder nanoseconds) {
+        return nanoseconds.sum() / 1_000_000_000.0;
+    }
 
-        @Override
-        public int compare(Float o1, Float o2) {
-            if (Float.isNaN(o1) && Float.isNaN(o2)) {
-                return 0;
-            } else if (Float.isNaN(o1)) {
-                return -1;
-            } else if (Float.isNaN(o2)) {
-                return 1;
-            } else if (o1 < o2) {
-                return -1;
-            } else if (o1 > o2) {
-                return 1;
+    private void profileTileCompleted(Rectangle targetRectangle) {
+        if (PROFILE) {
+            int completed = profileTiles.incrementAndGet();
+            if (completed % PROFILE_INTERVAL == 0) {
+                getLogger().fine(String.format(
+                        "IdePix S2 cloud-shadow post progress: completedTiles=%d, lastTile=%s, geometry=%.3fs, " +
+                                "preparation=%.3fs, components=%.3fs, potentialShadow=%.3fs, clustering=%.3fs, " +
+                                "gapFinder=%.3fs, output=%.3fs, total=%.3fs",
+                        completed, targetRectangle, seconds(profileGeometryNanos),
+                        seconds(profilePreparationNanos), seconds(profileComponentsNanos),
+                        seconds(profilePotentialShadowNanos), seconds(profileClusteringNanos),
+                        seconds(profileGapFinderNanos), seconds(profileOutputNanos), seconds(profileTotalNanos)));
             }
-            return 0;
         }
+    }
+
+    private static float maximumIgnoringNaN(float[] values) {
+        float maximum = Float.NaN;
+        for (float value : values) {
+            if (!Float.isNaN(value) && (Float.isNaN(maximum) || value > maximum)) {
+                maximum = value;
+            }
+        }
+        return maximum;
     }
 
     public static class Spi extends OperatorSpi {
