@@ -51,6 +51,15 @@ public class S2IdepixOp extends Operator {
     @Parameter(defaultValue = "false", label = " Compute cloud shadow")
     private boolean computeCloudShadow = false;
 
+    @Parameter(defaultValue = "true", label = " Use per-cloud shadow matching",
+            description = "Search locally around the scene-wide cloud-shadow offset for each connected cloud.")
+    private boolean usePerCloudShadowMatching = true;
+
+    @Parameter(defaultValue = "false", label = " Include cloud buffer in cloud-shadow detection",
+            description = "Treat cloud-buffer pixels as additional cloud-shadow casting objects. " +
+                    "Requires cloud-buffer computation to be enabled.")
+    private boolean includeCloudBufferForShadow;
+
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
 
@@ -59,11 +68,11 @@ public class S2IdepixOp extends Operator {
 
     @Parameter(defaultValue = "2", interval = "[0,100]",
             label = " Width of cloud buffer (# of pixels)",
-            description = " The width of the 'safety buffer' around a pixel identified as cloudy.")
+            description = " The Manhattan radius of the diamond-shaped safety buffer around a cloudy pixel.")
     private int cloudBufferWidth;
 
-    @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
-    private String demName = "SRTM 3Sec";
+    @Parameter(description = "The digital elevation model.", defaultValue = "Copernicus 30m Global DEM", label = "Digital Elevation Model")
+    private String demName = "Copernicus 30m Global DEM";
 
 
     @SourceProduct(alias = "l1cProduct",
@@ -80,6 +89,8 @@ public class S2IdepixOp extends Operator {
         if (!inputProductIsValid) {
             throw new OperatorException(S2IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
+        S2IdepixPerformanceAdvice.log(S2IdepixUtils.determineResolution(sourceProduct),
+                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight(), computeCloudShadow);
         sourceProduct.setPreferredTileSize(610, 610);
         if (S2IdepixUtils.isValidSentinel2(sourceProduct)) {
             processSentinel2();
@@ -138,6 +149,7 @@ public class S2IdepixOp extends Operator {
     private Product createS2ClassificationProduct(Map<String, Product> inputProducts) {
         Map<String, Object> classificationParameter = new HashMap<>(10);
         classificationParameter.put("copyFeatureValues", copyFeatureValues);
+        classificationParameter.put("copyToaReflectances", copyToaReflectances);
 
         return GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixClassificationOp.class),
                                  classificationParameter, inputProducts);
@@ -167,6 +179,8 @@ public class S2IdepixOp extends Operator {
             Map<String, Object> params = new HashMap<>();
             params.put("computeMountainShadow", computeMountainShadow);
             params.put("computeCloudShadow", computeCloudShadow);
+            params.put("usePerCloudShadowMatching", usePerCloudShadowMatching);
+            params.put("includeCloudBufferForShadow", includeCloudBufferForShadow);
             params.put("computeCloudBuffer", computeCloudBuffer);
             params.put("cloudBufferWidth", cloudBufferWidth);
             params.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);

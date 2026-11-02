@@ -56,7 +56,7 @@ public class S2IdepixCloudPostProcessOp extends Operator {
     @Parameter(defaultValue = "true", label = "Compute cloud buffer for cloud ambiguous pixels too.")
     private boolean computeCloudBufferForCloudAmbiguous;
 
-    @Parameter(defaultValue = "2", label = "Width of cloud buffer (# of pixels)")
+    @Parameter(defaultValue = "2", label = "Width of diamond-shaped cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
     // variables set in initialize and used in computeTile
@@ -151,7 +151,7 @@ public class S2IdepixCloudPostProcessOp extends Operator {
      * * waterNearby 33x33 (60m), 100x100 (20m), 200x200 (10m)
      * * clearNearby 11x11
      * * sum, square sum, and count of two band ratio expressions for the CDI
-     * * cloudBuffer 5x5 (cloudBufferWidth=2)
+     * * cloudBuffer 5x5 Manhattan-distance diamond (cloudBufferWidth=2)
      * For simplicity all the accus except cloudBuffer use the maximum number of lines that
      * occurs (contextSize). This does not change the logic, just the buffer line used.</p>
      *
@@ -415,15 +415,17 @@ public class S2IdepixCloudPostProcessOp extends Operator {
         }
     }
 
-    private void addCloudBufferInAccu(int y, int x, Rectangle targetRectangle, int halfWidth,
-                                      int[][] cloudBufferAccu) {
-        // reduce patch to part overlapping with target image
+    static void addCloudBufferInAccu(int y, int x, Rectangle targetRectangle, int halfWidth,
+                                     int[][] cloudBufferAccu) {
+        // Reduce the Manhattan-distance diamond to the part overlapping with the target image.
         final int jMin = Math.max(y - targetRectangle.y - halfWidth, 0);
         final int jMax = Math.min(y - targetRectangle.y + 1 + halfWidth, targetRectangle.height);
-        final int iMin = Math.max(x - targetRectangle.x - halfWidth, 0);
-        final int iMax = Math.min(x - targetRectangle.x + 1 + halfWidth, targetRectangle.width);
         for (int j = jMin; j < jMax; ++j) {
-            final int jj = j % cloudBufferSize;
+            final int jj = j % cloudBufferAccu.length;
+            final int yOffset = j - (y - targetRectangle.y);
+            final int horizontalExtent = S2IdepixCloudBuffer.getHorizontalExtent(yOffset, halfWidth);
+            final int iMin = Math.max(x - targetRectangle.x - horizontalExtent, 0);
+            final int iMax = Math.min(x - targetRectangle.x + 1 + horizontalExtent, targetRectangle.width);
             for (int i = iMin; i < iMax; ++i) {
                 if (isClear(cloudBufferAccu[jj][i])) {
                     cloudBufferAccu[jj][i] |= (1 << IDEPIX_CLOUD_BUFFER);

@@ -26,7 +26,7 @@
                 <tocitem text="Masking">
                     <tocitem text="IdePix (Sentinel-2 MSI)" target="snapIdepixS2MsiTool">
                         <tocitem text="Sentinel-2 MSI Processor Description" target="snapIdepixS2MsiProcessorDescription"/>
-                        <!--<tocitem text="Sentinel-2 MSI Algorithm Specification" target="snapIdepixS2MsiAlgorithmSpecification"/>-->
+                        <tocitem text="Sentinel-2 MSI Algorithm Specification" target="snapIdepixS2MsiAlgorithmSpecification"/>
                         <tocitem text="Sentinel-2 MSI Command Line Processing" target="snapIdepixS2MsiCommandLine"/>
                     </tocitem>
                 </tocitem>

@@ -138,18 +138,20 @@ For product descriptions and file naming conventions see the Sentinel-2 MSI Prod
 
 <p class="i1">
     <b>Compute a cloud buffer: </b><br>
-    Whether to leave an additional buffer around cluds during computation.
-    This buffer will be displayed as an extra flag and will be considered during the computation of, e.g., cloud shadow.
+    Whether to add an additional safety buffer around clouds. The buffer is written as the
+    <code>IDEPIX_CLOUD_BUFFER</code> flag on otherwise clear pixels.
 </p>
 
 <p class="i1">
-    <b>Compute a cloud buffer also for cloud ambiguous pixles: </b><br>
+    <b>Compute a cloud buffer also for cloud ambiguous pixels: </b><br>
     Whether the buffer shall also be applied to pixels that have not unambiguously been identified as cloud.
 </p>
 
 <p class="i1">
     <b>Width of cloud buffer (# of pixels): </b><br>
-    The width of the cloud buffer in pixels.
+    The Manhattan radius of the diamond-shaped cloud buffer in pixels. A width of 2 uses a
+    5-by-5 footprint with row widths 1, 3, 5, 3, and 1. Equivalently, an offset belongs to
+    the buffer when <code>abs(dx) + abs(dy) &lt;= width</code>.
     This value is only considered when cloud buffer computation has been selected.
 </p>
 
@@ -182,10 +184,20 @@ For product descriptions and file naming conventions see the Sentinel-2 MSI Prod
         SRTM 1Sec Hgt
     </li>
     <li>
-        SRTM 3Sec (Default)
+        SRTM 3Sec
+    </li>
+    <li>
+        Copernicus 30m Global DEM (Default)
     </li>
 </ul>
 <br>
+
+<h3>Performance advice</h3>
+<p>IdePix logs the effective tile-cache, maximum Java heap and thread settings at startup, with
+non-blocking advice when settings may limit processing performance. For instructions on GPT
+per-run flags, Desktop preferences, <code>gpt.vmoptions</code> and <code>snap.conf</code>, see
+<a href="S2MsiIdepixCommandLine.html#performance">Performance settings</a>. The advice never changes
+global settings automatically; example values must be adapted to available memory and concurrent jobs.</p>
 
 <h3>The Processing Result</h3>
 The IdePix classification result is written into the target product as a flag band named 'pixel_classif_flags'.
