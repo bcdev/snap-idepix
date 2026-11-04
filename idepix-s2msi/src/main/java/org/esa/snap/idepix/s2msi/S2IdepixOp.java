@@ -66,6 +66,62 @@ public class S2IdepixOp extends Operator {
     private String demName = "SRTM 3Sec";
 
 
+    @Parameter(defaultValue = "true",
+            label = " Flag land and water pixels",
+            description = " Flag land and water pixels")
+    private boolean flagLandWater;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag land and water pixels",
+            description = " Flag land and water pixels")
+    private boolean flagClearLandWater;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag snow/ice pixels",
+            description = " Flag snow/ice pixels")
+    private boolean flagSnowIce;
+
+    @Parameter(defaultValue = "false",
+            label = " Flag snow/ice pixels as cloud sure",
+            description = " Flag snow/ice pixels as cloud sure")
+    private boolean flagSnowIceAsCloudSure;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag bright pixels",
+            description = " Flag bright pixels")
+    private boolean flagBright;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag white pixels",
+            description = " Flag white pixels")
+    private boolean flagWhite;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag brightwhite pixels",
+            description = " Flag brightwhite pixels")
+    private boolean flagBrightWhite;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag vegetation risk pixels",
+            description = " Flag vegetation risk pixels")
+    private boolean flagVegRisk;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag cirrus clouds",
+            description = " Flag cirrus clouds")
+    private boolean flagCirrusClouds;
+
+    @Parameter(defaultValue = "0",
+            label = " debug x_ccord",
+            description = " debug x_ccord")
+    private int debug_x;
+
+    @Parameter(defaultValue = "0",
+            label = " debug y_ccord",
+            description = " debug x_ccord")
+    private int debug_y;
+
+
     @SourceProduct(alias = "l1cProduct",
             label = "Sentinel-2 MSI L1C product",
             description = "The Sentinel-2 MSI L1C product.")
@@ -113,7 +169,8 @@ public class S2IdepixOp extends Operator {
         //if (true) return;
 
         // Post Cloud Classification: cloud shadow, cloud buffer, mountain shadow
-        Product postProcessingProduct = computePostProcessProduct(sourceProduct, s2ClassifProduct);
+//        Product postProcessingProduct = computePostProcessProduct(sourceProduct, s2ClassifProduct);
+        Product postProcessingProduct = s2ClassifProduct;
 
         targetProduct = S2IdepixUtils.cloneProduct(s2ClassifProduct, true);
         if (!copyToaReflectances) {
@@ -138,6 +195,17 @@ public class S2IdepixOp extends Operator {
     private Product createS2ClassificationProduct(Map<String, Product> inputProducts) {
         Map<String, Object> classificationParameter = new HashMap<>(10);
         classificationParameter.put("copyFeatureValues", copyFeatureValues);
+        classificationParameter.put("flagLandWater", flagLandWater);
+        classificationParameter.put("flagClearLandWater", flagClearLandWater);
+        classificationParameter.put("flagSnowIce", flagSnowIce);
+        classificationParameter.put("flagSnowIceAsCloudSure", flagSnowIceAsCloudSure);
+        classificationParameter.put("flagBright", flagBright);
+        classificationParameter.put("flagWhite", flagWhite);
+        classificationParameter.put("flagBrightWhite", flagBrightWhite);
+        classificationParameter.put("flagVegRisk", flagVegRisk);
+        classificationParameter.put("flagCirrusClouds", flagCirrusClouds);
+        classificationParameter.put("debug_x", debug_x);
+        classificationParameter.put("debug_y", debug_y);
 
         return GPF.createProduct(OperatorSpi.getOperatorAlias(S2IdepixClassificationOp.class),
                                  classificationParameter, inputProducts);

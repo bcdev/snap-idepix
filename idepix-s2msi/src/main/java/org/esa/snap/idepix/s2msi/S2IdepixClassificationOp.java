@@ -82,6 +82,61 @@ public class S2IdepixClassificationOp extends Operator {
             description = " Threshold CL_THRESH")
     private double clThresh;
 
+    @Parameter(defaultValue = "0",
+            label = " debug x_ccord",
+            description = " debug x_ccord")
+    private int debug_x;
+
+    @Parameter(defaultValue = "0",
+            label = " debug y_ccord",
+            description = " debug x_ccord")
+    private int debug_y;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag land and water pixels",
+            description = " Flag land and water pixels")
+    private boolean flagLandWater;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag land and water pixels",
+            description = " Flag land and water pixels")
+    private boolean flagClearLandWater;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag snow/ice pixels",
+            description = " Flag snow/ice pixels")
+    private boolean flagSnowIce;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag snow/ice pixels as cloud sure",
+            description = " Flag snow/ice pixels as cloud sure")
+    private boolean flagSnowIceAsCloudSure;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag bright pixels",
+            description = " Flag bright pixels")
+    private boolean flagBright;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag cirrus clouds",
+            description = " Flag cirrus clouds")
+    private boolean flagCirrusClouds;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag white pixels",
+            description = " Flag white pixels")
+    private boolean flagWhite;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag brightwhite pixels",
+            description = " Flag brightwhite pixels")
+    private boolean flagBrightWhite;
+
+    @Parameter(defaultValue = "true",
+            label = " Flag vegetation risk pixels",
+            description = " Flag vegetation risk pixels")
+    private boolean flagVegRisk;
+
     @SourceProduct(alias = "l1c", description = "The MSI L1C source product.")
     Product sourceProduct;
 
@@ -429,22 +484,28 @@ public class S2IdepixClassificationOp extends Operator {
 
     void setCloudFlag(Tile targetTile, int y, int x, S2IdepixAlgorithm s2Algorithm) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
+        if (x == debug_x && y == debug_y) {
+            System.out.println("x,y = " + x + "," + y);
+        }
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_INVALID, s2Algorithm.isInvalid());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD, s2Algorithm.isCloud());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD_SURE, s2Algorithm.isCloudSure());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD,
+                s2Algorithm.isCloud() || (s2Algorithm.isClearSnow() && flagSnowIceAsCloudSure));
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD_SURE,
+                s2Algorithm.isCloudSure() || (s2Algorithm.isClearSnow() && flagSnowIceAsCloudSure));
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, s2Algorithm.isCloudAmbiguous());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CIRRUS_SURE, s2Algorithm.isCirrus());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CIRRUS_AMBIGUOUS, s2Algorithm.isCirrusAmbiguous());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CIRRUS_SURE, flagCirrusClouds && s2Algorithm.isCirrus());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CIRRUS_AMBIGUOUS, flagCirrusClouds && s2Algorithm.isCirrusAmbiguous());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLOUD_SHADOW, false); // not computed here
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLEAR_LAND, s2Algorithm.isClearLand());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLEAR_WATER, s2Algorithm.isClearWater());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_SNOW_ICE, s2Algorithm.isClearSnow());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_LAND, s2Algorithm.isLand());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_WATER, s2Algorithm.isWater());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_BRIGHT, s2Algorithm.isBright());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_WHITE, s2Algorithm.isWhite());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_BRIGHTWHITE, s2Algorithm.isBrightWhite());
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_VEG_RISK, s2Algorithm.isVegRisk());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLEAR_LAND, flagClearLandWater &&  s2Algorithm.isClearLand());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLEAR_WATER, flagClearLandWater &&  s2Algorithm.isClearWater());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_SNOW_ICE,
+                flagSnowIce && s2Algorithm.isClearSnow() && !flagSnowIceAsCloudSure);
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_LAND, flagLandWater &&  s2Algorithm.isLand());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_WATER, flagLandWater &&  s2Algorithm.isWater());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_BRIGHT, flagBright &&  s2Algorithm.isBright());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_WHITE, flagWhite &&  s2Algorithm.isWhite());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_BRIGHTWHITE, flagBrightWhite &&  s2Algorithm.isBrightWhite());
+        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_VEG_RISK, flagVegRisk &&  s2Algorithm.isVegRisk());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW, false); //not computed here
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_POTENTIAL_SHADOW, false); //not computed here
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLUSTERED_CLOUD_SHADOW, false); //not computed here

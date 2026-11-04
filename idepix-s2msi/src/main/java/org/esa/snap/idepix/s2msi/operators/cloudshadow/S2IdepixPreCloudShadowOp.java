@@ -151,6 +151,7 @@ public class S2IdepixPreCloudShadowOp extends Operator {
     }
 
     private float[] getSamples(RasterDataNode rasterDataNode, Rectangle rectangle) {
+        rasterDataNode.setValidPixelExpression(rasterDataNode.getName() + ".raw > -0.1");
         Tile tile = getSourceTile(rasterDataNode, rectangle, new BorderExtenderConstant(new double[]{Double.NaN}));
         return tile.getSamplesFloat();
     }

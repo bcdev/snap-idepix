@@ -375,7 +375,9 @@ public class S2IdepixUtils {
                 if (!clonedProduct.containsBand(b.getName())) {
                     ProductUtils.copyBand(b.getName(), sourceProduct, clonedProduct, true);
                     if (isIdepixSpectralBand(b)) {
-                        ProductUtils.copyRasterDataNodeProperties(b, clonedProduct.getBand(b.getName()));
+                        final Band clonedBand = clonedProduct.getBand(b.getName());
+                        ProductUtils.copyRasterDataNodeProperties(b, clonedBand);
+                        clonedBand.setValidPixelExpression(clonedBand.getName() + ".raw > -0.1");
                     }
                 }
             }

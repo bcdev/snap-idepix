@@ -96,7 +96,7 @@ public class S2IdepixAlgorithm {
         } else {
             return false; // this means: if we have no information about land, we return isClearLand = false
         }
-        return (!isCloudSure() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() && landValue > LAND_THRESH);
+        return (!isClearSnow() && !isCloudSure() && !isCloudAmbiguous() && !isCirrus() && !isCirrusAmbiguous() && landValue > LAND_THRESH);
     }
 
     public boolean isClearWater() {
