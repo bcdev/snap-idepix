@@ -10,6 +10,7 @@ import java.awt.geom.Point2D;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -136,7 +137,7 @@ public class S2IdepixPreCloudShadowOpTest {
     @Test
     public void materializedPostFlagsPreserveAllSamples() throws Exception {
         Product source = new Product("post", "post", 3, 2);
-        int[] expected = {0, 16, 32, 64, 128, 256};
+        int[] expected = {0, 16, 32, 64, 128, 1 << S2IdepixPreCloudShadowOp.F_RECOMMENDED_CLOUD_SHADOW};
         source.addBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW, ProductData.TYPE_INT32);
         source.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW)
                 .setRasterData(ProductData.createInstance(expected));
@@ -145,8 +146,10 @@ public class S2IdepixPreCloudShadowOpTest {
 
         assertEquals(3, materialized.getSceneRasterWidth());
         assertEquals(2, materialized.getSceneRasterHeight());
-        assertArrayEquals(expected, materialized.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW)
-                .readPixels(0, 0, 3, 2, new int[expected.length]));
+        var band = materialized.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW);
+        assertTrue("GPF must preserve the populated source image for native 60 m flags",
+                band.isSourceImageSet());
+        assertArrayEquals(expected, band.getSourceImage().getData().getSamples(0, 0, 3, 2, 0, (int[]) null));
     }
 
 }

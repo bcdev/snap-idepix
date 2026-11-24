@@ -15,7 +15,7 @@ Earlier evaluated commit: 5166b520  Finalize materialized cloud shadow input
 Final branch:     codex/s2-shadow-final-14-ready
 Finalization:     2026-10-07; based on the tested clean candidate, with quiet logging/offline Help.
 Base revision:    SNAP 14.x / SNAP_release_14.0.0 lineage
-Candidate NBM:    idepix-s2msi/target/nbm/idepix-s2msi-14.0.1-SNAPSHOT.nbm
+Candidate NBM:    idepix-s2msi/target/nbm/idepix-s2msi-14.0.2-SNAPSHOT.nbm
 
 The work was deliberately performed on a local branch. No pull request was created and the NBM
 is not an official SNAP release.
@@ -31,6 +31,8 @@ Use or adapt the following bullets only after maintainer review and final versio
     final cloud-shadow dilation.
   - Improved S2 cloud-shadow processing performance by materializing compact intermediate flag
     products, avoiding repeated upstream classification during overlapping shadow-path reads.
+  - Restored cloud-shadow flags for native 60 m products and preserved the reflectance validity
+    dependencies needed by cloud-shadow processing when reflectances are omitted from the output.
   - Replaced the S2 mountain-shadow result with a directional terrain cast-shadow calculation
     using a 5 km surrounding-DEM margin.
   - Changed the default S2 IdePix elevation model to Copernicus 30m Global DEM; other installed

@@ -298,6 +298,8 @@ public class S2IdepixCloudShadowOp extends Operator {
         ProductUtils.copyGeoCoding(sourceProduct, materializedProduct);
         final Band materializedBand = materializedProduct.addBand(sourceBand.getName(), sourceBand.getDataType());
         materializedBand.setRasterData(ProductData.createInstance(samples));
+        // Initialize the image before GPF registers the native 60 m product as an operator target.
+        materializedBand.getSourceImage();
         return materializedProduct;
     }
 
@@ -353,20 +355,20 @@ public class S2IdepixCloudShadowOp extends Operator {
         return (float) (sunAzimuthMean + diff_phi);
     }
 
-     private Product[] getInternalSourceProducts(int resolution) {
+    private Product[] getInternalSourceProducts(int resolution) {
+        final Product shadowBands = createCloudShadowResamplingSource(s2BandsProduct, l1cProduct, "B8A", "B3",
+                S2IdepixConstants.ELEVATION_BAND_NAME,
+                S2IdepixConstants.SUN_ZENITH_BAND_NAME, S2IdepixConstants.SUN_AZIMUTH_BAND_NAME,
+                S2IdepixConstants.VIEW_ZENITH_BAND_NAME, S2IdepixConstants.VIEW_AZIMUTH_BAND_NAME);
         if (resolution == 60) {
-            return new Product[]{s2ClassifProduct, s2BandsProduct};
+            return new Product[]{s2ClassifProduct, shadowBands};
         }
 
         // Keep shadow detection tied to the classification delivered at the input resolution. Reclassifying
         // resampled reflectances here is expensive and can produce a different cloud population.
         final Product resampledClassifProduct = resampleForCloudShadow(
                 createCloudShadowResamplingSource(s2ClassifProduct, l1cProduct, "pixel_classif_flags"));
-        final Product resampledBandsProduct = resampleForCloudShadow(
-                createCloudShadowResamplingSource(s2BandsProduct, l1cProduct, "B8A", "B3",
-                        S2IdepixConstants.ELEVATION_BAND_NAME,
-                        S2IdepixConstants.SUN_ZENITH_BAND_NAME, S2IdepixConstants.SUN_AZIMUTH_BAND_NAME,
-                        S2IdepixConstants.VIEW_ZENITH_BAND_NAME, S2IdepixConstants.VIEW_AZIMUTH_BAND_NAME));
+        final Product resampledBandsProduct = resampleForCloudShadow(shadowBands);
         return new Product[]{resampledClassifProduct, resampledBandsProduct};
     }
 
