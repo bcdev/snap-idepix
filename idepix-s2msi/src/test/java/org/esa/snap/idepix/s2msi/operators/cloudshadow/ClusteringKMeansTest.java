@@ -3,6 +3,8 @@ package org.esa.snap.idepix.s2msi.operators.cloudshadow;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Random;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -69,6 +71,36 @@ public class ClusteringKMeansTest {
         assertEquals(expectedDoubles.length, doubles.length);
         for (int i = 0; i < doubles.length; i++) {
             assertArrayEquals(expectedDoubles[i], doubles[i], 1e-8);
+        }
+    }
+
+    @Test
+    public void primitiveImplementationMatchesLegacyExactly() {
+        Random random = new Random(827364L);
+        for (int dimension = 1; dimension <= 3; dimension++) {
+            for (int clusterCount = 2; clusterCount <= 4; clusterCount++) {
+                double[][] bands = new double[dimension][80];
+                for (int band = 0; band < dimension; band++) {
+                    for (int point = 0; point < bands[band].length; point++) {
+                        bands[band][point] = point % 11 == 0 ? 0.025 : random.nextDouble();
+                    }
+                }
+                double[][] expected = ClusteringKMeans.computedKMeansClusterLegacy(clusterCount, bands);
+                double[][] actual = ClusteringKMeans.computedKMeansCluster(clusterCount, bands);
+                assertCentroidsEqual(expected, actual);
+            }
+        }
+
+        double[][] repeatedPoints = {{0.1, 0.1, 0.1, 0.4, 0.4, 0.4, 0.9, 0.9, 0.9},
+                {0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8}};
+        assertCentroidsEqual(ClusteringKMeans.computedKMeansClusterLegacy(4, repeatedPoints),
+                ClusteringKMeans.computedKMeansCluster(4, repeatedPoints));
+    }
+
+    private static void assertCentroidsEqual(double[][] expected, double[][] actual) {
+        assertEquals(expected.length, actual.length);
+        for (int cluster = 0; cluster < expected.length; cluster++) {
+            assertArrayEquals(expected[cluster], actual[cluster], 0.0);
         }
     }
 

@@ -118,22 +118,21 @@ public class CloudShadowUtils {
         return shapeRasterizer.rasterize(vertices);
     }
 
-    static double[] computeDistance(int index0, int indexPath, float[] sourceLongitude, float[] sourceLatitude,
-                                    float[] sourceAltitude) {
+    static void computeDistance(int index0, int indexPath, float[] sourceLongitude,
+                                double[] cosineLatitude, double[] sineLatitude, float[] sourceAltitude,
+                                double[] distanceAndAltitude) {
         double k = Math.PI / 180.0;
         double geoPos1Lon = sourceLongitude[index0];
-        double geoPos1Lat = sourceLatitude[index0];
         double geoPos2Lon = sourceLongitude[indexPath];
-        double geoPos2Lat = sourceLatitude[indexPath];
         double minAltitude = (double) Math.min(sourceAltitude[index0], sourceAltitude[indexPath]);
         if (minAltitude < 0 || Double.isNaN(minAltitude)) {
             minAltitude = 0.0;
         }
 
-        double cosPos1Lat = Math.cos(geoPos1Lat * k);
-        double cosPos2Lat = Math.cos(geoPos2Lat * k);
-        double sinPos1Lat = Math.sin(geoPos1Lat * k);
-        double sinPos2Lat = Math.sin(geoPos2Lat * k);
+        double cosPos1Lat = cosineLatitude[index0];
+        double cosPos2Lat = cosineLatitude[indexPath];
+        double sinPos1Lat = sineLatitude[index0];
+        double sinPos2Lat = sineLatitude[indexPath];
         double delta = (geoPos2Lon - geoPos1Lon) * k;
         double cosDelta = Math.cos(delta);
         double sinDelta = Math.sin(delta);
@@ -141,10 +140,8 @@ public class CloudShadowUtils {
                 Math.pow(cosPos1Lat * sinPos2Lat - sinPos1Lat * cosPos2Lat * cosDelta, 2));
         double x = sinPos1Lat * sinPos2Lat + cosPos1Lat * cosPos2Lat * cosDelta;
         double ad = Math.atan2(y, x);
-        double[] distAltArray = new double[3];
-        distAltArray[0] = ad * (MEAN_EARTH_RADIUS + minAltitude);
-        distAltArray[1] = minAltitude;
-        return distAltArray;
+        distanceAndAltitude[0] = ad * (MEAN_EARTH_RADIUS + minAltitude);
+        distanceAndAltitude[1] = minAltitude;
     }
 
     /*

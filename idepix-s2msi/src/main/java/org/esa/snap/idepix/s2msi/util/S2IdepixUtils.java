@@ -96,7 +96,7 @@ public class S2IdepixUtils {
         double deltaLatInMeters = (geoPos1.lat - geoPos2.lat) / (height-1) / 180.0 * 6367500 * Math.PI;
         double deltaLonInMeters = (geoPos1.lon - geoPos2.lon) / (height-1) / 180.0 * 6367500 * Math.PI * Math.cos((geoPos1.lat + geoPos2.lat) / 2 / 180 * Math.PI);
         int resolution = (int) Math.round(Math.sqrt(deltaLatInMeters * deltaLatInMeters + deltaLonInMeters * deltaLonInMeters));
-        SystemUtils.LOG.info("Determined resolution as " + resolution + " m");
+        SystemUtils.LOG.fine("Determined resolution as " + resolution + " m");
         return resolution;
     }
 
@@ -175,8 +175,6 @@ public class S2IdepixUtils {
         flagCoding.addFlag(IDEPIX_BRIGHTWHITE_NAME, BitSetter.setFlag(0, IDEPIX_BRIGHTWHITE), IDEPIX_BRIGHTWHITE_DESCR_TEXT);
         flagCoding.addFlag(IDEPIX_VEG_RISK_NAME, BitSetter.setFlag(0, IDEPIX_VEG_RISK), IDEPIX_VEG_RISK_DESCR_TEXT);
         flagCoding.addFlag(IDEPIX_MOUNTAIN_SHADOW_NAME, BitSetter.setFlag(0, IDEPIX_MOUNTAIN_SHADOW), IDEPIX_MOUNTAIN_SHADOW_DESCR_TEXT);
-        flagCoding.addFlag(IDEPIX_POTENTIAL_SHADOW_NAME, BitSetter.setFlag(0, IDEPIX_POTENTIAL_SHADOW), IDEPIX_POTENTIAL_SHADOW_DESCR_TEXT);
-        flagCoding.addFlag(IDEPIX_CLUSTERED_CLOUD_SHADOW_NAME, BitSetter.setFlag(0, IDEPIX_CLUSTERED_CLOUD_SHADOW), IDEPIX_CLUSTERED_CLOUD_SHADOW_DESCR_TEXT);
         return flagCoding;
     }
 
@@ -285,17 +283,6 @@ public class S2IdepixUtils {
                                          String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_MOUNTAIN_SHADOW_NAME),
                                          getRandomColour(r), 0.5f);
         gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create(IDEPIX_POTENTIAL_SHADOW_NAME,
-                                         IDEPIX_POTENTIAL_SHADOW_DESCR_TEXT, w, h,
-                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_POTENTIAL_SHADOW_NAME),
-                                         new Color(255, 200, 0), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create(IDEPIX_CLUSTERED_CLOUD_SHADOW_NAME,
-                                         IDEPIX_CLUSTERED_CLOUD_SHADOW_DESCR_TEXT, w, h,
-                                         String.format("%s.%s", IDEPIX_CLASSIF_FLAGS, IDEPIX_CLUSTERED_CLOUD_SHADOW_NAME),
-                                         Color.red, 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-
         return index;
     }
 

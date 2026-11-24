@@ -72,6 +72,137 @@ public class PhaseFilter {
     }
 
     public DoubleMatrix convolutionSimpleGapFinder() {
+        final int rowCount = data.rows;
+        final int columnCount = data.columns;
+        final int blockSize = kernel2d_circle.columns;
+        final int center = (int) Math.ceil(blockSize / 2.) - 1;
+
+        // Prefix sums along every matrix row turn each horizontal kernel segment into
+        // two array lookups. A circular kernel has one segment per row; the ring has
+        // at most two. This retains the legacy kernel and edge footprint while reducing
+        // the work from O(pixels * radius^2) to O(pixels * radius).
+        final int prefixStride = columnCount + 1;
+        final double[] rowPrefix = new double[rowCount * prefixStride];
+        for (int row = 0; row < rowCount; row++) {
+            int prefixOffset = row * prefixStride;
+            double sum = 0.0;
+            for (int column = 0; column < columnCount; column++) {
+                int complexDataIndex = 2 * (row + column * rowCount);
+                sum += data.data[complexDataIndex];
+                rowPrefix[prefixOffset + column + 1] = sum;
+            }
+        }
+
+        final KernelSegments circle = KernelSegments.from(kernel2d_circle, blockSize);
+        final KernelSegments ring = KernelSegments.from(kernel2d_ring, blockSize);
+        final DoubleMatrix output = new DoubleMatrix(rowCount, columnCount);
+
+        for (int column = 0; column < columnCount; column++) {
+            int minimumColumnOffset = Math.max(-center, -column);
+            int maximumColumnOffset = Math.min(center, columnCount - 1 - column);
+            // Preserve the legacy top/left edge footprint, which omits the positive
+            // outermost kernel row/column for pixels before the kernel center.
+            if (column < center) {
+                maximumColumnOffset = Math.min(maximumColumnOffset, center - 1);
+            }
+            for (int row = 0; row < rowCount; row++) {
+                int minimumRowOffset = Math.max(-center, -row);
+                int maximumRowOffset = Math.min(center, rowCount - 1 - row);
+                if (row < center) {
+                    maximumRowOffset = Math.min(maximumRowOffset, center - 1);
+                }
+
+                double circleSum = convolveAt(rowPrefix, prefixStride, row, column, center,
+                                              minimumRowOffset, maximumRowOffset,
+                                              minimumColumnOffset, maximumColumnOffset, circle);
+                double ringSum = convolveAt(rowPrefix, prefixStride, row, column, center,
+                                            minimumRowOffset, maximumRowOffset,
+                                            minimumColumnOffset, maximumColumnOffset, ring);
+                output.put(row, column, circleSum - ringSum);
+            }
+        }
+        return output;
+    }
+
+    private static double convolveAt(double[] rowPrefix, int prefixStride, int outputRow, int outputColumn,
+                                     int center, int minimumRowOffset, int maximumRowOffset,
+                                     int minimumColumnOffset, int maximumColumnOffset,
+                                     KernelSegments kernel) {
+        double sum = 0.0;
+        for (int rowOffset = minimumRowOffset; rowOffset <= maximumRowOffset; rowOffset++) {
+            int kernelRow = rowOffset + center;
+            int[] segments = kernel.segmentsByRow[kernelRow];
+            int prefixOffset = (outputRow + rowOffset) * prefixStride;
+            for (int segment = 0; segment < segments.length; segment += 2) {
+                int fromOffset = Math.max(segments[segment] - center, minimumColumnOffset);
+                int toOffset = Math.min(segments[segment + 1] - center, maximumColumnOffset);
+                if (fromOffset <= toOffset) {
+                    int fromColumn = outputColumn + fromOffset;
+                    int toColumn = outputColumn + toOffset;
+                    sum += (rowPrefix[prefixOffset + toColumn + 1] -
+                            rowPrefix[prefixOffset + fromColumn]) * kernel.weight;
+                }
+            }
+        }
+        return sum;
+    }
+
+    private static final class KernelSegments {
+        private final int[][] segmentsByRow;
+        private final double weight;
+
+        private KernelSegments(int[][] segmentsByRow, double weight) {
+            this.segmentsByRow = segmentsByRow;
+            this.weight = weight;
+        }
+
+        private static KernelSegments from(ComplexDoubleMatrix kernel, int blockSize) {
+            int[][] segmentsByRow = new int[blockSize][];
+            double weight = 0.0;
+            for (int row = 0; row < blockSize; row++) {
+                int[] segments = new int[4];
+                int segmentCount = 0;
+                int start = -1;
+                for (int column = 0; column < blockSize; column++) {
+                    double value = kernel.get(row, column).real();
+                    if (value != 0.0) {
+                        if (weight == 0.0) {
+                            weight = value;
+                        } else if (Double.doubleToLongBits(weight) != Double.doubleToLongBits(value)) {
+                            throw new IllegalStateException("Gap-finder kernel must have uniform non-zero weights");
+                        }
+                        if (start < 0) {
+                            start = column;
+                        }
+                    } else if (start >= 0) {
+                        if (segmentCount == segments.length) {
+                            int[] expanded = new int[segments.length * 2];
+                            System.arraycopy(segments, 0, expanded, 0, segments.length);
+                            segments = expanded;
+                        }
+                        segments[segmentCount++] = start;
+                        segments[segmentCount++] = column - 1;
+                        start = -1;
+                    }
+                }
+                if (start >= 0) {
+                    if (segmentCount == segments.length) {
+                        int[] expanded = new int[segments.length * 2];
+                        System.arraycopy(segments, 0, expanded, 0, segments.length);
+                        segments = expanded;
+                    }
+                    segments[segmentCount++] = start;
+                    segments[segmentCount++] = blockSize - 1;
+                }
+                int[] compact = new int[segmentCount];
+                System.arraycopy(segments, 0, compact, 0, segmentCount);
+                segmentsByRow[row] = compact;
+            }
+            return new KernelSegments(segmentsByRow, weight);
+        }
+    }
+
+    DoubleMatrix convolutionSimpleGapFinderLegacy() {
 
         // filters have the same size (now)
 

@@ -127,7 +127,8 @@
 <p>
     The buffer is written to the <b>IDEPIX_CLOUD_BUFFER</b> flag. It marks otherwise clear pixels
     surrounding detected clouds and can be used as a conservative exclusion zone for applications
-    that are sensitive to cloud-edge contamination. The buffer width is configurable in pixels.
+    that are sensitive to cloud-edge contamination. The buffer width is configurable as a
+    Manhattan radius in pixels: it uses a diamond-shaped rather than square structuring element.
     Users can also choose whether ambiguous cloud pixels contribute to the cloud buffer.
 </p>
 
@@ -144,36 +145,30 @@
 </p>
 
 <p>
-    First, detected cloud locations are displaced in the expected shadow direction using the solar
-    and viewing geometry. This produces a potential cloud-shadow region. The cloud-shadow workflow 
-    operates on a 60 m working grid, where the cloud classification and supporting information are 
-    prepared for shadow analysis.
+    First, cloud pixels are displaced in the expected shadow direction using the solar and viewing
+    geometry. Both sure and ambiguous cloud classifications contribute to this step. The cloud-shadow
+    workflow operates on a 60 m working grid, where the required cloud flags and supporting
+    reflectance information are prepared for shadow analysis. Flag values are conservatively combined
+    during this preparation, while continuous supporting bands are averaged.
 </p>
 
 <p>
     Second, the algorithm searches within the potential-shadow region for spectrally dark areas
     that are consistent with cloud shadow. Spatial clustering groups candidate shadow pixels. The
     geometrically projected cloud-shadow region and the spectrally detected dark clusters are then
-    combined to derive the final <b>IDEPIX_CLOUD_SHADOW</b> flag.
+    combined to derive the final <b>IDEPIX_CLOUD_SHADOW</b> flag. A scene-wide offset is determined
+    first; by default, connected cloud objects are subsequently matched locally around that offset,
+    which can improve the position of shadows from clouds at different heights.
 </p>
 
 <p>
-    The following flags can support diagnostic interpretation of the cloud-shadow result:
+    Optionally, <b>Include cloud buffer in cloud-shadow detection</b> also treats cloud-buffer pixels
+    as shadow-casting objects. This creates a more conservative result and can substantially increase
+    processing time. The final cloud-shadow mask is returned to the input grid and receives a
+    diamond-shaped safety dilation with Manhattan radii of four pixels at 10 m, two pixels at 20 m,
+    and one pixel at 60 m. Potential-shadow and clustered-shadow masks are retained only as internal
+    workflow information and are not written to the IdePix classification flags.
 </p>
-
-<ul>
-    <li>
-        <b>IDEPIX_POTENTIAL_SHADOW</b> marks locations that are geometrically plausible cloud
-        shadow positions.
-    </li>
-    <li>
-        <b>IDEPIX_CLUSTERED_CLOUD_SHADOW</b> marks spectrally dark candidate shadows identified
-        by the clustering stage.
-    </li>
-    <li>
-        <b>IDEPIX_CLOUD_SHADOW</b> is the final cloud-shadow classification.
-    </li>
-</ul>
 
 <p>
     Cloud-shadow detection is more computationally demanding than the basic pixel classification.
@@ -192,15 +187,21 @@
 <h4>Mountain-Shadow Detection</h4>
 
 <p>
-    Mountain shadows are derived independently from cloud shadows. When enabled, IdePix uses the
-    selected DEM together with solar illumination geometry to identify terrain areas that are not
-    directly illuminated by the sun.
+    Mountain shadows are derived independently from cloud shadows. When enabled, IdePix performs a
+    terrain-cast-shadow calculation on the input grid. It traces the solar direction through the DEM
+    using a directional terrain-envelope method and identifies pixels whose direct solar illumination
+    is blocked by higher terrain. This is a cast-shadow calculation, not a local slope or hillshade
+    test.
 </p>
 
 <p>
-    The result is written to <b>IDEPIX_MOUNTAIN_SHADOW</b>. Its reliability depends on the quality,
-    resolution, coverage, and geolocation of the selected DEM. It represents terrain-cast shadow
-    and should not be confused with cloud shadow.
+    To represent shadows cast into the scene by terrain just outside its boundary, the calculation
+    reads a fixed 5 km margin from the selected DEM. Solar geometry is represented by the scene-centre
+    solar zenith and azimuth. The default DEM is <b>Copernicus 30m Global DEM</b>; users should select a DEM with
+    suitable coverage and resolution for the scene, including the 5 km margin. The result is written
+    to <b>IDEPIX_MOUNTAIN_SHADOW</b>. Its reliability depends on the quality, resolution, coverage,
+    and geolocation of the selected DEM. It represents terrain-cast shadow and should not be confused
+    with cloud shadow.
 </p>
 
 <h4>Output Product</h4>
@@ -234,6 +235,39 @@
     write diagnostic feature values, such as brightness, whiteness, normalized-difference indices,
     and selected spectral-test values. These additional bands are primarily intended for algorithm
     diagnosis, validation, and scientific analysis.
+</p>
+
+<h4>Performance and Processing Settings</h4>
+
+<p>
+    Cloud-shadow detection, terrain-cast shadow detection, and 10 m inputs can require substantially
+    more processing time and memory than classification alone. A 20 m resampled input is the recommended
+    default for routine cloud- and terrain-shadow processing. Performance settings are SNAP/GPT runtime
+    settings; they are not IdePix operator parameters and therefore apply to the complete processing run.
+</p>
+
+<p>
+    For command-line processing, use GPT's <b>-q</b> option to set the number of processing threads and
+    <b>-c</b> to set the tile-cache size. For example:
+</p>
+
+<pre>
+gpt IdePix.S2 -Sl1cProduct=&lt;input-product&gt; -t &lt;output-product&gt; -q 6 -c 4G
+</pre>
+
+<p>
+    The values must be selected for the available CPU cores and memory. Start conservatively, leave
+    memory for the operating system and other applications, and keep the tile cache comfortably below
+    SNAP's configured Java maximum heap. A larger cache can avoid repeated tile reads; allocating too
+    much memory can instead cause paging or a Java out-of-memory failure. The default cache may be too
+    small for large Sentinel-2 processing workloads.
+</p>
+
+<p>
+    In SNAP Desktop, open <b>Tools &gt; Options &gt; Performance</b> to set <b>Cache Size (MB)</b> and
+    <b>Number of Threads</b>. These are application-wide settings rather than controls in the IdePix
+    processing dialog. The same page also shows the tile size selected by SNAP; changes should be made
+    deliberately and tested on representative scenes.
 </p>
 
 <h4>Limitations and Recommended Use</h4>

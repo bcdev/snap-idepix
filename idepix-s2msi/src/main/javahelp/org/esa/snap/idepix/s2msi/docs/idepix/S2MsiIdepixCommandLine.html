@@ -54,14 +54,14 @@ To obtain general help on the graph processing, use the command
 Specific help on the IdePix processor for a given instrument can be obtained with
 <ul>
     <li>
-        ${SNAP-INSTALL-DIR}/bin/gpt -h Snap.Idepix.&lt;Instrument&gt;
+        ${SNAP-INSTALL-DIR}/bin/gpt &lt;operator-name&gt; -h
     </li>
 </ul>
 
 so we have here for S2 MSI:
 <ul>
     <li>
-        ${SNAP-INSTALL-DIR}/bin/gpt -h Idepix.S2
+        ${SNAP-INSTALL-DIR}/bin/gpt Idepix.S2 -h
     </li>
 </ul>
 In this case, information on the usage and a list of all available parameters are given.
@@ -76,22 +76,14 @@ to explicitly set parameters if default values shall be used).
         &lt;node id="idepix"&gt;
             &lt;operator&gt;Idepix.S2&lt;/operator&gt;
             &lt;sources&gt;
-                &lt;source&gt;${sourceProduct}&lt;/source&gt;
+                &lt;l1cProduct&gt;${sourceProduct}&lt;/l1cProduct&gt;
             &lt;/sources&gt;
             &lt;parameters&gt;
                 &lt;computeCloudShadow&gt;false&lt;/computeCloudShadow&gt;
-            &lt;/parameters&gt;
-            &lt;parameters&gt;
-                &lt;outputCtp&gt;true&lt;/outputCtp&gt;
-            &lt;/parameters&gt;
-            &lt;parameters&gt;
+                &lt;usePerCloudShadowMatching&gt;true&lt;/usePerCloudShadowMatching&gt;
+                &lt;includeCloudBufferForShadow&gt;false&lt;/includeCloudBufferForShadow&gt;
                 &lt;computeCloudBuffer&gt;true&lt;/computeCloudBuffer&gt;
-            &lt;/parameters&gt;
-            &lt;parameters&gt;
-                &lt;cloudBufferWidth&gt;4&lt;/cloudBufferWidth&gt;
-            &lt;/parameters&gt;
-            &lt;parameters&gt;
-                &lt;useSrtmLandWaterMask&gt;true&lt;/useSrtmLandWaterMask&gt;
+                &lt;cloudBufferWidth&gt;2&lt;/cloudBufferWidth&gt;
             &lt;/parameters&gt;
         &lt;/node&gt;
     &lt;/graph&gt;
@@ -102,6 +94,69 @@ This graph can be invoked by the following call on the command line:
 <pre>
     ${SNAP-INSTALL-DIR}/bin/gpt &lt;graph-file.xml&gt; -SsourceProduct=&lt;path-to-source-file&gt;
 </pre>
+
+<h3 id="performance">Performance settings</h3>
+<p>IdePix reports the effective in-memory tile-cache capacity, maximum Java heap, tile-scheduler
+thread count and available processors at startup. Non-blocking advice is logged for disabled
+or unusually small caches during cloud-shadow processing, insufficient heap headroom, or CPU
+oversubscription. These messages do not change settings. In Desktop they appear in the application
+log, not in a modal dialog. The low-cache thresholds are heuristics for large scenes, not minimum
+requirements: smaller subsets may work well with smaller caches.</p>
+<p>Per-stage and per-tile timing reports are developer diagnostics and are disabled by default.
+To keep ordinary runs quiet, do not set <code>-Dsnap.idepix.s2msi.cloudshadow.profile=true</code>
+in <code>gpt.vmoptions</code> (or its <code>-J</code>-prefixed equivalent in Desktop configuration).
+The benchmark script reports one total elapsed duration per completed product. Developer profiling
+requires the opt-in property (or the script's <code>-ProfileCloudShadow</code> switch) and Java logging
+at <code>FINE</code> level; measurements and routine internal stage messages are not emitted at
+normal <code>INFO</code> level. SNAP's own progress and warnings are unaffected.</p>
+
+<h4>GPT: prefer explicit settings for each run</h4>
+<pre>gpt Idepix.S2 -Sl1cProduct=input.dim -PcomputeCloudShadow=true -c 8G -q 16 -t output.dim</pre>
+<p><code>-c</code> sets the tile-cache capacity (here 8 GiB); <code>-q</code> sets the number
+of SNAP tile-scheduler threads. These are GPT options, not IdePix algorithm parameters, and are
+also available when running a graph. Record them with benchmark results. IdePix's internal flag-read
+worker limit is reported separately; it currently uses the <code>snap.parallelism</code> JVM property
+(or available processors if unset), so <code>-q</code> alone does not control every internal worker.</p>
+<p>A 4 GiB cache performed well for tested 20 m products; an 8 GiB cache substantially improved a
+tested full-scene 10 m run on a 32 GB-class, 16-logical-processor PC with a 21 GiB maximum heap.
+These are examples, not universal optimal settings. Use fewer threads and smaller per-job heaps/caches
+when running several GPT processes concurrently. More threads are not always faster.</p>
+
+<h4>Persistent GPT configuration</h4>
+<p>On Windows, edit <code>&lt;SNAP installation&gt;\bin\gpt.vmoptions</code>, keeping one JVM option per line.
+Back up the file first and edit existing entries rather than duplicating them. For example:</p>
+<pre>-Xmx21G
+-Dsnap.jai.defaultTileCacheSize=8192M
+-Dsnap.parallelism=16</pre>
+<p>Do not use the Desktop <code>-J</code> prefix in this file. Start a new GPT process after editing.
+Explicit <code>-c</code> and <code>-q</code> are the clearest way to select and record GPT's effective
+tile-cache and tile-scheduler settings; check the startup summary rather than assuming configuration
+files or saved preferences took effect. The maximum heap is controlled by <code>-Xmx</code>, not
+<code>-c</code>. Large <code>-Xms</code> values are unnecessary and can cause startup failures when
+Windows memory commit/page-file capacity is exhausted.</p>
+
+<h4>SNAP Desktop configuration</h4>
+<p>Use <b>Tools &gt; Options &gt; Performance</b> to adjust <b>Cache Size (MB)</b> and <b>Number of Threads</b>.
+For 8 GiB, enter <code>8192</code> in the cache-size field. Cache Path is a disk-cache directory;
+it is not the in-memory tile-cache capacity. Apply the settings and check IdePix's startup summary.</p>
+<p>Alternatively, back up <code>&lt;SNAP installation&gt;\etc\snap.conf</code> and append these example
+options <em>inside</em> the existing quoted <code>default_options</code> value:</p>
+<pre>-J-Dsnap.jai.defaultTileCacheSize=8192M -J-Dsnap.parallelism=16</pre>
+<p>Leave the other launcher options intact, avoid duplicate entries, and restart Desktop. Desktop
+preferences can override launcher defaults; the reported effective settings are authoritative.
+Desktop heap settings use <code>-J-Xmx</code> in <code>snap.conf</code>, whereas <code>gpt.vmoptions</code>
+affects GPT, not Desktop. Installation updates may replace these files; check settings afterwards.</p>
+
+<h4>Memory and benchmark precautions</h4>
+<p>The tile cache occupies part of the Java heap; it is not additional RAM. Leave substantial heap
+space for source bands, operators and temporary arrays, and physical RAM for native libraries,
+the operating system, other applications and concurrent jobs. Do not copy the example heap/cache
+values onto a smaller machine. Close unused products before benchmarking. Warm the DEM cache first;
+downloads and remote errors can distort execution times. A 20 m input is the recommended practical
+starting point; 10 m contains four times as many pixels and can cost substantially more.</p>
+<p>Changing SNAP's global tile size is not recommended as an IdePix tuning step: IdePix defines its own
+internal processing layout. Consult the <a href="S2MsiIdepixProcessorDescription.html">processor description</a>
+for algorithm parameters. Performance settings do not change the intended classification methodology.</p>
 
 <hr>
 </body>

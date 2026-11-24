@@ -6,8 +6,8 @@ import org.esa.snap.core.util.math.MathUtils;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -53,11 +53,18 @@ class PotentialCloudShadowAreaIdentifier {
         if (cloudPath.length < 3) {
             LOGGER.fine("identifyPotentialCloudShadowPLUS: cloudPath.length=" + cloudPath.length);
         } else {
-            for (int i = xOffset; i < sourceWidth; i++) {
-                for (int j = yOffset; j < sourceHeight; j++) {
-                    identifyPotentialCloudShadowPLUS(i, j, sourceHeight, sourceWidth, cloudPath, sourceLongitude,
-                                                     sourceLatitude, sourceAltitude, flagArray, sunZenithCloudRad,
-                                                     cloudIDArray, indexToPositions, offsetAtPositions);
+            int[] cloudIndexes = collectCloudIndexes(flagArray, sourceWidth, sourceHeight, xOffset, yOffset);
+            if (cloudIndexes.length > 0) {
+                double[] cosineLatitude = new double[sourceLatitude.length];
+                double[] sineLatitude = new double[sourceLatitude.length];
+                boolean[] latitudeComputed = new boolean[sourceLatitude.length];
+                for (int cloudIndex : cloudIndexes) {
+                    int x = cloudIndex % sourceWidth;
+                    int y = cloudIndex / sourceWidth;
+                    identifyPotentialCloudShadowPLUS(x, y, sourceHeight, sourceWidth, cloudPath, sourceLongitude,
+                                                     sourceLatitude, cosineLatitude, sineLatitude, latitudeComputed,
+                                                     sourceAltitude, flagArray, sunZenithCloudRad, cloudIDArray,
+                                                     indexToPositions, offsetAtPositions);
                 }
             }
         }
@@ -80,6 +87,9 @@ class PotentialCloudShadowAreaIdentifier {
         // REMOVE the duplicates!
         // formerly done in CloudShadowFlaggerCombination
 
+        int[] seenGeneration = new int[flagArray.length];
+        int[] minimumOffset = new int[flagArray.length];
+        int generation = 0;
         for (int key : indexToPositions.keySet()) {
             /*
             positions and offsetAtPosition can contain duplicates!
@@ -88,24 +98,28 @@ class PotentialCloudShadowAreaIdentifier {
             List<Integer> positions = indexToPositions.get(key);
             List<Integer> offsetAtPos = offsetAtPositions.get(key);
 
-            List<Integer> noDuplicatesPositions = new ArrayList<>(new LinkedHashSet<>(positions));
+            generation++;
+            List<Integer> noDuplicatesPositions = new ArrayList<>(positions.size());
+            for (int k = 0; k < positions.size(); k++) {
+                int index = positions.get(k);
+                int offset = offsetAtPos.get(k);
+                if (index < seenGeneration.length) {
+                    if (seenGeneration[index] != generation) {
+                        seenGeneration[index] = generation;
+                        minimumOffset[index] = offset;
+                        noDuplicatesPositions.add(index);
+                    } else if (offset < minimumOffset[index]) {
+                        minimumOffset[index] = offset;
+                    }
+                } else {
+                    LOGGER.fine("Index: " + index + " outside range");
+                }
+            }
 
             if (noDuplicatesPositions.size() < positions.size()) {
-                int[] test = new int[flagArray.length];
-                for (int k = 0; k < positions.size(); k++) {
-                    int off = offsetAtPos.get(k);
-                    int ind = positions.get(k);
-                    if (ind < test.length) {
-                        if (test[ind] > off || test[ind] == 0) {
-                            test[ind] = off;
-                        }
-                    } else
-                        LOGGER.fine("Index: " + ind + " outside range");
-                }
-
                 List<Integer> noDuplicatesOffsets = new ArrayList<>();
-                for (int k : noDuplicatesPositions) {
-                    noDuplicatesOffsets.add(test[k]);
+                for (int index : noDuplicatesPositions) {
+                    noDuplicatesOffsets.add(minimumOffset[index]);
                 }
 
                 positions.clear();
@@ -117,8 +131,28 @@ class PotentialCloudShadowAreaIdentifier {
         return new IdentifiedPcs(indexToPositions, offsetAtPositions);
     }
 
+    private static int[] collectCloudIndexes(int[] flagArray, int width, int height, int xOffset, int yOffset) {
+        int[] indexes = new int[Math.min(1024, Math.max(1, (width - xOffset) * (height - yOffset)))];
+        int count = 0;
+        // Keep the original x-major/y-minor order because it defines list and HashMap insertion order downstream.
+        for (int x = xOffset; x < width; x++) {
+            for (int y = yOffset; y < height; y++) {
+                int index = y * width + x;
+                if ((flagArray[index] & PreparationMaskBand.CLOUD_FLAG) == PreparationMaskBand.CLOUD_FLAG) {
+                    if (count == indexes.length) {
+                        indexes = Arrays.copyOf(indexes, Math.min(flagArray.length, indexes.length * 2));
+                    }
+                    indexes[count++] = index;
+                }
+            }
+        }
+        return Arrays.copyOf(indexes, count);
+    }
+
     private static void identifyPotentialCloudShadowPLUS(int x0, int y0, int height, int width, Point2D[] cloudPath,
-                                                         float[] longitude, float[] latitude, float[] altitude,
+                                                         float[] longitude, float[] latitude,
+                                                         double[] cosineLatitude, double[] sineLatitude,
+                                                         boolean[] latitudeComputed, float[] altitude,
                                                          int[] flagArray, double sunZenithRad, int[] cloudIDArray,
                                                          Map<Integer, List<Integer>> indexToPositions,
                                                          Map<Integer, List<Integer>> offsetAtPositions) {
@@ -155,6 +189,7 @@ class PotentialCloudShadowAreaIdentifier {
             offsets = new ArrayList<>();
             offsetAtPositions.put(cloudIDArray[index0], offsets);
         }
+        double[] distanceAndAltitude = new double[2];
         for (int i = 1; i < cloudPath.length; i++) {
             x1 = x0 + (int) cloudPath[i].getX();
             y1 = y0 + (int) cloudPath[i].getY();
@@ -168,9 +203,12 @@ class PotentialCloudShadowAreaIdentifier {
                     ) {
 
                 //Dagmar: is fixated to minimum and latitude-dependent maximum
-                double[] distAltArray = CloudShadowUtils.computeDistance(index0, index1, longitude, latitude, altitude);
-                double dist = distAltArray[0];
-                double minAltitude = distAltArray[1];
+                ensureLatitudeTrigonometry(index0, latitude, cosineLatitude, sineLatitude, latitudeComputed);
+                ensureLatitudeTrigonometry(index1, latitude, cosineLatitude, sineLatitude, latitudeComputed);
+                CloudShadowUtils.computeDistance(index0, index1, longitude, cosineLatitude, sineLatitude, altitude,
+                                                 distanceAndAltitude);
+                double dist = distanceAndAltitude[0];
+                double minAltitude = distanceAndAltitude[1];
                 double cloudSearchPointHeight = dist * Math.tan(((Math.PI / 2. - sunZenithRad)));
                 if (altitude[index1] < 0 || Double.isNaN(altitude[index1])) {
                     cloudSearchPointHeight -= minAltitude;
@@ -190,6 +228,16 @@ class PotentialCloudShadowAreaIdentifier {
         if (positions.size() == 0) {
             indexToPositions.remove(cloudIDArray[index0]);
             offsetAtPositions.remove(cloudIDArray[index0]);
+        }
+    }
+
+    private static void ensureLatitudeTrigonometry(int index, float[] latitude, double[] cosineLatitude,
+                                                   double[] sineLatitude, boolean[] latitudeComputed) {
+        if (!latitudeComputed[index]) {
+            double latitudeRadians = latitude[index] * (Math.PI / 180.0);
+            cosineLatitude[index] = Math.cos(latitudeRadians);
+            sineLatitude[index] = Math.sin(latitudeRadians);
+            latitudeComputed[index] = true;
         }
     }
 

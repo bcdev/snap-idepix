@@ -12,21 +12,25 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixCloudShadowOp;
 import org.esa.snap.idepix.s2msi.operators.cloudshadow.S2IdepixPreCloudShadowOp;
-import org.esa.snap.idepix.s2msi.operators.mountainshadow.S2IdepixMountainShadowOp;
+import org.esa.snap.idepix.s2msi.operators.mountainshadow.S2IdepixCastMountainShadowOp;
+import org.esa.snap.idepix.s2msi.util.S2IdepixConstants;
+import org.esa.snap.idepix.s2msi.util.S2IdepixUtils;
 
 import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAdder;
 
 import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLASSIF_FLAGS;
+import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD;
 import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_BUFFER;
 import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLOUD_SHADOW;
-import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_CLUSTERED_CLOUD_SHADOW;
 import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_INVALID;
 import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW;
-import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_POTENTIAL_SHADOW;
 
 /**
  * Operator used to consolidate cloud flag for Sentinel-2:
@@ -43,6 +47,16 @@ import static org.esa.snap.idepix.s2msi.util.S2IdepixConstants.IDEPIX_POTENTIAL_
         description = "Refines the Sentinel-2 MSI pixel classification.")
 public class S2IdepixPostProcessOp extends Operator {
 
+    private static final boolean PROFILE = Boolean.getBoolean("snap.idepix.s2msi.cloudshadow.profile");
+    private static final int PROFILE_INTERVAL = Math.max(1,
+            Integer.getInteger("snap.idepix.s2msi.cloudshadow.profile.interval", 10));
+
+    private final AtomicInteger profileCloudShadowTiles = new AtomicInteger();
+    private final LongAdder profileCloudShadowSourceNanos = new LongAdder();
+    private final LongAdder profileCloudShadowDilationNanos = new LongAdder();
+    private final LongAdder profileCloudShadowIntegrationNanos = new LongAdder();
+    private final LongAdder profileCloudShadowTotalNanos = new LongAdder();
+
     @SourceProduct(alias = "l1c")
     private Product l1cProduct;
 
@@ -57,6 +71,12 @@ public class S2IdepixPostProcessOp extends Operator {
 
     @Parameter(defaultValue = "true", label = "Compute cloud shadow", description = "Compute cloud shadow")
     private boolean computeCloudShadow;
+
+    @Parameter(defaultValue = "true", label = "Use per-cloud shadow matching")
+    private boolean usePerCloudShadowMatching;
+
+    @Parameter(defaultValue = "false", label = "Include cloud buffer in cloud-shadow detection")
+    private boolean includeCloudBufferForShadow;
 
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
@@ -88,24 +108,25 @@ public class S2IdepixPostProcessOp extends Operator {
             description = " Threshold CL_THRESH")
     private double clThresh;
 
-    @Parameter(description = "The digital elevation model.", defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
-    private String demName = "SRTM 3Sec";
+    @Parameter(description = "The digital elevation model.", defaultValue = "Copernicus 30m Global DEM", label = "Digital Elevation Model")
+    private String demName = "Copernicus 30m Global DEM";
 
     private Band cloudBufferFlagBand;
     private Band mountainShadowFlagBand;
     private Product cloudShadowProduct;
     private Operator cloudShadowOp;
+    private int cloudShadowDilationRadius;
+    private int[][] cloudShadowDilationOffsets;
 
     @Override
     public void dispose() {
+        logCloudShadowProfile("final");
         if (cloudBufferFlagBand != null) {
             cloudBufferFlagBand.dispose();
             cloudBufferFlagBand = null;
         }
-        if (mountainShadowFlagBand != null) {
-            mountainShadowFlagBand.dispose();
-            mountainShadowFlagBand = null;
-        }
+        disposeBand(mountainShadowFlagBand);
+        mountainShadowFlagBand = null;
         if (cloudShadowOp != null) {
             cloudShadowOp.dispose();
             cloudShadowOp = null;
@@ -124,13 +145,19 @@ public class S2IdepixPostProcessOp extends Operator {
         }
 
         if (computeMountainShadow) {
-            final Product mountainShadowProduct = GPF.createProduct(
-                    OperatorSpi.getOperatorAlias(S2IdepixMountainShadowOp.class), GPF.NO_PARAMS, s2ClassifProduct);
-            mountainShadowFlagBand = mountainShadowProduct.getBand(
-                    S2IdepixMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
+            Map<String, Object> mountainShadowParameters = new HashMap<>();
+            mountainShadowParameters.put("demName", demName);
+            Product castShadowProduct = GPF.createProduct(
+                    OperatorSpi.getOperatorAlias(S2IdepixCastMountainShadowOp.class), mountainShadowParameters,
+                    s2ClassifProduct);
+            mountainShadowFlagBand = castShadowProduct.getBand(
+                    S2IdepixCastMountainShadowOp.MOUNTAIN_SHADOW_FLAG_BAND_NAME);
         }
 
         if (computeCloudShadow) {
+            cloudShadowDilationRadius = CloudShadowDilation.getRadius(
+                    S2IdepixUtils.determineResolution(l1cProduct));
+            cloudShadowDilationOffsets = CloudShadowDilation.createStarOffsets(cloudShadowDilationRadius);
             HashMap<String, Product> input = new HashMap<>();
             input.put("l1cProduct", l1cProduct);
             input.put("s2ClassifProduct", s2CloudBufferProduct);
@@ -142,6 +169,8 @@ public class S2IdepixPostProcessOp extends Operator {
             //      - add || computeMountainShadow to the condition above
             //      - consider the flag results in computeTile
             params.put("computeMountainShadow", false);
+            params.put("usePerCloudShadowMatching", usePerCloudShadowMatching);
+            params.put("includeCloudBufferForShadow", includeCloudBufferForShadow);
             params.put("computeCloudBuffer", computeCloudBuffer);
             params.put("cloudBufferWidth", cloudBufferWidth);
             params.put("computeCloudBufferForCloudAmbiguous", computeCloudBufferForCloudAmbiguous);
@@ -156,7 +185,8 @@ public class S2IdepixPostProcessOp extends Operator {
                     params, input, null);
 
             cloudShadowProduct = cloudShadowOp.getTargetProduct();
-            gpf.executeOperator(cloudShadowOp);
+            // Keep the operator and its target product alive for the complete post-processing lifecycle.
+            // Evaluation remains demand-driven when the target tiles request this source band.
         }
 
         ProductUtils.copyBand(IDEPIX_CLASSIF_FLAGS, s2ClassifProduct, postProcessedCloudProduct, false);
@@ -196,42 +226,105 @@ public class S2IdepixPostProcessOp extends Operator {
         }
 
         if (computeMountainShadow) {
-            final Tile mountainShadowFlagTile = getSourceTile(mountainShadowFlagBand, targetRectangle);
+            final Tile mountainShadowFlagTile = mountainShadowFlagBand == null ? null :
+                    getSourceTile(mountainShadowFlagBand, targetRectangle);
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
                 checkForCancellation();
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                    final boolean mountainShadow = mountainShadowFlagTile.getSampleInt(x, y) > 0;
+                    final boolean mountainShadow = mountainShadowFlagTile != null &&
+                            mountainShadowFlagTile.getSampleInt(x, y) > 0;
                     targetTile.setSample(x, y, IDEPIX_MOUNTAIN_SHADOW, mountainShadow);
                 }
             }
         }
         if (computeCloudShadow) {
+            final long cloudShadowStart = profileStart();
             Band band = cloudShadowProduct.getBand(S2IdepixCloudShadowOp.BAND_NAME_CLOUD_SHADOW);
-            //final Tile flagTile = getSourceTile(cloudShadowFlagBand, targetRectangle);
-            final Tile flagTile = getSourceTile(band, targetRectangle);
-            int clusteredCloudShadowFlag = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_CLOUD_SHADOW); //clustering algorithm
+            final Rectangle sourceRectangle = CloudShadowDilation.extend(targetRectangle, cloudShadowDilationRadius,
+                    band.getRasterWidth(), band.getRasterHeight());
+            final long sourceStart = profileStart();
+            final Tile flagTile = getSourceTile(band, sourceRectangle);
+            profileAdd(profileCloudShadowSourceNanos, sourceStart);
             int cloudBufferFlag = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_CLOUD_BUFFER);
-            int potentialShadowFlag = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_POTENTIAL_CLOUD_SHADOW);
             int recommendedCloudShadow = (int) Math.pow(2, S2IdepixPreCloudShadowOp.F_RECOMMENDED_CLOUD_SHADOW);
+            final long dilationStart = profileStart();
+            final boolean[] dilatedCloudShadow = dilateCloudShadow(flagTile, sourceRectangle, targetRectangle,
+                    recommendedCloudShadow);
+            profileAdd(profileCloudShadowDilationNanos, dilationStart);
+            final long integrationStart = profileStart();
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
                 checkForCancellation();
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                     final int flagValue = flagTile.getSampleInt(x, y);
-                    if ((flagValue & recommendedCloudShadow) == recommendedCloudShadow ) {
+                    final boolean originalCloudShadow = hasFlag(flagValue, recommendedCloudShadow);
+                    final int targetIndex = (y - targetRectangle.y) * targetRectangle.width + x - targetRectangle.x;
+                    final boolean mayAddDilatedShadow = !targetTile.getSampleBit(x, y, IDEPIX_INVALID) &&
+                            !targetTile.getSampleBit(x, y, IDEPIX_CLOUD);
+                    if (originalCloudShadow || (dilatedCloudShadow[targetIndex] && mayAddDilatedShadow)) {
                         targetTile.setSample(x, y, IDEPIX_CLOUD_SHADOW, true);
                     }
-                    if ((flagValue & cloudBufferFlag) == cloudBufferFlag) {
+                    if (hasFlag(flagValue, cloudBufferFlag)) {
                         targetTile.setSample(x, y, IDEPIX_CLOUD_BUFFER, true);
-                    }
-                    if ((flagValue & potentialShadowFlag) == potentialShadowFlag) {
-                        targetTile.setSample(x, y, IDEPIX_POTENTIAL_SHADOW, true);
-                    }
-                    if ((flagValue & clusteredCloudShadowFlag) == clusteredCloudShadowFlag) {
-                        targetTile.setSample(x, y, IDEPIX_CLUSTERED_CLOUD_SHADOW, true);
                     }
                 }
             }
+            profileAdd(profileCloudShadowIntegrationNanos, integrationStart);
+            profileAdd(profileCloudShadowTotalNanos, cloudShadowStart);
+            logCloudShadowProfile(null);
         }
+    }
+
+    private static void disposeBand(Band band) {
+        if (band != null) {
+            band.dispose();
+        }
+    }
+
+    private static long profileStart() {
+        return PROFILE ? System.nanoTime() : 0L;
+    }
+
+    private static void profileAdd(LongAdder accumulator, long startNanos) {
+        if (PROFILE) {
+            accumulator.add(System.nanoTime() - startNanos);
+        }
+    }
+
+    private void logCloudShadowProfile(String reason) {
+        if (!PROFILE) {
+            return;
+        }
+        final int completed = reason == null ? profileCloudShadowTiles.incrementAndGet() : profileCloudShadowTiles.get();
+        if (completed == 0 || (reason == null && completed % PROFILE_INTERVAL != 0)) {
+            return;
+        }
+        final String suffix = reason == null ? "" : " " + reason;
+        SystemUtils.LOG.fine(String.format("S2 cloud-shadow outer profile%s: tiles=%d, source=%.3fs, dilation=%.3fs, " +
+                        "integration=%.3fs, total=%.3fs",
+                suffix, completed,
+                profileCloudShadowSourceNanos.doubleValue() / 1.0e9,
+                profileCloudShadowDilationNanos.doubleValue() / 1.0e9,
+                profileCloudShadowIntegrationNanos.doubleValue() / 1.0e9,
+                profileCloudShadowTotalNanos.doubleValue() / 1.0e9));
+    }
+
+    private boolean[] dilateCloudShadow(Tile flagTile, Rectangle sourceRectangle, Rectangle targetRectangle,
+                                        int recommendedCloudShadowFlag) {
+        final boolean[] dilatedCloudShadow = new boolean[targetRectangle.width * targetRectangle.height];
+        for (int sourceY = sourceRectangle.y; sourceY < sourceRectangle.y + sourceRectangle.height; sourceY++) {
+            for (int sourceX = sourceRectangle.x; sourceX < sourceRectangle.x + sourceRectangle.width; sourceX++) {
+                if (!hasFlag(flagTile.getSampleInt(sourceX, sourceY), recommendedCloudShadowFlag)) {
+                    continue;
+                }
+                CloudShadowDilation.addStar(dilatedCloudShadow, targetRectangle.width, targetRectangle.height,
+                        sourceX - targetRectangle.x, sourceY - targetRectangle.y, cloudShadowDilationOffsets);
+            }
+        }
+        return dilatedCloudShadow;
+    }
+
+    private static boolean hasFlag(int flagValue, int flagMask) {
+        return (flagValue & flagMask) == flagMask;
     }
 
     private void combineFlags(int x, int y, Tile sourceFlagTile, Tile targetTile) {

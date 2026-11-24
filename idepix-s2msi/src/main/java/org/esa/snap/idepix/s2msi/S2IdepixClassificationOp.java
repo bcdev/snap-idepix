@@ -9,6 +9,10 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.dataop.barithm.BandArithmetic;
+import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -66,6 +70,11 @@ public class S2IdepixClassificationOp extends Operator {
             label = " Write feature values to the target product",
             description = " Write all feature values to the target product")
     private boolean copyFeatureValues;
+
+    // Propagated from Idepix.S2. Classification always needs reflectances internally, but the
+    // final public product needs the supporting validity rasters only when it retains them.
+    @Parameter(defaultValue = "false")
+    private boolean copyToaReflectances;
 
     @Parameter(defaultValue = "0.007",
             label = " Threshold CW_THRESH",
@@ -237,7 +246,13 @@ public class S2IdepixClassificationOp extends Operator {
     public void extendTargetProduct() throws OperatorException {
         for (String bandName : S2IdepixConstants.S2_MSI_REFLECTANCE_BAND_NAMES) {
             if (!targetProduct.containsBand(bandName)) {
-                final Band band = ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
+                final Band band;
+                if (copyToaReflectances) {
+                    copyBandWithValidityDependencies(sourceProduct.getBand(bandName), sourceProduct, targetProduct);
+                    band = targetProduct.getBand(bandName);
+                } else {
+                    band = ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
+                }
                 band.setUnit("dl");
             }
         }
@@ -259,6 +274,43 @@ public class S2IdepixClassificationOp extends Operator {
             lonBand.setUnit("deg");
         }
 
+    }
+
+    /**
+     * Copies a band and all rasters required by its valid-pixel expression. Recent Sentinel-2
+     * readers attach expressions referring to detector-footprint and no-data bands; copying only
+     * the reflectance leaves a product that cannot open its image view in SNAP Desktop.
+     */
+    static void copyBandWithValidityDependencies(Band band, Product source, Product target) {
+        if (band == null) {
+            throw new OperatorException("Cannot copy a missing reflectance band");
+        }
+        copyRasterWithValidityDependencies(band, source, target);
+    }
+
+    private static void copyRasterWithValidityDependencies(RasterDataNode raster, Product source, Product target) {
+        if (target.getRasterDataNode(raster.getName()) != null) {
+            return;
+        }
+        if (raster instanceof Band) {
+            ProductUtils.copyBand(raster.getName(), raster.getProduct(), target, true);
+        } else if (raster instanceof TiePointGrid) {
+            target.addTiePointGrid(((TiePointGrid) raster).cloneTiePointGrid());
+        } else {
+            throw new OperatorException("Unsupported valid-pixel dependency '" + raster.getName() + "'");
+        }
+        String expression = raster.getValidPixelExpression();
+        if (expression == null || expression.trim().isEmpty()) {
+            return;
+        }
+        try {
+            for (RasterDataNode dependency : BandArithmetic.getRefRasters(expression, source)) {
+                copyRasterWithValidityDependencies(dependency, source, target);
+            }
+        } catch (ParseException e) {
+            throw new OperatorException("Cannot resolve valid-pixel dependencies for band '" + raster.getName() +
+                    "': " + expression, e);
+        }
     }
 
     private S2IdepixAlgorithm createS2MsiAlgorithm(Tile[] s2MsiReflectanceTiles,
@@ -446,8 +498,6 @@ public class S2IdepixClassificationOp extends Operator {
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_BRIGHTWHITE, s2Algorithm.isBrightWhite());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_VEG_RISK, s2Algorithm.isVegRisk());
         targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_MOUNTAIN_SHADOW, false); //not computed here
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_POTENTIAL_SHADOW, false); //not computed here
-        targetTile.setSample(x, y, S2IdepixConstants.IDEPIX_CLUSTERED_CLOUD_SHADOW, false); //not computed here
     }
 
     /**
